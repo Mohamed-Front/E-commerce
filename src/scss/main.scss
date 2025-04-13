@@ -1,0 +1,130 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import 'vuestic-sass/index';
+@import 'icon-fonts/index';
+
+html {
+  line-height: 1.15;
+}
+* {
+  font-family: "Cairo", sans-serif;
+}
+
+body {
+  line-height: 1;
+  font-family: "Cairo", sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+strong,
+b {
+  line-height: 1.2;
+  font-weight: 600;
+}
+
+code,
+kbd,
+samp,
+pre {
+  font-family: monospace;
+  font-size: 1em;
+}
+
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.p-button,
+.p-button.p-button-success {
+  background-color: #E28C3F !important;
+  border-color: #E28C3F !important;
+  color: #fff;
+}
+
+.va-sidebar__menu{
+  background-color: #f8f4ec !important;
+
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.left {
+  color: black !important;
+}
+.va-sidebar-item-content{
+  color: rgb(21, 21, 21) !important;
+}
+.other {
+  background-color: #E28C3F !important;
+  border-color: #E28C3F !important;
+  color: #fff;
+}
+.pop {
+  background-color: #098071 !important;
+  border-color: #098071 !important;
+  color: #098071;
+}
+.exite {
+  background-color: #3d9209 !important;
+  border-color: #3d9209 !important;
+  color: red;
+}
+
+.delete {
+  margin-left: 10px !important;
+  margin-right: 10px !important;
+  border-radius: 50%;
+  background-color: rgb(185, 17, 17) !important;
+  border-color: rgb(177, 21, 21) !important;
+  color: red;
+  font-size: 16px;
+}
+.new {
+
+  background-color: #E28C3F !important;
+  border-color: #E28C3F !important;
+}
+.p-rating .p-rating-item .p-rating-icon {
+  color: rgb(166, 166, 0) !important;
+}
+.va-va-sidebar__item .va-sidebar-item  {
+  background-color: rgb(255, 255, 255) !important;
+}
+.p-button-text{
+  color:white !important;
+}
+.notification-dropdown__content
+{
+   max-height: 300px !important;
+  width: 300px !important;
+  overflow: hidden !important;
+}
+.va-sidebar-item-content{
+  color: white;
+}
+.bord{
+
+  border: 1.5px solid black !important;
+
+}
+.bg-dashboard{
+  background-color: #098071 !important;
+}
+
+.p-datatable-tbody{
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+td{
+  text-align: justify !important;
+  /* padding-top: 1px !important;
+  padding-bottom: 1px !important; */
+}
+canvas{
+  height: 550px !important;
+}
