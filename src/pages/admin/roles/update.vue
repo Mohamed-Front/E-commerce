@@ -2,7 +2,6 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from "axios";
-import router from '../../../router';
 
 const route = useRoute()
 const permissionsData = ref({});

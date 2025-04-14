@@ -18,11 +18,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/invioce/:id',
     component: () => import('../pages/admin/settings/order/invioce.vue'),
   },
-  {
-    name: 'home',
-    path: '/',
-    component: () => import('../pages/admin/frontend/pages/home.vue'),
-  },
+  // {
+  //   name: 'home',
+  //   path: '/',
+  //   component: () => import('../pages/admin/frontend/pages/home.vue'),
+  // },
   {
     name: 'admin',
     path: '/admin',
@@ -66,6 +66,11 @@ const routes: Array<RouteRecordRaw> = [
             name: 'users',
             path: 'users',
             component: () => import('../pages/admin/users/users.vue'),
+          },
+          {
+            name: 'user-edite',
+            path: 'user-edite/:id',
+            component: () => import('../pages/admin/users/edite.vue'),
           },
           {
             name: 'user-create',

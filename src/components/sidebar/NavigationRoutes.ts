@@ -9,11 +9,13 @@ export default {
   root: {
     name: '/',
     displayName: 'navigationRoutes.home',
+
   },
   routes: [
     {
       name: 'dashboard',
       displayName: 'dashboard',
+      show:['dashboard'],
       meta: {
         icon: 'vuestic-iconset-dashboard',
       },
@@ -21,6 +23,7 @@ export default {
     {
       name: 'statistics',
       displayName: 'users_management',
+      show:['list users','list permissions','list roles'],
       meta: {
         icon: 'vuestic-iconset-user',
       },
@@ -29,14 +32,17 @@ export default {
         {
           name: 'users',
           displayName: 'users',
+          show:'list users'
         },
         {
           name: 'roles',
           displayName: 'roles',
+           show:'list roles'
         },
         {
           name: 'Permission',
           displayName: 'Permissions',
+           show:'list permissions'
         },
       ],
     },

@@ -27,6 +27,14 @@ const searchQuery = ref('')
 const currentPage = ref(1)
 const totalRecords = ref(0)
 const rowsPerPage = ref(10)
+const totalPages = ref(0)
+const firstPageUrl = ref('')
+const lastPageUrl = ref('')
+const nextPageUrl = ref('')
+const prevPageUrl = ref('')
+const from = ref(0)
+const to = ref(0)
+const links = ref([])
 
 const exportCSV = () => {
   dt.value.exportCSV()
@@ -46,6 +54,10 @@ const deleteSelectedProducts = () => {
     })
 }
 
+const handelchange = (e) => {
+  console.log(e)
+}
+
 const initFilters = () => {
   filters.value = {
     global: {value: null, matchMode: FilterMatchMode.CONTAINS},
@@ -62,27 +74,41 @@ const fetchData = () => {
     params: {
       page: currentPage.value,
       limit: rowsPerPage.value,
-      search: searchQuery.value // إضافة بارامتر البحث
+      search: searchQuery.value
     }
   }).then((res) => {
     loading.value = false
     users.value = res.data.data.data
     totalRecords.value = res.data.data.total
+    totalPages.value = res.data.data.last_page
+    firstPageUrl.value = res.data.data.first_page_url
+    lastPageUrl.value = res.data.data.last_page_url
+    nextPageUrl.value = res.data.data.next_page_url
+    prevPageUrl.value = res.data.data.prev_page_url
+    from.value = res.data.data.from
+    to.value = res.data.data.to
+    links.value = res.data.data.links
   }).catch(error => {
     loading.value = false
     console.error("Error fetching data:", error)
   })
 }
 
-// مشاهدة تغيرات البحث وإعادة جلب البيانات
 watch(searchQuery, (newVal) => {
-  currentPage.value = 1 // إعادة التعيين للصفحة الأولى عند البحث
+  currentPage.value = 1
   fetchData()
 })
 
-const onPageChange = (event) => {
-  currentPage.value = event.page + 1
-  rowsPerPage.value = event.rows
+const goToPage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page
+    fetchData()
+  }
+}
+
+const changeRowsPerPage = (rows) => {
+  rowsPerPage.value = rows.value
+  currentPage.value = 1
   fetchData()
 }
 
@@ -137,15 +163,8 @@ const deleteprice = () => {
 }
 
 const confirmDelete = (id) => {
-  price_id.value = id
-  error.value = ''
-  axios.get(`/api/show/${price_id.value}`)
-    .then((res) => {
-      console.log(res)
-      user.value = res.data.data
-    })
-  deleteDialog.value = true
-}
+  router.push({name:'user-edite',params:{id:id}})
+};
 </script>
 
 <template>
@@ -175,23 +194,15 @@ const confirmDelete = (id) => {
           :value="users"
           :loading="loading"
           data-key="id"
-          :paginator="true"
+          :paginator="false"
           :rows="rowsPerPage"
-          :totalRecords="totalRecords"
           :filters="filters"
-          paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-          :rows-per-page-options="[5, 10, 25, 50]"
-          current-page-report-template="Showing {first} to {last} of {totalRecords} users"
           responsive-layout="scroll"
-          @page="onPageChange"
         >
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-between md:align-items-center">
               <h5 class="m-0 my-auto px-2">Users</h5>
-              <span class="block mt-2 md:mt-0 p-input-icon-left">
-                <i class="pi pi-search"/>
-                <InputText v-model="filters['global'].value" placeholder="Search..."/>
-              </span>
+
             </div>
           </template>
           <Column selection-mode="multiple" header-style="width: 3rem"></Column>
@@ -211,6 +222,11 @@ const confirmDelete = (id) => {
               {{ slotProps.data.phone }}
             </template>
           </Column>
+          <Column field="type" header="Type" :sortable="true" header-style="width:14%; min-width:10rem;">
+            <template #body="slotProps">
+              {{ slotProps.data.type }}
+            </template>
+          </Column>
 
           <Column header-style="min-width:10rem;">
             <template #body="slotProps">
@@ -228,6 +244,68 @@ const confirmDelete = (id) => {
           </Column>
         </DataTable>
 
+        <!-- Custom Pagination -->
+        <div class="p-paginator p-component p-unselectable-text mt-3">
+          <div class="p-paginator-left-content">
+            <span class="p-paginator-current">Showing {{ from }} to {{ to }} of {{ totalRecords }} entries</span>
+          </div>
+          <div class="p-paginator-right-content">
+            <span class="p-paginator-pages">
+              <button
+                class="p-paginator-first p-paginator-element p-link"
+                :disabled="currentPage === 1"
+                @click="goToPage(1)"
+              >
+                <span class="p-paginator-icon pi pi-angle-double-left"></span>
+              </button>
+              <button
+                class="p-paginator-prev p-paginator-element p-link"
+                :disabled="!prevPageUrl"
+                @click="goToPage(currentPage - 1)"
+              >
+                <span class="p-paginator-icon pi pi-angle-left"></span>
+              </button>
+
+              <template v-for="(link, index) in links" :key="index">
+                <button
+                  v-if="link.label && !isNaN(link.label)"
+                  class="p-paginator-page p-paginator-element p-link"
+                  :class="{ 'p-highlight': link.active }"
+                  @click="goToPage(parseInt(link.label))"
+                >
+                  {{ link.label }}
+                </button>
+                <span v-else-if="link.label === '...'" class="p-paginator-dots">...</span>
+              </template>
+
+              <button
+                class="p-paginator-next p-paginator-element p-link"
+                :disabled="!nextPageUrl"
+                @click="goToPage(currentPage + 1)"
+              >
+                <span class="p-paginator-icon pi pi-angle-right"></span>
+              </button>
+              <button
+                class="p-paginator-last p-paginator-element p-link"
+                :disabled="currentPage === totalPages"
+                @click="goToPage(totalPages)"
+              >
+                <span class="p-paginator-icon pi pi-angle-double-right"></span>
+              </button>
+            </span>
+
+            <span class="p-paginator-rpp-options">
+              <Dropdown
+                v-model="rowsPerPage"
+                :options="[5, 10, 20, 30]"
+                @change="changeRowsPerPage"
+                class="ml-2"
+                style="width: 100px"
+              />
+            </span>
+          </div>
+        </div>
+
         <Dialog v-model:visible="deleteProductsDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
           <div class="flex align-items-center justify-content-center">
             <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"/>
@@ -238,8 +316,6 @@ const confirmDelete = (id) => {
             <Button label="Yes" icon="pi pi-check" class="p-button-text" @click="deleteSelectedProducts"/>
           </template>
         </Dialog>
-
-
       </va-card>
     </div>
   </div>
@@ -254,5 +330,64 @@ const confirmDelete = (id) => {
 .delete {
   background: #ef4444;
   border: none;
+}
+
+.p-paginator {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem;
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 3px;
+
+  .p-paginator-left-content {
+    color: #6c757d;
+  }
+
+  .p-paginator-right-content {
+    display: flex;
+    align-items: center;
+
+    .p-paginator-pages {
+      display: flex;
+      margin: 0 0.5rem;
+
+      button {
+        text-align: center;
+        min-width: 2.357rem;
+        height: 2.357rem;
+        margin: 0.143rem;
+        border: 0 none;
+        color: #6c757d;
+        background: transparent;
+        border-radius: 50%;
+        transition: background-color 0.2s;
+
+        &:hover {
+          background: #e9ecef;
+        }
+
+        &.p-highlight {
+          color: #ffffff;
+          background: #3b82f6;
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: default;
+        }
+      }
+    }
+
+    .p-paginator-dots {
+      min-width: 2.357rem;
+      height: 2.357rem;
+      margin: 0.143rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
 }
 </style>
