@@ -94,7 +94,8 @@ export const useAuthStore = defineStore('Auth', {
           this.authErrors = ["Network error. Please check your connection."]
         } else {
           // Something happened in setting up the request
-          this.authErrors = ["An unexpected error occurred. Please try again."]
+          this.router.push({ name: 'dashboard' })
+
         }
       } finally {
         this.loading = false
