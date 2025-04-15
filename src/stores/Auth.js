@@ -107,8 +107,8 @@ export const useAuthStore = defineStore('Auth', {
     },
     async handleLogout() {
       this.resetAuthStore()
-
-      await axios.post('/api/logout')
+      this.router.push({ name: 'Login' })
+      await axios.post('/api/logouts')
 
       this.userPermissions = ''
 

@@ -9,7 +9,7 @@
     <div class="flex justify-center col-span-12 p-4">
       <va-card class="auth-layout__card">
         <va-card-content class="text-center">
-              <va-tab class="text-xl" style="color:#098071" name="login">{{ t('auth.login') }}</va-tab>
+              <va-tab class="text-xl" style="color:#000" name="login">{{ t('login') }}</va-tab>
 
 
           <va-separator />
