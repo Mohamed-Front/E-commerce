@@ -146,9 +146,9 @@ onMounted(() => {
             id="type"
             v-model="userData.type"
             :options="[
-              { label: 'Admin', value: 1 },
-              { label: 'Manager', value: 2 },
-              { label: 'User', value: 3 }
+              { label: 'Admin', value: 'admin' },
+              { label: 'customer', value: 'customer' },
+              { label: 'User', value: 'User' }
             ]"
             optionLabel="label"
             optionValue="value"

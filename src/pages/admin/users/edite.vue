@@ -22,7 +22,7 @@ const userData = ref({
   type: null,
   role_id: null,
   email: '',
-  password: '',
+
 });
 
 
@@ -69,7 +69,8 @@ const getoneRow=()=>{
     userData.value.name=res.data.data.name
     userData.value.email=res.data.data.email
     userData.value.phone=res.data.data.phone
-    userData.value.type=res.data.data.type
+    userData.value.role_id=res.data.data.roles[0].id
+    imagePreview.value=res.data.data.media[0].path
 
   })
 }
@@ -91,7 +92,7 @@ const submitForm = async () => {
   formData.append('type', userData.value.type);
   formData.append('role_id', userData.value.role_id);
   formData.append('email', userData.value.email);
-  formData.append('password', userData.value.password);
+
 
   if (imageFile.value) {
     formData.append('image', imageFile.value);
@@ -158,9 +159,9 @@ onMounted(() => {
             id="type"
             v-model="userData.type"
             :options="[
-              { label: 'Admin', value: 1 },
-              { label: 'Manager', value: 2 },
-              { label: 'User', value: 3 }
+              { label: 'Admin', value: 'admin' },
+              { label: 'customer', value: 'customer' },
+              { label: 'User', value: 'User' }
             ]"
             optionLabel="label"
             optionValue="value"
@@ -202,22 +203,7 @@ onMounted(() => {
           <small class="text-red-500 text-xs" v-if="form?.errors?.email">{{ form.errors.email[0].message }}</small>
         </div>
 
-        <!-- Password -->
-        <div class="space-y-2">
-          <label for="password" class="block text-sm font-medium text-gray-700">
-            Password <span class="text-red-500">*</span>
-          </label>
-          <Password
-            id="password"
-            v-model="userData.password"
-            placeholder="••••••••"
-            toggleMask
-            :feedback="false"
-            inputClass="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            class="w-full"
-          />
-          <small class="text-red-500 text-xs" v-if="form?.errors?.password">{{ form.errors.password[0].message }}</small>
-        </div>
+
 
         <!-- Image Upload -->
         <div class="md:col-span-2 space-y-2">
@@ -279,13 +265,13 @@ onMounted(() => {
       <div class="pt-4 flex justify-center">
         <Button
           type="submit"
-          label="Create User"
+          label="Update User"
           icon="pi pi-user-plus"
           :loading="loading"
           class="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
           :disabled="loading"
         >
-          <span v-if="!loading">Create User</span>
+          <span v-if="!loading">Update User</span>
           <i v-else class="pi pi-spinner pi-spin"></i>
         </Button>
       </div>
