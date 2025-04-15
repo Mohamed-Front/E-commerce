@@ -116,7 +116,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow-lg">
+  <div  v-can="'edit users'"  class="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow-lg">
     <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Edit  User</h1>
 
     <Form ref="form" :model="userData" :rules="rules" @submit.prevent="submitForm" class="space-y-6">

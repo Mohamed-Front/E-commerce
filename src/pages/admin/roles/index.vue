@@ -198,6 +198,7 @@ onMounted(() => {
           <template #start>
             <div class="my-2">
               <Button
+              v-can="'create roles'"
                 label="New"
                 icon="pi pi-plus"
                 class="new mr-2"
@@ -207,7 +208,7 @@ onMounted(() => {
           </template>
 
           <template #end>
-            <div class="my-2 flex gap-2">
+            <div  v-can="'list roles'" class="my-2 flex gap-2">
               <span class="p-input-icon-left">
                 <i class="pi pi-search" />
                 <InputText
@@ -237,6 +238,7 @@ onMounted(() => {
           :rows="rowsPerPage"
           :filters="filters"
           responsive-layout="scroll"
+           v-can="'list roles'"
         >
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-between md:align-items-center">
@@ -271,11 +273,13 @@ onMounted(() => {
           <Column header-style="min-width:10rem;">
             <template #body="slotProps">
               <Button
+              v-can="'edit roles'"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
                 @click="edit(slotProps.data.id)"
               />
               <Button
+              v-can="'delete roles'"
                 icon="pi pi-trash"
                 class="delete mt-2"
                 @click="confirmDelete(slotProps.data.id)"

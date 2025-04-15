@@ -10,10 +10,10 @@ const toast = useToast()
 const price_id = ref(null)
 const loading = ref(true)
 const delete_id = ref('')
-const user = ref({})
+const brand = ref({})
 const status = ref(true)
 const error = ref('')
-const users = ref(null)
+const brands = ref(null)
 const productDialog = ref(false)
 const deleteDialog = ref(false)
 const deleteProductsDialog = ref(false)
@@ -46,16 +46,12 @@ const delet = (id) => {
 }
 
 const deleteSelectedProducts = () => {
-  axios.get(`/api/delete/${delete_id.value}`)
+  axios.get(`/api/brand/${delete_id.value}`)
     .then(() => {
       fetchData()
       deleteProductsDialog.value = false
-      toast.add({severity: 'success', summary: 'Successful', detail: 'user Deleted', life: 3000})
+      toast.add({severity: 'success', summary: 'Successful', detail: 'brand Deleted', life: 3000})
     })
-}
-
-const handelchange = (e) => {
-  console.log(e)
 }
 
 const initFilters = () => {
@@ -70,7 +66,7 @@ onBeforeMount(() => {
 
 const fetchData = () => {
   loading.value = true
-  axios.get("/api/user", {
+  axios.get("/api/brand", {
     params: {
       page: currentPage.value,
       limit: rowsPerPage.value,
@@ -78,7 +74,7 @@ const fetchData = () => {
     }
   }).then((res) => {
     loading.value = false
-    users.value = res.data.data.data
+    brands.value = res.data.data.data
     totalRecords.value = res.data.data.total
     totalPages.value = res.data.data.last_page
     firstPageUrl.value = res.data.data.first_page_url
@@ -117,53 +113,11 @@ onMounted(() => {
 })
 
 const openNew = () => {
-  router.push({name:'user-create'})
-}
-
-const createprice = () => {
-  axios
-    .post('/api/Register', user.value)
-    .then((res) => {
-      console.log(res.data)
-      fetchData()
-      productDialog.value = false
-      toast.add({severity: 'success', summary: 'Successful', detail: 'User Created', life: 3000})
-      user.value = {}
-    })
-    .catch((el) => {
-      error.value = el.response.data.errors
-    })
-}
-
-const deleteprice = () => {
-  const body = new FormData();
-  body.append("country_id", user.value.country_id);
-  body.append("price", user.value.price);
-  body.append("fees", user.value.fees);
-  body.append("tax", user.value.tax);
-  if (status.value == true) {
-    status.value = 1
-    body.append("status", status.value);
-  }
-  if (status.value == false) {
-    status.value = 0
-    body.append("status", status.value);
-  }
-  axios.post(`/api/country-price/${price_id.value}/update`, body)
-    .then((res) => {
-      fetchData()
-      deleteDialog.value = false
-      toast.add({severity: 'success', summary: 'Successful', detail: 'update Successful', life: 3000})
-      user.value = {}
-    })
-    .catch((el) => {
-      error.value = el.response.data.errors
-      console.log(error.value)
-    })
+  router.push({name:'brand-create'})
 }
 
 const confirmDelete = (id) => {
-  router.push({name:'user-edite',params:{id:id}})
+  router.push({name:'brand-edit',params:{id:id}})
 };
 </script>
 
@@ -174,16 +128,16 @@ const confirmDelete = (id) => {
         <Toolbar class="mb-4">
           <template #start>
             <div class="my-2 ">
-              <Button  v-can="'create users'" label="New" icon="pi pi-plus" class="new mr-2" @click="openNew"/>
+              <Button v-can="'create brands'" label="New" icon="pi pi-plus" class="new mr-2" @click="openNew"/>
             </div>
           </template>
           <template #end>
-            <div  v-can="'list users'" class="my-2 flex gap-2">
+            <div  v-can="'list brands'" class="my-2 flex gap-2">
               <span class="p-input-icon-left">
                 <i class="pi pi-search"/>
                 <InputText v-model="searchQuery" placeholder="Search..." />
               </span>
-              <Button  label="Export" icon="pi pi-upload" class="new" @click="exportCSV($event)"/>
+              <Button label="Export" icon="pi pi-upload" class="new" @click="exportCSV($event)"/>
             </div>
           </template>
         </Toolbar>
@@ -191,54 +145,42 @@ const confirmDelete = (id) => {
         <DataTable
           ref="dt"
           v-model:selection="selectedProducts"
-          :value="users"
+          :value="brands"
           :loading="loading"
           data-key="id"
           :paginator="false"
           :rows="rowsPerPage"
           :filters="filters"
           responsive-layout="scroll"
-          v-can="'list users'"
+          v-can="'list brands'"
         >
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-between md:align-items-center">
-              <h5 class="m-0 my-auto px-2">Users</h5>
-
+              <h5 class="m-0 my-auto px-2">Brands</h5>
             </div>
           </template>
           <Column selection-mode="multiple" header-style="width: 3rem"></Column>
-          <Column field="name" header="Name" :sortable="true" header-style="width:14%; min-width:10rem;">
+          <Column field="name_ar" header="Name (ar)" :sortable="true" header-style="width:14%; min-width:10rem;">
             <template #body="slotProps">
-              {{ slotProps.data.name }}
+              {{ slotProps.data.name_ar }}
             </template>
           </Column>
-          <Column field="email" header="Email" :sortable="true" header-style="width:14%; min-width:10rem;">
+          <Column field="name_en" header="Name (en)" :sortable="true" header-style="width:14%; min-width:10rem;">
             <template #body="slotProps">
-              {{ slotProps.data.email }}
-            </template>
-          </Column>
-
-          <Column field="phone" header="Mobile Number" :sortable="true" header-style="width:14%; min-width:10rem;">
-            <template #body="slotProps">
-              {{ slotProps.data.phone }}
-            </template>
-          </Column>
-          <Column field="type" header="Type" :sortable="true" header-style="width:14%; min-width:10rem;">
-            <template #body="slotProps">
-              {{ slotProps.data.type }}
+              {{ slotProps.data.name_en }}
             </template>
           </Column>
 
           <Column header-style="min-width:10rem;">
             <template #body="slotProps">
               <Button
-                v-can="'edit users'"
+               v-can="'edit brands'"
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-success mr-2"
                 @click="confirmDelete(slotProps.data.id)"
               />
               <Button
-               v-can="'delete users'"
+              v-can="'delete brands'"
                 icon="pi pi-trash"
                 class="delete mt-2"
                 @click="delet(slotProps.data.id)"
@@ -312,7 +254,7 @@ const confirmDelete = (id) => {
         <Dialog v-model:visible="deleteProductsDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
           <div class="flex align-items-center justify-content-center">
             <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"/>
-            <span v-if="product">Are you sure you want to delete the selected user?</span>
+            <span v-if="product">Are you sure you want to delete the selected brand?</span>
           </div>
           <template #footer>
             <Button label="No" icon="pi pi-times" class="p-button-text" @click="deleteProductsDialog = false"/>

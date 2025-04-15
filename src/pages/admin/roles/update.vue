@@ -2,7 +2,8 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from "axios";
-
+import {useRouter} from "vue-router";
+const router = useRouter()
 const route = useRoute()
 const permissionsData = ref({});
 const roleData = ref(null);
@@ -98,7 +99,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="permission-manager">
+  <div v-can="'edit roles'" class="permission-manager">
     <h1>{{ isEditing ? 'Edit' : 'Create' }} Role Permissions</h1>
 
     <div class="controls">

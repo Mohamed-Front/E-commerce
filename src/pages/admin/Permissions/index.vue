@@ -77,7 +77,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="permissions-container">
+  <div v-can="'list permissions'" class="permissions-container">
     <div class="card">
       <div class="header">
         <h1>Permissions Management</h1>
@@ -105,7 +105,7 @@ onMounted(() => {
               <template #body="{data}">
                 <div class="description-cell">
                   {{ data.description || 'No description' }}
-                  <Button icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm"
+                  <Button v-can="'edit permissions'" icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm"
                           @click="openEditDialog(data)" />
                 </div>
               </template>

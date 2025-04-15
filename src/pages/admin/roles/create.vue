@@ -91,7 +91,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="permission-manager">
+  <div v-can="'create roles'" class="permission-manager">
     <h1>Role Permissions Manager</h1>
 
     <div class="controls">

@@ -46,6 +46,23 @@ export default {
         },
       ],
     },
+    {
+      name: 'brands',
+      displayName: 'brands',
+      show:['list brands'],
+      meta: {
+        icon: 'eye',
+      },
+      disabled: true,
+      children: [
+        {
+          name: 'brand',
+          displayName: 'brand',
+          show:'list brands'
+        },
+
+      ],
+    },
 
 
 
