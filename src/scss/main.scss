@@ -54,8 +54,15 @@ pre {
 
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
+.pi{
+  margin-left: 5px !important;
+}
 .left {
   color: black !important;
+}
+
+.nave{
+  direction: ltr !important;
 }
 .va-sidebar-item-content{
   color: rgb(21, 21, 21) !important;

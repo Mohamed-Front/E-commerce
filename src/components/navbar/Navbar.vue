@@ -1,5 +1,5 @@
 <template>
-  <va-navbar class="shadow-xl" style="color:white !important;" >
+  <va-navbar class=" nave shadow-xl" style="color:white !important; direction: ltr !important;" >
     <template #left>
       <div class="left">
         <va-icon-menu-collapsed

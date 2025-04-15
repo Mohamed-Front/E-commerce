@@ -46,7 +46,7 @@ const delet = (id) => {
 }
 
 const deleteSelectedProducts = () => {
-  axios.get(`/api/brand/${delete_id.value}`)
+  axios.delete(`/api/brand/${delete_id.value}`)
     .then(() => {
       fetchData()
       deleteProductsDialog.value = false
@@ -315,7 +315,7 @@ const confirmDelete = (id) => {
 
         &.p-highlight {
           color: #ffffff;
-          background: #3b82f6;
+          background: #E28C3F;
         }
 
         &:disabled {

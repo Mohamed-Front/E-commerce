@@ -183,6 +183,7 @@ onMounted(() => {
           <div v-for="(group, groupName) in permissionsData" :key="groupName" class="permission-group">
             <div class="group-header">
               <input
+              class="mx-2 my-auto"
                 type="checkbox"
                 :id="`group-${groupName}`"
                 :checked="isGroupSelected(groupName)"

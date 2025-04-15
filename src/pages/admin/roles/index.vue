@@ -524,7 +524,7 @@ onMounted(() => {
 
         &.p-highlight {
           color: #ffffff;
-          background: #3b82f6;
+          background: #E28C3F;
         }
 
         &:disabled {

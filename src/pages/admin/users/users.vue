@@ -202,28 +202,28 @@ const confirmDelete = (id) => {
         >
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-between md:align-items-center">
-              <h5 class="m-0 my-auto px-2">Users</h5>
+              <h5 class="m-0 my-auto px-2">{{ $t('user.users') }}</h5>
 
             </div>
           </template>
           <Column selection-mode="multiple" header-style="width: 3rem"></Column>
-          <Column field="name" header="Name" :sortable="true" header-style="width:14%; min-width:10rem;">
+          <Column field="name" :header='$t("user.name")' :sortable="true" header-style="width:14%; min-width:10rem;">
             <template #body="slotProps">
               {{ slotProps.data.name }}
             </template>
           </Column>
-          <Column field="email" header="Email" :sortable="true" header-style="width:14%; min-width:10rem;">
+          <Column field="email" :header='$t("user.email")' :sortable="true" header-style="width:14%; min-width:10rem;">
             <template #body="slotProps">
               {{ slotProps.data.email }}
             </template>
           </Column>
 
-          <Column field="phone" header="Mobile Number" :sortable="true" header-style="width:14%; min-width:10rem;">
+          <Column field="phone" :header='$t("user.phone")' :sortable="true" header-style="width:14%; min-width:10rem;">
             <template #body="slotProps">
               {{ slotProps.data.phone }}
             </template>
           </Column>
-          <Column field="type" header="Type" :sortable="true" header-style="width:14%; min-width:10rem;">
+          <Column field="type" :header='$t("user.type")' :sortable="true" header-style="width:14%; min-width:10rem;">
             <template #body="slotProps">
               {{ slotProps.data.type }}
             </template>
@@ -373,7 +373,7 @@ const confirmDelete = (id) => {
 
         &.p-highlight {
           color: #ffffff;
-          background: #3b82f6;
+          background: #E28C3F;
         }
 
         &:disabled {
