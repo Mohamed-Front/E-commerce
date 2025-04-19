@@ -19,7 +19,7 @@
         </span>
     </div>
     <div class="flex justify-center mt-4">
-      <button style="background-color: #D7A648 !important;border-radius: 10px;color:white" class="w-full lg:w-[50%] py-2 text-lg" @click="authStore.handleLogin(form)">{{ t('auth.login') }}</button>
+      <button style="background-color: #D7A648 !important;border-radius: 10px;color:white" class="w-full lg:w-[50%] py-2 text-lg" @click="authStore.handleLogin(form)">{{ t('login') }}</button>
     </div>
   </form>
 </template>

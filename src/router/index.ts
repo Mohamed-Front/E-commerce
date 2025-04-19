@@ -18,11 +18,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/invioce/:id',
     component: () => import('../pages/admin/settings/order/invioce.vue'),
   },
-  {
-    name: 'home',
-    path: '/',
-    component: () => import('../pages/admin/frontend/pages/home.vue'),
-  },
+  // {
+  //   name: 'home',
+  //   path: '/',
+  //   component: () => import('../pages/admin/frontend/pages/home.vue'),
+  // },
   {
     name: 'admin',
     path: '/admin',
@@ -68,6 +68,11 @@ const routes: Array<RouteRecordRaw> = [
             component: () => import('../pages/admin/users/users.vue'),
           },
           {
+            name: 'user-edite',
+            path: 'user-edite/:id',
+            component: () => import('../pages/admin/users/edite.vue'),
+          },
+          {
             name: 'user-create',
             path: 'user-create',
             component: () => import('../pages/admin/users/create.vue'),
@@ -99,6 +104,29 @@ const routes: Array<RouteRecordRaw> = [
 
         ],
       },
+      {
+        name: 'brand-management',
+        path: 'brands',
+        // component: RouteViewComponent,
+        children: [
+          {
+            name: 'brand',
+            path: 'brand',
+            component: () => import('../pages/admin/brand/index.vue'),
+          },
+          {
+            name: 'brand-create',
+            path: 'brand-create',
+            component: () => import('../pages/admin/brand/create.vue'),
+          },
+          {
+            name: 'brand-edit',
+            path: 'brand-edit/:id',
+            component: () => import('../pages/admin/brand/edite.vue'),
+          },
+
+        ],
+      },
 
       {
         name: 'settings',
@@ -110,60 +138,7 @@ const routes: Array<RouteRecordRaw> = [
             path: 'pages',
             component: () => import('../pages/admin/settings/pages/index.vue'),
           },
-          {
-            name: 'about',
-            path: 'about',
-            component: () => import('../pages/admin/about/index.vue'),
-          },
 
-          {
-            name: 'terms-create',
-            path: 'terms-create',
-            component: () => import('../pages/admin/settings/terms/create.vue'),
-          },
-
-          {
-            name: 'pages-update',
-            path: 'pages-update/:id',
-            component: () => import('../pages/admin/settings/pages/update.vue'),
-          },
-
-          {
-            name: 'banner',
-            path: 'banner',
-            component: () => import('../pages/admin/settings/banner/index.vue'),
-          },
-          {
-            name: 'Country',
-            path: 'Country',
-            component: () => import('../pages/admin/settings/Country/index.vue'),
-          },
-
-          {
-            name: 'order',
-            path: 'order',
-            component: () => import('../pages/admin/settings/order/index.vue'),
-          },
-          {
-            name: 'order-print',
-            path: 'order-print',
-            component: () => import('../pages/admin/settings/order/print.vue'),
-          },
-          {
-            name: 'reminder',
-            path: 'reminder',
-            component: () => import('../pages/admin/settings/reminder/index.vue'),
-          },
-          {
-            name: 'payment',
-            path: 'payment',
-            component: () => import('../pages/admin/settings/reports/index.vue'),
-          },
-          {
-            name: 'earn',
-            path: 'earn',
-            component: () => import('../pages/admin/settings/reports/earn.vue'),
-          },
         ],
       },
 

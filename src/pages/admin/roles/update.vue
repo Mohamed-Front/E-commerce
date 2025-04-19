@@ -2,8 +2,8 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from "axios";
-import router from '../../../router';
-
+import {useRouter} from "vue-router";
+const router = useRouter()
 const route = useRoute()
 const permissionsData = ref({});
 const roleData = ref(null);
@@ -99,7 +99,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="permission-manager">
+  <div v-can="'edit roles'" class="permission-manager">
     <h1>{{ isEditing ? 'Edit' : 'Create' }} Role Permissions</h1>
 
     <div class="controls">
@@ -183,6 +183,7 @@ onMounted(() => {
           <div v-for="(group, groupName) in permissionsData" :key="groupName" class="permission-group">
             <div class="group-header">
               <input
+              class="mx-2 my-auto"
                 type="checkbox"
                 :id="`group-${groupName}`"
                 :checked="isGroupSelected(groupName)"

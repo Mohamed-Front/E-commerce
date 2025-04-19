@@ -91,7 +91,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="permission-manager">
+  <div v-can="'create roles'" class="permission-manager">
     <h1>Role Permissions Manager</h1>
 
     <div class="controls">
@@ -100,6 +100,7 @@ onMounted(() => {
           Role Name <span class="required">*</span>
         </label>
         <input
+
           type="text"
           id="roleName"
           v-model="roleName"
@@ -135,7 +136,7 @@ onMounted(() => {
               <tr v-for="permission in group" :key="permission.id">
                 <td v-if="group.indexOf(permission) === 0" :rowspan="group.length">
                   <input
-
+                   class="mx-2 my-auto"
                     type="checkbox"
                     :id="`group-${groupName}-table`"
                     :checked="isGroupSelected(groupName)"
@@ -158,7 +159,7 @@ onMounted(() => {
                 </td>
                 <td>
                   <input
-                    class="mx-2"
+                    class="mx-2 my-auto"
                     type="checkbox"
                     :id="`permission-${permission.id}-table`"
                     :value="permission.id"
@@ -177,6 +178,7 @@ onMounted(() => {
           <div v-for="(group, groupName) in permissionsData" :key="groupName" class="permission-group">
             <div class="group-header">
               <input
+              class="mx-2 my-auto"
                 type="checkbox"
                 :id="`group-${groupName}`"
                 :checked="isGroupSelected(groupName)"

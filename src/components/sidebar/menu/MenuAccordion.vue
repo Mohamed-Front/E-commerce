@@ -2,9 +2,8 @@
   <va-accordion v-model="accordionValue" class="sidebar-accordion va-sidebar__menu__inner" multiple>
     <va-collapse v-for="(route, idx) in arr" :key="idx">
       <template #header>
-        <va-sidebar-item  :active="isRouteActive(route)" :to="route.children ? undefined : { name: route.name }">
-          <va-sidebar-item-content>
-            <va-icon :name="route.meta.icon" class="va-sidebar-item__icon" />
+        <va-sidebar-item  :active="isRouteActive(route)"  :to="route.children ? undefined : { name: route.name }">
+          <va-sidebar-item-content v-if="Array.isArray(route.show) && route.show.some(element => showRoutes.includes(element))">            <va-icon :name="route.meta.icon" class="va-sidebar-item__icon" />
 
             <va-sidebar-item-title>
               {{ t(route.displayName) }}
@@ -14,14 +13,16 @@
           </va-sidebar-item-content>
         </va-sidebar-item>
       </template>
-      <template v-for="(child, index) in route.children" :key="index">
-        <va-sidebar-item :active="isRouteActive(child)" :to="{ name: child.name }">
+      <template  v-for="(child, index) in route.children" :key="index"  >
+        <va-sidebar-item v-if="showRoutes.includes(child.show)" :active="isRouteActive(child)" :to="{ name: child.name }">
           <va-sidebar-item-content>
             <div class="va-sidebar-item__icon" />
 
             <va-sidebar-item-title>
               {{ t(child.displayName) }}
+
             </va-sidebar-item-title>
+
           </va-sidebar-item-content>
         </va-sidebar-item>
       </template>
@@ -38,6 +39,7 @@ import { cos } from '@amcharts/amcharts5/.internal/core/util/Math'
   const { t } = useI18n()
   const arr =ref([])
   const pro =ref('')
+  const showRoutes= ref([])
   const props = withDefaults(
     defineProps<{
       items?: INavigationRoute[]
@@ -50,7 +52,7 @@ import { cos } from '@amcharts/amcharts5/.internal/core/util/Math'
   const accordionValue = ref<boolean[]>([])
 
   onMounted(() => {
-
+    showRoutes.value=localStorage.getItem('userPermissions')
     arr.value=props.items
 
   })

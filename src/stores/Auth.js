@@ -30,56 +30,75 @@ export const useAuthStore = defineStore('Auth', {
       }
     },
     async handleLogin(data) {
-      // this.router.push({name: "admin"});
+      this.authErrors = ["Invalid credentials. Please try again."]
+      this.loading = true
       this.resetAuthStore()
 
-      const response = await axios.post('/api/login', {
-        email: data.email,
-        password: data.password,
-      })
-      const headers = {
-        Authorization: `"Bearer ${response.data.data.access_token}"`, // Headers your auth endpoint needs
-        Accept: 'application/json', // Headers your auth endpoint needs
-      }
-      // headers['Access-Control-Allow-Origin']='*'
-      if (response.data.data.access_token) {
-        console.log(response.data.user)
-        this.authenticated = true
-        this.token = response.data.data.access_token
-        this.authUser = response.data.data.user
-        this.userPermissions = response.data.data.user.permissions
-
-        console.log(response.data.data.user)
-        const beamsTokenProvider = new PusherPushNotifications.TokenProvider({
-          url: `${import.meta.env.VITE_API}/pusher/beams-auth`,
-          queryParams: {
-            user_id: `${response.data.data.user.id}`, // URL query params your auth endpoint needs
-          },
-
-          headers: {
-            Authorization: `Bearer ${response.data.data.access_token}`, // Headers your auth endpoint needs
-            Accept: 'application/json', // Headers your auth endpoint needs
-            'Access-Control-Allow-Origin': '*',
-            Origin: import.meta.env.VITE_URI,
-          },
+      try {
+        const response = await axios.post('/api/login', {
+          email: data.email,
+          password: data.password,
         })
-        const beamsClient = new PusherPushNotifications.Client({
-          instanceId: '140343aa-f173-4a2d-940a-7724c7c12be1',
-        })
-        beamsClient
-          .start()
-          .then(() => {
-            beamsClient.setUserId(`"${response.data.data.user.id}"`, beamsTokenProvider)
-            console.log('hello auth ')
-          })
-          .catch((error) => {
-            console.log(error)
+
+        if (response.data.data?.access_token) {
+          this.authenticated = true
+          this.token = response.data.data.access_token
+          this.authUser = response.data.data.user
+          this.userPermissions = response.data.data.user.permissions
+
+          // Initialize Pusher Beams
+          const beamsTokenProvider = new PusherPushNotifications.TokenProvider({
+            url: `${import.meta.env.VITE_API}/pusher/beams-auth`,
+            queryParams: {
+              user_id: `${response.data.data.user.id}`,
+            },
+            headers: {
+              Authorization: `Bearer ${response.data.data.access_token}`,
+              Accept: 'application/json',
+              'Access-Control-Allow-Origin': '*',
+              Origin: import.meta.env.VITE_URI,
+            },
           })
 
-        // this.userPermissions = response.data.user.permissions;
-        this.router.push({ name: 'dashboard' })
-      } else {
-        this.authErrors = "Email or password Doesn't match our record "
+          const beamsClient = new PusherPushNotifications.Client({
+            instanceId: '140343aa-f173-4a2d-940a-7724c7c12be1',
+          })
+
+          beamsClient
+            .start()
+            .then(() => {
+              beamsClient.setUserId(`"${response.data.data.user.id}"`, beamsTokenProvider)
+            })
+            .catch((error) => {
+              console.error('Pusher Beams error:', error)
+            })
+
+          this.router.push({ name: 'dashboard' })
+        } else {
+          this.authErrors = ["Invalid credentials. Please try again."]
+        }
+      } catch (error) {
+        if (error.response) {
+          // Handle server validation errors
+          if (error.response.status === 422) {
+            this.authErrors = error.response.data.errors
+              ? Object.values(error.response.data.errors).flat()
+              : ["Validation failed. Please check your inputs."]
+          } else if (error.response.status === 401) {
+            this.authErrors = "Invalid email or password."
+          } else {
+            this.authErrors = [error.response.data.message || "An error occurred during login."]
+          }
+        } else if (error.request) {
+          // The request was made but no response was received
+          this.authErrors = ["Network error. Please check your connection."]
+        } else {
+          // Something happened in setting up the request
+          this.router.push({ name: 'dashboard' })
+
+        }
+      } finally {
+        this.loading = false
       }
     },
     async handleRegister(data) {
@@ -98,20 +117,26 @@ export const useAuthStore = defineStore('Auth', {
         this.authUser = response.data.user
         this.router.push({ name: 'Home' })
       } catch (error) {
-        if (error.response.status === 422) {
+        if (error.response?.status === 422) {
           this.authErrors = error.response.data.errors
+            ? Object.values(error.response.data.errors).flat()
+            : ["Validation failed. Please check your inputs."]
+        } else {
+          this.authErrors = [error.response?.data?.message || "Registration failed. Please try again."]
         }
       } finally {
         this.loading = false
       }
     },
     async handleLogout() {
-      this.resetAuthStore()
-
-      await axios.post('/api/logout')
-
-      this.userPermissions = ''
-
+      try {
+        await axios.post('/api/logout')
+      } catch (error) {
+        console.error('Logout error:', error)
+      } finally {
+        this.resetAuthStore()
+        this.router.push({ name: 'Login' })
+      }
     },
     async forgotPassword(data) {
       try {
@@ -122,15 +147,10 @@ export const useAuthStore = defineStore('Auth', {
         this.msg = response.data.status
         this.router.push({ name: 'ResetPassword' })
       } catch (error) {
-        if (error.response.status === 422) {
-          this.authErrors = error.response.data.errors
+        if (error.response?.status === 422) {
+          this.authErrors = Object.values(error.response.data.errors).flat()
         } else {
-          // handling exceptions from frontend prespective only
-          let errors = []
-          let exceptionArr = []
-          exceptionArr.push(error.response.data.message)
-          errors.push(exceptionArr)
-          this.authErrors = errors
+          this.authErrors = [error.response?.data?.message || "Password reset request failed."]
         }
       }
     },
@@ -139,8 +159,10 @@ export const useAuthStore = defineStore('Auth', {
         await axios.post('/api/reset-password', data)
         this.router.push({ name: 'Login' })
       } catch (error) {
-        if (error.response.status === 422) {
-          this.authErrors = error.response.data.errors
+        if (error.response?.status === 422) {
+          this.authErrors = Object.values(error.response.data.errors).flat()
+        } else {
+          this.authErrors = [error.response?.data?.message || "Password reset failed."]
         }
       }
     },

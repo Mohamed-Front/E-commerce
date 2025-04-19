@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import axios from "axios";
 
 const permissionsData = ref({});
+const groupedPermissions = ref([]);
 const loading = ref(true);
 const activeTab = ref(0);
 const visibleDialog = ref(false);
@@ -12,22 +13,43 @@ const currentPermission = ref({
   description: ''
 });
 
+// Group permissions by their module
+const groupPermissions = (data) => {
+  const groups = [];
+
+  for (const [module, permissions] of Object.entries(data)) {
+    groups.push({
+      name: module.charAt(0).toUpperCase() + module.slice(1),
+      value: module,
+      permissions: permissions
+    });
+  }
+
+  // Sort groups alphabetically
+  groups.sort((a, b) => a.name.localeCompare(b.name));
+
+  return groups;
+};
+
 const fetchData = () => {
+  loading.value = true;
   axios.get("api/role/get/permissions").then((res) => {
     permissionsData.value = res.data.data;
+    groupedPermissions.value = groupPermissions(res.data.data);
+    loading.value = false;
+  }).catch(error => {
+    console.error("Error fetching permissions:", error);
     loading.value = false;
   });
 };
 
 const openEditDialog = (permission) => {
   visibleDialog.value = true;
-  console.log(permission)
   currentPermission.value = {
-    id: permission?.id,
-    name: permission?.name,
-    description: permission?.description || ''
+    id: permission.id,
+    name: permission.name,
+    description: permission.description || ''
   };
-
 };
 
 const updateDescription = () => {
@@ -55,83 +77,57 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="permissions-container">
+  <div v-can="'list permissions'" class="permissions-container">
     <div class="card">
-      <h1>Permissions Management</h1>
-      <p class="subtitle">View and manage all system permissions</p>
+      <div class="header">
+        <h1>Permissions Management</h1>
+        <p class="subtitle">View and manage all system permissions grouped by modules</p>
+      </div>
 
-      <TabView v-model:activeIndex="activeTab">
-        <!-- Permissions Tab -->
-        <TabPanel header="Permissions">
-          <DataTable :value="permissionsData.permissions" stripedRows class="p-datatable-sm"
-                     :loading="loading" dataKey="id">
-            <Column field="id" header="ID" sortable></Column>
+      <div class="toolbar">
+        <Button icon="pi pi-refresh" label="Refresh" @click="fetchData" :loading="loading" />
+      </div>
+
+      <TabView v-model:activeIndex="activeTab" class="grouped-tabs">
+        <TabPanel v-for="group in groupedPermissions" :key="group.value" :header="group.name">
+          <DataTable :value="group.permissions" stripedRows class="p-datatable-sm"
+                    :loading="loading" dataKey="id" scrollable scrollHeight="flex">
+            <Column field="id" header="ID" sortable style="width: 80px"></Column>
             <Column field="name" header="Name" sortable>
               <template #body="{data}">
-                <Tag :value="data.name" severity="info" />
+                <Tag :value="data.name"
+                     :severity="data.name.includes('delete') ? 'danger' :
+                              data.name.includes('edit') ? 'warning' :
+                              data.name.includes('create') ? 'success' : 'info'" />
               </template>
             </Column>
             <Column field="description" header="Description">
               <template #body="{data}">
                 <div class="description-cell">
                   {{ data.description || 'No description' }}
-                  <Button icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm"
+                  <Button v-can="'edit permissions'" icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm"
                           @click="openEditDialog(data)" />
                 </div>
               </template>
             </Column>
-          </DataTable>
-        </TabPanel>
-
-        <!-- Users Permissions Tab -->
-        <TabPanel header="User Permissions">
-          <DataTable :value="permissionsData.users" stripedRows class="p-datatable-sm"
-                     :loading="loading" dataKey="id">
-            <Column field="id" header="ID" sortable></Column>
-            <Column field="name" header="Name" sortable>
+            <Column header="Actions" style="width: 100px">
               <template #body="{data}">
-                <Tag :value="data.name" :severity="data.name.includes('delete') ? 'danger' :
-                     data.name.includes('edit') ? 'warning' : 'success'" />
+                <Button icon="pi pi-cog" class="p-button-rounded p-button-text p-button-sm"
+                        @click="openEditDialog(data)" />
               </template>
             </Column>
-            <Column field="description" header="Description">
-              <template #body="{data}">
-                <div class="description-cell">
-                  {{ data.description || 'No description' }}
-                  <Button icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm"
-                          @click="openEditDialog(data)" />
-                </div>
-              </template>
-            </Column>
-          </DataTable>
-        </TabPanel>
-
-        <!-- Roles Permissions Tab -->
-        <TabPanel header="Role Permissions">
-          <DataTable :value="permissionsData.roles" stripedRows class="p-datatable-sm"
-                     :loading="loading" dataKey="id">
-            <Column field="id" header="ID" sortable></Column>
-            <Column field="name" header="Name" sortable>
-              <template #body="{data}">
-                <Tag :value="data.name" :severity="data.name.includes('delete') ? 'danger' :
-                     data.name.includes('edit') ? 'warning' : 'info'" />
-              </template>
-            </Column>
-            <Column field="description" header="Description">
-              <template #body="{data}">
-                <div class="description-cell">
-                  {{ data.description || 'No description' }}
-                  <Button icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm"
-                          @click="openEditDialog(data)" />
-                </div>
-              </template>
-            </Column>
+            <template #empty>
+              <div class="empty-message">
+                <i class="pi pi-database" style="font-size: 2rem"></i>
+                <p>No permissions found in this group</p>
+              </div>
+            </template>
           </DataTable>
         </TabPanel>
       </TabView>
 
       <!-- Update Description Dialog -->
-      <Dialog v-model:visible="visibleDialog" modal header="Update Description"
+      <Dialog v-model:visible="visibleDialog" modal header="Update Permission Description"
               :style="{ width: '50vw' }" :breakpoints="{ '960px': '75vw', '640px': '90vw' }">
         <div class="p-fluid">
           <div class="p-field">
@@ -140,7 +136,8 @@ onMounted(() => {
           </div>
           <div class="p-field">
             <label for="description">Description</label>
-            <Textarea id="description" v-model="currentPermission.description" rows="5" autoResize />
+            <Textarea id="description" v-model="currentPermission.description"
+                     rows="5" autoResize placeholder="Enter permission description..." />
           </div>
         </div>
         <template #footer>
@@ -164,6 +161,13 @@ onMounted(() => {
   padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.header {
+  margin-bottom: 1rem;
 }
 
 h1 {
@@ -173,28 +177,13 @@ h1 {
 
 .subtitle {
   color: #7f8c8d;
-  margin-bottom: 2rem;
+  margin-bottom: 0;
 }
 
-.stats-container {
+.toolbar {
   display: flex;
-  gap: 1rem;
-  margin-top: 2rem;
-}
-
-.stat-card {
-  flex: 1;
-  text-align: center;
-  transition: transform 0.3s;
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
-}
-
-.stat-card h2 {
-  color: #3498db;
-  margin: 0.5rem 0 0;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
 }
 
 .description-cell {
@@ -204,12 +193,25 @@ h1 {
   gap: 0.5rem;
 }
 
-:deep(.p-tabview-nav) {
-  border-bottom: 2px solid #e9ecef;
+.empty-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: #7f8c8d;
 }
 
-:deep(.p-tabview-nav-link) {
-  padding: 1rem 1.5rem;
+:deep(.grouped-tabs .p-tabview-nav) {
+  flex-wrap: wrap;
+}
+
+:deep(.grouped-tabs .p-tabview-nav-link) {
+  padding: 0.75rem 1.25rem;
+}
+
+:deep(.grouped-tabs .p-tabview-panels) {
+  padding: 1rem 0;
 }
 
 :deep(.p-tag) {
@@ -219,5 +221,26 @@ h1 {
 
 .p-field {
   margin-bottom: 1.5rem;
+}
+
+.p-field label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .permissions-container {
+    padding: 1rem;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  :deep(.grouped-tabs .p-tabview-nav-link) {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
 }
 </style>

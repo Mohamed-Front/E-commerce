@@ -13,6 +13,6 @@ axios.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${localStorage.getItem('token')}`
   }
   config.headers.Accept = 'application/json'
-  // config.headers["Content-Type"] = "application/json";
+  config.headers["Content-Type"] = "application/json";
   return config
 })
