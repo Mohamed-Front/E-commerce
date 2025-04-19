@@ -18,11 +18,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/invioce/:id',
     component: () => import('../pages/admin/settings/order/invioce.vue'),
   },
-  // {
-  //   name: 'home',
-  //   path: '/',
-  //   component: () => import('../pages/admin/frontend/pages/home.vue'),
-  // },
+  {
+    name: 'home',
+    path: '/',
+    component: () => import('../pages/admin/frontend/pages/home.vue'),
+  },
   {
     name: 'admin',
     path: '/admin',

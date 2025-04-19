@@ -135,19 +135,9 @@
         <!-- Other products -->
       </section>
     </div>
-    <footer
-      class="max-h-[211px] flex flex-col justify-center items-center gap-4 fixed bottom-0 w-full p-6 bg-[#FAF7F0] text-[#A17D1C] font-semibold 24 xs:text-[.5rem] sm:text-[.7rem] md:text-[1rem] lg:text-[1rem]">
-      <div class="flex justify-evenly items-center gap-4 w-3/4">
-        <p><a href="#">Shift7 Mall</a></p>
-        <p><a href="#">Shift7 Market</a></p>
-        <p><a href="#">Centro</a></p>
-        <p><a href="#">Yasser Mall</a></p>
-      </div>
-      <!-- <div><i class="fa-brands fa-instagram" style="color: #A17D1C;"></i> <i class="fa-brands fa-twitter"
-          style="color: #A17D1C;"></i> <i class="fa-brands fa-facebook" style="color: #A17D1C;"></i></div> -->
-      <p>© 2025 Shift7</p>
-    </footer>
 
+    <!-- footer -->
+    <Footer></Footer>
   </main>
 </template>
 
@@ -162,6 +152,7 @@ import imge5 from '../imges/prand 5.png'
 import prand2_img from '../imges/prand 2_2.png'
 
 import Nav from '../components/nav.vue';
+import Footer from '../components/footer.vue';
 const titels = ref(["ازياء", "القرطاسية", "جمال وعطور", "الصحة والتغذية", "الالكترونيات", "الجمال والعطور", "الصحة والتغذية"])
 const product_titels = ref(["العناية الشخصية", "ازياء النساء", "ازياء الرجال", "العناية بالبشرة", "العناية بالشعر", "شنط واكسسوارات", "العناية الشخصية", "ازياء النساء"])
 const Exclusive_offers = ref([
