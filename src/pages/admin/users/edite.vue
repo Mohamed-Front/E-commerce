@@ -118,19 +118,19 @@ onMounted(() => {
 
 <template>
   <div  v-can="'edit users'"  class="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow-lg">
-    <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Edit  User</h1>
+    <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">{{$t("user.edit_User")}}</h1>
 
     <Form ref="form" :model="userData" :rules="rules" @submit.prevent="submitForm" class="space-y-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Name -->
         <div class="space-y-2">
           <label for="name" class="block text-sm font-medium text-gray-700">
-            Name <span class="text-red-500">*</span>
+            {{$t("user.name")}} <span class="text-red-500">*</span>
           </label>
           <InputText
             id="name"
             v-model="userData.name"
-            placeholder="Enter full name"
+            :placeholder='$t("user.enter_full_name")'
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           />
           <small class="text-red-500 text-xs" v-if="form?.errors?.name">{{ form.errors.name[0].message }}</small>
@@ -139,7 +139,7 @@ onMounted(() => {
         <!-- Phone -->
         <div class="space-y-2">
           <label for="phone" class="block text-sm font-medium text-gray-700">
-            Phone <span class="text-red-500">*</span>
+            {{$t("user.phone")}} <span class="text-red-500">*</span>
           </label>
           <InputText
             id="phone"
@@ -153,7 +153,7 @@ onMounted(() => {
         <!-- Type -->
         <div class="space-y-2">
           <label for="type" class="block text-sm font-medium text-gray-700">
-            Type <span class="text-red-500">*</span>
+            {{$t("user.type")}} <span class="text-red-500">*</span>
           </label>
           <Dropdown
             id="type"
@@ -165,7 +165,7 @@ onMounted(() => {
             ]"
             optionLabel="label"
             optionValue="value"
-            placeholder="Select user type"
+            placeholder='$t("user.select_user_type")'
             class="w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
           <small class="text-red-500 text-xs" v-if="form?.errors?.type">{{ form.errors.type[0].message }}</small>
@@ -174,7 +174,7 @@ onMounted(() => {
         <!-- Role -->
         <div class="space-y-2">
           <label for="role" class="block text-sm font-medium text-gray-700">
-            Role <span class="text-red-500">*</span>
+            {{$t("user.role")}} <span class="text-red-500">*</span>
           </label>
           <Dropdown
             id="role"
@@ -182,7 +182,7 @@ onMounted(() => {
             :options="roles"
             optionLabel="name"
             optionValue="id"
-            placeholder="Select role"
+            :placeholder='$t("user.select_role")'
             class="w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
           <small class="text-red-500 text-xs" v-if="form?.errors?.role_id">{{ form.errors.role_id[0].message }}</small>
@@ -191,7 +191,7 @@ onMounted(() => {
         <!-- Email -->
         <div class="space-y-2">
           <label for="email" class="block text-sm font-medium text-gray-700">
-            Email <span class="text-red-500">*</span>
+            {{$t("user.email")}}  <span class="text-red-500">*</span>
           </label>
           <InputText
             id="email"
@@ -207,7 +207,7 @@ onMounted(() => {
 
         <!-- Image Upload -->
         <div class="md:col-span-2 space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Profile Image</label>
+          <label class="block text-sm font-medium text-gray-700">{{$t("user.profile_Image")}}</label>
 
           <div class="flex justify-center">
             <label
@@ -252,7 +252,7 @@ onMounted(() => {
                   <i class="pi pi-image text-blue-500 text-2xl"></i>
                 </div>
                 <p class="text-sm text-center text-gray-600 mb-1">
-                  <span class="text-blue-500 font-medium">Click to upload</span> or drag and drop
+                  <span class="text-blue-500 font-medium">  {{$t("user.click_to_upload")}}  </span> {{ $t("user.or_drag_and_drop") }}
                 </p>
                 <p class="text-xs text-gray-400">SVG, PNG, JPG or GIF (max. 1MB)</p>
               </div>
@@ -271,7 +271,7 @@ onMounted(() => {
           class="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
           :disabled="loading"
         >
-          <span v-if="!loading">Update User</span>
+          <span v-if="!loading">{{$t("user.update_User")}}</span>
           <i v-else class="pi pi-spinner pi-spin"></i>
         </Button>
       </div>

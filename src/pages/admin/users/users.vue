@@ -174,16 +174,16 @@ const confirmDelete = (id) => {
         <Toolbar class="mb-4">
           <template #start>
             <div class="my-2 ">
-              <Button  v-can="'create users'" label="New" icon="pi pi-plus" class="new mr-2" @click="openNew"/>
+              <Button  v-can="'create users'" :label='$t("user.new")' icon="pi pi-plus" class="new mr-2" @click="openNew"/>
             </div>
           </template>
           <template #end>
             <div  v-can="'list users'" class="my-2 flex gap-2">
               <span class="p-input-icon-left">
                 <i class="pi pi-search"/>
-                <InputText v-model="searchQuery" placeholder="Search..." />
+                <InputText v-model="searchQuery" :placeholder='$t("user.search")' />
               </span>
-              <Button  label="Export" icon="pi pi-upload" class="new" @click="exportCSV($event)"/>
+              <Button  :label='$t("user.export")' icon="pi pi-upload" class="new" @click="exportCSV($event)"/>
             </div>
           </template>
         </Toolbar>
