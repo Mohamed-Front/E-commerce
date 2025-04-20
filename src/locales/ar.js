@@ -30,6 +30,37 @@ export default {
     edit_User:"تحرير المستخدم",
     update_User:"تحديث المستخدم",
 
+
+
+ 
  
   },    
+  role:{
+    manage_Roles:"إدارة الأدوار",
+    iD:"الفهرس",
+    name:"الاسم",
+    role_Permissions_Manager:"مدير أذونات الأدوار",
+    role_Name :"اسم الدور",
+    enter_role_name:"أدخل اسم الدور",
+    loading_permissions:"جاري تحميل الأذونات...",
+    create_Role_with_Selected_Permissions:"إنشاء دور بالأذونات المحددة",
+    permission_Description:"وصف الإذن",
+    role_Name:"اسم الدور",
+    role_Permissions:"أذونات الدور",
+    edit:"تحرير",
+     
+  }
+     
+  //   },
+  //   "permissions": {
+  //   "edit": "تعديل صلاحيات",
+  //   "create": "إنشاء صلاحيات"
+  // }
+  //   ,
+  //   "loading": {
+  //     "roleData": "جاري تحميل بيانات الدور...",
+  //     "permissions": "جاري تحميل الصلاحيات..."
+  //   }
+  //   ,
+     
 };

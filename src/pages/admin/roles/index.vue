@@ -199,7 +199,7 @@ onMounted(() => {
             <div class="my-2">
               <Button
               v-can="'create roles'"
-                label="New"
+                :label='$t("user.new")'
                 icon="pi pi-plus"
                 class="new mr-2"
                 @click="openNew"
@@ -213,11 +213,11 @@ onMounted(() => {
                 <i class="pi pi-search" />
                 <InputText
                   v-model="searchQuery"
-                  placeholder="Search..."
+                  :placeholder='$t("user.search")'
                 />
               </span>
               <Button
-                label="Export"
+                :label='$t("user.export")'
                 icon="pi pi-upload"
                 class="new"
                 @click="exportCSV($event)"
@@ -242,7 +242,7 @@ onMounted(() => {
         >
           <template #header>
             <div class="flex flex-column md:flex-row md:justify-between md:align-items-center">
-              <h5 class="m-0">Manage Roles</h5>
+              <h5 class="m-0">{{$t("role.manage_Roles")}}</h5>
             </div>
           </template>
 
@@ -250,7 +250,7 @@ onMounted(() => {
 
           <Column
             field="id"
-            header="ID"
+            :header='$t("role.iD")'
             :sortable="true"
             header-style="width:14%; min-width:5rem;"
           >
@@ -261,7 +261,7 @@ onMounted(() => {
 
           <Column
             field="name"
-            header="Name"
+            :header='$t("role.name")'
             :sortable="true"
             header-style="width:14%; min-width:10rem;"
           >
