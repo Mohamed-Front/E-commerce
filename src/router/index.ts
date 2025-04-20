@@ -130,6 +130,16 @@ const routes: Array<RouteRecordRaw> = [
             path: 'model',
             component: () => import('../pages/admin/products/model/index.vue'),
           },
+          {
+            name: 'model-create',
+            path: 'model-create',
+            component: () => import('../pages/admin/products/model/create.vue'),
+          },
+          {
+            name: 'model-edit',
+            path: 'model-edit/:id',
+            component: () => import('../pages/admin/products/model/edit.vue'),
+          },
 
         ],
       },
