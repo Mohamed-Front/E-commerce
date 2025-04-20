@@ -68,9 +68,11 @@ const getoneRow=()=>{
   axios.get(`api/user/${route.currentRoute._value.params.id}`).then((res)=>{
     userData.value.name=res.data.data.name
     userData.value.email=res.data.data.email
+    userData.value.type=res.data.data.type
+    imagePreview.value=res.data.data.media[0].url
     userData.value.phone=res.data.data.phone
     userData.value.role_id=res.data.data.roles[0].id
-    imagePreview.value=res.data.data.media[0].path
+
 
   })
 }
@@ -98,10 +100,9 @@ const submitForm = async () => {
     formData.append('image', imageFile.value);
   }
 
-  axios.post("/api/user", formData)
+  axios.post(`/api/user/${route.currentRoute._value.params.id}`, formData)
     .then(response => {
-      router.push({name:'users'})
-      loading.value = false;
+      route.push({name:'users'})
     })
     .catch(error => {
       console.error("Error:", error);
@@ -112,7 +113,6 @@ const submitForm = async () => {
 
 onMounted(() => {
   fetchRoles();
-  console.log(route)
 });
 </script>
 
@@ -159,9 +159,9 @@ onMounted(() => {
             id="type"
             v-model="userData.type"
             :options="[
-              { label: 'Admin', value: 'admin' },
-              { label: 'customer', value: 'customer' },
-              { label: 'User', value: 'User' }
+              { label: 'Admin', value: 1 },
+              { label: 'customer', value: 2},
+              { label: 'User', value: 2 }
             ]"
             optionLabel="label"
             optionValue="value"

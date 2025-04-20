@@ -270,7 +270,7 @@ onMounted(() => {
             </template>
           </Column>
 
-          <Column header-style="min-width:10rem;">
+          <Column header-style="min-width:17rem;">
             <template #body="slotProps">
               <Button
               v-can="'edit roles'"

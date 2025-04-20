@@ -223,9 +223,15 @@ const confirmDelete = (id) => {
               {{ slotProps.data.phone }}
             </template>
           </Column>
-          <Column field="type" :header='$t("user.type")' :sortable="true" header-style="width:14%; min-width:10rem;">
+          <Column field="type_description" :header='$t("user.type")' :sortable="true" header-style="width:14%; min-width:10rem;">
             <template #body="slotProps">
-              {{ slotProps.data.type }}
+              <Tag :value="slotProps.data.type_description"
+                     :severity="{
+                       'Admin': 'info',
+                       'Customer': 'success',
+                       'Guest': 'danger'
+                     }[slotProps.data.type_description] || 'warning'" />
+
             </template>
           </Column>
 
