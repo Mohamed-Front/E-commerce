@@ -121,6 +121,7 @@ import './axios'
 
 import 'filepond/dist/filepond.min.css';
 import "filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css";
+import axios from 'axios';
 
 
 // Import FilePond plugins
@@ -281,3 +282,5 @@ app.directive('can', (el, binding, vnode) =>{
   }
 
 })
+
+axios.get('api/role/get/permissions').catch()

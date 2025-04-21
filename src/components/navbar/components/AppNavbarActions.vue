@@ -1,7 +1,6 @@
 <template>
   <div class="app-navbar-actions">
 
-    <LocaleSelect id="local-switcher"></LocaleSelect>
 
      <settings-dropdown class="app-navbar-actions__item" />
     <language-dropdown style="width: 100% !important;text-align: justify !important;padding-right: 15px;font-size: 17px !important; " class="app-navbar-actions__item" />

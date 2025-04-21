@@ -105,24 +105,40 @@ const routes: Array<RouteRecordRaw> = [
         ],
       },
       {
-        name: 'brand-management',
-        path: 'brands',
+        name: 'products-management',
+        path: 'products',
         // component: RouteViewComponent,
         children: [
           {
             name: 'brand',
             path: 'brand',
-            component: () => import('../pages/admin/brand/index.vue'),
+            component: () => import('../pages/admin/products/brand/index.vue'),
           },
           {
             name: 'brand-create',
             path: 'brand-create',
-            component: () => import('../pages/admin/brand/create.vue'),
+            component: () => import('../pages/admin/products/brand/create.vue'),
           },
           {
             name: 'brand-edit',
             path: 'brand-edit/:id',
-            component: () => import('../pages/admin/brand/edite.vue'),
+            component: () => import('../pages/admin/products/brand/edite.vue'),
+          },
+
+          {
+            name: 'model',
+            path: 'model',
+            component: () => import('../pages/admin/products/model/index.vue'),
+          },
+          {
+            name: 'model-create',
+            path: 'model-create',
+            component: () => import('../pages/admin/products/model/create.vue'),
+          },
+          {
+            name: 'model-edit',
+            path: 'model-edit/:id',
+            component: () => import('../pages/admin/products/model/edit.vue'),
           },
 
         ],

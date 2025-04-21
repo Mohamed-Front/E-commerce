@@ -100,18 +100,18 @@ onMounted(() => {
 
 <template>
   <div v-can="'edit roles'" class="permission-manager">
-    <h1>{{ isEditing ? 'Edit' : 'Create' }} Role Permissions</h1>
+    <h1>{{ isEditing ? $t('permissions.edit') : $t('permissions.create') }}</h1>
 
     <div class="controls">
       <div class="name-input">
         <label for="roleName">
-          Role Name <span class="required">*</span>
+         {{$t("role.role_Name")}} <span class="required">*</span>
         </label>
         <input
           type="text"
           id="roleName"
           v-model="roleName"
-          placeholder="Enter role name"
+          :placeholder='$t("role.enter_role_name")'
           required
         />
       </div>
@@ -124,9 +124,9 @@ onMounted(() => {
       </button>
     </div>
 
-    <div v-if="loading" class="loading">Loading {{ isEditing ? 'role data' : 'permissions' }}...</div>
-
-    <template v-else>
+    <div v-if="loading" class="loading">
+  {{ isEditing ? $t('loading.roleData') : $t('loading.permissions') }}
+</div>    <template v-else>
       <!-- Table View -->
       <div v-if="tableView" class="table-view">
         <table>
@@ -228,8 +228,8 @@ onMounted(() => {
       class="submit-btn"
       :disabled="selectedPermissions.length === 0 || !roleName"
     >
-      {{ isEditing ? 'Update' : 'Create' }} Role with Selected Permissions
-    </button>
+    {{ isEditing ? $t('role.updateWithPermissions') : $t('role.createWithPermissions') }}
+  </button>
 
     <!-- Description Modal -->
     <div v-if="showDescriptionModal" class="modal-overlay" @click.self="showDescriptionModal = false">

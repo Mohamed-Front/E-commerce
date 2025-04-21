@@ -1,5 +1,5 @@
 <template>
-  <va-navbar class=" nave shadow-xl" style="color:white !important; direction: ltr !important;" >
+  <va-navbar class=" nave grid lg:flex lg:justify-between shadow-xl" style="color:white !important; direction: ltr !important;" >
     <template #left>
       <div class="left">
         <va-icon-menu-collapsed
@@ -13,6 +13,7 @@
         </router-link>
       </div>
     </template>
+    <LocaleSelect id="local-switcher"></LocaleSelect>
     <template #right>
       <app-navbar-actions class="app-navbar__actions" :user-name="userName" />
     </template>
@@ -28,6 +29,7 @@
   import VuesticLogo from '../VuesticLogo.vue'
   import VaIconMenuCollapsed from '../icons/VaIconMenuCollapsed.vue'
   import AppNavbarActions from './components/AppNavbarActions.vue'
+  import LocaleSelect from '../LocaleSelect.vue'
 
   const GlobalStore = useGlobalStore()
   const { t } = useI18n()

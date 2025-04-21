@@ -47,9 +47,9 @@ export default {
       ],
     },
     {
-      name: 'brands',
-      displayName: 'brands',
-      show:['list brands'],
+      name: 'products',
+      displayName: 'Products',
+      show:['list brands','list model'],
       meta: {
         icon: 'eye',
       },
@@ -59,6 +59,11 @@ export default {
           name: 'brand',
           displayName: 'brand',
           show:'list brands'
+        },
+        {
+          name: 'model',
+          displayName: 'Model',
+          show:'list model'
         },
 
       ],
