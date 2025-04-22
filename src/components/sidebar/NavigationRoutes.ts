@@ -70,7 +70,23 @@ export default {
     },
 
 
+    {
+      name: 'store',
+      displayName: 'store',
+      show:['list brands','list model'],
+      meta: {
+        icon: 'eye',
+      },
+      disabled: true,
+      children: [
+        {
+          name: 'stores',
+          displayName: 'Stores',
+          show:'list stores'
+        },
 
+      ],
+    },
 
 
 

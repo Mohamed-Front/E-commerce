@@ -69,9 +69,10 @@ const getoneRow=()=>{
     userData.value.name=res.data.data.name
     userData.value.email=res.data.data.email
     userData.value.type=res.data.data.type
-    imagePreview.value=res.data.data.media[0].url
     userData.value.phone=res.data.data.phone
     userData.value.role_id=res.data.data.roles[0].id
+    imagePreview.value=res.data?.data?.media[0]?.url
+
 
 
   })

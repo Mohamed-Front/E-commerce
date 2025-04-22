@@ -143,7 +143,31 @@ const routes: Array<RouteRecordRaw> = [
 
         ],
       },
+      {
+        name: 'store-management',
+        path: 'store',
+        // component: RouteViewComponent,
+        children: [
+          {
+            name: 'stores',
+            path: 'stores',
+            component: () => import('../pages/admin/store/index.vue'),
+          },
+          {
+            name: 'store-create',
+            path: 'store-create',
+            component: () => import('../pages/admin/store/create.vue'),
+          },
+          {
+            name: 'store-edit',
+            path: 'store-edit/:id',
+            component: () => import('../pages/admin/store/edit.vue'),
+          },
 
+
+
+        ],
+      },
       {
         name: 'settings',
         path: 'settings',
