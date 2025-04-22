@@ -36,18 +36,15 @@
         </div>
         <!-- products -->
         <div class="bg-[#E6AC312B] w-full overflow-x-auto py-4 scrollbar-hide">
-          <div class="flex space-x-4 px-4 w-max ">
-            <div v-for="(pro, index) in product_titels" :key="index"
-              class="pro flex-shrink-0 w-24 xs:w-[70px] text-center flex flex-col items-center">
-              <img src="../imges/image.png" :alt="pro" class="w-20 h-20 xs:h-16 xs:w-16 object-contain mb-2">
-              <p class="font-sans text-xs font-bold truncate w-full">{{ pro }}</p>
-            </div>
-            <div v-for="(pro, index) in product_titels" :key="index"
-              class="pro flex-shrink-0 w-24 xs:w-[70px] text-center flex flex-col items-center">
-              <img src="../imges/image.png" :alt="pro" class="w-20 h-20 xs:h-16 xs:w-16 object-contain mb-2">
-              <p class="font-sans text-xs font-bold truncate w-full">{{ pro }}</p>
-            </div>
-          </div>
+          <swiper :modules="[Autoplay]" :slides-per-view="10" :space-between="10" :loop="true"
+            :autoplay="{ delay: 0, disableOnInteraction: false }" :speed="3000" grab-cursor>
+            <swiper-slide v-for="(pro, index) in product_titels" :key="index">
+              <div class="pro flex-shrink-0 w-24 xs:w-[70px] text-center flex flex-col items-center">
+                <img src="../imges/image.png" :alt="pro.title" class="w-20 h-20 xs:h-16 xs:w-16 object-contain mb-2">
+                <p class="font-sans text-xs font-bold truncate w-full">{{ pro.title }}</p>
+              </div>
+            </swiper-slide>
+          </swiper>
         </div>
         <!-- banner -->
         <div class="h-[143px] flex place-content-center items-center">
@@ -56,43 +53,47 @@
         <!-- more products -->
         <!-- Exclusive_offers -->
         <h2 class="font-bold font-sans lg:mt-8 xs:mt-2 xs:text-[.7rem] sm:text-[.9rem] md:text-[1.1rem]">عروض حصرية</h2>
-        <div class="mt-6 grid grid-cols-4 gap-4">
-          <div class="text-end" v-for="(pro, i) in Exclusive_offers" :key="i">
+        <swiper :modules="[Autoplay]" :slides-per-view="4" :space-between="8" :loop="true"
+          :autoplay="{ delay: 0, disableOnInteraction: false }" :speed="25000" grab-cursor class="mt-6">
+          <SwiperSlide class="text-end" v-for="(pro, i) in Exclusive_offers" :key="i">
             <img src="../imges/prod2.png" alt="">
             <p class="font-sans mt-2 mb-1 xs:text-[.5rem] sm:text-[.7rem] md:text-[1rem]">{{ pro.name + " " +
               Number(i + 1) }}</p>
             <span class="font-sans text-[#A6853B] xs:text-[.5rem] sm:text-[.7rem] md:text-[1rem]">{{ pro.price }}</span>
-          </div>
-        </div>
+          </SwiperSlide>
+        </swiper>
         <!-- best_seller -->
         <h2 class="font-bold font-sans lg:mt-20 xs:mt-10 xs:text-[.7rem] sm:text-[.9rem] md:text-[1.1rem]">الاكثر مبيعاً
         </h2>
-        <div class="mt-6 grid grid-cols-4 gap-4">
-          <div class="text-end" v-for="(pro, i) in best_seller" :key="i">
+        <swiper :modules="[Autoplay]" :slides-per-view="4" :space-between="8" :loop="true"
+          :autoplay="{ delay: 0, disableOnInteraction: false }" :speed="25000" grab-cursor class="mt-6">
+          <SwiperSlide class="text-end" v-for="(pro, i) in best_seller" :key="i">
             <img src="../imges/prod3.png" alt="">
             <p class="font-sans mt-2 mb-1 xs:text-[.5rem] sm:text-[.7rem] md:text-[1rem]">{{ pro.name + " " +
-              Number(i + 5) }}</p>
+              Number(i + 1) }}</p>
             <span class="font-sans text-[#A6853B] xs:text-[.5rem] sm:text-[.7rem] md:text-[1rem]">{{ pro.price }}</span>
-          </div>
-        </div>
+          </SwiperSlide>
+        </swiper>
         <!-- New_arrival -->
         <h2 class="font-bold font-sans lg:mt-20 xs:mt-10 xs:text-[.7rem] sm:text-[.9rem] md:text-[1.1rem]">وصل حديثاً
         </h2>
-        <div class="mt-6 grid grid-cols-4 gap-4">
-          <div class="text-end" v-for="(pro, i) in New_arrival" :key="i">
+        <swiper :modules="[Autoplay]" :slides-per-view="4" :space-between="8" :loop="true"
+          :autoplay="{ delay: 0, disableOnInteraction: false }" :speed="25000" grab-cursor class="mt-6">
+          <SwiperSlide class="text-end" v-for="(pro, i) in New_arrival" :key="i">
             <img src="../imges/prod4.png" alt="">
             <p class="font-sans mt-2 mb-1 xs:text-[.5rem] sm:text-[.7rem] md:text-[1rem]">{{ pro.name + " " +
-              Number(i + 9) }}</p>
+              Number(i + 1) }}</p>
             <span class="font-sans text-[#A6853B] xs:text-[.5rem] sm:text-[.7rem] md:text-[1rem]">{{ pro.price }}</span>
-          </div>
-        </div>
+          </SwiperSlide>
+        </swiper>
       </section>
       <section class="max-w-full">
         <!-- Variety we chose for you -->
         <h1 class="lg:mt-24 xs:mt-12 mr-4 font-bold font-sans xs:text-[.9rem] sm:text-[1.3rem] md:text-[1.8rem]">منوعات
           اخترناها لكم .</h1>
-        <div class="max-h-[873px] bg-[#E6AC31] mt-3 grid grid-flow-row-2 grid-cols-5 gap-2   p-4">
-          <div class="bg-white text-center rounded-md pb-3" v-for="pro in Variety">
+        <div
+          class="max-h-[873px] bg-[#E6AC31] mt-3 grid grid-flow-row-2 grid-cols-5 gap-2 cursor-pointer p-4 Variety transition">
+          <div class="bg-white text-center rounded-md pb-3 transition" v-for="pro in Variety">
             <img :src="pro.img" alt="" class="h-[87%] rounded-md">
             <p
               class="text-[#E29A30] font-bold m-[calc((12%)/2)] xs:text-[.3rem] sm:text-[.5rem] md:text-[.7rem] lg:text-[1rem]  p-2">
@@ -102,36 +103,42 @@
         <!-- For lady -->
         <h1 class="lg:mt-24 xs:mt-12 mr-4 font-bold font-sans xs:text-[.9rem] sm:text-[1.3rem] md:text-[1.8rem]">لكي
           سيدتي</h1>
-        <div class="max-h-[405px] mt-3 grid grid-flow-row-1 grid-cols-5 gap-2 p-4">
-          <div class="bg-white text-center rounded-md" v-for="pro in for_lady">
+        <swiper :modules="[Autoplay]" :slides-per-view="5" :space-between="8" :loop="true"
+          :autoplay="{ delay: 0, disableOnInteraction: false }" :speed="25000" grab-cursor
+          class="max-h-[405px] mt-3 p-4">
+          <SwiperSlide class="bg-white text-center rounded-md" v-for="pro in for_lady">
             <img :src="pro.img" alt="" class="h-[87%] rounded-md">
             <p
               class="text-[#E29A30] font-bold m-[calc((13%)/2)] xs:text-[.3rem] sm:text-[.5rem] md:text-[.7rem] lg:text-[1rem]">
               {{ pro.name }}</p>
-          </div>
-        </div>
+          </SwiperSlide>
+        </swiper>
         <!-- Variety we chose for you 2 -->
         <h1 class="lg:mt-24 xs:mt-12 mr-4 font-bold font-sans xs:text-[.9rem] sm:text-[1.3rem] md:text-[1.8rem]">منوعات
           اخترناها لكم</h1>
-        <div class="max-h-[405px] mt-3 grid grid-flow-row-1 grid-cols-5 gap-2 p-4">
-          <div class="bg-white text-center rounded-md pb-3" v-for="pro in Variety.slice(0, 5)">
+        <swiper :modules="[Autoplay]" :slides-per-view="5" :space-between="10" :loop="true"
+          :autoplay="{ delay: 0, disableOnInteraction: false }" :speed="25000" grab-cursor
+          class="max-h-[405px] mt-3 p-4">
+          <SwiperSlide class="bg-white text-center rounded-md pb-3" v-for="pro in Variety">
             <img :src="pro.img" alt="" class="h-[87%] rounded-md">
             <p
               class="text-[#E29A30] font-bold m-[calc((13%)/2)] xs:text-[.3rem] sm:text-[.5rem] md:text-[.7rem] lg:text-[1rem] p-2">
               {{ pro.name }}</p>
-          </div>
-        </div>
+          </SwiperSlide>
+        </swiper>
         <!-- For lady 2-->
         <h1 class="lg:mt-24 xs:mt-12 mr-4 font-bold font-sans xs:text-[.9rem] sm:text-[1.3rem] md:text-[1.8rem]">لكي
           سيدتي</h1>
-        <div class="max-h-[405px] mt-3 grid grid-flow-row-1 grid-cols-5 gap-2 p-4">
-          <div class="bg-white text-center rounded-md" v-for="pro in for_lady">
+        <swiper :modules="[Autoplay]" :slides-per-view="5" :space-between="8" :loop="true"
+          :autoplay="{ delay: 0, disableOnInteraction: false }" :speed="25000" grab-cursor
+          class="max-h-[405px] mt-3 p-4">
+          <SwiperSlide class="bg-white text-center rounded-md" v-for="pro in for_lady">
             <img :src="pro.img" alt="" class="h-[87%] rounded-md">
             <p
               class="text-[#E29A30] font-bold m-[calc((13%)/2)] xs:text-[.3rem] sm:text-[.5rem] md:text-[.7rem] lg:text-[1rem]">
               {{ pro.name }}</p>
-          </div>
-        </div>
+          </SwiperSlide>
+        </swiper>
         <!-- Other products -->
       </section>
     </div>
@@ -151,11 +158,41 @@ import imge4 from '../imges/prand 4.png'
 import imge5 from '../imges/prand 5.png'
 import prand2_img from '../imges/prand 2_2.png'
 
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import { Autoplay } from 'swiper/modules';
+
+import 'swiper/css';
+
 import Nav from '../components/nav.vue';
 import Footer from '../components/footer.vue';
 const titels = ref(["ازياء", "القرطاسية", "جمال وعطور", "الصحة والتغذية", "الالكترونيات", "الجمال والعطور", "الصحة والتغذية"])
-const product_titels = ref(["العناية الشخصية", "ازياء النساء", "ازياء الرجال", "العناية بالبشرة", "العناية بالشعر", "شنط واكسسوارات", "العناية الشخصية", "ازياء النساء"])
+const product_titels = ref([
+  { title: "العناية الشخصية", img: "../imges/personal-care.png" },
+  { title: "أزياء النساء", img: "../imges/women-fashion.png" },
+  { title: "أزياء الرجال", img: "../imges/men-fashion.png" },
+  { title: "العناية بالبشرة", img: "../imges/skin-care.png" },
+  { title: "العناية بالشعر", img: "../imges/hair-care.png" },
+  { title: "شنط واكسسوارات", img: "../imges/bags-accessories.png" },
+  { title: "الإلكترونيات", img: "../imges/electronics.png" },
+  { title: "المنزل والمطبخ", img: "../imges/home-kitchen.png" },
+  { title: "ألعاب الأطفال", img: "../imges/kids-toys.png" },
+  { title: "العروض اليومية", img: "../imges/daily-deals.png" },
+  { title: "العناية الشخصية", img: "../imges/personal-care.png" },
+  { title: "أزياء النساء", img: "../imges/women-fashion.png" },
+  { title: "أزياء الرجال", img: "../imges/men-fashion.png" },
+  { title: "العناية بالبشرة", img: "../imges/skin-care.png" },
+  { title: "العناية بالشعر", img: "../imges/hair-care.png" },
+  { title: "شنط واكسسوارات", img: "../imges/bags-accessories.png" },
+  { title: "الإلكترونيات", img: "../imges/electronics.png" },
+  { title: "المنزل والمطبخ", img: "../imges/home-kitchen.png" },
+  { title: "ألعاب الأطفال", img: "../imges/kids-toys.png" },
+  { title: "العروض اليومية", img: "../imges/daily-deals.png" },
+])
 const Exclusive_offers = ref([
+  { name: "Product", img: "../imges/prod.png", price: "10.00 JD" },
+  { name: "Product", img: "../imges/prod.png", price: "20.00 JD" },
+  { name: "Product", img: "../imges/prod.png", price: "30.00 JD" },
+  { name: "Product", img: "../imges/prod.png", price: "40.00 JD" },
   { name: "Product", img: "../imges/prod.png", price: "10.00 JD" },
   { name: "Product", img: "../imges/prod.png", price: "20.00 JD" },
   { name: "Product", img: "../imges/prod.png", price: "30.00 JD" },
@@ -165,9 +202,17 @@ const best_seller = ref([
   { name: "Product", img: "../imges/prod.png", price: "15.00 JD" },
   { name: "Product", img: "../imges/prod.png", price: "25.00 JD" },
   { name: "Product", img: "../imges/prod.png", price: "35.00 JD" },
+  { name: "Product", img: "../imges/prod.png", price: "45.00 JD" },
+  { name: "Product", img: "../imges/prod.png", price: "15.00 JD" },
+  { name: "Product", img: "../imges/prod.png", price: "25.00 JD" },
+  { name: "Product", img: "../imges/prod.png", price: "35.00 JD" },
   { name: "Product", img: "../imges/prod.png", price: "45.00 JD" }
 ]);
 const New_arrival = ref([
+  { name: "Product", img: "../imges/prod.png", price: "12.00 JD" },
+  { name: "Product", img: "../imges/prod.png", price: "22.00 JD" },
+  { name: "Product", img: "../imges/prod.png", price: "32.00 JD" },
+  { name: "Product", img: "../imges/prod.png", price: "42.00 JD" },
   { name: "Product", img: "../imges/prod.png", price: "12.00 JD" },
   { name: "Product", img: "../imges/prod.png", price: "22.00 JD" },
   { name: "Product", img: "../imges/prod.png", price: "32.00 JD" },
@@ -187,6 +232,11 @@ const Variety = ref([
 ]);
 // const Variety2 = Variety.slice(0,4)
 const for_lady = ref([
+  { name: "مستلزمات يومية", img: prand2_img },
+  { name: "فوانيس رمضان", img: prand2_img },
+  { name: "أجهزة المطبخ", img: prand2_img },
+  { name: "العبايات والجلاليب", img: prand2_img },
+  { name: "العناية بالبشرة", img: prand2_img },
   { name: "مستلزمات يومية", img: prand2_img },
   { name: "فوانيس رمضان", img: prand2_img },
   { name: "أجهزة المطبخ", img: prand2_img },
@@ -213,5 +263,13 @@ const for_lady = ref([
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+.Variety:hover div {
+  filter: blur(3px);
+}
+
+.Variety div:hover {
+  filter: blur(0px);
 }
 </style>
