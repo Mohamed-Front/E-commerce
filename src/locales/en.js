@@ -1,7 +1,5 @@
 import Password from "primevue/password";
-
 export default {
-
   Permissions: "Permissions",
   users: "Users",
   users_management:"users management",
@@ -31,6 +29,8 @@ export default {
      create_User:"Create User",
      edit_User:"Edit  User",
      update_User:"Update User",
+     click_or_drag_to_change_photo:"Click or drag to change photo",
+
     
   },
   role:{
@@ -47,16 +47,71 @@ export default {
     role_Name:" Role Name",
     role_Permissions:"Role Permissions",
     edit:"Edit",
+    click_or_drag_to_change_image:"Click or drag to change image",
+    close:"Close",
+
   },
-  // "permissions": {
-  //   "edit": "Edit Permissions",
-  //   "create": "Create Permissions"
-  // },
-
-  // "loading": {
-  //   "roleData": "Loading role data...",
-  //   "permissions": "Loading permissions..."
-  // },
   
+permission:{
+  permissions_Management:"Permissions Management",
+  view_and_manage_all_system_permissions_grouped_by_modules:"View and manage all system permissions grouped by modules",
+  refresh:"Refresh",
+  no_permissions_found_in_this_group:"No permissions found in this group",
+  permission_Name:"Permission Name",
+ 
 
+},
+brand:{
+  new:"new",
+  search:"Search...",
+
+  export:"Export",
+  brands:"Brands",
+  name_ar:"Name (ar)",
+
+  name_en:"Name (en)",
+  showing:"Showing",
+  entries:"Entries",
+  to:"To",
+  of:"Of",
+  create_New_Brand:"Create New Brand",
+  english_Name :"English Name ",
+  arabic_Name:"  Arabic Name",
+  enter_brand_name_in_English:"Enter brand name in English",
+  enter_brand_name_in_Arabic:" Enter brand name in Arbic",
+  brand_Logo:"Brand Logo",
+  click_to_upload:"Click to upload",
+  or_drag_and_drop:"or drag and drop",
+  cancel:"Cancel",
+  create_Brand:"Create Brand",
+  edit_Brand:"Edit Brand",
+  update_Brand:"Update Brand",
+  click_or_drag_to_change_logo:"Click or drag to change logo",
+},
+model:{
+  new:"new",
+  search:"Search...",
+  export:"Export",
+  models:"Models",
+  name_ar:"Name (ar)",
+  name_en:"Name (en)",
+  brand:"Brand",
+  create_New_Model:"Create New Model",
+  english_Name :"English Name ",
+  arabic_Name:"  Arabic Name",
+  enter_model_name_in_English:"Enter model name in English",
+  enter_model_name_in_Arabic:" Enter model name in Arabic",
+  select_a_brand:"Select a brand",
+  model_Image:"Model Image",
+  click_to_upload:"Click to upload",
+  or_drag_and_drop:"or drag and drop",
+  create_Model:"Create Model",
+    cancel:"Cancel",
+    edit_Model:" Edit Model",
+    click_or_drag_to_change_image:"Click or drag to change image",
+    update_Model:"Update Model",
+    select_a_brand:"Select a brand",
+
+
+}
 };

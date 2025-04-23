@@ -246,7 +246,7 @@ onMounted(() => {
                     </div>
                   </div>
                 </div>
-                <p class="mt-2 text-center text-sm text-gray-500">Click or drag to change photo</p>
+                <p class="mt-2 text-center text-sm text-gray-500">{{$t("user.click_or_drag_to_change_photo")}}</p>
               </div>
 
               <div v-else class="p-8 flex flex-col items-center justify-center">
