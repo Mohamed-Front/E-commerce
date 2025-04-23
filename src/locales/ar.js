@@ -4,7 +4,7 @@ export default {
   roles:"الأدوار",
   Permissions: "الأذونات",
   users_management:"إدارة المستخدمين",
-  dashboard:"لوحة القيادة",
+  dashboard:"لوحة التحم",
   user: {
     new:"جديد",
     users:"المستخدمين",
@@ -32,9 +32,9 @@ export default {
 
 
 
- 
- 
-  },    
+
+
+  },
   role:{
     manage_Roles:"إدارة الأدوار",
     iD:"الفهرس",
@@ -48,9 +48,9 @@ export default {
     role_Name:"اسم الدور",
     role_Permissions:"أذونات الدور",
     edit:"تحرير",
-     
+
   }
-     
+
   //   },
   //   "permissions": {
   //   "edit": "تعديل صلاحيات",
@@ -62,5 +62,5 @@ export default {
   //     "permissions": "جاري تحميل الصلاحيات..."
   //   }
   //   ,
-     
+
 };

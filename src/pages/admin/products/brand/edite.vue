@@ -30,8 +30,8 @@ const fetchBrand = async () => {
     const response = await axios.get(`/api/brand/${brandId.value}`);
     brandData.value = response.data.data;
 
-    if (response.data.data.image) {
-      imagePreview.value = response.data.data.image_url; // Assuming your API returns image_url
+    if (response.data.data.media[0].url) {
+      imagePreview.value = response.data.data.media[0].url; // Assuming your API returns image_url
     }
 
     loading.value = false;
@@ -223,8 +223,9 @@ const submitForm = async () => {
           type="button"
           label="Cancel"
           icon="pi pi-times"
+
           @click="router.go(-1)"
-          class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
+          class="px-6 mx-2 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
           :disabled="loading"
         />
 

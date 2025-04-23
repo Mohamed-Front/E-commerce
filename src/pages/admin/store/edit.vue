@@ -1,13 +1,11 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useToast } from 'primevue/usetoast';
-import { useI18n } from 'vue-i18n';
 import { useRouter } from "vue-router";
 
 const router = useRouter();
 const toast = useToast();
-const { t } = useI18n();
 const form = ref();
 const storeId = ref(router.currentRoute._value.params.id);
 const loading = ref(false);
@@ -22,12 +20,16 @@ const storeData = ref({
   main_banner_image: null,
   sub_banner_image: null,
   slider_images_one: [],
-  slider_images_two: []
+  slider_images_two: [],
+  existing_images: {
+    store_image: null,
+    main_banner_image: null,
+    sub_banner_image: null,
+    slider_images_one: [],
+    slider_images_two: []
+  }
 });
-onMounted(() => {
 
-fetchStore();
-});
 // Image previews
 const storeImagePreview = ref(null);
 const mainBannerPreview = ref(null);
@@ -57,7 +59,6 @@ const validateForm = () => {
 
 // Handle image uploads
 const handleImageUpload = (file, type) => {
-  // Validate file size (max 2MB)
   if (file.size > 2 * 1024 * 1024) {
     toast.add({ severity: 'error', summary: 'Error', detail: 'Image size should be less than 2MB', life: 3000 });
     return;
@@ -90,19 +91,21 @@ const handleSliderUpload = (files, type) => {
   const newPreviews = [];
   const newFiles = [];
 
-  // Validate total files don't exceed 10
-  if (type === 'slider_one' && storeData.value.slider_images_one.length + files.length > 10) {
-    toast.add({ severity: 'error', summary: 'Error', detail: 'Maximum 10 images allowed for Slider One', life: 3000 });
-    return;
-  }
+  const currentCount = type === 'slider_one'
+    ? storeData.value.slider_images_one.length + storeData.value.existing_images.slider_images_one.length
+    : storeData.value.slider_images_two.length + storeData.value.existing_images.slider_images_two.length;
 
-  if (type === 'slider_two' && storeData.value.slider_images_two.length + files.length > 10) {
-    toast.add({ severity: 'error', summary: 'Error', detail: 'Maximum 10 images allowed for Slider Two', life: 3000 });
+  if (currentCount + files.length > 10) {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: `Maximum 10 images allowed for ${type === 'slider_one' ? 'Slider One' : 'Slider Two'}`,
+      life: 3000
+    });
     return;
   }
 
   Array.from(files).forEach(file => {
-    // Validate each file size
     if (file.size > 2 * 1024 * 1024) {
       toast.add({ severity: 'error', summary: 'Error', detail: `${file.name} exceeds 2MB limit`, life: 3000 });
       return;
@@ -149,46 +152,90 @@ const removeImage = (type) => {
     case 'store':
       storeData.value.store_image = null;
       storeImagePreview.value = null;
+      storeData.value.existing_images.store_image = null;
       break;
     case 'main_banner':
       storeData.value.main_banner_image = null;
       mainBannerPreview.value = null;
+      storeData.value.existing_images.main_banner_image = null;
       break;
     case 'sub_banner':
       storeData.value.sub_banner_image = null;
       subBannerPreview.value = null;
+      storeData.value.existing_images.sub_banner_image = null;
       break;
   }
 };
 
 const removeSliderImage = (index, type) => {
   if (type === 'slider_one') {
-    storeData.value.slider_images_one.splice(index, 1);
-    sliderOnePreviews.value.splice(index, 1);
+    if (index < storeData.value.existing_images.slider_images_one.length) {
+      storeData.value.existing_images.slider_images_one.splice(index, 1);
+    } else {
+      const adjustedIndex = index - storeData.value.existing_images.slider_images_one.length;
+      storeData.value.slider_images_one.splice(adjustedIndex, 1);
+      sliderOnePreviews.value.splice(adjustedIndex, 1);
+    }
   } else {
-    storeData.value.slider_images_two.splice(index, 1);
-    sliderTwoPreviews.value.splice(index, 1);
+    if (index < storeData.value.existing_images.slider_images_two.length) {
+      storeData.value.existing_images.slider_images_two.splice(index, 1);
+    } else {
+      const adjustedIndex = index - storeData.value.existing_images.slider_images_two.length;
+      storeData.value.slider_images_two.splice(adjustedIndex, 1);
+      sliderTwoPreviews.value.splice(adjustedIndex, 1);
+    }
   }
 };
 
-// fetchStore
-const fetchStore =()=>{
+// Fetch store data
+const fetchStore = async () => {
+  try {
+    loading.value = true;
+    const response = await axios.get(`/api/store/${storeId.value}`);
+    const data = response.data.data;
 
-  axios.get(`api/store/${storeId.value}`).then((res)=>{
-    storeData.value.name_ar=res.data.data.name_ar
-    storeData.value.name_en=res.data.data.name_en
-    if(res.data.data.is_default == 1 ){
-    storeData.value.is_default=true
-    }else{
-      false
-    }
-    if(res.data.data.has_market == 1 ){
-      storeData.value.has_market=true
-    }else{
-      storeData.value.has_market=false
-    }
-  })
-}
+    storeData.value.name_ar = data.name_ar;
+    storeData.value.name_en = data.name_en;
+    storeData.value.is_default = data.is_default === 1;
+    storeData.value.has_market = data.has_market === 1;
+
+    // Process media
+    data.media.forEach(media => {
+      switch (media.name) {
+        case 'store_image':
+          storeData.value.existing_images.store_image = media.url;
+          storeImagePreview.value = media.url;
+          break;
+        case 'main_banner_image':
+          storeData.value.existing_images.main_banner_image = media.url;
+          mainBannerPreview.value = media.url;
+          break;
+        case 'sub_banner_image':
+          storeData.value.existing_images.sub_banner_image = media.url;
+          subBannerPreview.value = media.url;
+          break;
+        case 'slider_images_one':
+          storeData.value.existing_images.slider_images_one.push(media.url);
+          break;
+        case 'slider_images_two':
+          storeData.value.existing_images.slider_images_two.push(media.url);
+          break;
+      }
+    });
+
+  } catch (error) {
+    console.error("Error fetching store:", error);
+    toast.add({
+      severity: 'error',
+      summary: "Error",
+      detail: 'Failed to load store data',
+      life: 3000
+    });
+    router.push({ name: 'stores' });
+  } finally {
+    loading.value = false;
+  }
+};
 
 // Submit form
 const submitForm = async () => {
@@ -197,41 +244,69 @@ const submitForm = async () => {
   loading.value = true;
 
   const formData = new FormData();
-  formData.append('name_en', storeData.value.name_en);
-  formData.append('name_ar', storeData.value.name_ar);
+  formData.append('_method', 'post');
+  formData.append('name_en', storeData.value.name_en || '');
+  formData.append('name_ar', storeData.value.name_ar || '');
   formData.append('is_default', storeData.value.is_default ? '1' : '0');
   formData.append('has_market', storeData.value.has_market ? '1' : '0');
 
+  // Handle image updates
   if (storeData.value.store_image) {
     formData.append('store_image', storeData.value.store_image);
+  } else if (storeData.value.existing_images.store_image === null) {
+    formData.append('store_image', '');
   }
+
   if (storeData.value.main_banner_image) {
     formData.append('main_banner_image', storeData.value.main_banner_image);
+  } else if (storeData.value.existing_images.main_banner_image === null) {
+    formData.append('main_banner_image', '');
   }
+
   if (storeData.value.sub_banner_image) {
     formData.append('sub_banner_image', storeData.value.sub_banner_image);
+  } else if (storeData.value.existing_images.sub_banner_image === null) {
+    formData.append('sub_banner_image', '');
   }
 
-  storeData.value.slider_images_one.forEach((file, index) => {
-    formData.append(`slider_images_one[${index}]`, file);
+  // Handle slider images - always send arrays even if empty
+  if (storeData.value.slider_images_one.length > 0) {
+    storeData.value.slider_images_one.forEach((file, index) => {
+      formData.append(`slider_images_one[${index}]`, file);
+    });
+  } else {
+    formData.append('slider_images_one', '');
+  }
+
+  if (storeData.value.slider_images_two.length > 0) {
+    storeData.value.slider_images_two.forEach((file, index) => {
+      formData.append(`slider_images_two[${index}]`, file);
+    });
+  } else {
+    formData.append('slider_images_two', '');
+  }
+
+  // Add existing slider images to keep
+  storeData.value.existing_images.slider_images_one.forEach((url, index) => {
+    formData.append(`keep_slider_one[${index}]`, url);
   });
 
-  storeData.value.slider_images_two.forEach((file, index) => {
-    formData.append(`slider_images_two[${index}]`, file);
+  storeData.value.existing_images.slider_images_two.forEach((url, index) => {
+    formData.append(`keep_slider_two[${index}]`, url);
   });
 
   try {
-    const response = await axios.post("/api/store", formData, {
+    const response = await axios.post(`/api/store/${storeId.value}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
     });
 
-    router.push({name: 'stores'});
+    router.push({ name: 'stores' });
     toast.add({
       severity: 'success',
-      summary: t("success"),
-      detail: 'Store created successfully',
+      summary: "Success",
+      detail: 'Store updated successfully',
       life: 3000
     });
   } catch (error) {
@@ -242,37 +317,38 @@ const submitForm = async () => {
     }
     toast.add({
       severity: 'error',
-      summary: t("error"),
+      summary: "Error",
       detail: errorMessage,
       life: 3000
     });
   } finally {
     loading.value = false;
   }
-
-
 };
+
+onMounted(() => {
+  fetchStore();
+});
 </script>
 
 <template>
-  <div v-can="'create stores'" class="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow-lg">
-    <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Create New Store</h1>
+  <div class="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow-lg">
+    <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Update Store</h1>
 
-    <Form ref="form" @submit.prevent="submitForm" class="space-y-6">
+    <form ref="form" @submit.prevent="submitForm" class="space-y-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- English Name -->
         <div class="space-y-2">
           <label for="name_en" class="block text-sm font-medium text-gray-700">
             English Name <span class="text-red-500">*</span>
           </label>
-          <InputText
+          <input
             id="name_en"
             v-model="storeData.name_en"
+            type="text"
             placeholder="Enter store name in English"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-            :class="{ 'p-invalid': form?.errors?.name_en }"
           />
-          <small class="p-error text-xs" v-if="form?.errors?.name_en">{{ form.errors.name_en[0] }}</small>
         </div>
 
         <!-- Arabic Name -->
@@ -280,28 +356,27 @@ const submitForm = async () => {
           <label for="name_ar" class="block text-sm font-medium text-gray-700">
             Arabic Name <span class="text-red-500">*</span>
           </label>
-          <InputText
+          <input
             id="name_ar"
             v-model="storeData.name_ar"
+            type="text"
             placeholder="أدخل اسم المتجر بالعربية"
             dir="rtl"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-            :class="{ 'p-invalid': form?.errors?.name_ar }"
           />
-          <small class="p-error text-xs" v-if="form?.errors?.name_ar">{{ form.errors.name_ar[0] }}</small>
         </div>
 
         <!-- Toggle Buttons -->
         <div class="space-y-4 md:col-span-2">
           <div class="flex items-center space-x-4">
             <label class="block text-sm font-medium text-gray-700">Default Store</label>
-            <InputSwitch v-model="storeData.is_default" />
+            <input type="checkbox" v-model="storeData.is_default" class="w-5 h-5 rounded" />
             <span class="text-sm text-gray-500">Mark this store as default</span>
           </div>
 
           <div class="flex items-center space-x-4">
             <label class="block text-sm font-medium text-gray-700">Has Market</label>
-            <InputSwitch v-model="storeData.has_market" />
+            <input type="checkbox" v-model="storeData.has_market" class="w-5 h-5 rounded" />
             <span class="text-sm text-gray-500">Enable market features for this store</span>
           </div>
         </div>
@@ -309,14 +384,14 @@ const submitForm = async () => {
         <!-- Store Image -->
         <div class="space-y-2">
           <label class="block text-sm font-medium text-gray-700">
-            Store Logo <span class="text-red-500">*</span>
+            Store Logo
           </label>
           <div class="flex justify-center">
             <label
               @dragover.prevent="isDraggingStoreImage = true"
               @dragleave="isDraggingStoreImage = false"
               @drop.prevent="onImageUpload($event, 'store')"
-              :class="{'border-blue-500 bg-blue-50': isDraggingStoreImage, 'border-gray-300': !isDraggingStoreImage, 'border-red-500': form?.errors?.store_image}"
+              :class="{'border-blue-500 bg-blue-50': isDraggingStoreImage, 'border-gray-300': !isDraggingStoreImage}"
               class="cursor-pointer w-full h-48 rounded-xl border-2 border-dashed transition-colors duration-300 flex items-center justify-center"
             >
               <input type="file" @change="onImageUpload($event, 'store')" accept="image/*" class="hidden">
@@ -351,20 +426,19 @@ const submitForm = async () => {
               </div>
             </label>
           </div>
-          <small class="p-error text-xs" v-if="form?.errors?.store_image">{{ form.errors.store_image[0] }}</small>
         </div>
 
         <!-- Main Banner Image -->
         <div class="space-y-2">
           <label class="block text-sm font-medium text-gray-700">
-            Main Banner <span class="text-red-500">*</span>
+            Main Banner
           </label>
           <div class="flex justify-center">
             <label
               @dragover.prevent="isDraggingMainBanner = true"
               @dragleave="isDraggingMainBanner = false"
               @drop.prevent="onImageUpload($event, 'main_banner')"
-              :class="{'border-blue-500 bg-blue-50': isDraggingMainBanner, 'border-gray-300': !isDraggingMainBanner, 'border-red-500': form?.errors?.main_banner_image}"
+              :class="{'border-blue-500 bg-blue-50': isDraggingMainBanner, 'border-gray-300': !isDraggingMainBanner}"
               class="cursor-pointer w-full h-48 rounded-xl border-2 border-dashed transition-colors duration-300 flex items-center justify-center"
             >
               <input type="file" @change="onImageUpload($event, 'main_banner')" accept="image/*" class="hidden">
@@ -399,7 +473,6 @@ const submitForm = async () => {
               </div>
             </label>
           </div>
-          <small class="p-error text-xs" v-if="form?.errors?.main_banner_image">{{ form.errors.main_banner_image[0] }}</small>
         </div>
 
         <!-- Sub Banner Image -->
@@ -410,7 +483,7 @@ const submitForm = async () => {
               @dragover.prevent="isDraggingSubBanner = true"
               @dragleave="isDraggingSubBanner = false"
               @drop.prevent="onImageUpload($event, 'sub_banner')"
-              :class="{'border-blue-500 bg-blue-50': isDraggingSubBanner, 'border-gray-300': !isDraggingSubBanner, 'border-red-500': form?.errors?.sub_banner_image}"
+              :class="{'border-blue-500 bg-blue-50': isDraggingSubBanner, 'border-gray-300': !isDraggingSubBanner}"
               class="cursor-pointer w-full max-w-2xl h-48 rounded-xl border-2 border-dashed transition-colors duration-300 flex items-center justify-center"
             >
               <input type="file" @change="onImageUpload($event, 'sub_banner')" accept="image/*" class="hidden">
@@ -445,7 +518,6 @@ const submitForm = async () => {
               </div>
             </label>
           </div>
-          <small class="p-error text-xs" v-if="form?.errors?.sub_banner_image">{{ form.errors.sub_banner_image[0] }}</small>
         </div>
 
         <!-- Slider Images One -->
@@ -458,17 +530,18 @@ const submitForm = async () => {
               @dragover.prevent="isDraggingSliderOne = true"
               @dragleave="isDraggingSliderOne = false"
               @drop.prevent="onSliderUpload($event, 'slider_one')"
-              :class="{'border-blue-500 bg-blue-50': isDraggingSliderOne, 'border-gray-300': !isDraggingSliderOne, 'border-red-500': form?.errors?.slider_images_one}"
+              :class="{'border-blue-500 bg-blue-50': isDraggingSliderOne, 'border-gray-300': !isDraggingSliderOne}"
               class="cursor-pointer w-full rounded-xl border-2 border-dashed transition-colors duration-300"
             >
               <input type="file" @change="onSliderUpload($event, 'slider_one')" accept="image/*" multiple class="hidden">
 
-              <div v-if="sliderOnePreviews.length > 0" class="p-4">
+              <div v-if="sliderOnePreviews.length > 0 || storeData.existing_images.slider_images_one.length > 0" class="p-4">
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                  <div v-for="(preview, index) in sliderOnePreviews" :key="index" class="relative group">
+                  <!-- Existing images -->
+                  <div v-for="(preview, index) in storeData.existing_images.slider_images_one" :key="'existing-'+index" class="relative group">
                     <img
                       :src="preview"
-                      :alt="`Slider One Image ${index + 1}`"
+                      :alt="`Existing Slider One Image ${index + 1}`"
                       class="w-full h-32 object-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"
                     >
                     <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
@@ -481,9 +554,27 @@ const submitForm = async () => {
                       </button>
                     </div>
                   </div>
+
+                  <!-- Newly uploaded images -->
+                  <div v-for="(preview, index) in sliderOnePreviews" :key="'new-'+index" class="relative group">
+                    <img
+                      :src="preview"
+                      :alt="`New Slider One Image ${index + 1}`"
+                      class="w-full h-32 object-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"
+                    >
+                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
+                      <button
+                        type="button"
+                        @click.stop="removeSliderImage(storeData.existing_images.slider_images_one.length + index, 'slider_one')"
+                        class="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                      >
+                        <i class="pi pi-trash text-sm"></i>
+                      </button>
+                    </div>
+                  </div>
                 </div>
                 <p class="mt-2 text-center text-sm text-gray-500">
-                  {{ sliderOnePreviews.length }} image(s) uploaded. Click or drag to add more (max 10)
+                  {{ storeData.existing_images.slider_images_one.length + sliderOnePreviews.length }} image(s) uploaded. Click or drag to add more (max 10)
                 </p>
               </div>
 
@@ -498,7 +589,6 @@ const submitForm = async () => {
               </div>
             </label>
           </div>
-          <small class="p-error text-xs" v-if="form?.errors?.slider_images_one">{{ form.errors.slider_images_one[0] }}</small>
         </div>
 
         <!-- Slider Images Two -->
@@ -511,17 +601,18 @@ const submitForm = async () => {
               @dragover.prevent="isDraggingSliderTwo = true"
               @dragleave="isDraggingSliderTwo = false"
               @drop.prevent="onSliderUpload($event, 'slider_two')"
-              :class="{'border-blue-500 bg-blue-50': isDraggingSliderTwo, 'border-gray-300': !isDraggingSliderTwo, 'border-red-500': form?.errors?.slider_images_two}"
+              :class="{'border-blue-500 bg-blue-50': isDraggingSliderTwo, 'border-gray-300': !isDraggingSliderTwo}"
               class="cursor-pointer w-full rounded-xl border-2 border-dashed transition-colors duration-300"
             >
               <input type="file" @change="onSliderUpload($event, 'slider_two')" accept="image/*" multiple class="hidden">
 
-              <div v-if="sliderTwoPreviews.length > 0" class="p-4">
+              <div v-if="sliderTwoPreviews.length > 0 || storeData.existing_images.slider_images_two.length > 0" class="p-4">
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                  <div v-for="(preview, index) in sliderTwoPreviews" :key="index" class="relative group">
+                  <!-- Existing images -->
+                  <div v-for="(preview, index) in storeData.existing_images.slider_images_two" :key="'existing-'+index" class="relative group">
                     <img
                       :src="preview"
-                      :alt="`Slider Two Image ${index + 1}`"
+                      :alt="`Existing Slider Two Image ${index + 1}`"
                       class="w-full h-32 object-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"
                     >
                     <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
@@ -534,9 +625,27 @@ const submitForm = async () => {
                       </button>
                     </div>
                   </div>
+
+                  <!-- Newly uploaded images -->
+                  <div v-for="(preview, index) in sliderTwoPreviews" :key="'new-'+index" class="relative group">
+                    <img
+                      :src="preview"
+                      :alt="`New Slider Two Image ${index + 1}`"
+                      class="w-full h-32 object-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"
+                    >
+                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
+                      <button
+                        type="button"
+                        @click.stop="removeSliderImage(storeData.existing_images.slider_images_two.length + index, 'slider_two')"
+                        class="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                      >
+                        <i class="pi pi-trash text-sm"></i>
+                      </button>
+                    </div>
+                  </div>
                 </div>
                 <p class="mt-2 text-center text-sm text-gray-500">
-                  {{ sliderTwoPreviews.length }} image(s) uploaded. Click or drag to add more (max 10)
+                  {{ storeData.existing_images.slider_images_two.length + sliderTwoPreviews.length }} image(s) uploaded. Click or drag to add more (max 10)
                 </p>
               </div>
 
@@ -551,36 +660,31 @@ const submitForm = async () => {
               </div>
             </label>
           </div>
-          <small class="p-error text-xs" v-if="form?.errors?.slider_images_two">{{ form.errors.slider_images_two[0] }}</small>
         </div>
       </div>
 
       <!-- Submit Button -->
       <div class="pt-4 flex justify-center space-x-4">
-        <Button
+        <button
           type="button"
-          label="Cancel"
-          icon="pi pi-times"
           @click="router.go(-1)"
           class="px-6 py-3 mx-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
           :disabled="loading"
-        />
+        >
+          <span>Cancel</span>
+        </button>
 
-        <Button
+        <button
           type="submit"
-          label="Create Store"
-          icon="pi pi-plus"
-          :loading="loading"
           class="px-8 mx-2 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
           :disabled="loading"
         >
-          <span v-if="!loading">Create Store</span>
-          <i v-else class="pi pi-spinner pi-spin"></i>
-        </Button>
+          <span v-if="!loading">Update Store</span>
+          <span v-else>Updating...</span>
+        </button>
       </div>
-    </Form>
+    </form>
   </div>
-  <Toast/>
 </template>
 
 <style scoped>
@@ -609,30 +713,5 @@ const submitForm = async () => {
 /* Button gradient animation */
 button.bg-gradient-to-r:hover {
   background-size: 150% 100%;
-}
-
-/* Custom scrollbar for dropdowns */
-:deep(.p-dropdown-panel .p-dropdown-items-wrapper) {
-  scrollbar-width: thin;
-  scrollbar-color: #3b82f6 #f1f1f1;
-}
-:deep(.p-dropdown-panel .p-dropdown-items-wrapper::-webkit-scrollbar) {
-  width: 6px;
-}
-:deep(.p-dropdown-panel .p-dropdown-items-wrapper::-webkit-scrollbar-track) {
-  background: #f1f1f1;
-  border-radius: 3px;
-}
-:deep(.p-dropdown-panel .p-dropdown-items-wrapper::-webkit-scrollbar-thumb) {
-  background-color: #3b82f6;
-  border-radius: 3px;
-}
-
-/* Error styling */
-.p-invalid {
-  border-color: #fca5a5 !important;
-}
-.p-error {
-  color: #ef4444;
 }
 </style>

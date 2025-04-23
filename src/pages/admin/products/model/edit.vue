@@ -39,9 +39,8 @@ const fetchModel = async () => {
 
     brands.value = brandsResponse.data.data.data;
 
-    if (modelResponse.data.data) {
-      imagePreview.value = modelResponse.data.data.media[0].url;
-    }
+
+      imagePreview.value = modelResponse.data?.data?.media[0]?.url;
 
     loading.value = false;
   } catch (error) {
@@ -53,7 +52,7 @@ const fetchModel = async () => {
       life: 3000
     });
     loading.value = false;
-    router.push({ name: 'model' });
+
   }
 };
 
