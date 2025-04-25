@@ -6,10 +6,10 @@
       <!-- products titels -->
       <div class="h-[58px] flex items-center place-content-evenly overflow-x-auto flex-nowrap scrollbar-hide">
         <div
-          class="titels font-sans bg-[#E6AC31] h-[25px] min-w-[60px] sm:h-[28px] sm:min-w-[80px] md:h-[32px] md:min-w-[128px] text-[.5rem] sm:text-[.7rem] md:text-[1rem] text-center place-content-center font-bold rounded-md mr-1 md:mr-3"
+          class="cursor-pointer titels font-sans bg-[#E6AC31] h-[25px] min-w-[60px] sm:h-[28px] sm:min-w-[80px] md:h-[32px] md:min-w-[128px] text-[.5rem] sm:text-[.7rem] md:text-[1rem] text-center place-content-center font-bold rounded-md mr-1 md:mr-3"
           v-for="title in titels">{{ title }}</div>
         <div
-          class="titels font-sans bg-[#E6AC31] h-[25px] min-w-[60px] sm:h-[28px] sm:min-w-[80px] md:h-[32px] md:min-w-[128px] text-[.5rem] sm:text-[.7rem] md:text-[1rem] text-center place-content-center font-bold rounded-md mr-1 md:mr-3"
+          class="cursor-pointer titels font-sans bg-[#E6AC31] h-[25px] min-w-[60px] sm:h-[28px] sm:min-w-[80px] md:h-[32px] md:min-w-[128px] text-[.5rem] sm:text-[.7rem] md:text-[1rem] text-center place-content-center font-bold rounded-md mr-1 md:mr-3"
           v-for="title in titels">{{ title }}</div>
       </div>
       <!-- main banner -->
@@ -40,8 +40,8 @@
             :autoplay="{ delay: 0, disableOnInteraction: false }" :speed="3000" grab-cursor>
             <swiper-slide v-for="(pro, index) in product_titels" :key="index">
               <div class="pro flex-shrink-0 w-24 xs:w-[70px] text-center flex flex-col items-center">
-                <img src="../imges/image.png" :alt="pro.title" class="w-20 h-20 xs:h-16 xs:w-16 object-contain mb-2">
-                <p class="font-sans text-xs font-bold truncate w-full">{{ pro.title }}</p>
+                <img src="../imges/image.png" :alt="pro.name" class="w-20 h-20 xs:h-16 xs:w-16 object-contain mb-2">
+                <p class="font-sans text-xs font-bold truncate w-full">{{ pro.name }}</p>
               </div>
             </swiper-slide>
           </swiper>
@@ -162,86 +162,93 @@ import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Autoplay } from 'swiper/modules';
 
 import 'swiper/css';
-
+// components
 import Nav from '../components/nav.vue';
 import Footer from '../components/footer.vue';
+
+// constructor
+function Data(name = 'No name', img = '', price = '$$') {
+  this.name = name;
+  this.img = img;
+  this.price = price;
+}
 const titels = ref(["ازياء", "القرطاسية", "جمال وعطور", "الصحة والتغذية", "الالكترونيات", "الجمال والعطور", "الصحة والتغذية"])
 const product_titels = ref([
-  { title: "العناية الشخصية", img: "../imges/personal-care.png" },
-  { title: "أزياء النساء", img: "../imges/women-fashion.png" },
-  { title: "أزياء الرجال", img: "../imges/men-fashion.png" },
-  { title: "العناية بالبشرة", img: "../imges/skin-care.png" },
-  { title: "العناية بالشعر", img: "../imges/hair-care.png" },
-  { title: "شنط واكسسوارات", img: "../imges/bags-accessories.png" },
-  { title: "الإلكترونيات", img: "../imges/electronics.png" },
-  { title: "المنزل والمطبخ", img: "../imges/home-kitchen.png" },
-  { title: "ألعاب الأطفال", img: "../imges/kids-toys.png" },
-  { title: "العروض اليومية", img: "../imges/daily-deals.png" },
-  { title: "العناية الشخصية", img: "../imges/personal-care.png" },
-  { title: "أزياء النساء", img: "../imges/women-fashion.png" },
-  { title: "أزياء الرجال", img: "../imges/men-fashion.png" },
-  { title: "العناية بالبشرة", img: "../imges/skin-care.png" },
-  { title: "العناية بالشعر", img: "../imges/hair-care.png" },
-  { title: "شنط واكسسوارات", img: "../imges/bags-accessories.png" },
-  { title: "الإلكترونيات", img: "../imges/electronics.png" },
-  { title: "المنزل والمطبخ", img: "../imges/home-kitchen.png" },
-  { title: "ألعاب الأطفال", img: "../imges/kids-toys.png" },
-  { title: "العروض اليومية", img: "../imges/daily-deals.png" },
+  new Data("العناية الشخصية", "../imges/personal-care.png"),
+  new Data("أزياء النساء", "../imges/women-fashion.png"),
+  new Data("أزياء الرجال", "../imges/men-fashion.png"),
+  new Data("العناية بالبشرة", "../imges/skin-care.png"),
+  new Data("العناية بالشعر", "../imges/hair-care.png"),
+  new Data("شنط واكسسوارات", "../imges/bags-accessories.png"),
+  new Data("الإلكترونيات", "../imges/electronics.png"),
+  new Data("المنزل والمطبخ", "../imges/home-kitchen.png"),
+  new Data("ألعاب الأطفال", "../imges/kids-toys.png"),
+  new Data("العروض اليومية", "../imges/daily-deals.png"),
+  new Data("العناية الشخصية", "../imges/personal-care.png"),
+  new Data("أزياء النساء", "../imges/women-fashion.png"),
+  new Data("أزياء الرجال", "../imges/men-fashion.png"),
+  new Data("العناية بالبشرة", "../imges/skin-care.png"),
+  new Data("العناية بالشعر", "../imges/hair-care.png"),
+  new Data("شنط واكسسوارات", "../imges/bags-accessories.png"),
+  new Data("الإلكترونيات", "../imges/electronics.png"),
+  new Data("المنزل والمطبخ", "../imges/home-kitchen.png"),
+  new Data("ألعاب الأطفال", "../imges/kids-toys.png"),
+  new Data("العروض اليومية", "../imges/daily-deals.png"),
 ])
 const Exclusive_offers = ref([
-  { name: "Product", img: "../imges/prod.png", price: "10.00 JD" },
-  { name: "Product", img: "../imges/prod.png", price: "20.00 JD" },
-  { name: "Product", img: "../imges/prod.png", price: "30.00 JD" },
-  { name: "Product", img: "../imges/prod.png", price: "40.00 JD" },
-  { name: "Product", img: "../imges/prod.png", price: "10.00 JD" },
-  { name: "Product", img: "../imges/prod.png", price: "20.00 JD" },
-  { name: "Product", img: "../imges/prod.png", price: "30.00 JD" },
-  { name: "Product", img: "../imges/prod.png", price: "40.00 JD" }
+  new Data("Product", "../imges/prod.png", "10.00 JD"),
+  new Data("Product", "../imges/prod.png", "20.00 JD"),
+  new Data("Product", "../imges/prod.png", "30.00 JD"),
+  new Data("Product", "../imges/prod.png", "40.00 JD"),
+  new Data("Product", "../imges/prod.png", "10.00 JD"),
+  new Data("Product", "../imges/prod.png", "20.00 JD"),
+  new Data("Product", "../imges/prod.png", "30.00 JD"),
+  new Data("Product", "../imges/prod.png", "40.00 JD"),
 ]);
 const best_seller = ref([
-  { name: "Product", img: "../imges/prod.png", price: "15.00 JD" },
-  { name: "Product", img: "../imges/prod.png", price: "25.00 JD" },
-  { name: "Product", img: "../imges/prod.png", price: "35.00 JD" },
-  { name: "Product", img: "../imges/prod.png", price: "45.00 JD" },
-  { name: "Product", img: "../imges/prod.png", price: "15.00 JD" },
-  { name: "Product", img: "../imges/prod.png", price: "25.00 JD" },
-  { name: "Product", img: "../imges/prod.png", price: "35.00 JD" },
-  { name: "Product", img: "../imges/prod.png", price: "45.00 JD" }
+  new Data("Product", "../imges/prod.png", "15.00 JD"),
+  new Data("Product", "../imges/prod.png", "25.00 JD"),
+  new Data("Product", "../imges/prod.png", "35.00 JD"),
+  new Data("Product", "../imges/prod.png", "45.00 JD"),
+  new Data("Product", "../imges/prod.png", "15.00 JD"),
+  new Data("Product", "../imges/prod.png", "25.00 JD"),
+  new Data("Product", "../imges/prod.png", "35.00 JD"),
+  new Data("Product", "../imges/prod.png", "45.00 JD"),
 ]);
 const New_arrival = ref([
-  { name: "Product", img: "../imges/prod.png", price: "12.00 JD" },
-  { name: "Product", img: "../imges/prod.png", price: "22.00 JD" },
-  { name: "Product", img: "../imges/prod.png", price: "32.00 JD" },
-  { name: "Product", img: "../imges/prod.png", price: "42.00 JD" },
-  { name: "Product", img: "../imges/prod.png", price: "12.00 JD" },
-  { name: "Product", img: "../imges/prod.png", price: "22.00 JD" },
-  { name: "Product", img: "../imges/prod.png", price: "32.00 JD" },
-  { name: "Product", img: "../imges/prod.png", price: "42.00 JD" }
+  new Data("Product", "../imges/prod.png", "12.00 JD"),
+  new Data("Product", "../imges/prod.png", "22.00 JD"),
+  new Data("Product", "../imges/prod.png", "32.00 JD"),
+  new Data("Product", "../imges/prod.png", "42.00 JD"),
+  new Data("Product", "../imges/prod.png", "12.00 JD"),
+  new Data("Product", "../imges/prod.png", "22.00 JD"),
+  new Data("Product", "../imges/prod.png", "32.00 JD"),
+  new Data("Product", "../imges/prod.png", "42.00 JD"),
 ]);
 const Variety = ref([
-  { name: "مستلزمات يومية", img: imge1 },
-  { name: "فوانيس رمضان", img: imge2 },
-  { name: "أجهزة المطبخ", img: imge3 },
-  { name: "العبايات والجلاليب", img: imge4 },
-  { name: "العناية بالبشرة", img: imge5 },
-  { name: "مستلزمات يومية", img: imge1 },
-  { name: "فوانيس رمضان", img: imge2 },
-  { name: "أجهزة المطبخ", img: imge3 },
-  { name: "العبايات والجلاليب", img: imge4 },
-  { name: "العناية بالبشرة", img: imge5 },
+  new Data("مستلزمات يومية", imge1),
+  new Data("فوانيس رمضان", imge2),
+  new Data("أجهزة المطبخ", imge3),
+  new Data("العبايات والجلاليب", imge4),
+  new Data("العناية بالبشرة", imge5),
+  new Data("مستلزمات يومية", imge1),
+  new Data("فوانيس رمضان", imge2),
+  new Data("أجهزة المطبخ", imge3),
+  new Data("العبايات والجلاليب", imge4),
+  new Data("العناية بالبشرة", imge5),
 ]);
 // const Variety2 = Variety.slice(0,4)
 const for_lady = ref([
-  { name: "مستلزمات يومية", img: prand2_img },
-  { name: "فوانيس رمضان", img: prand2_img },
-  { name: "أجهزة المطبخ", img: prand2_img },
-  { name: "العبايات والجلاليب", img: prand2_img },
-  { name: "العناية بالبشرة", img: prand2_img },
-  { name: "مستلزمات يومية", img: prand2_img },
-  { name: "فوانيس رمضان", img: prand2_img },
-  { name: "أجهزة المطبخ", img: prand2_img },
-  { name: "العبايات والجلاليب", img: prand2_img },
-  { name: "العناية بالبشرة", img: prand2_img },
+  new Data("مستلزمات يومية", prand2_img),
+  new Data("فوانيس رمضان", prand2_img),
+  new Data("أجهزة المطبخ", prand2_img),
+  new Data("العبايات والجلاليب", prand2_img),
+  new Data("العناية بالبشرة", prand2_img),
+  new Data("مستلزمات يومية", prand2_img),
+  new Data("فوانيس رمضان", prand2_img),
+  new Data("أجهزة المطبخ", prand2_img),
+  new Data("العبايات والجلاليب", prand2_img),
+  new Data("العناية بالبشرة", prand2_img),
 ])
 </script>
 
