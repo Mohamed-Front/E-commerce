@@ -65,6 +65,11 @@ export default {
           displayName: 'Model',
           show:'list model'
         },
+          {
+          name: 'coupon',
+          displayName: 'coupon',
+          show:'list coupon'
+        },
 
       ],
     },

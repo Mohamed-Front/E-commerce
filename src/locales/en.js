@@ -31,10 +31,10 @@ export default {
      update_User:"Update User",
      click_or_drag_to_change_photo:"Click or drag to change photo",
 
-    
+
   },
   role:{
-    
+
     manage_Roles:"Manage Roles",
     iD:"ID",
     name:"Name",
@@ -51,16 +51,32 @@ export default {
     close:"Close",
 
   },
-  
+
 permission:{
   permissions_Management:"Permissions Management",
   view_and_manage_all_system_permissions_grouped_by_modules:"View and manage all system permissions grouped by modules",
   refresh:"Refresh",
   no_permissions_found_in_this_group:"No permissions found in this group",
   permission_Name:"Permission Name",
- 
+
 
 },
+"coupon": {
+    "managementTitle": "Coupons Management",
+    "search": "Search coupons...",
+    "export": "Export",
+    "new": "New Coupon",
+    "code": "Code",
+    "type": "Type",
+    "value": "Value",
+    "expiry": "Expiry Date",
+    "noData": "No coupons found",
+    "loadError": "Failed to load coupons",
+    "deleteConfirmTitle": "Confirm Delete",
+    "deleteConfirmMessage": "Are you sure you want to delete this coupon?",
+    "deleteSuccess": "Coupon deleted successfully",
+    "deleteError": "Failed to delete coupon"
+  },
 brand:{
   new:"new",
   search:"Search...",

@@ -13,16 +13,16 @@ const routes: Array<RouteRecordRaw> = [
     redirect: { name: 'dashboard' },
   },
 
-  {
-    name: 'invioce',
-    path: '/invioce/:id',
-    component: () => import('../pages/admin/settings/order/invioce.vue'),
-  },
-  {
-    name: 'home',
-    path: '/',
-    component: () => import('../pages/admin/frontend/pages/home.vue'),
-  },
+  // {
+  //   name: 'invioce',
+  //   path: '/invioce/:id',
+  //   component: () => import('../pages/admin/settings/order/invioce.vue'),
+  // },
+  // {
+  //   name: 'home',
+  //   path: '/',
+  //   component: () => import('../pages/admin/frontend/pages/home.vue'),
+  // },
   {
     name: 'admin',
     path: '/admin',
@@ -139,6 +139,11 @@ const routes: Array<RouteRecordRaw> = [
             name: 'model-edit',
             path: 'model-edit/:id',
             component: () => import('../pages/admin/products/model/edit.vue'),
+          },
+           {
+            name: 'coupon',
+            path: 'coupon',
+            component: () => import('../pages/admin/products/coupon/index.vue'),
           },
 
         ],

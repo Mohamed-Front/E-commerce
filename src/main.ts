@@ -283,4 +283,3 @@ app.directive('can', (el, binding, vnode) =>{
 
 })
 
-axios.get('api/role/get/permissions').catch()

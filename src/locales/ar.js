@@ -36,9 +36,9 @@ export default {
 
 
 
- 
- 
-  },    
+
+
+  },
   role:{
     manage_Roles:"إدارة الأدوار",
     iD:"الفهرس",
@@ -55,9 +55,24 @@ export default {
     click_or_drag_to_change_image:"انقر أو اسحب لتغيير الصورة",
     close:"اغلق"
 
-     
+
   },
-     
+       "coupon": {
+    "managementTitle": "إدارة الكوبونات",
+    "search": "بحث في الكوبونات...",
+    "export": "تصدير",
+    "new": "كوبون جديد",
+    "code": "الكود",
+    "type": "النوع",
+    "value": "القيمة",
+    "expiry": "تاريخ الانتهاء",
+    "noData": "لا توجد كوبونات",
+    "loadError": "فشل تحميل الكوبونات",
+    "deleteConfirmTitle": "تأكيد الحذف",
+    "deleteConfirmMessage": "هل أنت متأكد أنك تريد حذف هذا الكوبون؟",
+    "deleteSuccess": "تم حذف الكوبون بنجاح",
+    "deleteError": "فشل حذف الكوبون"
+  },
   permission:{
     permissions_Management:"إدارة الأذونات",
     view_and_manage_all_system_permissions_grouped_by_modules:"عرض وإدارة جميع أذونات النظام المجمعة حسب الوحدات النمطية",
@@ -115,6 +130,6 @@ export default {
     click_or_drag_to_change_image:"انقر أو اسحب لتغيير الصورة",
     update_Model:"تحديث النموذج",
 
-  
+
   }
 };
