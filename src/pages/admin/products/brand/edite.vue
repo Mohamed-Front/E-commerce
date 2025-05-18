@@ -127,11 +127,11 @@ const submitForm = async () => {
 </script>
 
 <template>
-  <div  v-can="'edit brands'" class="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow-lg">
-    <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Edit Brand</h1>
+  <div  v-can="'edit brands'" class="max-w-5xl p-6 mx-auto bg-white shadow-lg rounded-xl">
+    <h1 class="mb-8 text-3xl font-bold text-center text-gray-800">Edit Brand</h1>
 
     <Form ref="form" @submit.prevent="submitForm" class="space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
         <!-- English Name -->
         <div class="space-y-2">
           <label for="name_en" class="block text-sm font-medium text-gray-700">
@@ -141,9 +141,9 @@ const submitForm = async () => {
             id="name_en"
             v-model="brandData.name_en"
             placeholder="Enter brand name in English"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
-          <small class="text-red-500 text-xs" v-if="form?.errors?.name_en">{{ form.errors.name_en[0] }}</small>
+          <small class="text-xs text-red-500" v-if="form?.errors?.name_en">{{ form.errors.name_en[0] }}</small>
         </div>
 
         <!-- Arabic Name -->
@@ -156,13 +156,13 @@ const submitForm = async () => {
             v-model="brandData.name_ar"
             placeholder="أدخل اسم العلامة التجارية بالعربية"
             dir="rtl"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
-          <small class="text-red-500 text-xs" v-if="form?.errors?.name_ar">{{ form.errors.name_ar[0] }}</small>
+          <small class="text-xs text-red-500" v-if="form?.errors?.name_ar">{{ form.errors.name_ar[0] }}</small>
         </div>
 
         <!-- Image Upload -->
-        <div class="md:col-span-2 space-y-2">
+        <div class="space-y-2 md:col-span-2">
           <label class="block text-sm font-medium text-gray-700">Brand Logo</label>
 
           <div class="flex justify-center">
@@ -171,7 +171,7 @@ const submitForm = async () => {
               @dragleave="handleDragLeave"
               @drop.prevent="onImageUpload"
               :class="{'border-blue-500 bg-blue-50': isDragging, 'border-gray-300': !isDragging}"
-              class="cursor-pointer w-full max-w-md rounded-xl border-2 border-dashed transition-colors duration-300"
+              class="w-full max-w-md transition-colors duration-300 border-2 border-dashed cursor-pointer rounded-xl"
             >
               <input type="file" @change="onImageUpload" accept="image/*" class="hidden">
 
@@ -180,35 +180,35 @@ const submitForm = async () => {
                   <img
                     :src="imagePreview"
                     alt="Preview"
-                    class="w-full h-64 object-contain rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"
+                    class="object-contain w-full h-64 transition-transform duration-300 rounded-lg shadow-md group-hover:scale-105"
                   >
-                  <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
-                    <div class="opacity-0 group-hover:opacity-100 space-x-3 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
+                  <div class="absolute inset-0 flex items-center justify-center transition-all duration-300 bg-black bg-opacity-0 rounded-lg group-hover:bg-opacity-30">
+                    <div class="space-x-3 transition-all duration-300 transform translate-y-4 opacity-0 group-hover:opacity-100 group-hover:translate-y-0">
                       <button
                         type="button"
                         @click.stop="removeImage"
-                        class="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                        class="p-2 text-white transition bg-red-500 rounded-full hover:bg-red-600"
                       >
-                        <i class="pi pi-trash text-sm"></i>
+                        <i class="text-sm pi pi-trash"></i>
                       </button>
                       <label
-                        class="bg-white text-gray-700 p-2 rounded-full hover:bg-gray-100 transition cursor-pointer"
+                        class="p-2 text-gray-700 transition bg-white rounded-full cursor-pointer hover:bg-gray-100"
                       >
-                        <i class="pi pi-pencil text-sm"></i>
+                        <i class="text-sm pi pi-pencil"></i>
                         <input type="file" @change="onImageUpload" accept="image/*" class="hidden">
                       </label>
                     </div>
                   </div>
                 </div>
-                <p class="mt-2 text-center text-sm text-gray-500">Click or drag to change logo</p>
+                <p class="mt-2 text-sm text-center text-gray-500">Click or drag to change logo</p>
               </div>
 
-              <div v-else class="p-8 flex flex-col items-center justify-center">
-                <div class="bg-blue-100 p-4 rounded-full mb-4">
-                  <i class="pi pi-image text-blue-500 text-2xl"></i>
+              <div v-else class="flex flex-col items-center justify-center p-8">
+                <div class="p-4 mb-4 bg-blue-100 rounded-full">
+                  <i class="text-2xl text-blue-500 pi pi-image"></i>
                 </div>
-                <p class="text-sm text-center text-gray-600 mb-1">
-                  <span class="text-blue-500 font-medium">Click to upload</span> or drag and drop
+                <p class="mb-1 text-sm text-center text-gray-600">
+                  <span class="font-medium text-blue-500">Click to upload</span> or drag and drop
                 </p>
                 <p class="text-xs text-gray-400">SVG, PNG, JPG or GIF (max. 2MB)</p>
               </div>
@@ -218,14 +218,14 @@ const submitForm = async () => {
       </div>
 
       <!-- Submit Button -->
-      <div class="pt-4 flex justify-center space-x-4">
+      <div class="flex justify-center pt-4 space-x-4">
         <Button
           type="button"
           label="Cancel"
           icon="pi pi-times"
 
           @click="router.go(-1)"
-          class="px-6 mx-2 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
+          class="flex items-center justify-center px-6 py-3 mx-2 space-x-2 text-gray-700 transition-all duration-300 bg-gray-200 rounded-lg shadow-md hover:bg-gray-300 hover:shadow-lg"
           :disabled="loading"
         />
 
@@ -234,7 +234,7 @@ const submitForm = async () => {
           label="Update Brand"
           icon="pi pi-check"
           :loading="loading"
-          class="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
+          class="flex items-center justify-center px-8 py-3 space-x-2 text-white transition-all duration-300 rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 hover:shadow-lg"
           :disabled="loading"
         >
           <span v-if="!loading">Update Brand</span>

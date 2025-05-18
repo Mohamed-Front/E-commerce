@@ -332,11 +332,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow-lg">
-    <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Update Store</h1>
+  <div class="max-w-5xl p-6 mx-auto bg-white shadow-lg rounded-xl">
+    <h1 class="mb-8 text-3xl font-bold text-center text-gray-800">Update Store</h1>
 
     <form ref="form" @submit.prevent="submitForm" class="space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
         <!-- English Name -->
         <div class="space-y-2">
           <label for="name_en" class="block text-sm font-medium text-gray-700">
@@ -347,7 +347,7 @@ onMounted(() => {
             v-model="storeData.name_en"
             type="text"
             placeholder="Enter store name in English"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
@@ -362,7 +362,7 @@ onMounted(() => {
             type="text"
             placeholder="أدخل اسم المتجر بالعربية"
             dir="rtl"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
@@ -392,35 +392,35 @@ onMounted(() => {
               @dragleave="isDraggingStoreImage = false"
               @drop.prevent="onImageUpload($event, 'store')"
               :class="{'border-blue-500 bg-blue-50': isDraggingStoreImage, 'border-gray-300': !isDraggingStoreImage}"
-              class="cursor-pointer w-full h-48 rounded-xl border-2 border-dashed transition-colors duration-300 flex items-center justify-center"
+              class="flex items-center justify-center w-full h-48 transition-colors duration-300 border-2 border-dashed cursor-pointer rounded-xl"
             >
               <input type="file" @change="onImageUpload($event, 'store')" accept="image/*" class="hidden">
 
-              <div v-if="storeImagePreview" class="p-4 w-full h-full">
-                <div class="relative group w-full h-full">
+              <div v-if="storeImagePreview" class="w-full h-full p-4">
+                <div class="relative w-full h-full group">
                   <img
                     :src="storeImagePreview"
                     alt="Store Logo Preview"
-                    class="w-full h-full object-contain rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"
+                    class="object-contain w-full h-full transition-transform duration-300 rounded-lg shadow-md group-hover:scale-105"
                   >
-                  <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
+                  <div class="absolute inset-0 flex items-center justify-center transition-all duration-300 bg-black bg-opacity-0 rounded-lg group-hover:bg-opacity-30">
                     <button
                       type="button"
                       @click.stop="removeImage('store')"
-                      class="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                      class="p-2 text-white transition bg-red-500 rounded-full opacity-0 group-hover:opacity-100 hover:bg-red-600"
                     >
-                      <i class="pi pi-trash text-sm"></i>
+                      <i class="text-sm pi pi-trash"></i>
                     </button>
                   </div>
                 </div>
               </div>
 
-              <div v-else class="p-4 flex flex-col items-center justify-center">
-                <div class="bg-blue-100 p-3 rounded-full mb-2">
-                  <i class="pi pi-image text-blue-500 text-xl"></i>
+              <div v-else class="flex flex-col items-center justify-center p-4">
+                <div class="p-3 mb-2 bg-blue-100 rounded-full">
+                  <i class="text-xl text-blue-500 pi pi-image"></i>
                 </div>
                 <p class="text-sm text-center text-gray-600">
-                  <span class="text-blue-500 font-medium">Click to upload</span> or drag and drop
+                  <span class="font-medium text-blue-500">Click to upload</span> or drag and drop
                 </p>
                 <p class="text-xs text-gray-400">PNG, JPG (max. 2MB)</p>
               </div>
@@ -439,35 +439,35 @@ onMounted(() => {
               @dragleave="isDraggingMainBanner = false"
               @drop.prevent="onImageUpload($event, 'main_banner')"
               :class="{'border-blue-500 bg-blue-50': isDraggingMainBanner, 'border-gray-300': !isDraggingMainBanner}"
-              class="cursor-pointer w-full h-48 rounded-xl border-2 border-dashed transition-colors duration-300 flex items-center justify-center"
+              class="flex items-center justify-center w-full h-48 transition-colors duration-300 border-2 border-dashed cursor-pointer rounded-xl"
             >
               <input type="file" @change="onImageUpload($event, 'main_banner')" accept="image/*" class="hidden">
 
-              <div v-if="mainBannerPreview" class="p-4 w-full h-full">
-                <div class="relative group w-full h-full">
+              <div v-if="mainBannerPreview" class="w-full h-full p-4">
+                <div class="relative w-full h-full group">
                   <img
                     :src="mainBannerPreview"
                     alt="Main Banner Preview"
-                    class="w-full h-full object-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"
+                    class="object-cover w-full h-full transition-transform duration-300 rounded-lg shadow-md group-hover:scale-105"
                   >
-                  <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
+                  <div class="absolute inset-0 flex items-center justify-center transition-all duration-300 bg-black bg-opacity-0 rounded-lg group-hover:bg-opacity-30">
                     <button
                       type="button"
                       @click.stop="removeImage('main_banner')"
-                      class="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                      class="p-2 text-white transition bg-red-500 rounded-full opacity-0 group-hover:opacity-100 hover:bg-red-600"
                     >
-                      <i class="pi pi-trash text-sm"></i>
+                      <i class="text-sm pi pi-trash"></i>
                     </button>
                   </div>
                 </div>
               </div>
 
-              <div v-else class="p-4 flex flex-col items-center justify-center">
-                <div class="bg-blue-100 p-3 rounded-full mb-2">
-                  <i class="pi pi-image text-blue-500 text-xl"></i>
+              <div v-else class="flex flex-col items-center justify-center p-4">
+                <div class="p-3 mb-2 bg-blue-100 rounded-full">
+                  <i class="text-xl text-blue-500 pi pi-image"></i>
                 </div>
                 <p class="text-sm text-center text-gray-600">
-                  <span class="text-blue-500 font-medium">Click to upload</span> or drag and drop
+                  <span class="font-medium text-blue-500">Click to upload</span> or drag and drop
                 </p>
                 <p class="text-xs text-gray-400">PNG, JPG (max. 2MB)</p>
               </div>
@@ -484,35 +484,35 @@ onMounted(() => {
               @dragleave="isDraggingSubBanner = false"
               @drop.prevent="onImageUpload($event, 'sub_banner')"
               :class="{'border-blue-500 bg-blue-50': isDraggingSubBanner, 'border-gray-300': !isDraggingSubBanner}"
-              class="cursor-pointer w-full max-w-2xl h-48 rounded-xl border-2 border-dashed transition-colors duration-300 flex items-center justify-center"
+              class="flex items-center justify-center w-full h-48 max-w-2xl transition-colors duration-300 border-2 border-dashed cursor-pointer rounded-xl"
             >
               <input type="file" @change="onImageUpload($event, 'sub_banner')" accept="image/*" class="hidden">
 
-              <div v-if="subBannerPreview" class="p-4 w-full h-full">
-                <div class="relative group w-full h-full">
+              <div v-if="subBannerPreview" class="w-full h-full p-4">
+                <div class="relative w-full h-full group">
                   <img
                     :src="subBannerPreview"
                     alt="Sub Banner Preview"
-                    class="w-full h-full object-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"
+                    class="object-cover w-full h-full transition-transform duration-300 rounded-lg shadow-md group-hover:scale-105"
                   >
-                  <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
+                  <div class="absolute inset-0 flex items-center justify-center transition-all duration-300 bg-black bg-opacity-0 rounded-lg group-hover:bg-opacity-30">
                     <button
                       type="button"
                       @click.stop="removeImage('sub_banner')"
-                      class="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                      class="p-2 text-white transition bg-red-500 rounded-full opacity-0 group-hover:opacity-100 hover:bg-red-600"
                     >
-                      <i class="pi pi-trash text-sm"></i>
+                      <i class="text-sm pi pi-trash"></i>
                     </button>
                   </div>
                 </div>
               </div>
 
-              <div v-else class="p-4 flex flex-col items-center justify-center">
-                <div class="bg-blue-100 p-3 rounded-full mb-2">
-                  <i class="pi pi-image text-blue-500 text-xl"></i>
+              <div v-else class="flex flex-col items-center justify-center p-4">
+                <div class="p-3 mb-2 bg-blue-100 rounded-full">
+                  <i class="text-xl text-blue-500 pi pi-image"></i>
                 </div>
                 <p class="text-sm text-center text-gray-600">
-                  <span class="text-blue-500 font-medium">Click to upload</span> or drag and drop
+                  <span class="font-medium text-blue-500">Click to upload</span> or drag and drop
                 </p>
                 <p class="text-xs text-gray-400">PNG, JPG (max. 2MB)</p>
               </div>
@@ -531,26 +531,26 @@ onMounted(() => {
               @dragleave="isDraggingSliderOne = false"
               @drop.prevent="onSliderUpload($event, 'slider_one')"
               :class="{'border-blue-500 bg-blue-50': isDraggingSliderOne, 'border-gray-300': !isDraggingSliderOne}"
-              class="cursor-pointer w-full rounded-xl border-2 border-dashed transition-colors duration-300"
+              class="w-full transition-colors duration-300 border-2 border-dashed cursor-pointer rounded-xl"
             >
               <input type="file" @change="onSliderUpload($event, 'slider_one')" accept="image/*" multiple class="hidden">
 
               <div v-if="sliderOnePreviews.length > 0 || storeData.existing_images.slider_images_one.length > 0" class="p-4">
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
                   <!-- Existing images -->
                   <div v-for="(preview, index) in storeData.existing_images.slider_images_one" :key="'existing-'+index" class="relative group">
                     <img
                       :src="preview"
                       :alt="`Existing Slider One Image ${index + 1}`"
-                      class="w-full h-32 object-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"
+                      class="object-cover w-full h-32 transition-transform duration-300 rounded-lg shadow-md group-hover:scale-105"
                     >
-                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
+                    <div class="absolute inset-0 flex items-center justify-center transition-all duration-300 bg-black bg-opacity-0 rounded-lg group-hover:bg-opacity-30">
                       <button
                         type="button"
                         @click.stop="removeSliderImage(index, 'slider_one')"
-                        class="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                        class="p-2 text-white transition bg-red-500 rounded-full opacity-0 group-hover:opacity-100 hover:bg-red-600"
                       >
-                        <i class="pi pi-trash text-sm"></i>
+                        <i class="text-sm pi pi-trash"></i>
                       </button>
                     </div>
                   </div>
@@ -560,30 +560,30 @@ onMounted(() => {
                     <img
                       :src="preview"
                       :alt="`New Slider One Image ${index + 1}`"
-                      class="w-full h-32 object-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"
+                      class="object-cover w-full h-32 transition-transform duration-300 rounded-lg shadow-md group-hover:scale-105"
                     >
-                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
+                    <div class="absolute inset-0 flex items-center justify-center transition-all duration-300 bg-black bg-opacity-0 rounded-lg group-hover:bg-opacity-30">
                       <button
                         type="button"
                         @click.stop="removeSliderImage(storeData.existing_images.slider_images_one.length + index, 'slider_one')"
-                        class="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                        class="p-2 text-white transition bg-red-500 rounded-full opacity-0 group-hover:opacity-100 hover:bg-red-600"
                       >
-                        <i class="pi pi-trash text-sm"></i>
+                        <i class="text-sm pi pi-trash"></i>
                       </button>
                     </div>
                   </div>
                 </div>
-                <p class="mt-2 text-center text-sm text-gray-500">
+                <p class="mt-2 text-sm text-center text-gray-500">
                   {{ storeData.existing_images.slider_images_one.length + sliderOnePreviews.length }} image(s) uploaded. Click or drag to add more (max 10)
                 </p>
               </div>
 
-              <div v-else class="p-8 flex flex-col items-center justify-center">
-                <div class="bg-blue-100 p-4 rounded-full mb-4">
-                  <i class="pi pi-images text-blue-500 text-2xl"></i>
+              <div v-else class="flex flex-col items-center justify-center p-8">
+                <div class="p-4 mb-4 bg-blue-100 rounded-full">
+                  <i class="text-2xl text-blue-500 pi pi-images"></i>
                 </div>
-                <p class="text-sm text-center text-gray-600 mb-1">
-                  <span class="text-blue-500 font-medium">Click to upload</span> or drag and drop
+                <p class="mb-1 text-sm text-center text-gray-600">
+                  <span class="font-medium text-blue-500">Click to upload</span> or drag and drop
                 </p>
                 <p class="text-xs text-gray-400">Multiple images can be selected (max 10, 2MB each)</p>
               </div>
@@ -602,26 +602,26 @@ onMounted(() => {
               @dragleave="isDraggingSliderTwo = false"
               @drop.prevent="onSliderUpload($event, 'slider_two')"
               :class="{'border-blue-500 bg-blue-50': isDraggingSliderTwo, 'border-gray-300': !isDraggingSliderTwo}"
-              class="cursor-pointer w-full rounded-xl border-2 border-dashed transition-colors duration-300"
+              class="w-full transition-colors duration-300 border-2 border-dashed cursor-pointer rounded-xl"
             >
               <input type="file" @change="onSliderUpload($event, 'slider_two')" accept="image/*" multiple class="hidden">
 
               <div v-if="sliderTwoPreviews.length > 0 || storeData.existing_images.slider_images_two.length > 0" class="p-4">
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
                   <!-- Existing images -->
                   <div v-for="(preview, index) in storeData.existing_images.slider_images_two" :key="'existing-'+index" class="relative group">
                     <img
                       :src="preview"
                       :alt="`Existing Slider Two Image ${index + 1}`"
-                      class="w-full h-32 object-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"
+                      class="object-cover w-full h-32 transition-transform duration-300 rounded-lg shadow-md group-hover:scale-105"
                     >
-                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
+                    <div class="absolute inset-0 flex items-center justify-center transition-all duration-300 bg-black bg-opacity-0 rounded-lg group-hover:bg-opacity-30">
                       <button
                         type="button"
                         @click.stop="removeSliderImage(index, 'slider_two')"
-                        class="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                        class="p-2 text-white transition bg-red-500 rounded-full opacity-0 group-hover:opacity-100 hover:bg-red-600"
                       >
-                        <i class="pi pi-trash text-sm"></i>
+                        <i class="text-sm pi pi-trash"></i>
                       </button>
                     </div>
                   </div>
@@ -631,30 +631,30 @@ onMounted(() => {
                     <img
                       :src="preview"
                       :alt="`New Slider Two Image ${index + 1}`"
-                      class="w-full h-32 object-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"
+                      class="object-cover w-full h-32 transition-transform duration-300 rounded-lg shadow-md group-hover:scale-105"
                     >
-                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
+                    <div class="absolute inset-0 flex items-center justify-center transition-all duration-300 bg-black bg-opacity-0 rounded-lg group-hover:bg-opacity-30">
                       <button
                         type="button"
                         @click.stop="removeSliderImage(storeData.existing_images.slider_images_two.length + index, 'slider_two')"
-                        class="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                        class="p-2 text-white transition bg-red-500 rounded-full opacity-0 group-hover:opacity-100 hover:bg-red-600"
                       >
-                        <i class="pi pi-trash text-sm"></i>
+                        <i class="text-sm pi pi-trash"></i>
                       </button>
                     </div>
                   </div>
                 </div>
-                <p class="mt-2 text-center text-sm text-gray-500">
+                <p class="mt-2 text-sm text-center text-gray-500">
                   {{ storeData.existing_images.slider_images_two.length + sliderTwoPreviews.length }} image(s) uploaded. Click or drag to add more (max 10)
                 </p>
               </div>
 
-              <div v-else class="p-8 flex flex-col items-center justify-center">
-                <div class="bg-blue-100 p-4 rounded-full mb-4">
-                  <i class="pi pi-images text-blue-500 text-2xl"></i>
+              <div v-else class="flex flex-col items-center justify-center p-8">
+                <div class="p-4 mb-4 bg-blue-100 rounded-full">
+                  <i class="text-2xl text-blue-500 pi pi-images"></i>
                 </div>
-                <p class="text-sm text-center text-gray-600 mb-1">
-                  <span class="text-blue-500 font-medium">Click to upload</span> or drag and drop
+                <p class="mb-1 text-sm text-center text-gray-600">
+                  <span class="font-medium text-blue-500">Click to upload</span> or drag and drop
                 </p>
                 <p class="text-xs text-gray-400">Multiple images can be selected (max 10, 2MB each)</p>
               </div>
@@ -664,11 +664,11 @@ onMounted(() => {
       </div>
 
       <!-- Submit Button -->
-      <div class="pt-4 flex justify-center space-x-4">
+      <div class="flex justify-center pt-4 space-x-4">
         <button
           type="button"
           @click="router.go(-1)"
-          class="px-6 py-3 mx-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
+          class="flex items-center justify-center px-6 py-3 mx-2 space-x-2 text-gray-700 transition-all duration-300 bg-gray-200 rounded-lg shadow-md hover:bg-gray-300 hover:shadow-lg"
           :disabled="loading"
         >
           <span>Cancel</span>
@@ -676,7 +676,7 @@ onMounted(() => {
 
         <button
           type="submit"
-          class="px-8 mx-2 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
+          class="flex items-center justify-center px-8 py-3 mx-2 space-x-2 text-white transition-all duration-300 rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 hover:shadow-lg"
           :disabled="loading"
         >
           <span v-if="!loading">Update Store</span>

@@ -8,92 +8,135 @@ export interface INavigationRoute {
 export default {
   root: {
     name: '/',
-    displayName: 'navigationRoutes.home',
-
+    displayName: 'navigation.home',
+    meta: {
+      icon: 'home'
+    }
   },
   routes: [
     {
       name: 'dashboard',
-      displayName: 'dashboard',
-      show:['dashboard'],
+      displayName: 'navigation.dashboard',
+      show: ['dashboard'],
       meta: {
-        icon: 'vuestic-iconset-dashboard',
+        icon: 'dashboard',
       },
     },
     {
       name: 'statistics',
-      displayName: 'users_management',
-      show:['list users','list permissions','list roles'],
+      displayName: 'navigation.users_management',
+      show: ['list users', 'list permissions', 'list roles'],
       meta: {
-        icon: 'vuestic-iconset-user',
+        icon: 'people',
       },
       disabled: true,
       children: [
         {
           name: 'users',
-          displayName: 'users',
-          show:'list users'
+          displayName: 'navigation.users',
+          show: 'list users',
+          meta: {
+            icon: 'person'
+          }
         },
         {
           name: 'roles',
-          displayName: 'roles',
-           show:'list roles'
+          displayName: 'navigation.roles',
+          show: 'list roles',
+          meta: {
+            icon: 'security'
+          }
         },
         {
           name: 'Permission',
-          displayName: 'Permissions',
-           show:'list permissions'
+          displayName: 'navigation.permissions',
+          show: 'list permissions',
+          meta: {
+            icon: 'lock'
+          }
         },
       ],
     },
     {
       name: 'products',
-      displayName: 'Products',
-      show:['list brands','list model'],
+      displayName: 'navigation.products',
+      show: ['list brands', 'list model'],
       meta: {
-        icon: 'eye',
+        icon: 'inventory',
       },
       disabled: true,
       children: [
         {
           name: 'brand',
-          displayName: 'brand',
-          show:'list brands'
+          displayName: 'navigation.brands',
+          show: 'list brands',
+          meta: {
+            icon: 'branding_watermark'
+          }
         },
         {
           name: 'model',
-          displayName: 'Model',
-          show:'list model'
+          displayName: 'navigation.models',
+          show: 'list model',
+          meta: {
+            icon: 'model_training'
+          }
         },
-          {
+        {
           name: 'coupon',
-          displayName: 'coupon',
-          show:'list coupon'
+          displayName: 'navigation.coupons',
+          show: 'list coupon',
+          meta: {
+            icon: 'local_offer'
+          }
         },
-
       ],
     },
-
-
     {
       name: 'store',
-      displayName: 'store',
-      show:['list brands','list model'],
+      displayName: 'navigation.stores',
+      show: ['list stores', 'list categories'],
       meta: {
-        icon: 'eye',
+        icon: 'store',
       },
       disabled: true,
       children: [
         {
           name: 'stores',
-          displayName: 'Stores',
-          show:'list stores'
+          displayName: 'navigation.stores',
+          show: 'list stores',
+          meta: {
+            icon: 'storefront'
+          }
         },
-
+        {
+          name: 'category',
+          displayName: 'navigation.categories',
+          show: 'list categories',
+          meta: {
+            icon: 'category'
+          }
+        },
       ],
     },
-
-
-
+    {
+      name: 'setting',
+      displayName: 'navigation.settings',
+      show: ['list address'],
+      meta: {
+        icon: 'settings',
+      },
+      disabled: true,
+      children: [
+        {
+          name: 'address',
+          displayName: 'navigation.addresses',
+          show: 'list address',
+          meta: {
+            icon: 'location_on'
+          }
+        },
+      ],
+    },
   ] as INavigationRoute[],
 }

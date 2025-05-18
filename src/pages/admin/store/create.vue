@@ -160,15 +160,13 @@ const submitForm = async () => {
   });
 
   try {
-    const response = await axios.post("/api/store", formData, {
-
-    });
+    await axios.post("/api/store", formData);
 
     router.push({name: 'stores'});
     toast.add({
       severity: 'success',
       summary: t("success"),
-      detail: 'Store created successfully',
+      detail: t("store.createdSuccess"),
       life: 3000
     });
   } catch (error) {
@@ -176,7 +174,7 @@ const submitForm = async () => {
     toast.add({
       severity: 'error',
       summary: t("error"),
-      detail: error.response?.data?.message || 'An error occurred',
+      detail: error.response?.data?.message || t("store.createError"),
       life: 3000
     });
   } finally {
@@ -187,55 +185,55 @@ const submitForm = async () => {
 
 <template>
   <div v-can="'create stores'" class="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow-lg">
-    <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Create New Store</h1>
+    <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">{{ t('store.createTitle') }}</h1>
 
-    <Form ref="form" @submit.prevent="submitForm" class="space-y-6">
+    <form @submit.prevent="submitForm" class="space-y-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- English Name -->
         <div class="space-y-2">
           <label for="name_en" class="block text-sm font-medium text-gray-700">
-            English Name <span class="text-red-500">*</span>
+            {{ t('store.nameEn') }} <span class="text-red-500">*</span>
           </label>
           <InputText
             id="name_en"
             v-model="storeData.name_en"
-            placeholder="Enter store name in English"
+            :placeholder="t('store.enterNameEn')"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            required
           />
-          <small class="text-red-500 text-xs" v-if="form?.errors?.name_en">{{ form.errors.name_en[0] }}</small>
         </div>
 
         <!-- Arabic Name -->
         <div class="space-y-2">
           <label for="name_ar" class="block text-sm font-medium text-gray-700">
-            Arabic Name <span class="text-red-500">*</span>
+            {{ t('store.nameAr') }} <span class="text-red-500">*</span>
           </label>
           <InputText
             id="name_ar"
             v-model="storeData.name_ar"
-            placeholder="أدخل اسم المتجر بالعربية"
+            :placeholder="t('store.enterNameAr')"
             dir="rtl"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            required
           />
-          <small class="text-red-500 text-xs" v-if="form?.errors?.name_ar">{{ form.errors.name_ar[0] }}</small>
         </div>
 
         <!-- Toggle Buttons -->
         <div class="space-y-4 md:col-span-2">
           <div class="flex items-center space-x-4">
-            <label class="block text-sm font-medium text-gray-700 mx-2">Default Store</label>
+            <label class="block text-sm font-medium text-gray-700 mx-2">{{ t('store.isDefault') }}</label>
             <InputSwitch v-model="storeData.is_default" />
           </div>
 
           <div class="flex items-center space-x-4">
-            <label class="block text-sm font-medium text-gray-700 mx-2">Has Market</label>
+            <label class="block text-sm font-medium text-gray-700 mx-2">{{ t('store.hasMarket') }}</label>
             <InputSwitch v-model="storeData.has_market" />
           </div>
         </div>
 
         <!-- Store Image -->
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Store Logo</label>
+          <label class="block text-sm font-medium text-gray-700">{{ t('store.storeLogo') }}</label>
           <div class="flex justify-center">
             <label
               @dragover.prevent="isDraggingStoreImage = true"
@@ -250,7 +248,7 @@ const submitForm = async () => {
                 <div class="relative group w-full h-full">
                   <img
                     :src="storeImagePreview"
-                    alt="Store Logo Preview"
+                    :alt="t('store.storeLogo')"
                     class="w-full h-full object-contain rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"
                   >
                   <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
@@ -270,7 +268,7 @@ const submitForm = async () => {
                   <i class="pi pi-image text-blue-500 text-xl"></i>
                 </div>
                 <p class="text-sm text-center text-gray-600">
-                  <span class="text-blue-500 font-medium">Click to upload</span> or drag and drop
+                  <span class="text-blue-500 font-medium">{{ t('store.clickToUpload') }}</span> {{ t('store.orDragDrop') }}
                 </p>
               </div>
             </label>
@@ -279,7 +277,7 @@ const submitForm = async () => {
 
         <!-- Main Banner Image -->
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Main Banner</label>
+          <label class="block text-sm font-medium text-gray-700">{{ t('store.mainBanner') }}</label>
           <div class="flex justify-center">
             <label
               @dragover.prevent="isDraggingMainBanner = true"
@@ -294,7 +292,7 @@ const submitForm = async () => {
                 <div class="relative group w-full h-full">
                   <img
                     :src="mainBannerPreview"
-                    alt="Main Banner Preview"
+                    :alt="t('store.mainBanner')"
                     class="w-full h-full object-contain rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"
                   >
                   <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
@@ -314,7 +312,7 @@ const submitForm = async () => {
                   <i class="pi pi-image text-blue-500 text-xl"></i>
                 </div>
                 <p class="text-sm text-center text-gray-600">
-                  <span class="text-blue-500 font-medium">Click to upload</span> or drag and drop
+                  <span class="text-blue-500 font-medium">{{ t('store.clickToUpload') }}</span> {{ t('store.orDragDrop') }}
                 </p>
               </div>
             </label>
@@ -323,7 +321,7 @@ const submitForm = async () => {
 
         <!-- Sub Banner Image -->
         <div class="space-y-2 md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700">Sub Banner</label>
+          <label class="block text-sm font-medium text-gray-700">{{ t('store.subBanner') }}</label>
           <div class="flex justify-center">
             <label
               @dragover.prevent="isDraggingSubBanner = true"
@@ -338,7 +336,7 @@ const submitForm = async () => {
                 <div class="relative group w-full h-full">
                   <img
                     :src="subBannerPreview"
-                    alt="Sub Banner Preview"
+                    :alt="t('store.subBanner')"
                     class="w-full h-full object-contain rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"
                   >
                   <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
@@ -358,7 +356,7 @@ const submitForm = async () => {
                   <i class="pi pi-image text-blue-500 text-xl"></i>
                 </div>
                 <p class="text-sm text-center text-gray-600">
-                  <span class="text-blue-500 font-medium">Click to upload</span> or drag and drop
+                  <span class="text-blue-500 font-medium">{{ t('store.clickToUpload') }}</span> {{ t('store.orDragDrop') }}
                 </p>
               </div>
             </label>
@@ -367,7 +365,7 @@ const submitForm = async () => {
 
         <!-- Slider Images One -->
         <div class="space-y-2 md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700">Slider Images One</label>
+          <label class="block text-sm font-medium text-gray-700">{{ t('store.sliderOne') }}</label>
           <div class="flex justify-center">
             <label
               @dragover.prevent="isDraggingSliderOne = true"
@@ -383,7 +381,7 @@ const submitForm = async () => {
                   <div v-for="(preview, index) in sliderOnePreviews" :key="index" class="relative group">
                     <img
                       :src="preview"
-                      :alt="`Slider One Image ${index + 1}`"
+                      :alt="`${t('store.sliderOne')} ${index + 1}`"
                       class="w-full h-32 object-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"
                     >
                     <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
@@ -397,7 +395,7 @@ const submitForm = async () => {
                     </div>
                   </div>
                 </div>
-                <p class="mt-2 text-center text-sm text-gray-500">Click or drag to add more images</p>
+                <p class="mt-2 text-center text-sm text-gray-500">{{ t('store.clickOrDragMore') }}</p>
               </div>
 
               <div v-else class="p-8 flex flex-col items-center justify-center">
@@ -405,9 +403,9 @@ const submitForm = async () => {
                   <i class="pi pi-images text-blue-500 text-2xl"></i>
                 </div>
                 <p class="text-sm text-center text-gray-600 mb-1">
-                  <span class="text-blue-500 font-medium">Click to upload</span> or drag and drop
+                  <span class="text-blue-500 font-medium">{{ t('store.clickToUpload') }}</span> {{ t('store.orDragDrop') }}
                 </p>
-                <p class="text-xs text-gray-400">Multiple images can be selected</p>
+                <p class="text-xs text-gray-400">{{ t('store.multipleImages') }}</p>
               </div>
             </label>
           </div>
@@ -415,7 +413,7 @@ const submitForm = async () => {
 
         <!-- Slider Images Two -->
         <div class="space-y-2 md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700">Slider Images Two</label>
+          <label class="block text-sm font-medium text-gray-700">{{ t('store.sliderTwo') }}</label>
           <div class="flex justify-center">
             <label
               @dragover.prevent="isDraggingSliderTwo = true"
@@ -431,7 +429,7 @@ const submitForm = async () => {
                   <div v-for="(preview, index) in sliderTwoPreviews" :key="index" class="relative group">
                     <img
                       :src="preview"
-                      :alt="`Slider Two Image ${index + 1}`"
+                      :alt="`${t('store.sliderTwo')} ${index + 1}`"
                       class="w-full h-32 object-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"
                     >
                     <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
@@ -445,7 +443,7 @@ const submitForm = async () => {
                     </div>
                   </div>
                 </div>
-                <p class="mt-2 text-center text-sm text-gray-500">Click or drag to add more images</p>
+                <p class="mt-2 text-center text-sm text-gray-500">{{ t('store.clickOrDragMore') }}</p>
               </div>
 
               <div v-else class="p-8 flex flex-col items-center justify-center">
@@ -453,9 +451,9 @@ const submitForm = async () => {
                   <i class="pi pi-images text-blue-500 text-2xl"></i>
                 </div>
                 <p class="text-sm text-center text-gray-600 mb-1">
-                  <span class="text-blue-500 font-medium">Click to upload</span> or drag and drop
+                  <span class="text-blue-500 font-medium">{{ t('store.clickToUpload') }}</span> {{ t('store.orDragDrop') }}
                 </p>
-                <p class="text-xs text-gray-400">Multiple images can be selected</p>
+                <p class="text-xs text-gray-400">{{ t('store.multipleImages') }}</p>
               </div>
             </label>
           </div>
@@ -466,26 +464,26 @@ const submitForm = async () => {
       <div class="pt-4 flex justify-center space-x-4">
         <Button
           type="button"
-          label="Cancel"
+          :label="t('cancel')"
           icon="pi pi-times"
           @click="router.go(-1)"
-          class="px-6 py-3 mx-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
+          class="px-6 py-3 bg-gray-200 mx-2 hover:bg-gray-300 text-gray-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
           :disabled="loading"
         />
 
         <Button
           type="submit"
-          label="Create Store"
+          :label="t('store.createStore')"
           icon="pi pi-plus"
           :loading="loading"
-          class="px-8 mx-2 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
+          class="px-8 py-3 bg-gradient-to-r mx-2 from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
           :disabled="loading"
         >
-          <span v-if="!loading">Create Store</span>
+          <span v-if="!loading">{{ t('store.createStore') }}</span>
           <i v-else class="pi pi-spinner pi-spin"></i>
         </Button>
       </div>
-    </Form>
+    </form>
   </div>
   <Toast/>
 </template>

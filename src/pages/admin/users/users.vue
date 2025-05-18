@@ -1,24 +1,19 @@
 <script setup>
-import {useToast} from 'primevue/usetoast'
+import { useToast } from 'primevue/usetoast'
 import { FilterMatchMode } from 'primevue/api'
 import { ref, onMounted, onBeforeMount, watch } from 'vue'
-import axios from "axios";
-import {useRouter} from "vue-router";
+import axios from "axios"
+import { useRouter } from "vue-router"
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 const router = useRouter()
-const countries = ref([])
 const toast = useToast()
-const price_id = ref(null)
 const loading = ref(true)
 const delete_id = ref('')
-const user = ref({})
-const status = ref(true)
-const error = ref('')
 const users = ref(null)
-const productDialog = ref(false)
 const deleteDialog = ref(false)
-const deleteProductsDialog = ref(false)
-const product = ref({})
-const selectedProducts = ref(null)
+const selectedUsers = ref(null)
 const dt = ref(null)
 const filters = ref({})
 const searchQuery = ref('')
@@ -40,27 +35,36 @@ const exportCSV = () => {
   dt.value.exportCSV()
 }
 
-const delet = (id) => {
+const confirmDelete = (id) => {
   delete_id.value = id
-  deleteProductsDialog.value = true
+  deleteDialog.value = true
 }
 
-const deleteSelectedProducts = () => {
-  axios.get(`/api/delete/${delete_id.value}`)
+const deleteUser = () => {
+  axios.delete(`/api/user/${delete_id.value}`)
     .then(() => {
       fetchData()
-      deleteProductsDialog.value = false
-      toast.add({severity: 'success', summary: 'Successful', detail: 'user Deleted', life: 3000})
+      deleteDialog.value = false
+      toast.add({
+        severity: 'success',
+        summary: t('success'),
+        detail: t('user.deleteSuccess'),
+        life: 3000
+      })
     })
-}
-
-const handelchange = (e) => {
-  console.log(e)
+    .catch(error => {
+      toast.add({
+        severity: 'error',
+        summary: t('error'),
+        detail: t('user.deleteError'),
+        life: 3000
+      })
+    })
 }
 
 const initFilters = () => {
   filters.value = {
-    global: {value: null, matchMode: FilterMatchMode.CONTAINS},
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   }
 }
 
@@ -90,6 +94,12 @@ const fetchData = () => {
     links.value = res.data.data.links
   }).catch(error => {
     loading.value = false
+    toast.add({
+      severity: 'error',
+      summary: t('error'),
+      detail: t('user.loadError'),
+      life: 3000
+    })
     console.error("Error fetching data:", error)
   })
 }
@@ -117,228 +127,247 @@ onMounted(() => {
 })
 
 const openNew = () => {
-  router.push({name:'user-create'})
+  router.push({ name: 'user-create' })
 }
 
-const createprice = () => {
-  axios
-    .post('/api/Register', user.value)
-    .then((res) => {
-      console.log(res.data)
-      fetchData()
-      productDialog.value = false
-      toast.add({severity: 'success', summary: 'Successful', detail: 'User Created', life: 3000})
-      user.value = {}
-    })
-    .catch((el) => {
-      error.value = el.response.data.errors
-    })
+const editUser = (id) => {
+  router.push({ name: 'user-edit', params: { id: id } })
 }
-
-const deleteprice = () => {
-  const body = new FormData();
-  body.append("country_id", user.value.country_id);
-  body.append("price", user.value.price);
-  body.append("fees", user.value.fees);
-  body.append("tax", user.value.tax);
-  if (status.value == true) {
-    status.value = 1
-    body.append("status", status.value);
-  }
-  if (status.value == false) {
-    status.value = 0
-    body.append("status", status.value);
-  }
-  axios.post(`/api/country-price/${price_id.value}/update`, body)
-    .then((res) => {
-      fetchData()
-      deleteDialog.value = false
-      toast.add({severity: 'success', summary: 'Successful', detail: 'update Successful', life: 3000})
-      user.value = {}
-    })
-    .catch((el) => {
-      error.value = el.response.data.errors
-      console.log(error.value)
-    })
-}
-
-const confirmDelete = (id) => {
-  router.push({name:'user-edite',params:{id:id}})
-};
 </script>
 
 <template>
   <div class="grid">
     <div class="col-12">
-      <va-card class="card">
+      <div class="card p-4 shadow-2 border-round">
         <Toolbar class="mb-4">
           <template #start>
-            <div class="my-2 ">
-              <Button  v-can="'create users'" :label='$t("user.new")' icon="pi pi-plus" class="new mr-2" @click="openNew"/>
-            </div>
+            <h2 class="text-2xl font-bold">{{ t('user.managementTitle') }}</h2>
           </template>
+
           <template #end>
-            <div  v-can="'list users'" class="my-2 flex gap-2">
+            <div class="flex gap-2">
               <span class="p-input-icon-left">
-                <i class="pi pi-search"/>
-                <InputText v-model="searchQuery" :placeholder='$t("user.search")' />
+                <i class="pi pi-search" />
+                <InputText v-model="searchQuery" :placeholder="t('user.search')" />
               </span>
-              <Button  :label='$t("user.export")' icon="pi pi-upload" class="new" @click="exportCSV($event)"/>
+              <Button
+                :label="t('user.export')"
+                icon="pi pi-upload"
+                class="p-export"
+                v-can="'export users'"
+                @click="exportCSV"
+              />
+              <Button
+                v-can="'create users'"
+                :label="t('user.new')"
+                icon="pi pi-plus"
+                class="p-button-success"
+                @click="openNew"
+              />
             </div>
           </template>
         </Toolbar>
-        <Toast/>
-        <DataTable
-          ref="dt"
-          v-model:selection="selectedProducts"
-          :value="users"
-          :loading="loading"
-          data-key="id"
-          :paginator="false"
-          :rows="rowsPerPage"
-          :filters="filters"
-          responsive-layout="scroll"
-          v-can="'list users'"
-        >
-          <template #header>
-            <div class="flex flex-column md:flex-row md:justify-between md:align-items-center">
-              <h5 class="m-0 my-auto px-2">{{ $t('user.users') }}</h5>
 
-            </div>
-          </template>
-          <Column selection-mode="multiple" header-style="width: 3rem"></Column>
-          <Column field="name" :header='$t("user.name")' :sortable="true" header-style="width:14%; min-width:10rem;">
-            <template #body="slotProps">
-              {{ slotProps.data.name }}
-            </template>
-          </Column>
-          <Column field="email" :header='$t("user.email")' :sortable="true" header-style="width:14%; min-width:10rem;">
-            <template #body="slotProps">
-              {{ slotProps.data.email }}
-            </template>
-          </Column>
+        <Toast />
 
-          <Column field="phone" :header='$t("user.phone")' :sortable="true" header-style="width:14%; min-width:10rem;">
-            <template #body="slotProps">
-              {{ slotProps.data.phone }}
-            </template>
-          </Column>
-          <Column field="type_description" :header='$t("user.type")' :sortable="true" header-style="width:14%; min-width:10rem;">
-            <template #body="slotProps">
-              <Tag :value="slotProps.data.type_description"
-                     :severity="{
-                       'Admin': 'info',
-                       'Customer': 'success',
-                       'Guest': 'danger'
-                     }[slotProps.data.type_description] || 'warning'" />
+        <div class="card shadow-1 surface-0">
+          <DataTable
+            ref="dt"
+            :value="users"
+            :loading="loading"
+            data-key="id"
+            :paginator="false"
+            :rows="rowsPerPage"
+            :filters="filters"
+            :totalRecords="totalRecords"
+            responsive-layout="scroll"
+            stripedRows
+            showGridlines
+            class="p-datatable-sm"
+            v-can="'list users'"
+          >
+            <Column selection-mode="multiple" header-style="width: 3rem"></Column>
 
-            </template>
-          </Column>
-
-          <Column header-style="min-width:10rem;">
-            <template #body="slotProps">
-              <Button
-                v-can="'edit users'"
-                icon="pi pi-pencil"
-                class="p-button-rounded p-button-success mr-2"
-                @click="confirmDelete(slotProps.data.id)"
-              />
-              <Button
-               v-can="'delete users'"
-                icon="pi pi-trash"
-                class="delete mt-2"
-                @click="delet(slotProps.data.id)"
-              />
-            </template>
-          </Column>
-        </DataTable>
-
-        <!-- Custom Pagination -->
-        <div class="p-paginator p-component p-unselectable-text mt-3">
-          <div class="p-paginator-left-content">
-            <span class="p-paginator-current">Showing {{ from }} to {{ to }} of {{ totalRecords }} entries</span>
-          </div>
-          <div class="p-paginator-right-content">
-            <span class="p-paginator-pages">
-              <button
-                class="p-paginator-first p-paginator-element p-link"
-                :disabled="currentPage === 1"
-                @click="goToPage(1)"
-              >
-                <span class="p-paginator-icon pi pi-angle-double-left"></span>
-              </button>
-              <button
-                class="p-paginator-prev p-paginator-element p-link"
-                :disabled="!prevPageUrl"
-                @click="goToPage(currentPage - 1)"
-              >
-                <span class="p-paginator-icon pi pi-angle-left"></span>
-              </button>
-
-              <template v-for="(link, index) in links" :key="index">
-                <button
-                  v-if="link.label && !isNaN(link.label)"
-                  class="p-paginator-page p-paginator-element p-link"
-                  :class="{ 'p-highlight': link.active }"
-                  @click="goToPage(parseInt(link.label))"
-                >
-                  {{ link.label }}
-                </button>
-                <span v-else-if="link.label === '...'" class="p-paginator-dots">...</span>
+            <Column field="name" :header="t('user.name')" :sortable="true" header-style="width:14%; min-width:10rem;">
+              <template #body="slotProps">
+                {{ slotProps.data.name }}
               </template>
+            </Column>
 
-              <button
-                class="p-paginator-next p-paginator-element p-link"
-                :disabled="!nextPageUrl"
-                @click="goToPage(currentPage + 1)"
-              >
-                <span class="p-paginator-icon pi pi-angle-right"></span>
-              </button>
-              <button
-                class="p-paginator-last p-paginator-element p-link"
-                :disabled="currentPage === totalPages"
-                @click="goToPage(totalPages)"
-              >
-                <span class="p-paginator-icon pi pi-angle-double-right"></span>
-              </button>
-            </span>
+            <Column field="email" :header="t('user.email')" :sortable="true" header-style="width:14%; min-width:10rem;">
+              <template #body="slotProps">
+                {{ slotProps.data.email }}
+              </template>
+            </Column>
 
-            <span class="p-paginator-rpp-options">
-              <Dropdown
-                v-model="rowsPerPage"
-                :options="[5, 10, 20, 30]"
-                @change="changeRowsPerPage"
-                class="ml-2"
-                style="width: 100px"
-              />
-            </span>
+            <Column field="phone" :header="t('user.phone')" :sortable="true" header-style="width:14%; min-width:10rem;">
+              <template #body="slotProps">
+                {{ slotProps.data.phone }}
+              </template>
+            </Column>
+
+            <Column field="type_description" :header="t('user.type')" :sortable="true" header-style="width:14%; min-width:10rem;">
+              <template #body="slotProps">
+                <Tag
+                  :value="slotProps.data.type_description"
+                  :severity="{
+                    'Admin': 'info',
+                    'Customer': 'success',
+                    'Guest': 'danger'
+                  }[slotProps.data.type_description] || 'warning'"
+                />
+              </template>
+            </Column>
+
+            <Column :header="t('actions')" header-style="min-width:10rem;">
+              <template #body="slotProps">
+                <Button
+                  v-can="'edit users'"
+                  icon="pi pi-pencil"
+                  class="p-detail"
+                  @click="editUser(slotProps.data.id)"
+                  v-tooltip.top="t('edit')"
+                />
+                <Button
+                  v-can="'delete users'"
+                  icon="pi pi-trash mx-2"
+                  class="p-delete"
+                  @click="confirmDelete(slotProps.data.id)"
+                  v-tooltip.top="t('delete')"
+                />
+              </template>
+            </Column>
+
+            <template #empty>
+              <div class="text-center py-4">
+                <i class="pi pi-exclamation-circle text-2xl mb-2" />
+                <p class="text-xl">{{ t('user.noData') }}</p>
+              </div>
+            </template>
+
+            <template #loading>
+              <div class="flex justify-content-center align-items-center py-4">
+                <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="4" />
+              </div>
+            </template>
+          </DataTable>
+
+          <!-- Custom Pagination -->
+          <div class="p-paginator p-component p-unselectable-text mt-3">
+            <div class="p-paginator-left-content">
+              <span class="p-paginator-current">
+                {{ t('showing') }} {{ from }} {{ t('to') }} {{ to }} {{ t('of') }} {{ totalRecords }} {{ t('entries') }}
+              </span>
+            </div>
+            <div class="p-paginator-right-content">
+              <span class="p-paginator-pages">
+                <button
+                  class="p-paginator-first p-paginator-element p-link"
+                  :disabled="currentPage === 1"
+                  @click="goToPage(1)"
+                >
+                  <span class="p-paginator-icon pi pi-angle-double-left"></span>
+                </button>
+                <button
+                  class="p-paginator-prev p-paginator-element p-link"
+                  :disabled="!prevPageUrl"
+                  @click="goToPage(currentPage - 1)"
+                >
+                  <span class="p-paginator-icon pi pi-angle-left"></span>
+                </button>
+
+                <template v-for="(link, index) in links" :key="index">
+                  <button
+                    v-if="link.label && !isNaN(link.label)"
+                    class="p-paginator-page p-paginator-element p-link"
+                    :class="{ 'p-highlight': link.active }"
+                    @click="goToPage(parseInt(link.label))"
+                  >
+                    {{ link.label }}
+                  </button>
+                  <span v-else-if="link.label === '...'" class="p-paginator-dots">...</span>
+                </template>
+
+                <button
+                  class="p-paginator-next p-paginator-element p-link"
+                  :disabled="!nextPageUrl"
+                  @click="goToPage(currentPage + 1)"
+                >
+                  <span class="p-paginator-icon pi pi-angle-right"></span>
+                </button>
+                <button
+                  class="p-paginator-last p-paginator-element p-link"
+                  :disabled="currentPage === totalPages"
+                  @click="goToPage(totalPages)"
+                >
+                  <span class="p-paginator-icon pi pi-angle-double-right"></span>
+                </button>
+              </span>
+
+              <span class="p-paginator-rpp-options">
+                <Dropdown
+                  v-model="rowsPerPage"
+                  :options="[5, 10, 20, 30]"
+                  optionLabel="label"
+                  optionValue="value"
+                  @change="changeRowsPerPage"
+                  class="ml-2"
+                  style="width: 100px"
+                />
+              </span>
+            </div>
           </div>
         </div>
 
-        <Dialog v-model:visible="deleteProductsDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
+        <!-- Delete Confirmation Dialog -->
+        <Dialog
+          v-model:visible="deleteDialog"
+          :style="{ width: '450px' }"
+          :header="t('user.deleteConfirmTitle')"
+          :modal="true"
+        >
           <div class="flex align-items-center justify-content-center">
-            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"/>
-            <span v-if="product">Are you sure you want to delete the selected user?</span>
+            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem; color: var(--red-500)" />
+            <span>{{ t('user.deleteConfirmMessage') }}</span>
           </div>
           <template #footer>
-            <Button label="No" icon="pi pi-times" class="p-button-text" @click="deleteProductsDialog = false"/>
-            <Button label="Yes" icon="pi pi-check" class="p-button-text" @click="deleteSelectedProducts"/>
+            <Button
+              :label="t('no')"
+              icon="pi pi-times"
+              class="p-button-text"
+              @click="deleteDialog = false"
+            />
+            <Button
+              :label="t('yes')"
+              icon="pi pi-check"
+              class="p-button-text p-button-danger"
+              @click="deleteUser"
+            />
           </template>
         </Dialog>
-      </va-card>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped lang="scss">
-.new {
-  background: #3b82f6;
-  border: none;
-}
+:deep(.p-datatable) {
+  font-size: 0.9rem;
 
-.delete {
-  background: #ef4444;
-  border: none;
+  .p-datatable-thead > tr > th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+  }
+
+  .p-datatable-tbody > tr {
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: var(--surface-hover);
+    }
+  }
 }
 
 .p-paginator {
@@ -346,12 +375,12 @@ const confirmDelete = (id) => {
   align-items: center;
   justify-content: space-between;
   padding: 0.5rem;
-  background: #ffffff;
-  border: 1px solid #dee2e6;
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
   border-radius: 3px;
 
   .p-paginator-left-content {
-    color: #6c757d;
+    color: var(--text-color-secondary);
   }
 
   .p-paginator-right-content {
@@ -368,18 +397,18 @@ const confirmDelete = (id) => {
         height: 2.357rem;
         margin: 0.143rem;
         border: 0 none;
-        color: #6c757d;
+        color: var(--text-color-secondary);
         background: transparent;
         border-radius: 50%;
         transition: background-color 0.2s;
 
         &:hover {
-          background: #e9ecef;
+          background: var(--surface-hover);
         }
 
         &.p-highlight {
-          color: #ffffff;
-          background: #E28C3F;
+          color: var(--primary-color-text);
+          background: var(--primary-color);
         }
 
         &:disabled {
@@ -396,6 +425,27 @@ const confirmDelete = (id) => {
       display: flex;
       align-items: center;
       justify-content: center;
+      color: var(--text-color-secondary);
+    }
+  }
+}
+
+@media screen and (max-width: 960px) {
+  :deep(.p-datatable) {
+    overflow-x: auto;
+    display: block;
+  }
+
+  .p-paginator {
+    flex-direction: column;
+    gap: 1rem;
+
+    .p-paginator-left-content {
+      order: 2;
+    }
+
+    .p-paginator-right-content {
+      order: 1;
     }
   }
 }

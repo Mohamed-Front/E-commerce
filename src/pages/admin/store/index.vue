@@ -4,8 +4,11 @@ import { FilterMatchMode } from 'primevue/api'
 import { ref, onMounted, onBeforeMount, watch } from 'vue'
 import axios from "axios";
 import {useRouter} from "vue-router";
+import { useI18n } from 'vue-i18n';
+
 const router = useRouter()
 const toast = useToast()
+const { t } = useI18n()
 const loading = ref(true)
 const delete_id = ref('')
 const store = ref({})
@@ -45,7 +48,10 @@ const deleteSelectedStore = () => {
     .then(() => {
       fetchData()
       deleteStoresDialog.value = false
-      toast.add({severity: 'success', summary: 'Successful', detail: 'Store Deleted', life: 3000})
+      toast.add({severity: 'success', summary: t('success'), detail: t('store.deletedSuccess'), life: 3000})
+    })
+    .catch(() => {
+      toast.add({severity: 'error', summary: t('error'), detail: t('store.deleteError'), life: 3000})
     })
 }
 
@@ -81,6 +87,12 @@ const fetchData = () => {
     links.value = res.data.data.links
   }).catch(error => {
     loading.value = false
+    toast.add({
+      severity: 'error',
+      summary: t('error'),
+      detail: t('store.loadError'),
+      life: 3000
+    })
     console.error("Error fetching data:", error)
   })
 }
@@ -125,98 +137,125 @@ const formatDate = (dateString) => {
 <template>
   <div class="grid">
     <div class="col-12">
-      <va-card class="card">
+      <div class="card p-4 shadow-2 border-round">
         <Toolbar class="mb-4">
           <template #start>
-            <div class="my-2 ">
-              <Button v-can="'create stores'" label="New" icon="pi pi-plus" class="new mr-2" @click="openNew"/>
-            </div>
+            <h2 class="text-2xl font-bold">{{ t('store.managementTitle') }}</h2>
           </template>
+
           <template #end>
-            <div v-can="'list stores'" class="my-2 flex gap-2">
+            <div class="flex gap-2">
               <span class="p-input-icon-left">
-                <i class="pi pi-search"/>
-                <InputText v-model="searchQuery" placeholder="Search..." />
+                <i class="pi pi-search" />
+                <InputText v-model="searchQuery" :placeholder="t('store.search')" />
               </span>
-              <Button label="Export" icon="pi pi-upload" class="new" @click="exportCSV($event)"/>
+              <Button
+                :label="t('store.export')"
+                icon="pi pi-upload"
+                class="p-export"
+                v-can="'list stores'"
+                @click="exportCSV"
+              />
+              <Button
+                v-can="'create stores'"
+                :label="t('store.new')"
+                icon="pi pi-plus"
+                class="p-button-success"
+                @click="openNew"
+              />
             </div>
           </template>
         </Toolbar>
-        <Toast/>
-        <DataTable
-          ref="dt"
-          v-model:selection="selectedStores"
-          :value="stores"
-          :loading="loading"
-          data-key="id"
-          :paginator="false"
-          :rows="rowsPerPage"
-          :filters="filters"
-          responsive-layout="scroll"
-          v-can="'list stores'"
-        >
-          <template #header>
-            <div class="flex flex-column md:flex-row md:justify-between md:align-items-center">
-              <h5 class="m-0 my-auto px-2">Stores</h5>
+
+        <Toast />
+
+        <div class="card shadow-1 surface-0">
+          <DataTable
+            ref="dt"
+            :value="stores"
+            :loading="loading"
+            data-key="id"
+            :paginator="false"
+            :rows="rowsPerPage"
+            :filters="filters"
+            :totalRecords="totalRecords"
+            responsive-layout="scroll"
+            stripedRows
+            showGridlines
+            class="p-datatable-sm"
+            v-can="'list stores'"
+          >
+            <Column selection-mode="multiple" header-style="width: 3rem"></Column>
+
+            <Column field="name_en" :header="t('store.nameEn')" :sortable="true">
+              <template #body="slotProps">
+                {{ slotProps.data.name_en }}
+              </template>
+            </Column>
+
+            <Column field="name_ar" :header="t('store.nameAr')" :sortable="true">
+              <template #body="slotProps">
+                {{ slotProps.data.name_ar }}
+              </template>
+            </Column>
+
+            <Column field="is_default" :header="t('store.isDefault')" :sortable="true">
+              <template #body="slotProps">
+                <Tag
+                  :value="slotProps.data.is_default ? t('store.yes') : t('store.no')"
+                  :severity="slotProps.data.is_default ? 'success' : 'info'"
+                />
+              </template>
+            </Column>
+
+            <Column field="has_market" :header="t('store.hasMarket')" :sortable="true">
+              <template #body="slotProps">
+                <Tag
+                  :value="slotProps.data.has_market ? t('store.yes') : t('store.no')"
+                  :severity="slotProps.data.has_market ? 'success' : 'info'"
+                />
+              </template>
+            </Column>
+
+            <Column :header="t('actions')" headerStyle="width: 12rem">
+              <template #body="slotProps">
+                <Button
+                  v-can="'edit stores'"
+                  icon="pi pi-pencil"
+                  class="p-detail"
+                  @click="confirmEdit(slotProps.data.id)"
+                  v-tooltip.top="t('edit')"
+                />
+                <Button
+                  v-can="'delete stores'"
+                  icon="pi pi-trash"
+                  class="p-delete mx-2"
+                  @click="delet(slotProps.data.id)"
+                  v-tooltip.top="t('delete')"
+                />
+              </template>
+            </Column>
+
+            <template #empty>
+              <div class="text-center py-4">
+                <i class="pi pi-exclamation-circle text-2xl mb-2" />
+                <p class="text-xl">{{ t('store.noData') }}</p>
+              </div>
+            </template>
+
+            <template #loading>
+              <div class="flex justify-content-center align-items-center py-4">
+                <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="4" />
+              </div>
+            </template>
+          </DataTable>
+
+          <!-- Custom Pagination -->
+          <div class="p-paginator p-component p-unselectable-text p-paginator-bottom">
+            <div class="p-paginator-left-content">
+              <span class="p-paginator-current">{{ t('show') }} {{ from }} {{ t('to') }} {{ to }} {{ t('from') }} {{ totalRecords }}</span>
             </div>
-          </template>
-          <Column selection-mode="multiple" header-style="width: 3rem"></Column>
-
-          <Column field="name_en" header="Name (en)" :sortable="true" header-style="width:14%; min-width:10rem;">
-            <template #body="slotProps">
-              <span class="font-medium">{{ slotProps.data.name_en }}</span>
-            </template>
-          </Column>
-          <Column field="name_ar" header="Name (ar)" :sortable="true" header-style="width:14%; min-width:10rem;">
-            <template #body="slotProps">
-              <span class="font-medium">{{ slotProps.data.name_ar }}</span>
-            </template>
-          </Column>
-          <Column field="is_default" header="Default" :sortable="true" header-style="width:10%; min-width:8rem;">
-            <template #body="slotProps">
-              <Tag
-                :value="slotProps.data.is_default ? 'Yes' : 'No'"
-                :severity="slotProps.data.is_default ? 'success' : 'info'"
-              />
-            </template>
-          </Column>
-
-          <Column field="has_market" header="Has Market" :sortable="true" header-style="width:12%; min-width:8rem;">
-            <template #body="slotProps">
-              <Tag
-                :value="slotProps.data.has_market ? 'Yes' : 'No'"
-                :severity="slotProps.data.has_market ? 'success' : 'info'"
-              />
-            </template>
-          </Column>
-
-
-
-          <Column header-style="min-width:10rem;">
-            <template #body="slotProps">
-              <Button
-                v-can="'edit stores'"
-                icon="pi pi-pencil"
-                class="p-button-rounded p-button-success mr-2"
-                @click="confirmEdit(slotProps.data.id)"
-              />
-              <Button
-                v-can="'delete stores'"
-                icon="pi pi-trash"
-                class="delete mt-2"
-                @click="delet(slotProps.data.id)"
-              />
-            </template>
-          </Column>
-        </DataTable>
-
-        <!-- Custom Pagination -->
-        <div class="p-paginator p-component p-unselectable-text mt-3">
-          <div class="p-paginator-left-content">
-            <span class="p-paginator-current">Showing {{ from }} to {{ to }} of {{ totalRecords }} entries</span>
-          </div>
-          <div class="p-paginator-right-content">
-            <span class="p-paginator-pages">
+            <div class="p-paginator-right-content">
               <button
                 class="p-paginator-first p-paginator-element p-link"
                 :disabled="currentPage === 1"
@@ -258,112 +297,77 @@ const formatDate = (dateString) => {
               >
                 <span class="p-paginator-icon pi pi-angle-double-right"></span>
               </button>
-            </span>
 
-            <span class="p-paginator-rpp-options">
               <Dropdown
                 v-model="rowsPerPage"
                 :options="[5, 10, 20, 30]"
+                optionLabel=""
                 @change="changeRowsPerPage"
                 class="ml-2"
-                style="width: 100px"
+                style="width: 80px"
               />
-            </span>
+            </div>
           </div>
         </div>
 
-        <Dialog v-model:visible="deleteStoresDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
+        <Dialog
+          v-model:visible="deleteStoresDialog"
+          :style="{ width: '450px' }"
+          :header="t('store.deleteConfirmTitle')"
+          :modal="true"
+        >
           <div class="flex align-items-center justify-content-center">
-            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"/>
-            <span v-if="store">Are you sure you want to delete the selected store?</span>
+            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem; color: var(--red-500)" />
+            <span>{{ t('store.deleteConfirmMessage') }}</span>
           </div>
           <template #footer>
-            <Button label="No" icon="pi pi-times" class="p-button-text" @click="deleteStoresDialog = false"/>
-            <Button label="Yes" icon="pi pi-check" class="p-button-text" @click="deleteSelectedStore"/>
+            <Button
+              :label="t('no')"
+              icon="pi pi-times"
+              class="p-button-text"
+              @click="deleteStoresDialog = false"
+            />
+            <Button
+              :label="t('yes')"
+              icon="pi pi-check"
+              class="p-button-text p-button-danger"
+              @click="deleteSelectedStore"
+            />
           </template>
         </Dialog>
-      </va-card>
+      </div>
     </div>
   </div>
 </template>
 
+
 <style scoped lang="scss">
-.new {
-  background: #3b82f6;
-  border: none;
+/* Custom styles for better table display */
+:deep(.p-datatable) {
+  font-size: 0.9rem;
 }
 
-.delete {
-  background: #ef4444;
-  border: none;
+:deep(.p-datatable .p-datatable-thead > tr > th) {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
 }
 
-.p-paginator {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.5rem;
-  background: #ffffff;
-  border: 1px solid #dee2e6;
-  border-radius: 3px;
-
-  .p-paginator-left-content {
-    color: #6c757d;
-  }
-
-  .p-paginator-right-content {
-    display: flex;
-    align-items: center;
-
-    .p-paginator-pages {
-      display: flex;
-      margin: 0 0.5rem;
-
-      button {
-        text-align: center;
-        min-width: 2.357rem;
-        height: 2.357rem;
-        margin: 0.143rem;
-        border: 0 none;
-        color: #6c757d;
-        background: transparent;
-        border-radius: 50%;
-        transition: background-color 0.2s;
-
-        &:hover {
-          background: #e9ecef;
-        }
-
-        &.p-highlight {
-          color: #ffffff;
-          background: #E28C3F;
-        }
-
-        &:disabled {
-          opacity: 0.5;
-          cursor: default;
-        }
-      }
-    }
-
-    .p-paginator-dots {
-      min-width: 2.357rem;
-      height: 2.357rem;
-      margin: 0.143rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-  }
+:deep(.p-datatable .p-datatable-tbody > tr) {
+  transition: background-color 0.2s;
 }
 
-// Tag styling
-.p-tag {
-  &.p-tag-success {
-    background: #10B981;
-  }
-  &.p-tag-info {
-    background: #3B82F6;
+:deep(.p-datatable .p-datatable-tbody > tr:hover) {
+  background-color: var(--hoverColor);
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 960px) {
+  :deep(.p-datatable) {
+    overflow-x: auto;
+    display: block;
   }
 }
 </style>
+

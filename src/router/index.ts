@@ -145,6 +145,33 @@ const routes: Array<RouteRecordRaw> = [
             path: 'coupon',
             component: () => import('../pages/admin/products/coupon/index.vue'),
           },
+           {
+            name: 'coupon-create',
+            path: 'coupon-create',
+            component: () => import('../pages/admin/products/coupon/create.vue'),
+          },
+           {
+            name: 'coupon-update',
+            path: 'coupon-update/:id',
+            component: () => import('../pages/admin/products/coupon/update.vue'),
+          },
+
+           {
+            name: 'category',
+            path: 'category',
+            component: () => import('../pages/admin/products/category/index.vue'),
+          },
+           {
+            name: 'category-create',
+            path: 'category-create',
+            component: () => import('../pages/admin/products/category/create.vue'),
+          },
+            {
+            name: 'category-update',
+            path: 'category-update/:id',
+            component: () => import('../pages/admin/products/category/update.vue'),
+          },
+
 
         ],
       },
@@ -179,9 +206,19 @@ const routes: Array<RouteRecordRaw> = [
         // component: RouteViewComponent,
         children: [
           {
-            name: 'pages',
-            path: 'pages',
-            component: () => import('../pages/admin/settings/pages/index.vue'),
+            name: 'address',
+            path: 'address',
+            component: () => import('../pages/admin/settings/address/index.vue'),
+          },
+           {
+            name: 'address-create',
+            path: 'address-create',
+            component: () => import('../pages/admin/settings/address/create.vue'),
+          },
+           {
+            name: 'address-update',
+            path: 'address-update/:id',
+            component: () => import('../pages/admin/settings/address/update.vue'),
           },
 
         ],

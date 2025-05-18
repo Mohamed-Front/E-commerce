@@ -97,7 +97,7 @@ const createNewCoupon = () => {
 }
 
 const editCoupon = (id) => {
-  router.push({ name: 'coupon-edit', params: { id } })
+  router.push({ name: 'coupon-update', params: { id } })
 }
 
 // Get discount type severity
@@ -135,6 +135,7 @@ onMounted(() => {
                 :label="t('coupon.export')"
                 icon="pi pi-upload"
                 class="p-export"
+                 v-can="'list coupons'"
                 @click="exportCSV"
               />
               <Button
