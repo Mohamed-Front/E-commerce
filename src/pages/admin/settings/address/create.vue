@@ -17,7 +17,7 @@ const addressData = ref({});
 const fetchUsers =()=>{
   axios.get('api/user').then((res)=>{
     users.value=res.data.data.data
-    fetchAddress()
+
   })
 }
 // Submit form

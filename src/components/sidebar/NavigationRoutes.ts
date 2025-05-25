@@ -67,6 +67,14 @@ export default {
       disabled: true,
       children: [
         {
+          name: 'product',
+          displayName: 'navigation.product',
+          show: 'list product',
+          meta: {
+            icon: 'product'
+          }
+        },
+        {
           name: 'brand',
           displayName: 'navigation.brands',
           show: 'list brands',
@@ -128,6 +136,14 @@ export default {
       },
       disabled: true,
       children: [
+        {
+          name: 'attributes',
+          displayName: 'navigation.attributes',
+          show: 'list attributes',
+          meta: {
+            icon: 'settings'
+          }
+        },
         {
           name: 'address',
           displayName: 'navigation.addresses',

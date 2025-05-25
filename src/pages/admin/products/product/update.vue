@@ -3,9 +3,10 @@ import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { useToast } from 'primevue/usetoast';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
+const route = useRoute();
 const toast = useToast();
 const { t } = useI18n();
 const form = ref();
@@ -18,7 +19,6 @@ const categories = ref([]);
 const brands = ref([]);
 const attributes = ref([]);
 const hasVariants = ref(false);
-const isDisplayed = ref(true); // New toggle for is_displayed
 
 // Language handling
 const currentLanguage = computed(() => localStorage.getItem('appLang') || 'en');
@@ -37,9 +37,9 @@ const productData = ref({
   description_en: '',
   description_ar: '',
   base_price: null,
-  cost_price: null, // New cost_price field
-  tax: null, // New tax field
-  is_displayed: true, // New is_displayed field
+  cost_price: null,
+  tax: 0,
+  is_displayed: true,
   variants: []
 });
 
@@ -53,6 +53,48 @@ const formattedAttributes = computed(() => {
     }))
   }));
 });
+
+// Fetch product data
+const fetchProduct = async () => {
+  try {
+    const response = await axios.get(`/api/product/${route.params.id}`);
+    const data = response.data.data;
+
+    // Map the API response to our form structure
+    productData.value = {
+      store_id: data.store_id,
+      category_id: data.category_id,
+      brand_id: data.brand_id,
+      name_en: data.name_en,
+      name_ar: data.name_ar,
+      sub_name_en: data.sub_name_en || '',
+      sub_name_ar: data.sub_name_ar || '',
+      description_en: data.description_en || '',
+      description_ar: data.description_ar || '',
+      base_price: data.base_price || null,
+      cost_price: data.cost_price || null,
+      tax: data.tax || 0,
+      is_displayed: data.is_displayed === 1,
+      variants: data.variants.map(variant => ({
+        id: variant.id,
+        sku_en: variant.sku_en,
+        sku_ar: variant.sku_ar,
+        price: variant.price,
+        cost_price: variant.cost_price || null,
+        attribute_value_ids: variant.attribute_values.map(av => av.id)
+      })) || []
+    };
+
+    hasVariants.value = data.has_variants;
+
+    // Set image preview if available
+    if (data.media && data.media.length > 0) {
+      imagePreview.value = data.media[0].url;
+    }
+  } catch (error) {
+    toast.add({ severity: 'error', summary: t('error'), detail: t('error.productLoad'), life: 3000 });
+  }
+};
 
 // Fetch data for dropdowns
 const fetchStores = async () => {
@@ -96,6 +138,7 @@ onMounted(() => {
   fetchCategories();
   fetchBrands();
   fetchAttributes();
+  fetchProduct();
 });
 
 // Handle drag events
@@ -144,14 +187,14 @@ const removeImage = () => {
 const toggleVariants = () => {
   hasVariants.value = !hasVariants.value;
   if (hasVariants.value && !productData.value.variants.length) {
-    productData.value.variants.push({ sku_ar: '', sku_en: '', price: '', attribute_value_ids: [] });
+    productData.value.variants.push({ sku_ar: '', sku_en: '', price: '', cost_price: null, attribute_value_ids: [] });
   } else if (!hasVariants.value) {
     productData.value.variants = [];
   }
 };
 
 const addVariant = () => {
-  productData.value.variants.push({ sku_ar: '', sku_en: '', price: '', attribute_value_ids: [] });
+  productData.value.variants.push({ sku_ar: '', sku_en: '', price: '', cost_price: null, attribute_value_ids: [] });
 };
 
 const removeVariant = (index) => {
@@ -172,14 +215,14 @@ const submitForm = async () => {
     return;
   }
 
-  // Validate variants or base_price/cost_price
+  // Validate variants or base_price
   if (hasVariants.value) {
-    if (productData.value.variants.some(v => !v.sku_en || !v.sku_ar || !v.price || !v.attribute_value_ids.length)) {
+    if (productData.value.variants.some(v => !v.sku_en || !v.sku_ar || !v.price || !v.attribute_value_ids?.length)) {
       toast.add({ severity: 'error', summary: t('error'), detail: t('validation.variantRequiredFields'), life: 3000 });
       return;
     }
-  } else if (!productData.value.base_price || !productData.value.cost_price) {
-    toast.add({ severity: 'error', summary: t('error'), detail: t('validation.baseAndCostPriceRequired'), life: 3000 });
+  } else if (!productData.value.base_price) {
+    toast.add({ severity: 'error', summary: t('error'), detail: t('validation.basePriceRequired'), life: 3000 });
     return;
   }
 
@@ -194,14 +237,14 @@ const submitForm = async () => {
   formData.append('sub_name_ar', productData.value.sub_name_ar || '');
   formData.append('description_en', productData.value.description_en || '');
   formData.append('description_ar', productData.value.description_ar || '');
-  formData.append('tax', productData.value.tax || 0); // Append tax
-  formData.append('is_displayed', productData.value.is_displayed ? 1 : 0); // Append is_displayed
+  formData.append('tax', productData.value.tax);
+  formData.append('is_displayed', productData.value.is_displayed ? 1 : 0);
 
   if (hasVariants.value) {
     formData.append('variants', JSON.stringify(productData.value.variants));
   } else {
     formData.append('base_price', productData.value.base_price);
-    formData.append('cost_price', productData.value.cost_price); // Append cost_price
+    formData.append('cost_price', productData.value.cost_price || 0);
   }
 
   if (imageFile.value) {
@@ -209,11 +252,11 @@ const submitForm = async () => {
   }
 
   try {
-    await axios.post('/api/product', formData);
+    await axios.post(`/api/product/${route.params.id}`, formData);
     router.push({ name: 'product' });
-    toast.add({ severity: 'success', summary: t('success'), detail: t('product.createSuccess'), life: 3000 });
+    toast.add({ severity: 'success', summary: t('success'), detail: t('product.updateSuccess'), life: 3000 });
   } catch (error) {
-    toast.add({ severity: 'error', summary: t('error'), detail: error.response?.data?.message || t('error.createError'), life: 3000 });
+    toast.add({ severity: 'error', summary: t('error'), detail: error.response?.data?.message || t('error.updateError'), life: 3000 });
   } finally {
     loading.value = false;
   }
@@ -221,11 +264,11 @@ const submitForm = async () => {
 </script>
 
 <template>
-  <div v-can="'create products'" class="max-w-5xl p-6 mx-auto bg-white shadow-lg rounded-xl" :dir="isRTL ? 'rtl' : 'ltr'">
-    <h1 class="mb-8 text-3xl font-bold text-center text-gray-800">{{ t('product.createTitle') }}</h1>
+  <div v-can="'update product inventories'" class="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow-lg" :dir="isRTL ? 'rtl' : 'ltr'">
+    <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">{{ t('product.updateTitle') }}</h1>
 
     <form @submit.prevent="submitForm" class="space-y-6">
-      <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Store Selection -->
         <div class="space-y-2">
           <label for="store_id" class="block text-sm font-medium text-gray-700">
@@ -279,7 +322,7 @@ const submitForm = async () => {
           <InputText
             id="name_en"
             v-model="productData.name_en"
-            class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           />
         </div>
 
@@ -292,7 +335,7 @@ const submitForm = async () => {
             id="name_ar"
             v-model="productData.name_ar"
             dir="rtl"
-            class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           />
         </div>
 
@@ -304,7 +347,7 @@ const submitForm = async () => {
           <InputText
             id="sub_name_en"
             v-model="productData.sub_name_en"
-            class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           />
         </div>
 
@@ -317,12 +360,12 @@ const submitForm = async () => {
             id="sub_name_ar"
             v-model="productData.sub_name_ar"
             dir="rtl"
-            class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           />
         </div>
 
         <!-- English Description -->
-        <div class="space-y-2 md:col-span-2">
+        <div class="md:col-span-2 space-y-2">
           <label for="description_en" class="block text-sm font-medium text-gray-700">
             {{ t('product.descriptionEn') }}
           </label>
@@ -330,12 +373,12 @@ const submitForm = async () => {
             id="description_en"
             v-model="productData.description_en"
             rows="4"
-            class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           />
         </div>
 
         <!-- Arabic Description -->
-        <div class="space-y-2 md:col-span-2">
+        <div class="md:col-span-2 space-y-2">
           <label for="description_ar" class="block text-sm font-medium text-gray-700">
             {{ t('product.descriptionAr') }}
           </label>
@@ -344,66 +387,68 @@ const submitForm = async () => {
             v-model="productData.description_ar"
             rows="4"
             dir="rtl"
-            class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-
-        <!-- Base Price (when no variants) -->
-        <div v-if="!hasVariants" class="space-y-2">
-          <label for="base_price" class="block text-sm font-medium text-gray-700">
-            {{ t('product.basePrice') }} <span class="text-red-500">*</span>
-          </label>
-          <InputNumber
-            id="base_price"
-            v-model="productData.base_price"
-            mode="decimal"
-            :minFractionDigits="2"
-            class="w-full"
-          />
-        </div>
-
-        <!-- Cost Price (when no variants) -->
-        <div v-if="!hasVariants" class="space-y-2">
-          <label for="cost_price" class="block text-sm font-medium text-gray-700">
-            {{ t('product.costPrice') }} <span class="text-red-500">*</span>
-          </label>
-          <InputNumber
-            id="cost_price"
-            v-model="productData.cost_price"
-            mode="decimal"
-            :minFractionDigits="2"
-            class="w-full"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           />
         </div>
 
         <!-- Tax -->
         <div class="space-y-2">
           <label for="tax" class="block text-sm font-medium text-gray-700">
-            {{ t('product.tax') }}
+            {{ t('product.tax') }} (%)
           </label>
           <InputNumber
             id="tax"
             v-model="productData.tax"
             mode="decimal"
+            :min="0"
+            :max="100"
             :minFractionDigits="2"
             class="w-full"
           />
         </div>
 
-        <!-- Is Displayed Toggle -->
+        <!-- Display Status -->
         <div class="space-y-2">
-          <Checkbox
-            v-model="productData.is_displayed"
-            inputId="isDisplayed"
-            :binary="true"
-          />
-          <label for="isDisplayed" class="ml-2 text-sm font-medium text-gray-700">
-            {{ t('product.isDisplayed') }}
+          <label for="is_displayed" class="block text-sm font-medium text-gray-700">
+            {{ t('product.displayStatus') }}
           </label>
+          <InputSwitch
+            id="is_displayed"
+            v-model="productData.is_displayed"
+          />
         </div>
 
+        <!-- Base Price and Cost Price (when no variants) -->
+        <template v-if="!hasVariants">
+          <div class="space-y-2">
+            <label for="base_price" class="block text-sm font-medium text-gray-700">
+              {{ t('product.basePrice') }} <span class="text-red-500">*</span>
+            </label>
+            <InputNumber
+              id="base_price"
+              v-model="productData.base_price"
+              mode="decimal"
+              :minFractionDigits="2"
+              class="w-full"
+            />
+          </div>
+
+          <div class="space-y-2">
+            <label for="cost_price" class="block text-sm font-medium text-gray-700">
+              {{ t('product.costPrice') }}
+            </label>
+            <InputNumber
+              id="cost_price"
+              v-model="productData.cost_price"
+              mode="decimal"
+              :minFractionDigits="2"
+              class="w-full"
+            />
+          </div>
+        </template>
+
         <!-- Variants Toggle -->
-        <div class="space-y-2 md:col-span-2">
+        <div class="md:col-span-2 space-y-2">
           <Checkbox
             v-model="hasVariants"
             inputId="hasVariants"
@@ -416,10 +461,10 @@ const submitForm = async () => {
         </div>
 
         <!-- Variants -->
-        <div v-if="hasVariants" class="space-y-4 md:col-span-2">
+        <div v-if="hasVariants" class="md:col-span-2 space-y-4">
           <label class="block text-sm font-medium text-gray-700">{{ t('product.variants') }}</label>
-          <div v-for="(variant, index) in productData.variants" :key="index" class="p-4 space-y-4 border rounded-lg">
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div v-for="(variant, index) in productData.variants" :key="index" class="p-4 border rounded-lg space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <!-- SKU English -->
               <div class="space-y-2">
                 <label :for="'sku_en_' + index" class="block text-sm font-medium text-gray-700">
@@ -428,7 +473,7 @@ const submitForm = async () => {
                 <InputText
                   :id="'sku_en_' + index"
                   v-model="variant.sku_en"
-                  class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                 />
               </div>
 
@@ -441,7 +486,7 @@ const submitForm = async () => {
                   :id="'sku_ar_' + index"
                   v-model="variant.sku_ar"
                   dir="rtl"
-                  class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                 />
               </div>
 
@@ -453,6 +498,20 @@ const submitForm = async () => {
                 <InputNumber
                   :id="'price_' + index"
                   v-model="variant.price"
+                  mode="decimal"
+                  :minFractionDigits="2"
+                  class="w-full"
+                />
+              </div>
+
+              <!-- Cost Price -->
+              <div class="space-y-2">
+                <label :for="'cost_price_' + index" class="block text-sm font-medium text-gray-700">
+                  {{ t('product.costPrice') }}
+                </label>
+                <InputNumber
+                  :id="'cost_price_' + index"
+                  v-model="variant.cost_price"
                   mode="decimal"
                   :minFractionDigits="2"
                   class="w-full"
@@ -494,7 +553,7 @@ const submitForm = async () => {
         </div>
 
         <!-- Image Upload -->
-        <div class="space-y-2 md:col-span-2">
+        <div class="md:col-span-2 space-y-2">
           <label class="block text-sm font-medium text-gray-700">{{ t('product.image') }}</label>
           <div class="flex justify-center">
             <label
@@ -502,7 +561,7 @@ const submitForm = async () => {
               @dragleave="handleDragLeave"
               @drop.prevent="onImageUpload"
               :class="{'border-blue-500 bg-blue-50': isDragging, 'border-gray-300': !isDragging}"
-              class="w-full max-w-md transition-colors duration-300 border-2 border-dashed cursor-pointer rounded-xl"
+              class="cursor-pointer w-full max-w-md rounded-xl border-2 border-dashed transition-colors duration-300"
             >
               <input type="file" @change="onImageUpload" accept="image/*" class="hidden">
               <div v-if="imagePreview" class="p-4">
@@ -510,36 +569,36 @@ const submitForm = async () => {
                   <img
                     :src="imagePreview"
                     alt="Preview"
-                    class="object-contain w-full h-64 transition-transform duration-300 rounded-lg shadow-md group-hover:scale-105"
+                    class="w-full h-64 object-contain rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"
                   />
-                  <div class="absolute inset-0 flex items-center justify-center transition-all duration-300 bg-black bg-opacity-0 rounded-lg group-hover:bg-opacity-30">
-                    <div class="space-x-3 transition-all duration-300 transform translate-y-4 opacity-0 group-hover:opacity-100 group-hover:translate-y-0">
+                  <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
+                    <div class="opacity-0 group-hover:opacity-100 space-x-3 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
                       <button
                         type="button"
                         @click.stop="removeImage"
-                        class="p-2 text-white transition bg-red-500 rounded-full hover:bg-red-600"
+                        class="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
                         :title="t('product.deleteImage')"
                       >
-                        <i class="text-sm pi pi-trash"></i>
+                        <i class="pi pi-trash text-sm"></i>
                       </button>
                       <button
                         type="button"
-                        class="p-2 text-gray-700 transition bg-white rounded-full hover:bg-gray-100"
+                        class="bg-white text-gray-700 p-2 rounded-full hover:bg-gray-100 transition"
                         :title="t('product.editImage')"
                       >
-                        <i class="text-sm pi pi-pencil"></i>
+                        <i class="pi pi-pencil text-sm"></i>
                       </button>
                     </div>
                   </div>
                 </div>
-                <p class="mt-2 text-sm text-center text-gray-500">{{ t('product.changeImage') }}</p>
+                <p class="mt-2 text-center text-sm text-gray-500">{{ t('product.changeImage') }}</p>
               </div>
-              <div v-else class="flex flex-col items-center justify-center p-8">
-                <div class="p-4 mb-4 bg-blue-100 rounded-full">
-                  <i class="text-2xl text-blue-500 pi pi-image"></i>
+              <div v-else class="p-8 flex flex-col items-center justify-center">
+                <div class="bg-blue-100 p-4 rounded-full mb-4">
+                  <i class="pi pi-image text-blue-500 text-2xl"></i>
                 </div>
-                <p class="mb-1 text-sm text-center text-gray-600">
-                  <span class="font-medium text-blue-500">{{ t('product.uploadClick') }}</span> {{ t('product.uploadDrag') }}
+                <p class="text-sm text-center text-gray-600 mb-1">
+                  <span class="text-blue-500 font-medium">{{ t('product.uploadClick') }}</span> {{ t('product.uploadDrag') }}
                 </p>
                 <p class="text-xs text-gray-400">{{ t('product.imageFormat') }}</p>
               </div>
@@ -549,24 +608,24 @@ const submitForm = async () => {
       </div>
 
       <!-- Submit Button -->
-      <div class="flex justify-center pt-4 space-x-4">
+      <div class="pt-4 flex justify-center space-x-4">
         <Button
           type="button"
           :label="t('product.cancelButton')"
           icon="pi pi-times"
           @click="router.go(-1)"
-          class="flex items-center justify-center px-6 py-3 mx-2 space-x-2 text-gray-700 transition-all duration-300 bg-gray-200 rounded-lg shadow-md hover:bg-gray-300 hover:shadow-lg"
+          class="px-6 py-3 mx-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
           :disabled="loading"
         />
         <Button
           type="submit"
-          :label="t('product.createButton')"
-          icon="pi pi-plus"
+          :label="t('product.updateButton')"
+          icon="pi pi-check"
           :loading="loading"
-          class="flex items-center justify-center px-8 py-3 mx-2 space-x-2 text-white transition-all duration-300 rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 hover:shadow-lg"
+          class="px-8 mx-2 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
           :disabled="loading"
         >
-          <span v-if="!loading">{{ t('product.createButton') }}</span>
+          <span v-if="!loading">{{ t('product.updateButton') }}</span>
           <i v-else class="pi pi-spinner pi-spin"></i>
         </Button>
       </div>

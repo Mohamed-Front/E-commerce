@@ -109,6 +109,22 @@ const routes: Array<RouteRecordRaw> = [
         path: 'products',
         // component: RouteViewComponent,
         children: [
+
+          {
+            name: 'product',
+            path: 'product',
+            component: () => import('../pages/admin/products/product/index.vue'),
+          },
+          {
+            name: 'product-create',
+            path: 'product-create',
+            component: () => import('../pages/admin/products/product/create.vue'),
+          },
+  {
+            name: 'product-update',
+            path: 'product-update/:id',
+            component: () => import('../pages/admin/products/product/update.vue'),
+          },
           {
             name: 'brand',
             path: 'brand',
@@ -206,6 +222,21 @@ const routes: Array<RouteRecordRaw> = [
         // component: RouteViewComponent,
         children: [
           {
+            name: 'attributes',
+            path: 'attributes',
+            component: () => import('../pages/admin/settings/Attributes/index.vue'),
+          },
+          {
+            name: 'attribute-create',
+            path: 'attribute-create',
+            component: () => import('../pages/admin/settings/Attributes/create.vue'),
+          },
+          {
+            name: 'attribute-update',
+            path: 'attribute-update/:id',
+            component: () => import('../pages/admin/settings/Attributes/update.vue'),
+          },
+          {
             name: 'address',
             path: 'address',
             component: () => import('../pages/admin/settings/address/index.vue'),
@@ -219,6 +250,22 @@ const routes: Array<RouteRecordRaw> = [
             name: 'address-update',
             path: 'address-update/:id',
             component: () => import('../pages/admin/settings/address/update.vue'),
+          },
+
+            {
+            name: 'discount',
+            path: 'discount',
+            component: () => import('../pages/admin/settings/discount/index.vue'),
+          },
+           {
+            name: 'discount-create',
+            path: 'discount-create',
+            component: () => import('../pages/admin/settings/discount/create.vue'),
+          },
+           {
+            name: 'discount-update',
+            path: 'discount-update/:id',
+            component: () => import('../pages/admin/settings/discount/update.vue'),
           },
 
         ],

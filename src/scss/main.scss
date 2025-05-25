@@ -48,6 +48,9 @@ pre {
   border-color: #E28C3F !important;
   color: #fff;
 }
+.paginatorwrapper{
+  direction: rtl !important;
+}
 .p-export{
   background-color: #0b3baa !important;
   border-color: #0b3baa !important;
@@ -65,6 +68,7 @@ pre {
 }
 .va-sidebar__menu{
   background-color: #f8f4ec !important;
+  height: 100% !important;
 
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }

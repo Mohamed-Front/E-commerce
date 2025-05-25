@@ -9,6 +9,8 @@ export default {
   dashboard:"لوحة القيادة",
     "cancel": "إلغاء",
     "navigation": {
+      "attributes":"الخصائص",
+    "product":" جميع المنتجات",
     "home": "الرئيسية",
     "dashboard": "لوحة التحكم",
     "users_management": "إدارة المستخدمين",
@@ -55,6 +57,24 @@ export default {
 
 
 
+  },
+  "common": {
+    "id": "المعرف",
+    "name": "الاسم",
+    "description": "الوصف",
+    "actions": "الإجراءات",
+    "refresh": "تحديث",
+    "cancel": "إلغاء",
+    "save": "حفظ"
+  },
+  "permissions": {
+    "management": "إدارة الصلاحيات",
+    "subtitle": "عرض وإدارة جميع صلاحيات النظام مجمعة حسب الوحدات",
+    "noDescription": "لا يوجد وصف",
+    "noPermissionsFound": "لم يتم العثور على صلاحيات في هذه المجموعة",
+    "updateDescription": "تحديث وصف الصلاحية",
+    "permissionName": "اسم الصلاحية",
+    "enterDescription": "أدخل وصف الصلاحية..."
   },
   role:{
     manage_Roles:"إدارة الأدوار",
@@ -341,5 +361,58 @@ export default {
   "success": "نجاح",
   "show": "عرض",
   "to": "إلى",
-  "from": "من"
+  "from": "من",
+  "product": {
+    "managementTitle": "إدارة المنتجات",
+    "search": "بحث في المنتجات...",
+    "export": "تصدير",
+    "new": "منتج جديد",
+    "nameAr": "الاسم (بالعربية)",
+    "nameEn": "الاسم (بالإنجليزية)",
+    "basePrice": "السعر الأساسي",
+    "isDisplayed": "حالة العرض",
+    "noData": "لا توجد منتجات",
+    "loadError": "فشل تحميل المنتجات",
+    "deleteSuccess": "تم حذف المنتج بنجاح",
+    "deleteError": "فشل حذف المنتج",
+    "deleteConfirmTitle": "تأكيد الحذف",
+    "deleteConfirmMessage": "هل أنت متأكد أنك تريد حذف هذا المنتج؟",
+    "yes": "نعم",
+    "no": "لا",
+    "show": "عرض",
+    "to": "إلى",
+    "from": "من",
+    "actions": "الإجراءات",
+    "edit": "تعديل",
+    "delete": "حذف"
+  },
+  "attribute": {
+    "managementTitle": "إدارة الخصائص",
+    "search": "بحث في الخصائص...",
+    "export": "تصدير",
+    "new": "خاصية جديدة",
+    "nameEn": "الاسم (الإنجليزية)",
+    "nameAr": "الاسم (العربية)",
+    "values": "القيم",
+    "valueEn": "القيمة (الإنجليزية)",
+    "valueAr": "القيمة (العربية)",
+    "noData": "لا توجد خصائص",
+    "loadError": "خطأ في تحميل الخصائص",
+    "deleteSuccess": "تم حذف الخاصية بنجاح",
+    "deleteError": "خطأ في حذف الخاصية",
+    "deleteConfirmTitle": "تأكيد الحذف",
+    "deleteConfirmMessage": "هل أنت متأكد أنك تريد حذف هذه الخاصية؟",
+    "createTitle": "إنشاء خاصية جديدة",
+    "createButton": "إنشاء خاصية",
+    "cancelButton": "إلغاء",
+    "createSuccess": "تم إنشاء الخاصية بنجاح",
+    "updateTitle": "تحديث الخاصية",
+    "updateButton": "تحديث الخاصية",
+    "updateSuccess": "تم تحديث الخاصية بنجاح",
+    "updateError": "خطأ في تحديث الخاصية",
+    "addValue": "إضافة قيمة",
+    "removeValue": "حذف قيمة",
+    "minOneValue": "مطلوب قيمة واحدة على الأقل",
+    "valueRequired": "يجب ملء جميع القيم باللغتين"
+  }
 };

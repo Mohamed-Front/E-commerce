@@ -1,4 +1,3 @@
-import Password from "primevue/password";
 export default {
   Permissions: "Permissions",
   users: "Users",
@@ -9,6 +8,8 @@ export default {
   products:"Products",
    "cancel": "Cancel",
    "navigation": {
+     "attributes":"Attributes",
+     "product":"All Products",
     "home": "Home",
     "dashboard": "Dashboard",
     "users_management": "User Management",
@@ -49,6 +50,24 @@ export default {
      click_or_drag_to_change_photo:"Click or drag to change photo",
 
 
+  },
+  "common": {
+    "id": "ID",
+    "name": "Name",
+    "description": "Description",
+    "actions": "Actions",
+    "refresh": "Refresh",
+    "cancel": "Cancel",
+    "save": "Save"
+  },
+  "permissions": {
+    "management": "Permissions Management",
+    "subtitle": "View and manage all system permissions grouped by modules",
+    "noDescription": "No description",
+    "noPermissionsFound": "No permissions found in this group",
+    "updateDescription": "Update Permission Description",
+    "permissionName": "Permission Name",
+    "enterDescription": "Enter permission description..."
   },
   role:{
 
@@ -340,5 +359,58 @@ brand:{
   "success": "Success",
   "show": "Showing",
   "to": "to",
-  "from": "of"
+  "from": "of",
+  "product": {
+    "managementTitle": "Products Management",
+    "search": "Search products...",
+    "export": "Export",
+    "new": "New Product",
+    "nameAr": "Name (Arabic)",
+    "nameEn": "Name (English)",
+    "basePrice": "Base Price",
+    "isDisplayed": "Display Status",
+    "noData": "No products found",
+    "loadError": "Failed to load products",
+    "deleteSuccess": "Product deleted successfully",
+    "deleteError": "Failed to delete product",
+    "deleteConfirmTitle": "Confirm Delete",
+    "deleteConfirmMessage": "Are you sure you want to delete this product?",
+    "yes": "Yes",
+    "no": "No",
+    "show": "Showing",
+    "to": "to",
+    "from": "of",
+    "actions": "Actions",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "attribute": {
+    "managementTitle": "Attributes Management",
+    "search": "Search attributes...",
+    "export": "Export",
+    "new": "New Attribute",
+    "nameEn": "Name (English)",
+    "nameAr": "Name (Arabic)",
+    "values": "Values",
+    "valueEn": "Value (English)",
+    "valueAr": "Value (Arabic)",
+    "noData": "No attributes found",
+    "loadError": "Error loading attributes",
+    "deleteSuccess": "Attribute deleted successfully",
+    "deleteError": "Error deleting attribute",
+    "deleteConfirmTitle": "Confirm Delete",
+    "deleteConfirmMessage": "Are you sure you want to delete this attribute?",
+    "createTitle": "Create New Attribute",
+    "createButton": "Create Attribute",
+    "cancelButton": "Cancel",
+    "createSuccess": "Attribute created successfully",
+    "updateTitle": "Update Attribute",
+    "updateButton": "Update Attribute",
+    "updateSuccess": "Attribute updated successfully",
+    "updateError": "Error updating attribute",
+    "addValue": "Add Value",
+    "removeValue": "Remove Value",
+    "minOneValue": "At least one value is required",
+    "valueRequired": "All values must be filled in both languages"
+  }
 };
