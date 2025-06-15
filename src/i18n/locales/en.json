@@ -1,0 +1,52 @@
+{
+  "product": {
+    "createTitle": "Create New Product",
+    "store": "Store",
+    "category": "Category",
+    "brand": "Brand",
+    "nameEn": "Name (English)",
+    "nameAr": "Name (Arabic)",
+    "subNameEn": "Sub Name (English)",
+    "subNameAr": "Sub Name (Arabic)",
+    "descriptionEn": "Description (English)",
+    "descriptionAr": "Description (Arabic)",
+    "tax": "Tax",
+    "displayStatus": "Display Status",
+    "basePrice": "Base Price",
+    "costPrice": "Cost Price",
+    "hasVariants": "Has Variants",
+    "variants": "Variants",
+    "attributes": "Attributes",
+    "skuEn": "SKU (English)",
+    "skuAr": "SKU (Arabic)",
+    "price": "Price",
+    "variantImage": "Variant Image",
+    "image": "Main Image",
+    "uploadClick": "Click to upload",
+    "uploadDrag": "or drag and drop",
+    "imageFormat": "PNG, JPG or GIF (max. 2MB)",
+    "changeImage": "Click to change image",
+    "deleteImage": "Delete Image",
+    "editImage": "Edit Image",
+    "addVariant": "Add Variant",
+    "cancelButton": "Cancel",
+    "createButton": "Create Product",
+    "createSuccess": "Product created successfully",
+    "validation": {
+      "requiredFields": "Please fill in all required fields",
+      "variantRequiredFields": "Please fill in all required fields for variants",
+      "basePriceRequired": "Base price is required when no variants are selected",
+      "imageSize": "Image size should not exceed 2MB",
+      "imageInvalid": "Invalid image format. Please upload PNG, JPG or GIF",
+      "atLeastOneVariant": "At least one variant is required"
+    }
+  },
+  "error": {
+    "storeLoad": "Error loading stores",
+    "categoryLoad": "Error loading categories",
+    "brandLoad": "Error loading brands",
+    "attributeLoad": "Error loading attributes",
+    "createError": "Error creating product"
+  },
+  "success": "Success"
+}

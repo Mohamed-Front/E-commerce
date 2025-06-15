@@ -81,13 +81,15 @@ const fetchProduct = async () => {
         sku_ar: variant.sku_ar,
         price: variant.price,
         cost_price: variant.cost_price || null,
-        attribute_value_ids: variant.attribute_values.map(av => av.id)
+        attribute_value_ids: variant.attribute_values.map(av => av.id),
+        variant_image: null,
+        variant_image_preview: variant.media && variant.media.length > 0 ? variant.media[0].url : null
       })) || []
     };
 
     hasVariants.value = data.has_variants;
 
-    // Set image preview if available
+    // Set main image preview if available
     if (data.media && data.media.length > 0) {
       imagePreview.value = data.media[0].url;
     }
@@ -151,7 +153,7 @@ const handleDragLeave = () => {
   isDragging.value = false;
 };
 
-// Handle image upload
+// Handle main image upload
 const handleImageUpload = (file) => {
   if (file.size > 2 * 1024 * 1024) {
     toast.add({ severity: 'error', summary: t('error'), detail: t('validation.imageSize'), life: 3000 });
@@ -177,24 +179,71 @@ const onImageUpload = (event) => {
   }
 };
 
-// Remove image
+// Remove main image
 const removeImage = () => {
   imageFile.value = null;
   imagePreview.value = null;
+};
+
+// Handle variant image upload
+const handleVariantImageUpload = (file, variantIndex) => {
+  if (file.size > 2 * 1024 * 1024) {
+    toast.add({ severity: 'error', summary: t('error'), detail: t('validation.imageSize'), life: 3000 });
+    return;
+  }
+  if (!file.type.match('image.*')) {
+    toast.add({ severity: 'error', summary: t('error'), detail: t('validation.imageInvalid'), life: 3000 });
+    return;
+  }
+  productData.value.variants[variantIndex].variant_image = file;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    productData.value.variants[variantIndex].variant_image_preview = e.target.result;
+  };
+  reader.readAsDataURL(file);
+};
+
+const onVariantImageUpload = (event, variantIndex) => {
+  const file = event.target.files?.[0] || event.dataTransfer?.files?.[0];
+  if (file) {
+    handleVariantImageUpload(file, variantIndex);
+  }
+};
+
+// Remove variant image
+const removeVariantImage = (variantIndex) => {
+  productData.value.variants[variantIndex].variant_image = null;
+  productData.value.variants[variantIndex].variant_image_preview = null;
 };
 
 // Variant management
 const toggleVariants = () => {
   hasVariants.value = !hasVariants.value;
   if (hasVariants.value && !productData.value.variants.length) {
-    productData.value.variants.push({ sku_ar: '', sku_en: '', price: '', cost_price: null, attribute_value_ids: [] });
+    productData.value.variants.push({
+      sku_ar: '',
+      sku_en: '',
+      price: '',
+      cost_price: null,
+      attribute_value_ids: [],
+      variant_image: null,
+      variant_image_preview: null
+    });
   } else if (!hasVariants.value) {
     productData.value.variants = [];
   }
 };
 
 const addVariant = () => {
-  productData.value.variants.push({ sku_ar: '', sku_en: '', price: '', cost_price: null, attribute_value_ids: [] });
+  productData.value.variants.push({
+    sku_ar: '',
+    sku_en: '',
+    price: '',
+    cost_price: null,
+    attribute_value_ids: [],
+    variant_image: null,
+    variant_image_preview: null
+  });
 };
 
 const removeVariant = (index) => {
@@ -241,7 +290,17 @@ const submitForm = async () => {
   formData.append('is_displayed', productData.value.is_displayed ? 1 : 0);
 
   if (hasVariants.value) {
-    formData.append('variants', JSON.stringify(productData.value.variants));
+    productData.value.variants.forEach((variant, index) => {
+      formData.append(`variants[${index}][id]`, variant.id || '');
+      formData.append(`variants[${index}][sku_en]`, variant.sku_en);
+      formData.append(`variants[${index}][sku_ar]`, variant.sku_ar);
+      formData.append(`variants[${index}][price]`, variant.price);
+      formData.append(`variants[${index}][cost_price]`, variant.cost_price || 0);
+      formData.append(`variants[${index}][attribute_value_ids]`, JSON.stringify(variant.attribute_value_ids));
+      if (variant.variant_image) {
+        formData.append(`variants[${index}][variant_image]`, variant.variant_image);
+      }
+    });
   } else {
     formData.append('base_price', productData.value.base_price);
     formData.append('cost_price', productData.value.cost_price || 0);
@@ -252,7 +311,11 @@ const submitForm = async () => {
   }
 
   try {
-    await axios.post(`/api/product/${route.params.id}`, formData);
+    await axios.post(`/api/product/${route.params.id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
     router.push({ name: 'product' });
     toast.add({ severity: 'success', summary: t('success'), detail: t('product.updateSuccess'), life: 3000 });
   } catch (error) {
@@ -534,6 +597,66 @@ const submitForm = async () => {
                   class="w-full"
                 />
               </div>
+
+              <!-- Variant Image Upload -->
+              <div class="space-y-2">
+                <label :for="'variant_image_' + index" class="block text-sm font-medium text-gray-700">
+                  {{ t('product.variantImage') }}
+                </label>
+                <label
+                  @dragover.prevent="handleDragOver"
+                  @dragleave="handleDragLeave"
+                  @drop.prevent="onVariantImageUpload($event, index)"
+                  :class="{'border-blue-500 bg-blue-50': isDragging, 'border-gray-300': !isDragging}"
+                  class="cursor-pointer w-full rounded-lg border-2 border-dashed transition-colors duration-300"
+                >
+                  <input
+                    type="file"
+                    :id="'variant_image_' + index"
+                    @change="onVariantImageUpload($event, index)"
+                    accept="image/*"
+                    class="hidden"
+                  >
+                  <div v-if="variant.variant_image_preview" class="p-4">
+                    <div class="relative group">
+                      <img
+                        :src="variant.variant_image_preview"
+                        alt="Variant Preview"
+                        class="w-full h-32 object-contain rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"
+                      />
+                      <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
+                        <div class="opacity-0 group-hover:opacity-100 space-x-3 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
+                          <button
+                            type="button"
+                            @click.stop="removeVariantImage(index)"
+                            class="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                            :title="t('product.deleteImage')"
+                          >
+                            <i class="pi pi-trash text-sm"></i>
+                          </button>
+                          <button
+                            type="button"
+                            class="bg-white text-gray-700 p-2 rounded-full hover:bg-gray-100 transition"
+                            :title="t('product.editImage')"
+                          >
+                            <i class="pi pi-pencil text-sm"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <p class="mt-2 text-center text-sm text-gray-500">{{ t('product.changeImage') }}</p>
+                  </div>
+                  <div v-else class="p-4 flex flex-col items-center justify-center">
+                    <div class="bg-blue-100 p-2 rounded-full mb-2">
+                      <i class="pi pi-image text-blue-500 text-xl"></i>
+                    </div>
+                    <p class="text-xs text-center text-gray-600">
+                      <span class="text-blue-500 font-medium">{{ t('product.uploadClick') }}</span> {{ t('product.uploadDrag') }}
+                    </p>
+                    <p class="text-xs text-gray-400">{{ t('product.imageFormat') }}</p>
+                  </div>
+                </label>
+              </div>
             </div>
             <Button
               type="button"
@@ -552,7 +675,7 @@ const submitForm = async () => {
           />
         </div>
 
-        <!-- Image Upload -->
+        <!-- Main Image Upload -->
         <div class="md:col-span-2 space-y-2">
           <label class="block text-sm font-medium text-gray-700">{{ t('product.image') }}</label>
           <div class="flex justify-center">

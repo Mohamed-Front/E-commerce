@@ -25,7 +25,7 @@ export default {
     {
       name: 'statistics',
       displayName: 'navigation.users_management',
-      show: ['list users', 'list permissions', 'list roles'],
+      show: ['list users', 'list permissions', 'list roles','list address'],
       meta: {
         icon: 'people',
       },
@@ -37,6 +37,14 @@ export default {
           show: 'list users',
           meta: {
             icon: 'person'
+          }
+        },
+          {
+          name: 'address',
+          displayName: 'navigation.addresses',
+          show: 'list address',
+          meta: {
+            icon: 'location_on'
           }
         },
         {
@@ -60,7 +68,7 @@ export default {
     {
       name: 'products',
       displayName: 'navigation.products',
-      show: ['list brands', 'list model'],
+      show: ['list brands', 'list model','list attributes'],
       meta: {
         icon: 'inventory',
       },
@@ -74,6 +82,14 @@ export default {
             icon: 'product'
           }
         },
+         {
+          name: 'attributes',
+          displayName: 'navigation.attributes',
+          show: 'list attributes',
+          meta: {
+            icon: 'settings'
+          }
+        },
         {
           name: 'brand',
           displayName: 'navigation.brands',
@@ -82,6 +98,15 @@ export default {
             icon: 'branding_watermark'
           }
         },
+        {
+          name: 'discount',
+          displayName: 'navigation.discount',
+          show: 'list discount',
+          meta: {
+            icon: 'branding_watermark'
+          }
+        },
+
         {
           name: 'model',
           displayName: 'navigation.models',
@@ -136,22 +161,8 @@ export default {
       },
       disabled: true,
       children: [
-        {
-          name: 'attributes',
-          displayName: 'navigation.attributes',
-          show: 'list attributes',
-          meta: {
-            icon: 'settings'
-          }
-        },
-        {
-          name: 'address',
-          displayName: 'navigation.addresses',
-          show: 'list address',
-          meta: {
-            icon: 'location_on'
-          }
-        },
+
+
       ],
     },
   ] as INavigationRoute[],

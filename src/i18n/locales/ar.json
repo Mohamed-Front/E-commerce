@@ -1,0 +1,52 @@
+{
+  "product": {
+    "createTitle": "إنشاء منتج جديد",
+    "store": "المتجر",
+    "category": "الفئة",
+    "brand": "العلامة التجارية",
+    "nameEn": "الاسم (بالإنجليزية)",
+    "nameAr": "الاسم (بالعربية)",
+    "subNameEn": "الاسم الفرعي (بالإنجليزية)",
+    "subNameAr": "الاسم الفرعي (بالعربية)",
+    "descriptionEn": "الوصف (بالإنجليزية)",
+    "descriptionAr": "الوصف (بالعربية)",
+    "tax": "الضريبة",
+    "displayStatus": "حالة العرض",
+    "basePrice": "السعر الأساسي",
+    "costPrice": "سعر التكلفة",
+    "hasVariants": "لديه متغيرات",
+    "variants": "المتغيرات",
+    "attributes": "الخصائص",
+    "skuEn": "رمز المنتج (بالإنجليزية)",
+    "skuAr": "رمز المنتج (بالعربية)",
+    "price": "السعر",
+    "variantImage": "صورة المتغير",
+    "image": "الصورة الرئيسية",
+    "uploadClick": "انقر للتحميل",
+    "uploadDrag": "أو اسحب وأفلت",
+    "imageFormat": "PNG أو JPG أو GIF (الحد الأقصى 2 ميجابايت)",
+    "changeImage": "انقر لتغيير الصورة",
+    "deleteImage": "حذف الصورة",
+    "editImage": "تعديل الصورة",
+    "addVariant": "إضافة متغير",
+    "cancelButton": "إلغاء",
+    "createButton": "إنشاء المنتج",
+    "createSuccess": "تم إنشاء المنتج بنجاح",
+    "validation": {
+      "requiredFields": "يرجى ملء جميع الحقول المطلوبة",
+      "variantRequiredFields": "يرجى ملء جميع الحقول المطلوبة للمتغيرات",
+      "basePriceRequired": "السعر الأساسي مطلوب عندما لا يتم اختيار متغيرات",
+      "imageSize": "يجب ألا يتجاوز حجم الصورة 2 ميجابايت",
+      "imageInvalid": "تنسيق صورة غير صالح. يرجى تحميل PNG أو JPG أو GIF",
+      "atLeastOneVariant": "مطلوب متغير واحد على الأقل"
+    }
+  },
+  "error": {
+    "storeLoad": "خطأ في تحميل المتاجر",
+    "categoryLoad": "خطأ في تحميل الفئات",
+    "brandLoad": "خطأ في تحميل العلامات التجارية",
+    "attributeLoad": "خطأ في تحميل الخصائص",
+    "createError": "خطأ في إنشاء المنتج"
+  },
+  "success": "نجاح"
+}
