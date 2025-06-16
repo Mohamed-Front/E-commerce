@@ -5,6 +5,11 @@
 @import 'vuestic-sass/index';
 @import 'icon-fonts/index';
 
+
+
+:root {
+  --main-text-color: #A17D1C;
+}
 html {
   line-height: 1.15;
 }
