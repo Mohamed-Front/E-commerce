@@ -1,4 +1,5 @@
 <template>
+<<<<<<< Updated upstream
   <!-- main body -->
   <main class="bg-[#FAF7F0] min-h-[100vh]">
     <header>
@@ -265,4 +266,29 @@
   .Variety div:hover {
     filter: blur(0px);
   }
+=======
+  <div class="min-h-screen bg-gray-100 flex flex-col items-center justify-center">
+    <!-- Logo Image -->
+    <img
+      src="../../../../assets/logo.png"
+      alt="Project Logo"
+      class="w-60 h-60 mb-8 object-contain"
+    >
+    <!-- Coming Soon Message -->
+    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+      Project Coming Soon
+    </h1>
+    <p class="text-lg md:text-xl text-gray-600 text-center max-w-md">
+      We're working hard to bring you something amazing. Stay tuned for updates!
+    </p>
+  </div>
+</template>
+
+<script setup>
+// No script logic needed for this static page
+</script>
+
+<style scoped>
+/* Tailwind handles all styling, no additional CSS needed */
+>>>>>>> Stashed changes
 </style>

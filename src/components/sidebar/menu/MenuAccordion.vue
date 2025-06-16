@@ -1,5 +1,8 @@
 <template>
+
   <va-accordion v-model="accordionValue" class="sidebar-accordion va-sidebar__menu__inner" multiple>
+      <div class="w-[55%]  m-auto mb-4"> <a href="/admin/dashboard"><img src="../../../assets/logo.png" alt=""></a></div>
+
     <va-collapse v-for="(route, idx) in arr" :key="idx">
       <template #header>
         <va-sidebar-item  :active="isRouteActive(route)"  :to="route.children ? undefined : { name: route.name }">
@@ -14,7 +17,7 @@
         </va-sidebar-item>
       </template>
       <template  v-for="(child, index) in route.children" :key="index"  >
-        <va-sidebar-item v-if="showRoutes.includes(child.show)" :active="isRouteActive(child)" :to="{ name: child.name }">
+        <va-sidebar-item class="mx-4" v-if="showRoutes.includes(child.show)" :active="isRouteActive(child)" :to="{ name: child.name }">
           <va-sidebar-item-content>
             <div class="va-sidebar-item__icon" />
 
@@ -27,15 +30,30 @@
         </va-sidebar-item>
       </template>
     </va-collapse>
+
   </va-accordion>
+        <div class="w-[85%] m-auto mb-0">
+          <Button :label='$t("Log_Out")' class="w-full" style="background-color:#EF0000 !important;"  severity="danger" icon="pi pi-sign-out" @click="logout">
+
+
+          </Button>
+        </div>
+
 </template>
 
 <script setup lang="ts">
   import { onMounted, ref } from 'vue'
   import { INavigationRoute } from '../NavigationRoutes'
-  import { useRoute } from 'vue-router'
+  import { useRoute, useRouter } from 'vue-router'
   import { useI18n } from 'vue-i18n'
+
+    import { useAuthStore } from '../../../stores/Auth'
+
 import { cos } from '@amcharts/amcharts5/.internal/core/util/Math'
+import Button from 'primevue/button'
+  import axios from 'axios'
+  const authStore = useAuthStore()
+  const router = useRouter()
   const { t } = useI18n()
   const arr =ref([])
   const pro =ref('')
@@ -59,7 +77,18 @@ import { cos } from '@amcharts/amcharts5/.internal/core/util/Math'
   // function isGroup(item: INavigationRoute) {
   //   return !!item.children
   // }
-
+  const logout = () => {
+    authStore.resetAuthStore()
+        router.push({ name: 'login' })
+    axios
+      .post('/api/logout')
+      .then((res) => {
+        console.log(res.data)
+        authStore.resetAuthStore()
+        router.push({ name: 'login' })
+      })
+      .catch(() => {})
+  }
   function isRouteActive(item: INavigationRoute) {
     return item.name === useRoute().name
   }
@@ -75,6 +104,11 @@ import { cos } from '@amcharts/amcharts5/.internal/core/util/Math'
     )
 
     return isCurrentItemActive || isChildActive
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('userPermissions')
+    router.push('/login')
   }
 </script>
 <style >
