@@ -85,8 +85,6 @@ const routes: Array<RouteRecordRaw> = [
             path: 'user-create',
             component: () => import('../pages/admin/users/create.vue'),
           },
-
-
         ],
       },
       {
@@ -94,17 +92,11 @@ const routes: Array<RouteRecordRaw> = [
         path: 'product',
         // component: RouteViewComponent,
         children: [
-<<<<<<< Updated upstream
-
-
-
-=======
-          {
-            path: '/product/:id?', // optional id parameter
-            name: 'product', // this name must match what you're using
-            component: () => import('../pages/admin/torist/show.vue'),
-          },
->>>>>>> Stashed changes
+          // {
+          //   path: '/product/:id?', // optional id parameter
+          //   name: 'product', // this name must match what you're using
+          //   component: () => import('../pages/admin/torist/show.vue'),
+          // },
         ],
       },
       {
@@ -158,8 +150,7 @@ const routes: Array<RouteRecordRaw> = [
             path: 'model-edit/:id',
             component: () => import('../pages/admin/products/model/edit.vue'),
           },
-<<<<<<< Updated upstream
-           {
+          {
             name: 'discount',
             path: 'discount',
             component: () => import('../pages/admin/discount/index.vue'),
@@ -169,15 +160,12 @@ const routes: Array<RouteRecordRaw> = [
             path: 'discount-create',
             component: () => import('../pages/admin/discount/create.vue'),
           },
-           {
+          {
             name: 'discount-update',
             path: 'discount-update/:id',
             component: () => import('../pages/admin/discount/update.vue'),
           },
-           {
-=======
           {
->>>>>>> Stashed changes
             name: 'coupon',
             path: 'coupon',
             component: () => import('../pages/admin/products/coupon/index.vue'),
@@ -268,10 +256,6 @@ const routes: Array<RouteRecordRaw> = [
             component: () => import('../pages/admin/settings/address/update.vue'),
           },
 
-<<<<<<< Updated upstream
-
-
-=======
           {
             name: 'discount',
             path: 'discount',
@@ -287,7 +271,6 @@ const routes: Array<RouteRecordRaw> = [
             path: 'discount-update/:id',
             component: () => import('../pages/admin/settings/discount/update.vue'),
           },
->>>>>>> Stashed changes
         ],
       },
 
