@@ -1,11 +1,5 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 
-import AuthLayout from '../layouts/AuthLayout.vue'
-import AppLayout from '../layouts/AppLayout.vue'
-import Page404Layout from '../layouts/Page404Layout.vue'
-
-import RouteViewComponent from '../layouts/RouterBypass.vue'
-import UIRoute from '../pages/admin/ui/route'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -13,6 +7,7 @@ const routes: Array<RouteRecordRaw> = [
     redirect: { name: 'dashboard' },
   },
 
+<<<<<<< Updated upstream
   // {
   //   name: 'invioce',
   //   path: '/invioce/:id',
@@ -276,59 +271,15 @@ const routes: Array<RouteRecordRaw> = [
 
       UIRoute,
     ],
-  },
+=======
 
   {
-    path: '/auth',
-    component: AuthLayout,
-    children: [
-      {
-        name: 'login',
-        path: 'login',
-        component: () => import('../pages/auth/login/Login.vue'),
-      },
-      {
-        name: 'signup',
-        path: 'signup',
-        component: () => import('../pages/auth/signup/Signup.vue'),
-      },
-      {
-        name: 'recover-password',
-        path: 'recover-password',
-        component: () => import('../pages/auth/recover-password/RecoverPassword.vue'),
-      },
-      {
-        path: '',
-        redirect: { name: 'login' },
-      },
-    ],
+    name: 'home',
+    path: '/',
+    component: () => import('../pages/admin/frontend/pages/home.vue'),
+>>>>>>> Stashed changes
   },
-  {
-    path: '/404',
-    component: Page404Layout,
-    children: [
-      {
-        name: 'not-found-advanced',
-        path: 'not-found-advanced',
-        component: () => import('../pages/404-pages/VaPageNotFoundSearch.vue'),
-      },
-      {
-        name: 'not-found-simple',
-        path: 'not-found-simple',
-        component: () => import('../pages/404-pages/VaPageNotFoundSimple.vue'),
-      },
-      {
-        name: 'not-found-custom',
-        path: 'not-found-custom',
-        component: () => import('../pages/404-pages/VaPageNotFoundCustom.vue'),
-      },
-      {
-        name: 'not-found-large-text',
-        path: '/pages/not-found-large-text',
-        component: () => import('../pages/404-pages/VaPageNotFoundLargeText.vue'),
-      },
-    ],
-  },
+
 ]
 
 const router = createRouter({
