@@ -4,10 +4,10 @@
 
      <settings-dropdown class="app-navbar-actions__item" />
     <language-dropdown style="width: 100% !important;text-align: justify !important;padding-right: 15px;font-size: 17px !important; " class="app-navbar-actions__item" />
-    <profile-dropdown class="app-navbar-actions__item app-navbar-actions__item--profile text-black">
+    <!-- <profile-dropdown class="app-navbar-actions__item app-navbar-actions__item--profile text-black">
       <span>Admin</span>
 
-    </profile-dropdown>
+    </profile-dropdown> -->
   </div>
 </template>
 
