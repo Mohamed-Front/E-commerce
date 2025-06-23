@@ -49,23 +49,17 @@ pre {
 }
 .p-button,
 .p-button.p-button-success {
-  background-color: #1B8A45 !important;
-  border-color: #1B8A45 !important;
+  background-color: #E28C3F !important;
+  border-color: #E28C3F !important;
   color: #fff;
 }
 .paginatorwrapper{
-  direction: ltr !important;
-}
-.p-paginator{
-  direction: ltr !important;
+  direction: rtl !important;
 }
 .p-export{
   background-color: #0b3baa !important;
   border-color: #0b3baa !important;
   color: #fff;
-}
-.p-paginator .p-paginator-pages .p-paginator-page.p-highlight{
-  background-color: #1B8A45 !important;
 }
 .p-detail{
   background-color: #fbfefe !important;
@@ -78,18 +72,10 @@ pre {
   border: 0px !important;
 }
 .va-sidebar__menu{
-<<<<<<< Updated upstream
   background-color: #f8f4ec !important;
   min-height: 100% !important;
-=======
-  background-color: #ffffff !important;
-  min-height: 100vh !important;
->>>>>>> Stashed changes
 
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-}
-.sidebar-accordion{
-  padding: 15px !important;
 }
 .pi{
   margin-left: 5px !important;
@@ -105,8 +91,8 @@ pre {
   color: rgb(21, 21, 21) !important;
 }
 .other {
-  background-color: #1B8A45 !important;
-  border-color: #1B8A45 !important;
+  background-color: #E28C3F !important;
+  border-color: #E28C3F !important;
   color: #fff;
 }
 .pop {
@@ -131,8 +117,8 @@ pre {
 }
 .new {
 
-  background-color: #1B8A45 !important;
-  border-color: #1B8A45 !important;
+  background-color: #E28C3F !important;
+  border-color: #E28C3F !important;
 }
 .p-rating .p-rating-item .p-rating-icon {
   color: rgb(166, 166, 0) !important;
@@ -151,7 +137,6 @@ pre {
 }
 .va-sidebar-item-content{
   color: white;
-
 }
 .bord{
 
@@ -173,7 +158,3 @@ td{
 canvas{
   height: 550px !important;
 }
-.router-link-active, .va-collapse__header-wrapper {
-  border-radius: 10px !important;
-  color: white !important;
- }

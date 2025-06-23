@@ -27,41 +27,30 @@ export default {
     "addresses": "Addresses"
   },
   user: {
-    users: "Users",
-    new: "New",
-    search: "Search...",
-    export: "Export",
+    users:"Users",
+    new:"New",
+    search:"Search...",
+    export:"Export",
     name: "Name",
     email: "Email",
     phone: "Phone",
     image: "Image",
     role: "Role",
-    password: "Password",
-    type: "Type",
-    create_New_User: "Create New User",
-    profile_Image: "Profile Image",
-    enter_full_name: "Enter full name",
-    select_user_type: "Select user type",
-    select_role: "Select role",
-    click_to_upload: "Click to upload",
-    or_drag_and_drop: "or drag and drop",
-    create_User: "Create User",
-    edit_User: "Edit User",
-    update_User: "Update User",
-    click_or_drag_to_change_photo: "Click or drag to change photo",
-    select_a_brand: "Select a brand",
-    managementTitle: "Users Management",
-    noData: "No users found",
-    loadError: "Failed to load users",
-    deleteSuccess: "User deleted successfully",
-    deleteError: "Failed to delete user",
-    deleteConfirmTitle: "Confirm Delete",
-    deleteConfirmMessage: "Are you sure you want to delete this user?",
-    createdSuccess: "User created successfully",
-    updatedSuccess: "User updated successfully",
-    createError: "Error creating user",
-    updateError: "Error updating user",
-    fetchError: "Error loading user data"
+    password:"Password",
+    type:"Type",
+     create_New_User:"Create New User",
+     profile_Image:"Profile Image",
+     enter_full_name:"Enter full name",
+     select_user_type:"Select user type",
+     select_role:"Select role",
+     click_to_upload:"Click to upload",
+     or_drag_and_drop:"or drag and drop",
+     create_User:"Create User",
+     edit_User:"Edit  User",
+     update_User:"Update User",
+     click_or_drag_to_change_photo:"Click or drag to change photo",
+
+
   },
   "common": {
     "id": "ID",
@@ -82,6 +71,7 @@ export default {
     "enterDescription": "Enter permission description..."
   },
   role:{
+
     manage_Roles:"Manage Roles",
     iD:"ID",
     name:"Name",
@@ -96,45 +86,7 @@ export default {
     edit:"Edit",
     click_or_drag_to_change_image:"Click or drag to change image",
     close:"Close",
-    updateWithPermissions: "Update Role with Selected Permissions",
-    createWithPermissions: "Create Role with Selected Permissions",
-    loading: {
-      roleData: "Loading role data...",
-      permissions: "Loading permissions..."
-    },
-    group: "Group",
-    permission: "Permission",
-    description: "Description",
-    select: "Select",
-    view: "View",
-    none: "None",
-    viewDescription: "View Description",
-    noDescription: "No Description",
-    switchToCardView: "Switch to Card View",
-    switchToTableView: "Switch to Table View",
-    selectedPermissions: "Selected Permissions",
-    totalSelected: "Total Selected",
-    roles: "Roles",
-    search: "Search roles...",
-    export: "Export",
-    new: "New Role",
-    noData: "No roles found",
-    loadError: "Failed to load roles",
-    deleteSuccess: "Role deleted successfully",
-    deleteError: "Failed to delete role",
-    deleteConfirmTitle: "Confirm Delete",
-    deleteConfirmMessage: "Are you sure you want to delete this role?",
-    showing: "Showing",
-    to: "to",
-    of: "of",
-    entries: "entries",
-    actions: "Actions",
-    edit: "Edit",
-    delete: "Delete",
-    yes: "Yes",
-    no: "No",
-    success: "Success",
-    error: "Error"
+
   },
 
 permission:{
@@ -143,17 +95,8 @@ permission:{
   refresh:"Refresh",
   no_permissions_found_in_this_group:"No permissions found in this group",
   permission_Name:"Permission Name",
-  update_Permission_Description: "Update Permission Description",
-  enter_permission_description: "Enter permission description...",
-  id: "ID",
-  name: "Name",
-  description: "Description",
-  actions: "Actions",
-  cancel: "Cancel",
-  save: "Save",
-  loading: "Loading...",
-  error_updating: "Error updating permission",
-  success_updating: "Permission updated successfully"
+
+
 },
 "coupon": {
     "managementTitle": "Coupons Management",
@@ -529,7 +472,6 @@ brand:{
     "minOneValue": "At least one value is required",
     "valueRequired": "All values must be filled in both languages"
   },
-<<<<<<< Updated upstream
   "discount": {
     "managementTitle": "Discounts Management",
     "search": "Search discounts...",
@@ -592,27 +534,6 @@ brand:{
     "validation": {
       "updateRequired": "Please fill in all required fields",
       "invalidUpdateData": "Invalid update data provided"
-=======
-  pharmacy: {
-    pharmacy_overview: "Pharmacy Overview",
-    welcome_message: "Welcome to your pharmacy dashboard",
-    total_patients: "Total Patients",
-    revenue: "Revenue",
-    prescriptions: "Prescriptions",
-    fill_rate: "Fill Rate",
-    from_last_month: "from last month",
-    prescriptions_overview: "Prescriptions Overview",
-    revenue_sources: "Revenue Sources",
-    recent_prescriptions: "Recent Prescriptions",
-    top_medications: "Top Medications",
-    view_all: "View All",
-    table: {
-      rx_id: "RX ID",
-      patient: "Patient",
-      date: "Date",
-      amount: "Amount",
-      status: "Status"
->>>>>>> Stashed changes
     }
   }
 };
