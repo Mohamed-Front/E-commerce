@@ -271,6 +271,11 @@ const routes: Array<RouteRecordRaw> = [
             path: 'discount-update/:id',
             component: () => import('../pages/admin/settings/discount/update.vue'),
           },
+          {
+            name: 'connect',
+            path: 'connect',
+            component: () => import('../pages/admin/settings/quickBooks/connect.vue'),
+          },
         ],
       },
 
