@@ -1,41 +1,43 @@
 <template>
-    <!-- contaner -->
-    <div class="mx-auto mt-16 w-[70%]">
-            <div class="flex justify-between items-center text-center gap-2">
-        <div v-for="market in markets">
-          <img :src="market.img" alt="" class="rounded-lg">
-          <h1 class="text-[clamp(.6rem,2vw,1.3rem)]">{{ market.title }}</h1>
-          <p class="text-[#A17D1C] text-[clamp(.4rem,1vw,.8rem)]">All Categories</p>
-        </div>
+  <!-- contaner -->
+  <div class="mx-auto mt-16 w-[70%]">
+    <div class="flex justify-between items-center text-center gap-2">
+      <div v-for="market in markets">
+        <img :src="market.img" alt="" class="rounded-lg" />
+        <h1 class="text-[clamp(.6rem,2vw,1.3rem)]">{{ market.title }}</h1>
+        <p class="text-[var(--main-text-color)] text-[clamp(.4rem,1vw,.8rem)]">All Categories</p>
       </div>
-      <section>
-        <!-- banner -->
-         <img src="../imges/banner-addtion.png" alt="" class="mt-28">
-        <!-- products -->
-        <div class="flex place-content-between pt-[6px]">
-          <!-- img 1 -->
-          <div class="produt-img w-[48%] h-[257px] bg-cover place-content-center items-center">
-            <div class="text-center text-white font-sans">
-              <h2 class="font-bold font-sans sm:text-[2rem] lg:text-[3rem]">Home Slider</h2>
-              <p class="my-6 font-sans text-[12px] sm:text-[1rem] lg:text-[1.2rem]">Discover our exclusive deals</p>
-              <button
-                class="font-sans px-[16px] py-[8px] text-[10px] sm:text-[1rem] lg:text-[1.2rem] bg-[#E5AD30] rounded-md"
-              >
-                Shop Now
-              </button>
-            </div>
-          </div>
-          <!-- img 2 -->
-          <div class="produt-img w-[48%] h-[257px] bg-cover"></div>
-        </div>
-        <!-- Exclusive_offers -->
-        <productsSwiper :products="Exclusive_offers" />
-        <!-- best_seller -->
-        <productsSwiper :products="best_seller" />
-        <!-- New_arrival -->
-        <productsSwiper :products="New_arrival" />
-      </section>
     </div>
+    <section>
+      <!-- banner -->
+      <img src="../imges/banner-addtion.png" alt="" class="mt-28" />
+      <!-- products -->
+      <div class="flex place-content-between pt-[35px]">
+        <!-- img 1 -->
+        <div class="produt-img w-[48%] bg-cover place-content-center items-center p-6 lg:p-12">
+          <div class="text-white font-sans flex flex-col items-center gap-6 sm:gap-10 md:gap-12 lg:gap-16 xl:gap-20">
+            <h2 class="font-bold font-sans text-[.4rem] sm:text-[.7rem] md:text-[1rem] lg:text-[1.3rem] xl:text-[1.8rem]">
+              Home Slider
+            </h2>
+            <p class="text-center font-sans text-[8px] sm:text-[1rem] lg:text-[1.2rem]">Discover our exclusive deals</p>
+            <button
+              class="font-sans lg:px-[16px] lg:py-[8px] px-[8px] py-[4px] text-[8px] sm:text-[1rem] lg:text-[1.2rem] bg-[var(--main-text-color)] rounded-md"
+            >
+              Shop Now
+            </button>
+          </div>
+        </div>
+        <!-- img 2 -->
+        <div class="produt-img w-[48%] bg-cover"></div>
+      </div>
+      <!-- Exclusive_offers -->
+      <productsSwiper :products="Exclusive_offers" />
+      <!-- best_seller -->
+      <productsSwiper :products="best_seller" />
+      <!-- New_arrival -->
+      <productsSwiper :products="New_arrival" />
+    </section>
+  </div>
 </template>
 
 <script setup>

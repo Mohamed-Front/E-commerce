@@ -1,7 +1,13 @@
 <template>
   <!-- path -->
   <h1 class="text-lg mb-20">
-    <span class="text-[var(--main-text-color)] cursor-pointer" @click="router.push('/')">{{ $t('navigation.home') }} /</span> {{ catagoryesName[activetap] }}
+    <span class="text-[var(--main-text-color)] cursor-pointer" @click="router.push('/')"
+      >{{ $t('navigation.home') }} /</span
+    >
+    <span class="cursor-pointer" @click="router.push({ path: '/SubCategory', query: { activetap: activetap } })">{{
+      catagoryesName[activetap]
+    }}</span>
+    / {{ route.query.activeproduct }}
   </h1>
 
   <!-- catagorys taps -->
@@ -43,7 +49,7 @@
       <div
         :style="{ backgroundImage: `url(\'${pro.img}\')` }"
         class="relative bg-cover bg-center h-[148px] w-full rounded-md cursor-pointer"
-        @click="router.push({ path: '/SubSubCategory', query: { activeproduct: pro.name,activetap:activetap } })"
+        @click="router.push({ path: '/SubSubCategory', query: { activeproduct: pro.name } })"
       >
         <h1
           class="absolute top-[50%] text-center w-full text-white font-bold lg:text-xl md:text-lg sm:text-md text-xs translate-y-[-50%]"
@@ -200,7 +206,7 @@
   // active catagory
   const activecatagory = (index) => {
     activetap.value = index
-    router.push({ query: { ...route.query, activetap: index } })
+    router.push({ path: '/SubCategory', query: { activetap: activetap.value } })
   }
 
   const updateUnderline = () => {
