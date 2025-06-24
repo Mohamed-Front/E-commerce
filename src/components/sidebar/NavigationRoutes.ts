@@ -162,8 +162,14 @@ export default {
       },
       disabled: true,
       children: [
-
-
+      {
+          name: 'connect',
+          displayName: 'navigation.quickBooks',
+          show: 'list categories',
+          meta: {
+            icon: 'settings'
+          }
+        },
       ],
     },
 =======
