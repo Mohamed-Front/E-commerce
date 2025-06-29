@@ -6,7 +6,7 @@
       <!-- logo -->
       <div class="main-logo w-[30%] cursor-pointer">
         <a class="flex place-content-center items-center"
-          ><img src="../../../../assets/shiftlogo.png.png" width="70" alt="shift7 logo" @click="router.push('/')"
+          ><img src="../../../../assets/shiftlogo.png" width="70" alt="shift7 logo" @click="router.push('/')"
         /></a>
       </div>
       <!-- Super Market store -->
