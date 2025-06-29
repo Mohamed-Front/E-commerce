@@ -85,7 +85,7 @@
       overflow-x: visible;
       width: 16rem;
       color: var(--va-gray);
-      background: #1B8A45;
+      background: #CB2A2C;
       box-shadow: var(--va-box-shadow);
     }
   }

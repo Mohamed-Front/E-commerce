@@ -20,7 +20,7 @@ withDefaults(
     minimizedWidth?: string
   }>(),
   {
-    width: '1rem',
+    width: '16rem',
     color: 'secondary',
     animated: true,
     minimized: true,
@@ -35,8 +35,7 @@ const items = ref(NavigationRoutes.routes)
 .va-sidebar {
   &__menu {
     padding: 2rem 0;
-    background-color: #47865f;
-
+    background-color: #D7A648;
   }
 
   &-item {
@@ -44,7 +43,6 @@ const items = ref(NavigationRoutes.routes)
       width: 1.5rem;
       height: 1.5rem;
       display: flex;
-
       justify-content: center;
       align-items: center;
     }
@@ -52,19 +50,11 @@ const items = ref(NavigationRoutes.routes)
 }
 
 .router-link-active {
-  background-color: #1B8A45!important;
- border-color:  #1B8A45 !important;
- color: wheat !important;
- margin-right: 0px !important;
- margin-left: 0px !important;
- height: 50px !important;
+  background-color: #D7A648!important;
+ border-color:  #D7A648 !important;
 }
 .va-sidebar__item:hover {
-  background-color: #48a46b !important;
-  border-radius: 15px !important;
-   height: 50px !important;
-   margin-right: 0px !important;
- margin-left: 0px !important;
+  background-color: #c28f30 !important;
 }
 
 

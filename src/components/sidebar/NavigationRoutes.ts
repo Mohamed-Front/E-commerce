@@ -17,7 +17,7 @@ export default {
     {
       name: 'dashboard',
       displayName: 'navigation.dashboard',
-      show: ['list users'],
+      show: ['dashboard'],
       meta: {
         icon: 'dashboard',
       },
@@ -65,7 +65,6 @@ export default {
         },
       ],
     },
-<<<<<<< Updated upstream
     {
       name: 'products',
       displayName: 'navigation.products',
@@ -172,36 +171,5 @@ export default {
         },
       ],
     },
-=======
-
-
-    // {
-    //   name: 'setting',
-    //   displayName: 'navigation.settings',
-    //   show: ['list address'],
-    //   meta: {
-    //     icon: 'settings',
-    //   },
-    //   disabled: true,
-    //   children: [
-    //     {
-    //       name: 'attributes',
-    //       displayName: 'navigation.attributes',
-    //       show: 'list attributes',
-    //       meta: {
-    //         icon: 'settings'
-    //       }
-    //     },
-    //     {
-    //       name: 'address',
-    //       displayName: 'navigation.addresses',
-    //       show: 'list address',
-    //       meta: {
-    //         icon: 'location_on'
-    //       }
-    //     },
-    //   ],
-    // },
->>>>>>> Stashed changes
   ] as INavigationRoute[],
 }

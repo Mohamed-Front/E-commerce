@@ -1,22 +1,34 @@
 <template>
   <!-- path -->
-  <h1 class="text-left text-lg mb-20">
-    <span class="text-[var(--main-text-color)] cursor-pointer" @click="router.push('/')">Home /</span> {{ route.name }}
+  <h1 class="text-lg mb-20">
+    <span class="text-[var(--main-text-color)] cursor-pointer" @click="router.push('/')">{{ $t('navigation.home') }} /</span> {{ catagoryesName[activetap] }}
   </h1>
 
   <!-- catagorys taps -->
-  <div class="flex justify-between items-center overflow-scroll gap-4 scrollbar-hide">
-    <div
-      v-for="(catagory, index) in catagoryesName"
-      :key="index"
-      class="md:text-md sm:text-sm text-[.4rem] font-bold cursor-pointer"
-      :style="index === activetap ? 'color: black !important' : 'color: var(--main-text-color)'"
-      @click="activecatagory(index)"
-    >
-      {{ catagory }}
+  <div class="relative w-full border-b border-gray-300 overflow-x-auto whitespace-nowrap">
+    <div class="flex justify-evenly">
+      <div
+        v-for="(catagory, index) in catagoryesName"
+        :key="index"
+        :ref="(el) => (tabs[index] = el)"
+        class="px-4 py-2 sm:text-sm text-[.6rem] font-bold cursor-pointer flex-shrink-0 transition-all duration-300"
+        :class="{
+          'text-[var(--main-text-color)]': index === activetap,
+          'text-gray-500': index !== activetap,
+        }"
+        @click="activecatagory(index)"
+      >
+        {{ catagory }}
+      </div>
     </div>
+
+    <!-- underline -->
+    <div
+      class="absolute bottom-0 h-[2px] bg-[var(--main-text-color)] transition-all duration-300"
+      :style="underlineStyle"
+    ></div>
   </div>
-  <hr class="my-4 bg-[var(--main-text-color)]" />
+
   <swiper
     :modules="[Autoplay]"
     :slides-per-view="4.5"
@@ -27,10 +39,11 @@
     grab-cursor
     class="max-h-[405px] mt-3 p-4 w-[95%]"
   >
-    <SwiperSlide v-for="pro in mainProducts">
+    <SwiperSlide v-for="(pro, index) in mainProducts">
       <div
         :style="{ backgroundImage: `url(\'${pro.img}\')` }"
         class="relative bg-cover bg-center h-[148px] w-full rounded-md cursor-pointer"
+        @click="router.push({ path: '/SubSubCategory', query: { activeproduct: pro.name,activetap:activetap } })"
       >
         <h1
           class="absolute top-[50%] text-center w-full text-white font-bold lg:text-xl md:text-lg sm:text-md text-xs translate-y-[-50%]"
@@ -57,7 +70,7 @@
 </template>
 
 <script setup>
-  import { ref } from 'vue'
+  import { ref, onMounted, nextTick, watch } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import { Swiper, SwiperSlide } from 'swiper/vue'
   import { Autoplay } from 'swiper/modules'
@@ -75,15 +88,17 @@
   const route = useRoute()
   const router = useRouter()
 
-  const activetap = ref(0)
+  const tabs = ref([])
+  const underlineStyle = ref({})
+  const activetap = ref(+route.query.activetap || 0)
   const catagoryesName = ref([
-    'الجمال',
-    'Category 2',
-    'Category 3',
-    'Category 4',
-    'Category 5',
-    'Category 6',
-    'Category 7',
+    'ازياء',
+    'القرطاسية',
+    'جمال وعطور',
+    'الصحة والتغذية',
+    'الالكترونيات',
+    'الجمال والعطور',
+    'الصحة والتغذية',
   ])
   const mainProducts = ref([
     {
@@ -185,7 +200,37 @@
   // active catagory
   const activecatagory = (index) => {
     activetap.value = index
+    router.push({ query: { ...route.query, activetap: index } })
   }
+
+  const updateUnderline = () => {
+    const el = tabs.value[activetap.value]
+    const lang = localStorage.getItem('appLang') || 'en'
+
+    if (el) {
+      const parent = el.offsetParent
+      if (lang === 'ar') {
+        const rightOffset = parent.offsetWidth - (el.offsetLeft + el.offsetWidth)
+        underlineStyle.value = {
+          width: `${el.offsetWidth}px`,
+          transform: `translateX(-${rightOffset}px)`,
+        }
+      } else {
+        underlineStyle.value = {
+          width: `${el.offsetWidth}px`,
+          transform: `translateX(${el.offsetLeft}px)`,
+        }
+      }
+    }
+  }
+
+  onMounted(() => {
+    nextTick(updateUnderline)
+  })
+
+  watch(activetap, () => {
+    nextTick(updateUnderline)
+  })
 </script>
 
 <style scoped>

@@ -4,6 +4,7 @@ export default {
   users: 'المستخدمين',
   Settings: 'الاعدادات',
   roles: 'الأدوار',
+  search: "ابـــدأ بالبحــــــــث",
   Permissions: 'الأذونات',
   users_management: 'إدارة المستخدمين',
   dashboard: 'لوحة القيادة',
@@ -548,4 +549,9 @@ export default {
       invalidUpdateData: 'بيانات التحديث غير صالحة',
     },
   },
+  quickBooks: {
+    connect : 'اتصال',
+    erorrContent: 'حدث خطأ أثناء الاتصال بـ QuickBooks. يرجى التحقق من إعدادات الاتصال الخاصة بك.',
+    successContent: 'تم الاتصال بنجاح بـ QuickBooks.',
+  }
 }

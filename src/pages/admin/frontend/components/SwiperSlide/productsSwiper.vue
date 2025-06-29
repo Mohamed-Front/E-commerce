@@ -6,7 +6,7 @@
             <img :src="pro.img" alt="">
             <p class="font-sans mt-2 mb-1 xs:text-[.5rem] sm:text-[.7rem] md:text-[1rem]">{{ pro.name + " " +
               Number(i + 1) }}</p>
-            <span class="font-sans text-[#A6853B] xs:text-[.5rem] sm:text-[.7rem] md:text-[1rem]">{{ pro.price }}</span>
+            <span class="font-sans text-[var(--main-text-color)] xs:text-[.5rem] sm:text-[.7rem] md:text-[1rem]">{{ pro.price }}</span>
           </SwiperSlide>
         </swiper>
 </template>

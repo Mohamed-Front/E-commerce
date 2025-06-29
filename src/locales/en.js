@@ -3,6 +3,7 @@ export default {
   users: 'Users',
   users_management: 'users management',
   Settings: 'Settings',
+  search: 'Start Search...',
   roles: 'Roles',
   dashboard: 'Dashboard',
   products: 'Products',
@@ -532,7 +533,7 @@ export default {
   },
   quickBooks: {
     connect: 'Connect',
-    errorContent: 'An error occurred while connecting to QuickBooks. Please try again later.',
+    erorrContent: 'An error occurred while connecting to QuickBooks. Please try again later.',
     successContent: 'Successfully connected to QuickBooks.',
   }
 }
