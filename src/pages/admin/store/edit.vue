@@ -21,12 +21,14 @@ const storeData = ref({
   sub_banner_image: null,
   slider_images_one: [],
   slider_images_two: [],
+  slider_images_three: [],
   existing_images: {
     store_image: null,
     main_banner_image: null,
     sub_banner_image: null,
     slider_images_one: [],
-    slider_images_two: []
+    slider_images_two: [],
+    slider_images_three: []
   }
 });
 
@@ -36,6 +38,7 @@ const mainBannerPreview = ref(null);
 const subBannerPreview = ref(null);
 const sliderOnePreviews = ref([]);
 const sliderTwoPreviews = ref([]);
+const sliderThreePreviews = ref([]);
 
 // Drag states
 const isDraggingStoreImage = ref(false);
@@ -43,6 +46,7 @@ const isDraggingMainBanner = ref(false);
 const isDraggingSubBanner = ref(false);
 const isDraggingSliderOne = ref(false);
 const isDraggingSliderTwo = ref(false);
+const isDraggingSliderThree = ref(false);
 
 // Validation
 const validateForm = () => {
@@ -93,13 +97,15 @@ const handleSliderUpload = (files, type) => {
 
   const currentCount = type === 'slider_one'
     ? storeData.value.slider_images_one.length + storeData.value.existing_images.slider_images_one.length
-    : storeData.value.slider_images_two.length + storeData.value.existing_images.slider_images_two.length;
+    : type === 'slider_two'
+      ? storeData.value.slider_images_two.length + storeData.value.existing_images.slider_images_two.length
+      : storeData.value.slider_images_three.length + storeData.value.existing_images.slider_images_three.length;
 
   if (currentCount + files.length > 10) {
     toast.add({
       severity: 'error',
       summary: 'Error',
-      detail: `Maximum 10 images allowed for ${type === 'slider_one' ? 'Slider One' : 'Slider Two'}`,
+      detail: `Maximum 10 images allowed for ${type === 'slider_one' ? 'Slider One' : type === 'slider_two' ? 'Slider Two' : 'Slider Three'}`,
       life: 3000
     });
     return;
@@ -121,10 +127,14 @@ const handleSliderUpload = (files, type) => {
           storeData.value.slider_images_one = [...storeData.value.slider_images_one, ...newFiles];
           sliderOnePreviews.value = [...sliderOnePreviews.value, ...newPreviews];
           isDraggingSliderOne.value = false;
-        } else {
+        } else if (type === 'slider_two') {
           storeData.value.slider_images_two = [...storeData.value.slider_images_two, ...newFiles];
           sliderTwoPreviews.value = [...sliderTwoPreviews.value, ...newPreviews];
           isDraggingSliderTwo.value = false;
+        } else if (type === 'slider_three') {
+          storeData.value.slider_images_three = [...storeData.value.slider_images_three, ...newFiles];
+          sliderThreePreviews.value = [...sliderThreePreviews.value, ...newPreviews];
+          isDraggingSliderThree.value = false;
         }
       }
     };
@@ -176,13 +186,21 @@ const removeSliderImage = (index, type) => {
       storeData.value.slider_images_one.splice(adjustedIndex, 1);
       sliderOnePreviews.value.splice(adjustedIndex, 1);
     }
-  } else {
+  } else if (type === 'slider_two') {
     if (index < storeData.value.existing_images.slider_images_two.length) {
       storeData.value.existing_images.slider_images_two.splice(index, 1);
     } else {
       const adjustedIndex = index - storeData.value.existing_images.slider_images_two.length;
       storeData.value.slider_images_two.splice(adjustedIndex, 1);
       sliderTwoPreviews.value.splice(adjustedIndex, 1);
+    }
+  } else if (type === 'slider_three') {
+    if (index < storeData.value.existing_images.slider_images_three.length) {
+      storeData.value.existing_images.slider_images_three.splice(index, 1);
+    } else {
+      const adjustedIndex = index - storeData.value.existing_images.slider_images_three.length;
+      storeData.value.slider_images_three.splice(adjustedIndex, 1);
+      sliderThreePreviews.value.splice(adjustedIndex, 1);
     }
   }
 };
@@ -219,6 +237,9 @@ const fetchStore = async () => {
           break;
         case 'slider_images_two':
           storeData.value.existing_images.slider_images_two.push(media.url);
+          break;
+        case 'slider_images_three':
+          storeData.value.existing_images.slider_images_three.push(media.url);
           break;
       }
     });
@@ -269,7 +290,7 @@ const submitForm = async () => {
     formData.append('sub_banner_image', '');
   }
 
-  // Handle slider images - always send arrays even if empty
+  // Handle slider images
   if (storeData.value.slider_images_one.length > 0) {
     storeData.value.slider_images_one.forEach((file, index) => {
       formData.append(`slider_images_one[${index}]`, file);
@@ -286,6 +307,14 @@ const submitForm = async () => {
     formData.append('slider_images_two', '');
   }
 
+  if (storeData.value.slider_images_three.length > 0) {
+    storeData.value.slider_images_three.forEach((file, index) => {
+      formData.append(`slider_images_three[${index}]`, file);
+    });
+  } else {
+    formData.append('slider_images_three', '');
+  }
+
   // Add existing slider images to keep
   storeData.value.existing_images.slider_images_one.forEach((url, index) => {
     formData.append(`keep_slider_one[${index}]`, url);
@@ -293,6 +322,10 @@ const submitForm = async () => {
 
   storeData.value.existing_images.slider_images_two.forEach((url, index) => {
     formData.append(`keep_slider_two[${index}]`, url);
+  });
+
+  storeData.value.existing_images.slider_images_three.forEach((url, index) => {
+    formData.append(`keep_slider_three[${index}]`, url);
   });
 
   try {
@@ -538,7 +571,7 @@ onMounted(() => {
               <div v-if="sliderOnePreviews.length > 0 || storeData.existing_images.slider_images_one.length > 0" class="p-4">
                 <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
                   <!-- Existing images -->
-                  <div v-for="(preview, index) in storeData.existing_images.slider_images_one" :key="'existing-'+index" class="relative group">
+                  <div v-for="(preview, index) in storeData.existing_images.slider_images_one" :key="'existing-one-'+index" class="relative group">
                     <img
                       :src="preview"
                       :alt="`Existing Slider One Image ${index + 1}`"
@@ -556,7 +589,7 @@ onMounted(() => {
                   </div>
 
                   <!-- Newly uploaded images -->
-                  <div v-for="(preview, index) in sliderOnePreviews" :key="'new-'+index" class="relative group">
+                  <div v-for="(preview, index) in sliderOnePreviews" :key="'new-one-'+index" class="relative group">
                     <img
                       :src="preview"
                       :alt="`New Slider One Image ${index + 1}`"
@@ -609,7 +642,7 @@ onMounted(() => {
               <div v-if="sliderTwoPreviews.length > 0 || storeData.existing_images.slider_images_two.length > 0" class="p-4">
                 <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
                   <!-- Existing images -->
-                  <div v-for="(preview, index) in storeData.existing_images.slider_images_two" :key="'existing-'+index" class="relative group">
+                  <div v-for="(preview, index) in storeData.existing_images.slider_images_two" :key="'existing-two-'+index" class="relative group">
                     <img
                       :src="preview"
                       :alt="`Existing Slider Two Image ${index + 1}`"
@@ -627,7 +660,7 @@ onMounted(() => {
                   </div>
 
                   <!-- Newly uploaded images -->
-                  <div v-for="(preview, index) in sliderTwoPreviews" :key="'new-'+index" class="relative group">
+                  <div v-for="(preview, index) in sliderTwoPreviews" :key="'new-two-'+index" class="relative group">
                     <img
                       :src="preview"
                       :alt="`New Slider Two Image ${index + 1}`"
@@ -646,6 +679,77 @@ onMounted(() => {
                 </div>
                 <p class="mt-2 text-sm text-center text-gray-500">
                   {{ storeData.existing_images.slider_images_two.length + sliderTwoPreviews.length }} image(s) uploaded. Click or drag to add more (max 10)
+                </p>
+              </div>
+
+              <div v-else class="flex flex-col items-center justify-center p-8">
+                <div class="p-4 mb-4 bg-blue-100 rounded-full">
+                  <i class="text-2xl text-blue-500 pi pi-images"></i>
+                </div>
+                <p class="mb-1 text-sm text-center text-gray-600">
+                  <span class="font-medium text-blue-500">Click to upload</span> or drag and drop
+                </p>
+                <p class="text-xs text-gray-400">Multiple images can be selected (max 10, 2MB each)</p>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Slider Images Three -->
+        <div class="space-y-2 md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700">
+            Slider Images Three <span class="text-gray-500">(Max 10 images)</span>
+          </label>
+          <div class="flex justify-center">
+            <label
+              @dragover.prevent="isDraggingSliderThree = true"
+              @dragleave="isDraggingSliderThree = false"
+              @drop.prevent="onSliderUpload($event, 'slider_three')"
+              :class="{'border-blue-500 bg-blue-50': isDraggingSliderThree, 'border-gray-300': !isDraggingSliderThree}"
+              class="w-full transition-colors duration-300 border-2 border-dashed cursor-pointer rounded-xl"
+            >
+              <input type="file" @change="onSliderUpload($event, 'slider_three')" accept="image/*" multiple class="hidden">
+
+              <div v-if="sliderThreePreviews.length > 0 || storeData.existing_images.slider_images_three.length > 0" class="p-4">
+                <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                  <!-- Existing images -->
+                  <div v-for="(preview, index) in storeData.existing_images.slider_images_three" :key="'existing-three-'+index" class="relative group">
+                    <img
+                      :src="preview"
+                      :alt="`Existing Slider Three Image ${index + 1}`"
+                      class="object-cover w-full h-32 transition-transform duration-300 rounded-lg shadow-md group-hover:scale-105"
+                    >
+                    <div class="absolute inset-0 flex items-center justify-center transition-all duration-300 bg-black bg-opacity-0 rounded-lg group-hover:bg-opacity-30">
+                      <button
+                        type="button"
+                        @click.stop="removeSliderImage(index, 'slider_three')"
+                        class="p-2 text-white transition bg-red-500 rounded-full opacity-0 group-hover:opacity-100 hover:bg-red-600"
+                      >
+                        <i class="text-sm pi pi-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Newly uploaded images -->
+                  <div v-for="(preview, index) in sliderThreePreviews" :key="'new-three-'+index" class="relative group">
+                    <img
+                      :src="preview"
+                      :alt="`New Slider Three Image ${index + 1}`"
+                      class="object-cover w-full h-32 transition-transform duration-300 rounded-lg shadow-md group-hover:scale-105"
+                    >
+                    <div class="absolute inset-0 flex items-center justify-center transition-all duration-300 bg-black bg-opacity-0 rounded-lg group-hover:bg-opacity-30">
+                      <button
+                        type="button"
+                        @click.stop="removeSliderImage(storeData.existing_images.slider_images_three.length + index, 'slider_three')"
+                        class="p-2 text-white transition bg-red-500 rounded-full opacity-0 group-hover:opacity-100 hover:bg-red-600"
+                      >
+                        <i class="text-sm pi pi-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <p class="mt-2 text-sm text-center text-gray-500">
+                  {{ storeData.existing_images.slider_images_three.length + sliderThreePreviews.length }} image(s) uploaded. Click or drag to add more (max 10)
                 </p>
               </div>
 

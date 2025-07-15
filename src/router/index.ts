@@ -230,6 +230,11 @@ const routes: Array<RouteRecordRaw> = [
         path: 'settings',
         // component: RouteViewComponent,
         children: [
+           {
+            name: 'setting',
+            path: 'setting',
+            component: () => import('../pages/admin/settings/setting/update.vue'),
+          },
           {
             name: 'attributes',
             path: 'attributes',

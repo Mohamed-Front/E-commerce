@@ -161,6 +161,16 @@ export default {
       },
       disabled: true,
       children: [
+
+
+        {
+          name: 'setting',
+          displayName: 'navigation.setting',
+          show: 'list categories',
+          meta: {
+            icon: 'settings'
+          }
+        },
       {
           name: 'connect',
           displayName: 'navigation.quickBooks',

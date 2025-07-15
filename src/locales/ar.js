@@ -124,7 +124,51 @@ export default {
     update_coupon: 'تحديث الكوبون',
     updated_successfully: 'تم تحديث الكوبون بنجاح',
   },
-
+"dashboard": {
+    "title": "لوحة التحكم",
+    "subtitle": "مرحباً، هنا نظرة عامة على إحصائيات النظام",
+    "totalUsers": "إجمالي المستخدمين",
+    "total applicable to the userProducts": "إجمالي المنتجات",
+    "totalSales": "إجمالي المبيعات",
+    "totalStores": "إجمالي المتاجر",
+    "lastMonth": "من الشهر الماضي",
+    "topSellingProducts": "المنتجات الأكثر مبيعاً",
+    "salesSummary": "ملخص المبيعات",
+    "recentActivity": "النشاط الأخير",
+    "monthlySummary": "الملخص الشهري",
+    "errorFetchingData": "خطأ في جلب بيانات لوحة التحكم",
+    "language": "ar",
+    "months": {
+      "january": "يناير",
+      "february": "فبراير",
+      "march": "مارس",
+      "april": "أبريل",
+      "may": "مايو",
+      "june": "يونيو",
+      "july": "يوليو",
+      "august": "أغسطس",
+      "september": "سبتمبر",
+      "october": "أكتوبر",
+      "november": "نوفمبر",
+      "december": "ديسمبر"
+    },
+    "activities": {
+      "newUser": "مستخدم جديد",
+      "newUserDesc": "تم إنشاء حساب مستخدم جديد",
+      "orderPlaced": "طلب جديد",
+      "orderPlacedDesc": "تم تقديم طلب جديد",
+      "productAdded": "إضافة منتج",
+      "productAddedDesc": "تمت إضافة منتج جديد للنظام",
+      "active": "نشط",
+      "pending": "قيد الانتظار",
+      "completed": "مكتمل"
+    },
+    "monthlyStats": {
+      "newUsers": "مستخدمون جدد",
+      "orders": "الطلبات",
+      "sales": "المبيعات"
+    }
+  },
   permission: {
     permissions_Management: 'إدارة الأذونات',
     view_and_manage_all_system_permissions_grouped_by_modules:
@@ -302,6 +346,7 @@ export default {
     load_error: 'خطأ في تحميل بيانات العنوان',
   },
   store: {
+    sliderThree:"صور السلايدر الثالث",
     managementTitle: 'إدارة المتاجر',
     search: 'ابحث في المتاجر...',
     export: 'تصدير',

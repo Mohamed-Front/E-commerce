@@ -70,6 +70,51 @@ export default {
     permissionName: 'Permission Name',
     enterDescription: 'Enter permission description...',
   },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Welcome, here's an overview of system statistics",
+    "totalUsers": "Total Users",
+    "totalProducts": "Total Products",
+    "totalSales": "Total Sales",
+    "totalStores": "Total Stores",
+    "lastMonth": "From last month",
+    "topSellingProducts": "Top Selling Products",
+    "salesSummary": "Sales Summary",
+    "recentActivity": "Recent Activity",
+    "monthlySummary": "Monthly Summary",
+    "errorFetchingData": "Error fetching dashboard data",
+    "language": "en",
+    "months": {
+      "january": "January",
+      "february": "February",
+      "march": "March",
+      "april": "April",
+      "may": "May",
+      "june": "June",
+      "july": "July",
+      "august": "August",
+      "september": "September",
+      "october": "October",
+      "november": "November",
+      "december": "December"
+    },
+    "activities": {
+      "newUser": "New User",
+      "newUserDesc": "A new user account was created",
+      "orderPlaced": "Order Placed",
+      "orderPlacedDesc": "A new order was placed",
+      "productAdded": "Product Added",
+      "productAddedDesc": "A new product was added to the system",
+      "active": "Active",
+      "pending": "Pending",
+      "completed": "Completed"
+    },
+    "monthlyStats": {
+      "newUsers": "New Users",
+      "orders": "Orders",
+      "sales": "Sales"
+    }
+  },
   role: {
     manage_Roles: 'Manage Roles',
     iD: 'ID',
@@ -300,6 +345,8 @@ export default {
     load_error: 'Error loading address data',
   },
   store: {
+        sliderThree:"sliderThree",
+
     managementTitle: 'Store Management',
     search: 'Search stores...',
     export: 'Export',

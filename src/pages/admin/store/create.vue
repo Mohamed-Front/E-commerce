@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref } from 'vue';
 import axios from 'axios';
 import { useToast } from 'primevue/usetoast';
 import { useI18n } from 'vue-i18n';
@@ -21,7 +21,8 @@ const storeData = ref({
   main_banner_image: null,
   sub_banner_image: null,
   slider_images_one: [],
-  slider_images_two: []
+  slider_images_two: [],
+  slider_images_three: []
 });
 
 // Image previews
@@ -30,6 +31,7 @@ const mainBannerPreview = ref(null);
 const subBannerPreview = ref(null);
 const sliderOnePreviews = ref([]);
 const sliderTwoPreviews = ref([]);
+const sliderThreePreviews = ref([]);
 
 // Drag states
 const isDraggingStoreImage = ref(false);
@@ -37,6 +39,7 @@ const isDraggingMainBanner = ref(false);
 const isDraggingSubBanner = ref(false);
 const isDraggingSliderOne = ref(false);
 const isDraggingSliderTwo = ref(false);
+const isDraggingSliderThree = ref(false);
 
 // Handle image uploads
 const handleImageUpload = (file, type) => {
@@ -78,10 +81,14 @@ const handleSliderUpload = (files, type) => {
           storeData.value.slider_images_one = [...storeData.value.slider_images_one, ...newFiles];
           sliderOnePreviews.value = [...sliderOnePreviews.value, ...newPreviews];
           isDraggingSliderOne.value = false;
-        } else {
+        } else if (type === 'slider_two') {
           storeData.value.slider_images_two = [...storeData.value.slider_images_two, ...newFiles];
           sliderTwoPreviews.value = [...sliderTwoPreviews.value, ...newPreviews];
           isDraggingSliderTwo.value = false;
+        } else if (type === 'slider_three') {
+          storeData.value.slider_images_three = [...storeData.value.slider_images_three, ...newFiles];
+          sliderThreePreviews.value = [...sliderThreePreviews.value, ...newPreviews];
+          isDraggingSliderThree.value = false;
         }
       }
     };
@@ -125,9 +132,12 @@ const removeSliderImage = (index, type) => {
   if (type === 'slider_one') {
     storeData.value.slider_images_one.splice(index, 1);
     sliderOnePreviews.value.splice(index, 1);
-  } else {
+  } else if (type === 'slider_two') {
     storeData.value.slider_images_two.splice(index, 1);
     sliderTwoPreviews.value.splice(index, 1);
+  } else if (type === 'slider_three') {
+    storeData.value.slider_images_three.splice(index, 1);
+    sliderThreePreviews.value.splice(index, 1);
   }
 };
 
@@ -157,6 +167,10 @@ const submitForm = async () => {
 
   storeData.value.slider_images_two.forEach((file, index) => {
     formData.append(`slider_images_two[${index}]`, file);
+  });
+
+  storeData.value.slider_images_three.forEach((file, index) => {
+    formData.append(`slider_images_three[${index}]`, file);
   });
 
   try {
@@ -436,6 +450,54 @@ const submitForm = async () => {
                       <button
                         type="button"
                         @click.stop="removeSliderImage(index, 'slider_two')"
+                        class="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                      >
+                        <i class="pi pi-trash text-sm"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <p class="mt-2 text-center text-sm text-gray-500">{{ t('store.clickOrDragMore') }}</p>
+              </div>
+
+              <div v-else class="p-8 flex flex-col items-center justify-center">
+                <div class="bg-blue-100 p-4 rounded-full mb-4">
+                  <i class="pi pi-images text-blue-500 text-2xl"></i>
+                </div>
+                <p class="text-sm text-center text-gray-600 mb-1">
+                  <span class="text-blue-500 font-medium">{{ t('store.clickToUpload') }}</span> {{ t('store.orDragDrop') }}
+                </p>
+                <p class="text-xs text-gray-400">{{ t('store.multipleImages') }}</p>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Slider Images Three -->
+        <div class="space-y-2 md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700">{{ t('store.sliderThree') }}</label>
+          <div class="flex justify-center">
+            <label
+              @dragover.prevent="isDraggingSliderThree = true"
+              @dragleave="isDraggingSliderThree = false"
+              @drop.prevent="onSliderUpload($event, 'slider_three')"
+              :class="{'border-blue-500 bg-blue-50': isDraggingSliderThree, 'border-gray-300': !isDraggingSliderThree}"
+              class="cursor-pointer w-full rounded-xl border-2 border-dashed transition-colors duration-300"
+            >
+              <input type="file" @change="onSliderUpload($event, 'slider_three')" accept="image/*" multiple class="hidden">
+
+              <div v-if="sliderThreePreviews.length > 0" class="p-4">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  <div v-for="(preview, index) in sliderThreePreviews" :key="index" class="relative group">
+                    <img
+                      :src="preview"
+                      :alt="`${t('store.sliderThree')} ${index + 1}`"
+                      class="w-full h-32 object-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"
+                    >
+                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
+                      <button
+                        type="button"
+                        @click.stop="removeSliderImage(index, 'slider_three')"
                         class="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
                       >
                         <i class="pi pi-trash text-sm"></i>
