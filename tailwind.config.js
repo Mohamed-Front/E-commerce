@@ -2,7 +2,12 @@
 module.exports = {
   content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   theme: {
-    extend: {},
+    extend: {
+       fontFamily: {
+        sans: ['Cairo', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        cairo: ['Cairo', 'sans-serif'],
+      },
+    },
     screens: {
       xs: '0px',
       sm: '576px',

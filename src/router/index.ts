@@ -39,6 +39,16 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../pages/admin/frontend/pages/home/SubSubCategory.vue'),
   },
   {
+    name: 'Product',
+    path: '/product',
+    component: () => import('../pages/admin/frontend/pages/home/product.vue'),
+  },
+  {
+    name: 'Cart',
+    path: '/Cart',
+    component: () => import('../pages/admin/frontend/pages/cart.vue'),
+  },
+  {
     name: 'admin',
     path: '/admin',
     component: AppLayout,

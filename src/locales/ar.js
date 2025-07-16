@@ -4,11 +4,14 @@ export default {
   users: 'المستخدمين',
   Settings: 'الاعدادات',
   roles: 'الأدوار',
-  search: "ابـــدأ بالبحــــــــث",
+  search: 'ابـــدأ بالبحــــــــث',
   Permissions: 'الأذونات',
   users_management: 'إدارة المستخدمين',
   dashboard: 'لوحة القيادة',
+  lady: 'لكي سيدتي',
+  Miscellaneous: 'منوعات اخترناها لكم',
   cancel: 'إلغاء',
+  remove: 'إزالة',
   navigation: {
     quickBooks: 'Quick Books',
     discount: 'الخصومات',
@@ -260,6 +263,11 @@ export default {
     createError: 'فشل إنشاء الموديل',
   },
   category: {
+    suggestions : "أقتراحات تناسبك",
+    exclusive : 'عروض حصرية',
+    bestsellers: 'الأكثر مبيعاً',
+    newlyarrived: 'وصل حديثاً',
+
     managementTitle: 'إدارة الفئات',
     search: 'بحث في الفئات...',
     export: 'تصدير',
@@ -595,8 +603,8 @@ export default {
     },
   },
   quickBooks: {
-    connect : 'اتصال',
+    connect: 'اتصال',
     erorrContent: 'حدث خطأ أثناء الاتصال بـ QuickBooks. يرجى التحقق من إعدادات الاتصال الخاصة بك.',
     successContent: 'تم الاتصال بنجاح بـ QuickBooks.',
-  }
+  },
 }
