@@ -11,7 +11,7 @@
       <!-- stores markets and mall -->
     </header>
     <!-- contaner -->
-<div class="mx-auto mt-16 w-[60%] md:w-[70%] sm:w-[90%] xs:w-[96%]">
+<div class="mx-auto mt-16 w-[65%] md:w-[75%] sm:w-[90%] xs:w-[96%]">
       <router-view />
     </div>
     <!-- footer -->

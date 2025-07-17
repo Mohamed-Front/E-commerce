@@ -84,7 +84,9 @@
   // components
   import productsSwiper from '../../components/SwiperSlide/productsSwiper.vue'
   import productsSwipertow from '../../components/SwiperSlide/porductsSwipertow.vue'
+  import { useI18n } from 'vue-i18n'
 
+  const { t } = useI18n()
   const route = useRoute()
   const router = useRouter()
 
@@ -144,7 +146,7 @@
   }
   // Data for products
   const Exclusive_offers = ref({
-    title: 'عروض حصرية',
+    title: t('category.exclusive'),
     products: [
       new Data('Product', imge2, '10.00 JD'),
       new Data('Product', imge2, '20.00 JD'),
@@ -157,7 +159,7 @@
     ],
   })
   const best_seller = ref({
-    title: 'الأكثر مبيعاً',
+    title: t('category.bestsellers'),
     products: [
       new Data('Product', imge3, '15.00 JD'),
       new Data('Product', imge3, '25.00 JD'),
@@ -170,7 +172,7 @@
     ],
   })
   const New_arrival = ref({
-    title: 'وصل حديثاً',
+    title: t('category.newlyarrived'),
     products: [
       new Data('Product', imge1, '12.00 JD'),
       new Data('Product', imge1, '22.00 JD'),
@@ -183,7 +185,7 @@
     ],
   })
   const Variety = ref({
-    title: 'منوعات اخترناها لكم',
+    title: t('Miscellaneous'),
     products: [
       new Data('مستلزمات يومية', imge1),
       new Data('فوانيس رمضان', imge2),

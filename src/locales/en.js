@@ -6,8 +6,11 @@ export default {
   search: 'Start Search...',
   roles: 'Roles',
   dashboard: 'Dashboard',
+  lady: 'For You Lady',
+  Miscellaneous: 'Miscellaneous we picked for you',
   products: 'Products',
   cancel: 'Cancel',
+  remove: 'Remove',
   navigation: {
     custom_tabs:"mange custom tabs",
     quickBooks : 'Quick Books',
@@ -321,6 +324,11 @@ export default {
     createError: 'Failed to create model',
   },
   category: {
+    suggestions: 'Suggestions for you',
+    exclusive: 'Exclusive offers',
+    bestsellers: 'Bestsellers',
+    newlyarrived: 'Newly arrived',
+
     managementTitle: 'Categories Management',
     search: 'Search categories...',
     export: 'Export',
@@ -672,5 +680,5 @@ export default {
     connect: 'Connect',
     erorrContent: 'An error occurred while connecting to QuickBooks. Please try again later.',
     successContent: 'Successfully connected to QuickBooks.',
-  }
+  },
 }

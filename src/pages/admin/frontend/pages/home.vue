@@ -26,7 +26,7 @@
         :modules="[Autoplay]"
         :slides-per-view="1.5"
         :centered-slides="true"
-        :space-between="20"
+        :space-between="10"
         :loop="true"
         :autoplay="{ delay: 3000, disableOnInteraction: false }"
         :speed="3000"
@@ -34,7 +34,7 @@
         class="my-swiper mt-6"
       >
         <swiper-slide v-for="(pro, index) in banners_slider" :key="index" class="flex justify-center">
-          <img :src="pro" class="w-full h-auto max-w-[940px] max-h-[434px] object-contain mb-2" />
+          <img :src="pro" class="w-full h-auto max-w-[1100px] max-h-[500px] object-contain mb-2" />
         </swiper-slide>
       </swiper>
     </header>
@@ -105,8 +105,8 @@
       </section>
       <section class="max-w-full">
         <!-- Variety we chose for you -->
-        <h1 class="lg:mt-24 xs:mt-12 mr-4 font-bold font-sans xs:text-[.9rem] sm:text-[1.3rem] md:text-[1.8rem]">
-          منوعات اخترناها لكم .
+        <h1 class="lg:mt-24 xs:mt-12 mx-4 font-bold font-sans xs:text-[.9rem] sm:text-[1.3rem] md:text-[1.8rem]">
+          {{ $t('Miscellaneous') }}
         </h1>
         <div
           class="max-h-[873px] bg-[var(--main-text-color)] mt-3 grid grid-flow-row-2 grid-cols-5 gap-2 cursor-pointer p-4 Variety transition"
@@ -142,7 +142,7 @@
   import imge2 from '../imges/prand 2.png'
   import imge4 from '../imges/prand 4.png'
   import imge5 from '../imges/prand 5.png'
-  import prand2_img from '../imges/prand 2_2.png'
+  import prand2_img from '../imges/prand 1.png'
   import banners_sliderimg from '../imges/banner slider.png'
 
   import productsSwiper from '../components/SwiperSlide/productsSwiper.vue'
@@ -155,7 +155,9 @@
   // components
   import Nav from '../components/nav.vue'
   import Footer from '../components/footer.vue'
+  import { useI18n } from 'vue-i18n'
 
+  const { t } = useI18n()
   const router = useRouter()
   // constructor
   class Data {
@@ -198,7 +200,7 @@
     new Data('العروض اليومية', 'imges/daily-deals.png'),
   ])
   const Exclusive_offers = ref({
-    title: 'عروض حصرية',
+    title: t('category.exclusive'),
     products: [
       new Data('Product', imge2, '10.00 JD'),
       new Data('Product', imge2, '20.00 JD'),
@@ -211,7 +213,7 @@
     ],
   })
   const best_seller = ref({
-    title: 'الأكثر مبيعاً',
+    title: t('category.bestsellers'),
     products: [
       new Data('Product', imge3, '15.00 JD'),
       new Data('Product', imge3, '25.00 JD'),
@@ -224,7 +226,7 @@
     ],
   })
   const New_arrival = ref({
-    title: 'وصل حديثاً',
+    title: t('category.newlyarrived'),
     products: [
       new Data('Product', imge1, '12.00 JD'),
       new Data('Product', imge1, '22.00 JD'),
@@ -237,7 +239,7 @@
     ],
   })
   const Variety = ref({
-    title: 'منوعات اخترناها لكم',
+    title: t('Miscellaneous'),
     products: [
       new Data('مستلزمات يومية', imge1),
       new Data('فوانيس رمضان', imge2),
@@ -253,7 +255,7 @@
   })
   // const Variety2 = Variety.slice(0,4)
   const for_lady = ref({
-    title: 'لكي سيدتي',
+    title: t('lady'),
     products: [
       new Data('مستلزمات يومية', prand2_img),
       new Data('فوانيس رمضان', prand2_img),
