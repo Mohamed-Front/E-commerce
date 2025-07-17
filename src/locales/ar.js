@@ -502,6 +502,7 @@ export default {
   to: 'إلى',
   from: 'من',
   product: {
+    addtocart: 'إضافة إلى السلة',
     managementTitle: 'إدارة المنتجات',
     search: 'بحث في المنتجات...',
     export: 'تصدير',

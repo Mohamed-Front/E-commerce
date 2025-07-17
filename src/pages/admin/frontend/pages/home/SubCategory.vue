@@ -1,7 +1,10 @@
 <template>
   <!-- path -->
   <h1 class="text-lg mb-20">
-    <span class="text-[var(--main-text-color)] cursor-pointer" @click="router.push('/')">{{ $t('navigation.home') }} /</span> {{ catagoryesName[activetap]?.name }}
+    <span class="text-[var(--main-text-color)] cursor-pointer" @click="router.push('/')"
+      >{{ $t('navigation.home') }} /</span
+    >
+    {{ catagoryesName[activetap]?.name }}
   </h1>
 
   <!-- catagorys taps -->
@@ -43,7 +46,7 @@
       <div
         :style="{ backgroundImage: `url(\'${pro.img}\')` }"
         class="relative bg-cover bg-center h-[148px] w-full rounded-md cursor-pointer"
-        @click="router.push({ path: '/SubSubCategory', query: { activeproduct: pro.name,activetap:activetap } })"
+        @click="router.push({ path: '/SubSubCategory', query: { activeproduct: pro.name, activetap: activetap } })"
       >
         <h1
           class="absolute top-[50%] text-center w-full text-white font-bold lg:text-xl md:text-lg sm:text-md text-xs translate-y-[-50%]"
@@ -56,9 +59,9 @@
   <img :src="banner" class="mt-[36px]" />
 
   <!-- Exclusive_offers -->
-  <productsSwiper :products="Exclusive_offers" />
+  <Exclusiveoffers :Stor="Stor" />
   <!-- best_seller -->
-  <productsSwiper :products="best_seller" />
+  <bestSellers :Stor="Stor" />
   <!-- New_arrival -->
   <productsSwiper :products="New_arrival" />
 
@@ -84,8 +87,10 @@
   // components
   import productsSwiper from '../../components/SwiperSlide/productsSwiper.vue'
   import productsSwipertow from '../../components/SwiperSlide/porductsSwipertow.vue'
+  import Exclusiveoffers from '../../components/products/Exclusiveoffers.vue'
+  import bestSellers from '../../components/products/bestSellers.vue'
   import { useI18n } from 'vue-i18n'
-import axios from 'axios'
+  import axios from 'axios'
 
   const { t } = useI18n()
   const route = useRoute()
@@ -97,7 +102,7 @@ import axios from 'axios'
   const catagoryesName = ref({})
   const Stor = ref({ id: route.query.stor || 1 })
   const loaddata = () => {
-      axios.get(`api/home/get-categories/${Stor.value.id}`).then((response) => {
+    axios.get(`api/home/get-categories/${Stor.value.id}`).then((response) => {
       response.data.data.data.forEach((category) => {
         catagoryesName.value[category.id] = {
           name: localStorage.getItem('appLang') == 'en' ? category.name_en : category.name_ar || category.name_en,
@@ -150,32 +155,7 @@ import axios from 'axios'
     }
   }
   // Data for products
-  const Exclusive_offers = ref({
-    title: t('category.exclusive'),
-    products: [
-      new Data('Product', imge2, '10.00 JD'),
-      new Data('Product', imge2, '20.00 JD'),
-      new Data('Product', imge2, '30.00 JD'),
-      new Data('Product', imge2, '40.00 JD'),
-      new Data('Product', imge2, '10.00 JD'),
-      new Data('Product', imge2, '20.00 JD'),
-      new Data('Product', imge2, '30.00 JD'),
-      new Data('Product', imge2, '40.00 JD'),
-    ],
-  })
-  const best_seller = ref({
-    title: t('category.bestsellers'),
-    products: [
-      new Data('Product', imge3, '15.00 JD'),
-      new Data('Product', imge3, '25.00 JD'),
-      new Data('Product', imge3, '35.00 JD'),
-      new Data('Product', imge3, '45.00 JD'),
-      new Data('Product', imge3, '15.00 JD'),
-      new Data('Product', imge3, '25.00 JD'),
-      new Data('Product', imge3, '35.00 JD'),
-      new Data('Product', imge3, '45.00 JD'),
-    ],
-  })
+
   const New_arrival = ref({
     title: t('category.newlyarrived'),
     products: [

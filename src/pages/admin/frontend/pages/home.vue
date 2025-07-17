@@ -15,7 +15,7 @@
         <div
           class="cursor-pointer titels font-sans bg-[var(--main-text-color)] h-[25px] min-w-[60px] sm:h-[28px] sm:min-w-[80px] md:h-[32px] md:min-w-[128px] text-[.5rem] sm:text-[.7rem] md:text-[.8rem] text-center place-content-center font-bold rounded-md mr-1 md:mr-3"
           v-for="title in titels"
-          @click="router.push({ path: '/SubCategory', query: { activetap: title.id , stor : Stor.id } })"
+          @click="router.push({ path: '/SubCategory', query: { activetap: title.id, stor: Stor.id } })"
         >
           {{ title.name }}
         </div>
@@ -23,17 +23,17 @@
       <!-- main banner -->
       <swiper
         :modules="[Autoplay]"
-        :slides-per-view="1.5"
+        :slides-per-view="1.3"
         :centered-slides="true"
         :space-between="10"
         :loop="true"
         :autoplay="{ delay: 3000, disableOnInteraction: false }"
         :speed="3000"
         grab-cursor
-        class="my-swiper mt-6"
+        class="my-swiper mt-2"
       >
         <swiper-slide v-for="(pro, index) in banners_slider" :key="index" class="flex justify-center">
-          <img :src="pro" class="w-full h-auto max-w-[1100px] max-h-[500px] object-contain mb-2" />
+          <img :src="pro" class="w-full h-auto max-w-[1200px] max-h-[600px] object-contain mb-2" />
         </swiper-slide>
       </swiper>
     </header>
@@ -98,13 +98,13 @@
         </div>
         <!-- banner -->
         <div class="h-[143px] flex place-content-center items-center">
-          <img src="../imges/banner2.png" alt="" class="w-[70%]" />
+          <img :src="storimg.main_banner_image" alt="" class="w-[70%]" />
         </div>
         <!-- more products -->
         <!-- Exclusive_offers -->
-        <productsSwiper :products="Exclusive_offers" />
+        <Exclusiveoffers :Stor="Stor" />
         <!-- best_seller -->
-        <productsSwiper :products="best_seller" />
+        <bestSellers :Stor="Stor" />
         <!-- New_arrival -->
         <productsSwiper :products="New_arrival" />
       </section>
@@ -151,26 +151,29 @@
   import banners_sliderimg from '../imges/banner slider.png'
 
   import axios from 'axios'
-  import productsSwiper from '../components/SwiperSlide/productsSwiper.vue'
-  import productsSwipertow from '../components/SwiperSlide/porductsSwipertow.vue'
   import { Swiper, SwiperSlide } from 'swiper/vue'
   import { Autoplay } from 'swiper/modules'
   import { useRouter } from 'vue-router'
+  import { useI18n } from 'vue-i18n'
 
   import 'swiper/css'
   // components
+  import productsSwiper from '../components/SwiperSlide/productsSwiper.vue'
+  import productsSwipertow from '../components/SwiperSlide/porductsSwipertow.vue'
+  import Exclusiveoffers from '../components/products/Exclusiveoffers.vue'
+  import bestSellers from '../components/products/bestSellers.vue'
   import Nav from '../components/nav.vue'
   import Footer from '../components/footer.vue'
-  import { useI18n } from 'vue-i18n'
 
   const { t } = useI18n()
   const router = useRouter()
   // constructor
   class Data {
-    constructor(name = 'No name', img = '', price = '$$') {
+    constructor(name = 'No name', img = '', price = '$$', id) {
       this.name = name
       this.img = img
       this.price = price
+      this.id = id
     }
   }
 
@@ -225,32 +228,7 @@
     new Data('ألعاب الأطفال', 'imges/kids-toys.png'),
     new Data('العروض اليومية', 'imges/daily-deals.png'),
   ])
-  const Exclusive_offers = ref({
-    title: t('category.exclusive'),
-    products: [
-      new Data('Product', imge2, '10.00 JD'),
-      new Data('Product', imge2, '20.00 JD'),
-      new Data('Product', imge2, '30.00 JD'),
-      new Data('Product', imge2, '40.00 JD'),
-      new Data('Product', imge2, '10.00 JD'),
-      new Data('Product', imge2, '20.00 JD'),
-      new Data('Product', imge2, '30.00 JD'),
-      new Data('Product', imge2, '40.00 JD'),
-    ],
-  })
-  const best_seller = ref({
-    title: t('category.bestsellers'),
-    products: [
-      new Data('Product', imge3, '15.00 JD'),
-      new Data('Product', imge3, '25.00 JD'),
-      new Data('Product', imge3, '35.00 JD'),
-      new Data('Product', imge3, '45.00 JD'),
-      new Data('Product', imge3, '15.00 JD'),
-      new Data('Product', imge3, '25.00 JD'),
-      new Data('Product', imge3, '35.00 JD'),
-      new Data('Product', imge3, '45.00 JD'),
-    ],
-  })
+
   const New_arrival = ref({
     title: t('category.newlyarrived'),
     products: [
@@ -319,8 +297,17 @@
     isDragging = false
   }
 
-  onMounted(() => {
-    loaddata()
+  const storimg = ref({})
+  onMounted(async () => {
+    await loaddata()
+    storimg.value = {
+      store_image: Stor.value.media.find((img) => img.name == 'store_image').url,
+      sub_banner_image: Stor.value.media.find((img) => img.name == 'sub_banner_image').url,
+      slider_images_one: Stor.value.media.find((img) => img.name == 'slider_images_one').url,
+      slider_images_two: Stor.value.media.find((img) => img.name == 'slider_images_two').url,
+      slider_images_three: Stor.value.media.find((img) => img.name == 'slider_images_three').url,
+      main_banner_image: Stor.value.media.find((img) => img.name == 'main_banner_image').url,
+    }
   })
 </script>
 

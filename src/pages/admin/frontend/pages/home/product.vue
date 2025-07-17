@@ -1,7 +1,7 @@
 <template>
   <header class="flex lg:flex-row flex-col items-center gap-4">
     <div class="text-end w-3/4 lg:w-1/2">
-      <h1 class="text-[clamp(1rem,3vw,3rem)] font-bold text-start">{{ pro.name }}</h1>
+      <h1 class="text-[clamp(1rem,3vw,3rem)] font-bold text-start">{{ locale == 'en' ? pro.name_en : pro.name_ar }}</h1>
       <section class="mt-8">
         <div class="flex justify-evenly flex-wrap w-full gap-2 text-center">
           <span class="sub-titles">Store</span><span class="sub-titles">Category</span>
@@ -20,30 +20,32 @@
       <section>
         <div class="flex justify-around text-center">
           <div class="flex flex-col">
-            <span class="text-color font-bold">Before</span><span class="line-through">{{ pro.price }}</span>
+            <span class="text-color font-bold">Before</span><span class="line-through">{{ +pro.base_price + +pro.cost_price + +pro.tax }}$</span>
           </div>
           <div class="flex flex-col">
-            <span class="text-color font-bold">After</span><span>{{ pro.price }}</span>
+            <span class="text-color font-bold">After</span><span>{{ +pro.base_price + +pro.cost_price + +pro.tax }}$</span>
           </div>
         </div>
         <p class="my-6 text-start">Delivery within : 3 H</p>
         <button
           class="lg:py-[10px] py-[6px] text-[8px] sm:text-[1rem] lg:text-[1.2rem] bg-[var(--main-text-color)] rounded-md w-full text-white transition-transform duration-150 ease-in-out active:scale-95 hover:shadow-md"
         >
-          Add To Cart
+          {{ $t('product.addtocart') }}
         </button>
       </section>
     </div>
     <div class="w-3/4 lg:w-1/2 flex lg:flex-row flex-col items-center gap-4">
       <!-- الصورة الكبيرة -->
-      <div class="w-[78%]">
-        <img :src="curantimg" alt="Main product image" class="w-full h-auto shadow bg-full" />
+      <div class="max-w-[60%] ml-4">
+        <div class="w-full aspect-square shadow bg-full">
+          <img :src="curantimg" alt="Main product image" class="w-full h-full object-cover rounded-md" />
+        </div>
       </div>
 
       <!-- الصور الصغيرة -->
       <div class="lg:w-1/4 flex lg:flex-col flex-row items-center w-full justify-evenly gap-2">
         <img
-          v-for="img in imgs"
+          v-for="img in imgs.values"
           :key="img"
           :src="img"
           alt="Thumbnail"
@@ -54,14 +56,7 @@
     </div>
   </header>
   <section class="bg-[#E6AC312B] px-6 pt-2 pb-12 rounded-md text-left mt-8">
-    <p class="leading-relaxed text-[clamp(.7rem,1vw,1rem)]">
-      Describtion: Answer the frequently asked question in a simple sentence, a longish paragraph, or even in a list.
-      Answer the frequently asked question in a simple sentence, a longish paragraph, or even in a list. Answer the
-      frequently asked question in a simple sentence, a longish paragraph, or even in a list. Answer the frequently
-      asked question in a simple sentence, a longish paragraph, or even in a list.Answer the frequently asked question
-      in a simple sentence, a longish paragraph, or even in a list. Answer the frequently asked question in a simple
-      sentence, a longish paragraph, or even in a list.
-    </p>
+    <p class="leading-relaxed text-[clamp(.7rem,1vw,1rem)]">{{ locale == 'en' ? pro.description_en : pro.description_ar }}</p>
     <h3 class="text-[#E39F30] text-[clamp(.9rem,1.5vw,1.5rem)]">READ MORE</h3>
   </section>
 
@@ -148,28 +143,30 @@
     <div class="flex justify-center items-start flex-col mt-4">
       <h2 class="text-[clamp(1rem,2vw,2rem)] font-bold">Related Products</h2>
     </div>
-    <Swiper :products="Exclusive_offers" />
-    <Swiper :products="best_seller" />
+    <Exclusiveoffers :Stor="pro.store_id" />
+    <bestSellers :Stor="pro.store_id" />
   </section>
 </template>
 
 <script setup>
-  import { ref } from 'vue'
+  import { onMounted, ref } from 'vue'
   import { useRoute } from 'vue-router'
+  import axios from 'axios'
 
-  import Swiper from '../../components/SwiperSlide/productsSwiper.vue'
   import imge1 from '../../imges/prand 1.png'
   import imge3 from '../../imges/prand 3.png'
   import imge2 from '../../imges/prand 2.png'
   import imge4 from '../../imges/prand 4.png'
   import { useI18n } from 'vue-i18n'
 
-  const { t } = useI18n()
+  import Exclusiveoffers from '../../components/products/Exclusiveoffers.vue'
+  import bestSellers from '../../components/products/bestSellers.vue'
+  const { t,locale } = useI18n()
   const route = useRoute()
 
-  const pro = ref(JSON.parse(route.query.pro))
-  const curantimg = ref(pro.value.img)
-  const imgs = [curantimg.value, imge1, imge3, imge4]
+  const pro = ref({})
+  const curantimg = ref()
+  const imgs = []
   const changeimg = (img) => {
     curantimg.value = img
   }
@@ -237,39 +234,18 @@
     if (review.reaction === 'dislike' && review.reaction === 'like') review.reaction = 'dislike'
   }
 
-  // products data
-  class Data {
-    constructor(name = 'No name', img = '', price = '$$') {
-      this.name = name
-      this.img = img
-      this.price = price
-    }
-  }
-  const Exclusive_offers = ref({
-    title: t('category.exclusive'),
-    products: [
-      new Data('Product', imge2, '10.00 JD'),
-      new Data('Product', imge2, '20.00 JD'),
-      new Data('Product', imge2, '30.00 JD'),
-      new Data('Product', imge2, '40.00 JD'),
-      new Data('Product', imge2, '10.00 JD'),
-      new Data('Product', imge2, '20.00 JD'),
-      new Data('Product', imge2, '30.00 JD'),
-      new Data('Product', imge2, '40.00 JD'),
-    ],
-  })
-  const best_seller = ref({
-    title: t('category.bestsellers'),
-    products: [
-      new Data('Product', imge3, '15.00 JD'),
-      new Data('Product', imge3, '25.00 JD'),
-      new Data('Product', imge3, '35.00 JD'),
-      new Data('Product', imge3, '45.00 JD'),
-      new Data('Product', imge3, '15.00 JD'),
-      new Data('Product', imge3, '25.00 JD'),
-      new Data('Product', imge3, '35.00 JD'),
-      new Data('Product', imge3, '45.00 JD'),
-    ],
+  onMounted(async () => {
+   await axios
+      .get(`api/product/${route.query.product}`)
+      .then((response) => {
+        pro.value = response.data.data
+        curantimg.value = pro.value.media[0].url
+        imgs.values = pro.value.media.map((img) => img.url)
+      })
+      .catch((error) => {
+        console.error('Error fetching product:', error)
+      })
+      console.log(pro.value)
   })
 </script>
 

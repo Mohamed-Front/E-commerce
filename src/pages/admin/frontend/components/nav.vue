@@ -98,13 +98,13 @@
     <div class="w-[70%] flex place-content-between items-center">
       <!-- nav search -->
       <i
-        class="fa-solid fa-magnifying-glass rounded-l-md w-[20px] h-[20px] sm:w-[30px] text-[.7rem] sm:text-[1rem] sm:h-[30px] md:h-[40px] md:w-[40px] bg-[var(--main-text-color)] text-center place-content-center"
+        class="fa-solid fa-magnifying-glass  w-[20px] h-[20px] sm:w-[30px] text-[.7rem] sm:text-[1rem] sm:h-[30px] md:h-[40px] md:w-[40px] bg-[var(--main-text-color)] text-center place-content-center"
         style="color: #fff"
       ></i>
       <!-- nav search input -->
       <div class="w-[80%] rounded-r-md">
         <input
-          class="pr-2 sm:h-[30px] md:h-[40px] w-[90%] h-[20px] text-[.4rem] sm:text-[.7rem] md:text-[1rem] text-[var(--main-text-color)] font-bold placeholder:text-[#5c5c5c] placeholder:font-bold focus:outline-none bg-transparent border-2 border-[var(--main-text-color)] rounded-r-md px-4"
+          class="pr-2 sm:h-[30px] md:h-[40px] w-[90%] h-[20px] text-[.4rem] sm:text-[.7rem] md:text-[1rem] text-[var(--main-text-color)] font-bold placeholder:text-[#5c5c5c] placeholder:font-bold focus:outline-none bg-transparent border-2 border-[var(--main-text-color)]  px-4"
           type="text"
           :placeholder="$t('search')"
         />
