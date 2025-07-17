@@ -48,6 +48,7 @@
     "sass": "^1.53.0",
     "serve": "^14.2.0",
     "swiper": "^10.2.0",
+    "vee-validate": "^4.15.1",
     "vue": "^3.2.26",
     "vue-chartjs": "^4.1.2",
     "vue-core-image-upload": "^2.4.14",
@@ -57,7 +58,8 @@
     "vue-router": "^4.2.5",
     "vue-yandex-maps": "^0.12.3",
     "vue3-google-map": "^0.18.0",
-    "vuestic-ui": "^1.7.3"
+    "vuestic-ui": "^1.7.3",
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@intlify/unplugin-vue-i18n": "^0.12.2",

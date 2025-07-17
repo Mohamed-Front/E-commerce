@@ -41,7 +41,9 @@ pre {
   font-family: monospace;
   font-size: 1em;
 }
-
+.p-paginator{
+  direction: ltr !important;
+}
 .ellipsis {
   overflow: hidden;
   text-overflow: ellipsis;
