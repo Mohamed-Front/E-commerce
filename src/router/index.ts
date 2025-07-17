@@ -266,25 +266,31 @@ const routes: Array<RouteRecordRaw> = [
             component: () => import('../pages/admin/settings/address/update.vue'),
           },
 
-          {
-            name: 'discount',
-            path: 'discount',
-            component: () => import('../pages/admin/settings/discount/index.vue'),
-          },
-          {
-            name: 'discount-create',
-            path: 'discount-create',
-            component: () => import('../pages/admin/settings/discount/create.vue'),
-          },
-          {
-            name: 'discount-update',
-            path: 'discount-update/:id',
-            component: () => import('../pages/admin/settings/discount/update.vue'),
-          },
+
           {
             name: 'connect',
             path: 'connect',
             component: () => import('../pages/admin/settings/quickBooks/connect.vue'),
+          },
+           {
+            name: 'custom_tabs',
+            path: 'custom-tabs',
+            component: () => import('../pages/admin/settings/custom-tabs/index.vue'),
+          },
+           {
+            name: 'custom_tabs_create',
+            path: 'custom-tabs-create',
+            component: () => import('../pages/admin/settings/custom-tabs/create.vue'),
+          },
+           {
+            name: 'custom_tabs_update',
+            path: 'custom-tabs-update/:id',
+            component: () => import('../pages/admin/settings/custom-tabs/edit.vue'),
+          },
+           {
+            name: 'custom_tabs_show',
+            path: 'custom-tabs-show/:id',
+            component: () => import('../pages/admin/settings/custom-tabs/show.vue'),
           },
         ],
       },

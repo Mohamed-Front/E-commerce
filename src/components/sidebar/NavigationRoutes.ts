@@ -125,6 +125,8 @@ export default {
         },
       ],
     },
+
+
     {
       name: 'store',
       displayName: 'navigation.stores',
@@ -151,6 +153,14 @@ export default {
           }
         },
       ],
+    },
+     {
+      name: 'custom_tabs',
+      displayName: 'navigation.custom_tabs',
+      show: ['dashboard'],
+      meta: {
+        icon: 'dashboard',
+      },
     },
     {
       name: 'setting',
