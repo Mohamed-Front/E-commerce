@@ -1,24 +1,24 @@
 <template>
   <!-- path -->
   <h1 class="text-lg mb-20">
-    <span class="text-[var(--main-text-color)] cursor-pointer" @click="router.push('/')">{{ $t('navigation.home') }} /</span> {{ catagoryesName[activetap] }}
+    <span class="text-[var(--main-text-color)] cursor-pointer" @click="router.push('/')">{{ $t('navigation.home') }} /</span> {{ catagoryesName[activetap]?.name }}
   </h1>
 
   <!-- catagorys taps -->
   <div class="relative w-full border-b border-gray-300 overflow-x-auto whitespace-nowrap">
     <div class="flex justify-evenly">
       <div
-        v-for="(catagory, index) in catagoryesName"
-        :key="index"
-        :ref="(el) => (tabs[index] = el)"
+        v-for="catagory in catagoryesName"
+        :key="catagory.id"
+        :ref="(el) => (tabs[catagory.id] = el)"
         class="px-4 py-2 sm:text-sm text-[.6rem] font-bold cursor-pointer flex-shrink-0 transition-all duration-300"
         :class="{
-          'text-[var(--main-text-color)]': index === activetap,
-          'text-gray-500': index !== activetap,
+          'text-[var(--main-text-color)]': catagory.id === activetap,
+          'text-gray-500': catagory.id !== activetap,
         }"
-        @click="activecatagory(index)"
+        @click="activecatagory(catagory.id)"
       >
-        {{ catagory }}
+        {{ catagory.name }}
       </div>
     </div>
 
@@ -85,6 +85,7 @@
   import productsSwiper from '../../components/SwiperSlide/productsSwiper.vue'
   import productsSwipertow from '../../components/SwiperSlide/porductsSwipertow.vue'
   import { useI18n } from 'vue-i18n'
+import axios from 'axios'
 
   const { t } = useI18n()
   const route = useRoute()
@@ -93,15 +94,19 @@
   const tabs = ref([])
   const underlineStyle = ref({})
   const activetap = ref(+route.query.activetap || 0)
-  const catagoryesName = ref([
-    'ازياء',
-    'القرطاسية',
-    'جمال وعطور',
-    'الصحة والتغذية',
-    'الالكترونيات',
-    'الجمال والعطور',
-    'الصحة والتغذية',
-  ])
+  const catagoryesName = ref({})
+  const Stor = ref({ id: route.query.stor || 1 })
+  const loaddata = () => {
+      axios.get(`api/home/get-categories/${Stor.value.id}`).then((response) => {
+      response.data.data.data.forEach((category) => {
+        catagoryesName.value[category.id] = {
+          name: localStorage.getItem('appLang') == 'en' ? category.name_en : category.name_ar || category.name_en,
+          id: category.id,
+        }
+      })
+    })
+  }
+
   const mainProducts = ref([
     {
       name: 'العناية بالبشرة',
@@ -227,6 +232,7 @@
   }
 
   onMounted(() => {
+    loaddata()
     nextTick(updateUnderline)
   })
 

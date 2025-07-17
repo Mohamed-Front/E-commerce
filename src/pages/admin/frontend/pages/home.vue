@@ -5,20 +5,19 @@
       <Nav></Nav>
       <!-- products titels -->
       <div
-        class="h-[58px] flex items-center place-content-evenly overflow-x-auto flex-nowrap text-white scrollbar-hide"
+        class="h-[58px] flex items-center place-content-evenly overflow-x-auto flex-nowrap text-white scrollbar-hide cursor-grab active:cursor-grabbing"
+        @mousedown="startDrag"
+        @mousemove="onDrag"
+        @mouseup="stopDrag"
+        @mouseleave="stopDrag"
+        ref="scrollContainer"
       >
         <div
-          class="cursor-pointer titels font-sans bg-[var(--main-text-color)] h-[25px] min-w-[60px] sm:h-[28px] sm:min-w-[80px] md:h-[32px] md:min-w-[128px] text-[.5rem] sm:text-[.7rem] md:text-[1rem] text-center place-content-center font-bold rounded-md mr-1 md:mr-3"
-          v-for="(title, index) in titels"
-          @click="router.push({ path: '/SubCategory', query: { activetap: index } })"
-        >
-          {{ title }}
-        </div>
-        <div
-          class="cursor-pointer titels font-sans bg-[var(--main-text-color)] h-[25px] min-w-[60px] sm:h-[28px] sm:min-w-[80px] md:h-[32px] md:min-w-[128px] text-[.5rem] sm:text-[.7rem] md:text-[1rem] text-center place-content-center font-bold rounded-md mr-1 md:mr-3"
+          class="cursor-pointer titels font-sans bg-[var(--main-text-color)] h-[25px] min-w-[60px] sm:h-[28px] sm:min-w-[80px] md:h-[32px] md:min-w-[128px] text-[.5rem] sm:text-[.7rem] md:text-[.8rem] text-center place-content-center font-bold rounded-md mr-1 md:mr-3"
           v-for="title in titels"
+          @click="router.push({ path: '/SubCategory', query: { activetap: title.id , stor : Stor.id } })"
         >
-          {{ title }}
+          {{ title.name }}
         </div>
       </div>
       <!-- main banner -->
@@ -47,8 +46,14 @@
           <!-- img 1 -->
           <div class="produt-img w-[48%] bg-cover place-content-center items-center p-6 lg:p-12">
             <div class="text-white font-sans flex flex-col items-center gap-6 sm:gap-10 md:gap-12 lg:gap-16 xl:gap-20">
-              <h2 class="font-bold font-sans text-[.6rem] sm:text-[1rem] md:text-[1.5rem] lg:text-[2rem] xl:text-[3rem]">Home Slider</h2>
-              <p class="text-center font-sans text-[8px] sm:text-[1rem] lg:text-[1.2rem]">Discover our exclusive deals</p>
+              <h2
+                class="font-bold font-sans text-[.6rem] sm:text-[1rem] md:text-[1.5rem] lg:text-[2rem] xl:text-[3rem]"
+              >
+                Home Slider
+              </h2>
+              <p class="text-center font-sans text-[8px] sm:text-[1rem] lg:text-[1.2rem]">
+                Discover our exclusive deals
+              </p>
               <button
                 class="font-sans lg:px-[16px] lg:py-[8px] px-[8px] py-[4px] text-[8px] sm:text-[1rem] lg:text-[1.2rem] bg-[var(--main-text-color)] rounded-md"
               >
@@ -61,36 +66,36 @@
         </div>
         <!-- products -->
         <div class="bg-[var(--main-text-color)/15] w-full overflow-x-auto py-4 scrollbar-hide">
-    <swiper
-      :modules="[Autoplay]"
-      :loop="true"
-      :autoplay="{ delay: 0, disableOnInteraction: false }"
-      :speed="3000"
-      grab-cursor
-      :space-between="10"
-      :breakpoints="{
-        0: { slidesPerView: 3 },
-        480: { slidesPerView: 4 },
-        768: { slidesPerView: 6 },
-        1024: { slidesPerView: 8 },
-        1280: { slidesPerView: 10 }
-      }"
-      class="px-4"
-    >
-      <swiper-slide
-        v-for="(pro, index) in product_titels"
-        :key="index"
-        class="flex-shrink-0 text-center flex flex-col items-center"
-      >
-        <div class="w-20 h-20 xs:w-16 xs:h-16 flex items-center justify-center">
-          <img src="../imges/image.png" :alt="pro.name" class="w-full h-full object-contain" />
+          <swiper
+            :modules="[Autoplay]"
+            :loop="true"
+            :autoplay="{ delay: 0, disableOnInteraction: false }"
+            :speed="3000"
+            grab-cursor
+            :space-between="10"
+            :breakpoints="{
+              0: { slidesPerView: 3 },
+              480: { slidesPerView: 4 },
+              768: { slidesPerView: 6 },
+              1024: { slidesPerView: 8 },
+              1280: { slidesPerView: 10 },
+            }"
+            class="px-4"
+          >
+            <swiper-slide
+              v-for="(pro, index) in product_titels"
+              :key="index"
+              class="flex-shrink-0 text-center flex flex-col items-center"
+            >
+              <div class="w-20 h-20 xs:w-16 xs:h-16 flex items-center justify-center">
+                <img src="../imges/image.png" :alt="pro.name" class="w-full h-full object-contain" />
+              </div>
+              <p class="font-sans text-xs font-bold truncate w-full mt-1">
+                {{ pro.name }}
+              </p>
+            </swiper-slide>
+          </swiper>
         </div>
-        <p class="font-sans text-xs font-bold truncate w-full mt-1">
-          {{ pro.name }}
-        </p>
-      </swiper-slide>
-    </swiper>
-  </div>
         <!-- banner -->
         <div class="h-[143px] flex place-content-center items-center">
           <img src="../imges/banner2.png" alt="" class="w-[70%]" />
@@ -136,7 +141,7 @@
 </template>
 
 <script setup>
-  import { ref } from 'vue'
+  import { onMounted, ref } from 'vue'
   import imge1 from '../imges/prand 1.png'
   import imge3 from '../imges/prand 3.png'
   import imge2 from '../imges/prand 2.png'
@@ -145,6 +150,7 @@
   import prand2_img from '../imges/prand 1.png'
   import banners_sliderimg from '../imges/banner slider.png'
 
+  import axios from 'axios'
   import productsSwiper from '../components/SwiperSlide/productsSwiper.vue'
   import productsSwipertow from '../components/SwiperSlide/porductsSwipertow.vue'
   import { Swiper, SwiperSlide } from 'swiper/vue'
@@ -167,16 +173,36 @@
       this.price = price
     }
   }
+
+  // api shift7
+  const Stor = ref({})
+  const loaddata = async () => {
+    await axios
+      .get('api/home/get-stores')
+      .then((response) => {
+        const data = response.data.data.data
+        data.forEach((stor) => {
+          if (stor.is_default) {
+            Stor.value = stor
+          }
+        })
+      })
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+      })
+
+    await axios.get(`api/home/get-categories/${Stor.value.id}`).then((response) => {
+      response.data.data.data.forEach((category) => {
+        titels.value[category.id] = {
+          name: localStorage.getItem('appLang') == 'en' ? category.name_en : category.name_ar || category.name_en,
+          id: category.id,
+        }
+      })
+    })
+  }
+
   const banners_slider = ref([banners_sliderimg, banners_sliderimg, banners_sliderimg, banners_sliderimg])
-  const titels = ref([
-    'ازياء',
-    'القرطاسية',
-    'جمال وعطور',
-    'الصحة والتغذية',
-    'الالكترونيات',
-    'الجمال والعطور',
-    'الصحة والتغذية',
-  ])
+  const titels = ref({})
   const product_titels = ref([
     new Data('العناية الشخصية', 'imges/personal-care.png'),
     new Data('أزياء النساء', 'imges/women-fashion.png'),
@@ -268,6 +294,33 @@
       new Data('العبايات والجلاليب', prand2_img),
       new Data('العناية بالبشرة', prand2_img),
     ],
+  })
+
+  const scrollContainer = ref(null)
+  let isDragging = false
+  let startX
+  let scrollLeft
+
+  const startDrag = (e) => {
+    isDragging = true
+    startX = e.pageX - scrollContainer.value.offsetLeft
+    scrollLeft = scrollContainer.value.scrollLeft
+  }
+
+  const onDrag = (e) => {
+    if (!isDragging) return
+    e.preventDefault()
+    const x = e.pageX - scrollContainer.value.offsetLeft
+    const walk = (x - startX) * 1.5 // السرعة
+    scrollContainer.value.scrollLeft = scrollLeft - walk
+  }
+
+  const stopDrag = () => {
+    isDragging = false
+  }
+
+  onMounted(() => {
+    loaddata()
   })
 </script>
 
