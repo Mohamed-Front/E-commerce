@@ -35,7 +35,7 @@ const items = ref(NavigationRoutes.routes)
 .va-sidebar {
   &__menu {
     padding: 2rem 0;
-    background-color: #D7A648;
+    background-color: var(--main-text-color);
   }
 
   &-item {
@@ -50,12 +50,16 @@ const items = ref(NavigationRoutes.routes)
 }
 
 .router-link-active {
-  background-color: #D7A648!important;
- border-color:  #D7A648 !important;
-}
-.va-sidebar__item:hover {
-  background-color: #c28f30 !important;
+  background-color: var(--main-text-color)!important;
+  border-color:  var(--main-text-color) !important;
 }
 
+.router-link-active div , .router-link-active a {
+  color: white !important;
+}
 
+.sidebar-item__children {
+  background-color: #f8f4ec;
+  margin: 0 8px;
+}
 </style>

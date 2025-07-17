@@ -104,4 +104,7 @@
       }
     }
   }
+  .va-sidebar-item--active div{
+    color: white !important;
+  }
 </style>
