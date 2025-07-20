@@ -39,6 +39,7 @@ const fetchData = () => {
       categories.value = response.data.data.data
       totalRecords.value = response.data.data.total
       totalPages.value = response.data.data.last_page
+      currentPage.value = response.data.data.current_page // Ensure current page is synced with API
       loading.value = false
     })
     .catch((error) => {
@@ -54,9 +55,17 @@ const fetchData = () => {
 }
 
 // Watch for pagination changes
-watch([currentPage, rowsPerPage, searchQuery], () => {
+watch([searchQuery, rowsPerPage], () => {
+  currentPage.value = 1 // Reset to first page on search or rows per page change
   fetchData()
 })
+
+// Handle page change event from DataTable
+const onPageChange = (event) => {
+  currentPage.value = event.page + 1 // PrimeVue page event is 0-based, API is 1-based
+  rowsPerPage.value = event.rows // Update rows per page
+  fetchData()
+}
 
 // Delete category
 const confirmDelete = (id) => {
@@ -164,6 +173,7 @@ onMounted(() => {
             showGridlines
             class="p-datatable-sm"
             v-can="'list categories'"
+            @page="onPageChange"
           >
             <Column selection-mode="multiple" header-style="width: 3rem"></Column>
 

@@ -30,7 +30,7 @@ const fetchBrand = async () => {
     const response = await axios.get(`/api/brand/${brandId.value}`);
     brandData.value = response.data.data;
 
-    if (response.data.data.media[0].url) {
+    if (response.data.data.media[0]?.url) {
       imagePreview.value = response.data.data.media[0].url; // Assuming your API returns image_url
     }
 
@@ -44,7 +44,6 @@ const fetchBrand = async () => {
       life: 3000
     });
     loading.value = false;
-    router.push({ name: 'brand' });
   }
 };
 
