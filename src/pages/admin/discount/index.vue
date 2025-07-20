@@ -77,7 +77,7 @@ const fetchData = () => {
   axios.get("/api/discount", {
     params: {
       page: currentPage.value,
-      per_page: rowsPerPage.value,
+      limit: rowsPerPage.value,
       search: searchQuery.value
     }
   }).then((res) => {

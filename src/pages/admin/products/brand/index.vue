@@ -1,22 +1,45 @@
 <script setup>
-import {useToast} from 'primevue/usetoast'
-import { FilterMatchMode } from 'primevue/api'
-import { ref, onMounted, onBeforeMount, watch } from 'vue'
-import axios from "axios";
-import {useRouter} from "vue-router";
+import { ref, onMounted, watch } from 'vue'
+import { useToast } from 'primevue/usetoast'
+import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import axios from 'axios'
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import Toolbar from 'primevue/toolbar'
+import Toast from 'primevue/toast'
+import Tag from 'primevue/tag'
+import Dialog from 'primevue/dialog'
+import ProgressSpinner from 'primevue/progressspinner'
+import Dropdown from 'primevue/dropdown'
+
+// Permission directive
+const vCan = {
+  mounted(el, binding) {
+    // This is a placeholder for permission checking
+    // Implement actual permission logic based on your auth system
+    const hasPermission = true // Replace with actual permission check
+    if (!hasPermission) {
+      el.style.display = 'none'
+    }
+  }
+}
 
 const router = useRouter()
-const { t } = useI18n()
 const toast = useToast()
+const { t } = useI18n()
+
+// State variables
 const loading = ref(true)
-const delete_id = ref('')
-const brands = ref(null)
+const categories = ref([])
 const deleteDialog = ref(false)
-const selectedBrands = ref(null)
+const deleteId = ref(null)
 const dt = ref(null)
 const filters = ref({})
 const searchQuery = ref('')
+const selectedCategories = ref(null)
 
 // Pagination variables
 const currentPage = ref(1)
@@ -31,84 +54,48 @@ const from = ref(0)
 const to = ref(0)
 const links = ref([])
 
-const exportCSV = () => {
-  dt.value.exportCSV()
-}
-
-const confirmDelete = (id) => {
-  delete_id.value = id
-  deleteDialog.value = true
-}
-
-const deleteBrand = () => {
-  axios.delete(`/api/brand/${delete_id.value}`)
-    .then(() => {
-      fetchData()
-      deleteDialog.value = false
-      toast.add({
-        severity: 'success',
-        summary: t('success'),
-        detail: t('brand.deleteSuccess'),
-        life: 3000
-      })
+// Fetch data
+const fetchData = () => {
+  loading.value = true
+  axios.get('/api/category', {
+    params: {
+      page: currentPage.value,
+      limit: rowsPerPage.value,
+      search: searchQuery.value || undefined
+    }
+  })
+    .then((response) => {
+      categories.value = response.data.data.data
+      totalRecords.value = response.data.data.total
+      totalPages.value = response.data.data.last_page
+      firstPageUrl.value = response.data.data.first_page_url
+      lastPageUrl.value = response.data.data.last_page_url
+      nextPageUrl.value = response.data.data.next_page_url
+      prevPageUrl.value = response.data.data.prev_page_url
+      from.value = response.data.data.from
+      to.value = response.data.data.to
+      links.value = response.data.data.links
+      loading.value = false
     })
-    .catch(() => {
+    .catch((error) => {
       toast.add({
         severity: 'error',
         summary: t('error'),
-        detail: t('brand.deleteError'),
+        detail: t('category.loadError'),
         life: 3000
       })
+      loading.value = false
+      console.error('Error fetching categories:', error)
     })
 }
 
-const initFilters = () => {
-  filters.value = {
-    global: {value: null, matchMode: FilterMatchMode.CONTAINS},
-  }
-}
-
-onBeforeMount(() => {
-  initFilters()
-})
-
-const fetchData = () => {
-  loading.value = true
-  axios.get("/api/brand", {
-    params: {
-      page: currentPage.value,
-      per_page: rowsPerPage.value,
-      search: searchQuery.value
-    }
-  }).then((res) => {
-    brands.value = res.data.data.data
-    totalRecords.value = res.data.data.total
-    totalPages.value = res.data.data.last_page
-    firstPageUrl.value = res.data.data.first_page_url
-    lastPageUrl.value = res.data.data.last_page_url
-    nextPageUrl.value = res.data.data.next_page_url
-    prevPageUrl.value = res.data.data.prev_page_url
-    from.value = res.data.data.from
-    to.value = res.data.data.to
-    links.value = res.data.data.links
-    loading.value = false
-  }).catch(error => {
-    loading.value = false
-    toast.add({
-      severity: 'error',
-      summary: t('error'),
-      detail: t('brand.loadError'),
-      life: 3000
-    })
-    console.error("Error fetching brands:", error)
-  })
-}
-
-watch(searchQuery, (newVal) => {
+// Watch for search and rows per page changes
+watch([searchQuery, rowsPerPage], () => {
   currentPage.value = 1
   fetchData()
 })
 
+// Handle page navigation
 const goToPage = (page) => {
   if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page
@@ -116,23 +103,64 @@ const goToPage = (page) => {
   }
 }
 
-const changeRowsPerPage = (rows) => {
-  rowsPerPage.value = rows.value
+// Handle rows per page change
+const changeRowsPerPage = (event) => {
+  rowsPerPage.value = event.value
   currentPage.value = 1
   fetchData()
 }
 
+// Delete category
+const confirmDelete = (id) => {
+  deleteId.value = id
+  deleteDialog.value = true
+}
+
+const deleteCategory = () => {
+  axios.delete(`/api/category/${deleteId.value}`)
+    .then(() => {
+      toast.add({
+        severity: 'success',
+        summary: t('success'),
+        detail: t('category.deleteSuccess'),
+        life: 3000
+      })
+      fetchData()
+      deleteDialog.value = false
+    })
+    .catch((error) => {
+      toast.add({
+        severity: 'error',
+        summary: t('error'),
+        detail: t('category.deleteError'),
+        life: 3000
+      })
+    })
+}
+
+// Export CSV
+const exportCSV = () => {
+  dt.value.exportCSV()
+}
+
+// Navigation functions
+const createNewCategory = () => {
+  router.push({ name: 'category-create' })
+}
+
+const editCategory = (id) => {
+  router.push({ name: 'category-update', params: { id } })
+}
+
+// Get market type severity
+const getMarketTypeSeverity = (type) => {
+  return type === 1 ? 'success' : 'info'
+}
+
+// Lifecycle hooks
 onMounted(() => {
   fetchData()
 })
-
-const openNew = () => {
-  router.push({name:'brand-create'})
-}
-
-const editBrand = (id) => {
-  router.push({name:'brand-edit',params:{id:id}})
-}
 </script>
 
 <template>
@@ -141,28 +169,28 @@ const editBrand = (id) => {
       <div class="card p-4 shadow-2 border-round">
         <Toolbar class="mb-4">
           <template #start>
-            <h2 class="text-2xl font-bold">{{ t('brand.managementTitle') }}</h2>
+            <h2 class="text-2xl font-bold">{{ t('category.managementTitle') }}</h2>
           </template>
 
           <template #end>
             <div class="flex gap-2">
               <span class="p-input-icon-left">
                 <i class="pi pi-search" />
-                <InputText v-model="searchQuery" :placeholder="t('brand.search')" />
+                <InputText v-model="searchQuery" :placeholder="t('category.search')" />
               </span>
               <Button
-                :label="t('brand.export')"
+                :label="t('category.export')"
                 icon="pi pi-upload"
                 class="p-export"
-                v-can="'list brands'"
+                v-can="'list categories'"
                 @click="exportCSV"
               />
               <Button
-                v-can="'create brands'"
-                :label="t('brand.new')"
+                v-can="'create categories'"
+                :label="t('category.new')"
                 icon="pi pi-plus"
                 class="p-button-success"
-                @click="openNew"
+                @click="createNewCategory"
               />
             </div>
           </template>
@@ -173,7 +201,8 @@ const editBrand = (id) => {
         <div class="card shadow-1 surface-0">
           <DataTable
             ref="dt"
-            :value="brands"
+            :value="categories"
+            v-model:selection="selectedCategories"
             :loading="loading"
             data-key="id"
             :paginator="false"
@@ -184,33 +213,54 @@ const editBrand = (id) => {
             stripedRows
             showGridlines
             class="p-datatable-sm"
-            v-can="'list brands'"
+            v-can="'list categories'"
           >
             <Column selection-mode="multiple" header-style="width: 3rem"></Column>
 
-            <Column field="name_en" :header="t('brand.name_en')" :sortable="true">
+            <Column field="name_en" :header="t('category.nameEn')" :sortable="true">
               <template #body="slotProps">
                 {{ slotProps.data.name_en }}
               </template>
             </Column>
 
-            <Column field="name_ar" :header="t('brand.name_ar')" :sortable="true">
+            <Column field="name_ar" :header="t('category.nameAr')" :sortable="true">
               <template #body="slotProps">
                 {{ slotProps.data.name_ar }}
+              </template>
+            </Column>
+
+            <Column field="is_market" :header="t('category.marketType')" :sortable="true">
+              <template #body="slotProps">
+                <Tag
+                  :value="slotProps.data.is_market ? t('category.market') : t('category.nonMarket')"
+                  :severity="getMarketTypeSeverity(slotProps.data.is_market)"
+                />
+              </template>
+            </Column>
+
+            <Column field="parent.name_en" :header="t('category.parent')" :sortable="true">
+              <template #body="slotProps">
+                {{ slotProps.data.parent?.name_en || t('category.noParent') }}
+              </template>
+            </Column>
+
+            <Column field="store.name_en" :header="t('category.store')" :sortable="true">
+              <template #body="slotProps">
+                {{ slotProps.data.store?.name_en || '' }}
               </template>
             </Column>
 
             <Column :header="t('actions')" headerStyle="width: 12rem">
               <template #body="slotProps">
                 <Button
-                  v-can="'edit brands'"
+                  v-can="'edit categories'"
                   icon="pi pi-pencil"
                   class="p-detail"
-                  @click="editBrand(slotProps.data.id)"
+                  @click="editCategory(slotProps.data.id)"
                   v-tooltip.top="t('edit')"
                 />
                 <Button
-                  v-can="'delete brands'"
+                  v-can="'delete categories'"
                   icon="pi pi-trash"
                   class="p-delete mx-2"
                   @click="confirmDelete(slotProps.data.id)"
@@ -222,7 +272,7 @@ const editBrand = (id) => {
             <template #empty>
               <div class="text-center py-4">
                 <i class="pi pi-exclamation-circle text-2xl mb-2" />
-                <p class="text-xl">{{ t('brand.noData') }}</p>
+                <p class="text-xl">{{ t('category.noData') }}</p>
               </div>
             </template>
 
@@ -233,9 +283,8 @@ const editBrand = (id) => {
             </template>
           </DataTable>
 
-          <!-- Custom Pagination -->
           <div class="p-paginator p-component p-unselectable-text p-paginator-bottom">
-            <div class="p-paginator-left-content">
+            <div class="p-paginator-left Rd-content">
               <span class="p-paginator-current">{{ t('show') }} {{ from }} {{ t('to') }} {{ to }} {{ t('from') }} {{ totalRecords }}</span>
             </div>
             <div class="p-paginator-right-content">
@@ -256,7 +305,7 @@ const editBrand = (id) => {
 
               <template v-for="(link, index) in links" :key="index">
                 <button
-                  v-if="link.label && !isNaN(link.label)"
+                  v-if="link.label && !isNaN(parseInt(link.label))"
                   class="p-paginator-page p-paginator-element p-link"
                   :class="{ 'p-highlight': link.active }"
                   @click="goToPage(parseInt(link.label))"
@@ -284,7 +333,6 @@ const editBrand = (id) => {
               <Dropdown
                 v-model="rowsPerPage"
                 :options="[5, 10, 20, 30]"
-                optionLabel=""
                 @change="changeRowsPerPage"
                 class="ml-2"
                 style="width: 80px"
@@ -296,12 +344,12 @@ const editBrand = (id) => {
         <Dialog
           v-model:visible="deleteDialog"
           :style="{ width: '450px' }"
-          :header="t('brand.deleteConfirmTitle')"
+          :header="t('category.deleteConfirmTitle')"
           :modal="true"
         >
           <div class="flex align-items-center justify-content-center">
             <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem; color: var(--red-500)" />
-            <span>{{ t('brand.deleteConfirmMessage') }}</span>
+            <span>{{ t('category.deleteConfirmMessage') }}</span>
           </div>
           <template #footer>
             <Button
@@ -314,43 +362,13 @@ const editBrand = (id) => {
               :label="t('yes')"
               icon="pi pi-check"
               class="p-button-text p-button-danger"
-              @click="deleteBrand"
+              @click="deleteCategory"
             />
           </template>
         </Dialog>
+
       </div>
     </div>
   </div>
 </template>
 
-<style scoped lang="scss">
-/* Custom styles for better table display */
-:deep(.p-datatable) {
-  font-size: 0.9rem;
-}
-
-:deep(.p-datatable .p-datatable-thead > tr > th) {
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 0.8rem;
-  letter-spacing: 0.5px;
-}
-
-:deep(.p-datatable .p-datatable-tbody > tr) {
-  transition: background-color 0.2s;
-}
-
-:deep(.p-datatable .p-datatable-tbody > tr:hover) {
-  background-color: var(--hoverColor);
-}
-
-
-
-/* Responsive adjustments */
-@media screen and (max-width: 960px) {
-  :deep(.p-datatable) {
-    overflow-x: auto;
-    display: block;
-  }
-}
-</style>

@@ -59,7 +59,7 @@
         this.loading = true
 
         const params = {
-          per_page: this.perPage,
+          limit: this.perPage,
           page: page,
         }
 

@@ -1,9 +1,20 @@
+```vue
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import axios from "axios";
+import axios from 'axios'
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import Toolbar from 'primevue/toolbar'
+import Toast from 'primevue/toast'
+import Dialog from 'primevue/dialog'
+import ProgressSpinner from 'primevue/progressspinner'
+import Dropdown from 'primevue/dropdown'
+import Tag from 'primevue/tag'
 
 const router = useRouter()
 const toast = useToast()
@@ -24,15 +35,21 @@ const currentPage = ref(1)
 const totalRecords = ref(0)
 const rowsPerPage = ref(10)
 const totalPages = ref(0)
+const firstPageUrl = ref('')
+const lastPageUrl = ref('')
+const nextPageUrl = ref('')
+const prevPageUrl = ref('')
+const from = ref(0)
+const to = ref(0)
+const links = ref([])
 
 // Fetch data
 const fetchData = () => {
   loading.value = true
-  axios.get('api/custom-tab-details')
   axios.get('/api/custom-tabs', {
     params: {
       page: currentPage.value,
-      per_page: rowsPerPage.value,
+      limit: rowsPerPage.value,
       search: searchQuery.value || undefined
     }
   })
@@ -40,6 +57,13 @@ const fetchData = () => {
       customTabs.value = response.data.data.data
       totalRecords.value = response.data.data.total
       totalPages.value = response.data.data.last_page
+      firstPageUrl.value = response.data.data.first_page_url
+      lastPageUrl.value = response.data.data.last_page_url
+      nextPageUrl.value = response.data.data.next_page_url
+      prevPageUrl.value = response.data.data.prev_page_url
+      from.value = response.data.data.from
+      to.value = response.data.data.to
+      links.value = response.data.data.links
       loading.value = false
     })
     .catch((error) => {
@@ -54,10 +78,26 @@ const fetchData = () => {
     })
 }
 
-// Watch for pagination changes
-watch([currentPage, rowsPerPage, searchQuery], () => {
+// Watch for pagination and search changes
+watch([searchQuery, rowsPerPage], () => {
+  currentPage.value = 1
   fetchData()
 })
+
+// Handle page navigation
+const goToPage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page
+    fetchData()
+  }
+}
+
+// Handle rows per page change
+const changeRowsPerPage = (event) => {
+  rowsPerPage.value = event.value
+  currentPage.value = 1
+  fetchData()
+}
 
 // Delete custom tab
 const confirmDelete = (id) => {
@@ -84,6 +124,7 @@ const deleteCustomTab = () => {
         detail: t('customTabs.deleteError'),
         life: 3000
       })
+      console.error('Error deleting custom tab:', error)
     })
 }
 
@@ -100,6 +141,7 @@ const createNewCustomTab = () => {
 const editCustomTab = (id) => {
   router.push({ name: 'custom_tabs_update', params: { id } })
 }
+
 const showCustomTab = (id) => {
   router.push({ name: 'custom_tabs_show', params: { id } })
 }
@@ -138,7 +180,6 @@ onMounted(() => {
                 @click="exportCSV"
               />
               <Button
-
                 v-can="'create custom tabs'"
                 :label="t('customTabs.new')"
                 icon="pi pi-plus"
@@ -157,13 +198,10 @@ onMounted(() => {
             :value="customTabs"
             :loading="loading"
             data-key="id"
-            :paginator="true"
+            :paginator="false"
             :rows="rowsPerPage"
             :filters="filters"
             :totalRecords="totalRecords"
-            paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-            :rows-per-page-options="[5, 10, 20, 30]"
-            :current-page-report-template="`${t('show')} {first} ${t('to')} {last} ${t('from')} {totalRecords}`"
             responsive-layout="scroll"
             stripedRows
             showGridlines
@@ -172,33 +210,34 @@ onMounted(() => {
           >
             <Column selection-mode="multiple" header-style="width: 3rem"></Column>
 
-            <Column field="name_en" :header="t('customTabs.nameEn')" :sortable="true">
+            <Column field="name_en" :header="t('customTabs.nameEn')" :sortable="true" header-style="width:14%; min-width:10rem;">
               <template #body="slotProps">
                 {{ slotProps.data.name_en }}
               </template>
             </Column>
 
-            <Column field="name_ar" :header="t('customTabs.nameAr')" :sortable="true">
+            <Column field="name_ar" :header="t('customTabs.nameAr')" :sortable="true" header-style="width:14%; min-width:10rem;">
               <template #body="slotProps">
                 {{ slotProps.data.name_ar }}
               </template>
             </Column>
 
-            <Column field="model_type" :header="t('customTabs.modelType')" :sortable="true">
+            <Column field="model_type" :header="t('customTabs.modelType')" :sortable="true" header-style="width:14%; min-width:10rem;">
               <template #body="slotProps">
-                {{ slotProps.data.model_type }}
+                {{ slotProps.data.model_type || t('customTabs.noModelType') }}
               </template>
             </Column>
 
-            <Column field="type_description" :header="t('customTabs.typeDescription')" :sortable="true">
+            <Column field="type_description" :header="t('customTabs.typeDescription')" :sortable="true" header-style="width:14%; min-width:10rem;">
               <template #body="slotProps">
-                {{ slotProps.data.type_description }}
+                <Tag
+                  :value="slotProps.data.type_description || t('customTabs.noType')"
+                  :severity="getTypeSeverity(slotProps.data.type)"
+                />
               </template>
             </Column>
 
-
-
-            <Column :header="t('actions')" headerStyle="width: 15rem">
+            <Column :header="t('actions')" header-style="width:15rem;">
               <template #body="slotProps">
                 <Button
                   v-can="'edit custom tabs'"
@@ -209,19 +248,18 @@ onMounted(() => {
                 />
                 <Button
                   v-can="'delete custom tabs'"
-                  icon="pi pi-trash"
-                  class="p-delete mx-2"
+                  icon="pi pi-trash mx-2"
+                  class="p-delete"
                   @click="confirmDelete(slotProps.data.id)"
                   v-tooltip.top="t('delete')"
                 />
-                 <Button
-                  v-can="'delete custom tabs'"
-                  icon="pi pi-eye"
-                  class="p-detail mx-2"
+                <Button
+                  v-can="'view custom tabs'"
+                  icon="pi pi-eye mx-2"
+                  class="p-detail"
                   @click="showCustomTab(slotProps.data.id)"
                   v-tooltip.top="t('show')"
                 />
-
               </template>
             </Column>
 
@@ -238,6 +276,64 @@ onMounted(() => {
               </div>
             </template>
           </DataTable>
+
+          <!-- Custom Pagination -->
+          <div class="p-paginator p-component p-unselectable-text p-paginator-bottom">
+            <div class="p-paginator-left-content">
+              <span class="p-paginator-current">{{ t('show') }} {{ from }} {{ t('to') }} {{ to }} {{ t('from') }} {{ totalRecords }}</span>
+            </div>
+            <div class="p-paginator-right-content">
+              <button
+                class="p-paginator-first p-paginator-element p-link"
+                :disabled="currentPage === 1"
+                @click="goToPage(1)"
+              >
+                <span class="p-paginator-icon pi pi-angle-double-left"></span>
+              </button>
+              <button
+                class="p-paginator-prev p-paginator-element p-link"
+                :disabled="!prevPageUrl"
+                @click="goToPage(currentPage - 1)"
+              >
+                <span class="p-paginator-icon pi pi-angle-left"></span>
+              </button>
+
+              <template v-for="(link, index) in links" :key="index">
+                <button
+                  v-if="link.label && !isNaN(parseInt(link.label))"
+                  class="p-paginator-page p-paginator-element p-link"
+                  :class="{ 'p-highlight': link.active }"
+                  @click="goToPage(parseInt(link.label))"
+                >
+                  {{ link.label }}
+                </button>
+                <span v-else-if="link.label === '...'" class="p-paginator-dots">...</span>
+              </template>
+
+              <button
+                class="p-paginator-next p-paginator-element p-link"
+                :disabled="!nextPageUrl"
+                @click="goToPage(currentPage + 1)"
+              >
+                <span class="p-paginator-icon pi pi-angle-right"></span>
+              </button>
+              <button
+                class="p-paginator-last p-paginator-element p-link"
+                :disabled="currentPage === totalPages"
+                @click="goToPage(totalPages)"
+              >
+                <span class="p-paginator-icon pi pi-angle-double-right"></span>
+              </button>
+
+              <Dropdown
+                v-model="rowsPerPage"
+                :options="[5, 10, 20, 30]"
+                @change="changeRowsPerPage"
+                class="ml-2"
+                style="width: 80px"
+              />
+            </div>
+          </div>
         </div>
 
         <!-- Delete Confirmation Dialog -->
@@ -258,14 +354,12 @@ onMounted(() => {
               class="p-button-text"
               @click="deleteDialog = false"
             />
-
             <Button
               :label="t('yes')"
               icon="pi pi-check"
               class="p-button-text p-button-danger"
               @click="deleteCustomTab"
             />
-
           </template>
         </Dialog>
       </div>
@@ -273,32 +367,3 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped lang="scss">
-/* Custom styles for better table display */
-:deep(.p-datatable) {
-  font-size: 0.9rem;
-}
-
-:deep(.p-datatable .p-datatable-thead > tr > th) {
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 0.8rem;
-  letter-spacing: 0.5px;
-}
-
-:deep(.p-datatable .p-datatable-tbody > tr) {
-  transition: background-color 0.2s;
-}
-
-:deep(.p-datatable .p-datatable-tbody > tr:hover) {
-  background-color: var(--hoverColor);
-}
-
-/* Responsive adjustments */
-@media screen and (max-width: 960px) {
-  :deep(.p-datatable) {
-    overflow-x: auto;
-    display: block;
-  }
-}
-</style>

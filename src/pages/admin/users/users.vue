@@ -1,14 +1,27 @@
+```vue
 <script setup>
-import { useToast } from 'primevue/usetoast'
-import { FilterMatchMode } from 'primevue/api'
 import { ref, onMounted, onBeforeMount, watch } from 'vue'
-import axios from "axios"
-import { useRouter } from "vue-router"
+import { useToast } from 'primevue/usetoast'
+import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { FilterMatchMode } from 'primevue/api'
+import axios from 'axios'
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import Toolbar from 'primevue/toolbar'
+import Toast from 'primevue/toast'
+import Tag from 'primevue/tag'
+import Dialog from 'primevue/dialog'
+import ProgressSpinner from 'primevue/progressspinner'
+import Dropdown from 'primevue/dropdown'
 
 const { t } = useI18n()
 const router = useRouter()
 const toast = useToast()
+
+// State variables
 const loading = ref(true)
 const delete_id = ref('')
 const users = ref(null)
@@ -31,10 +44,70 @@ const from = ref(0)
 const to = ref(0)
 const links = ref([])
 
-const exportCSV = () => {
-  dt.value.exportCSV()
+// Initialize filters
+const initFilters = () => {
+  filters.value = {
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  }
 }
 
+// Fetch data
+const fetchData = () => {
+  loading.value = true
+  axios.get('/api/user', {
+    params: {
+      page: currentPage.value,
+      limit: rowsPerPage.value,
+      search: searchQuery.value || undefined
+    }
+  })
+    .then((res) => {
+      users.value = res.data.data.data
+      totalRecords.value = res.data.data.total
+      totalPages.value = res.data.data.last_page
+      firstPageUrl.value = res.data.data.first_page_url
+      lastPageUrl.value = res.data.data.last_page_url
+      nextPageUrl.value = res.data.data.next_page_url
+      prevPageUrl.value = res.data.data.prev_page_url
+      from.value = res.data.data.from
+      to.value = res.data.data.to
+      links.value = res.data.data.links
+      loading.value = false
+    })
+    .catch((error) => {
+      toast.add({
+        severity: 'error',
+        summary: t('error'),
+        detail: t('user.loadError'),
+        life: 3000
+      })
+      loading.value = false
+      console.error('Error fetching data:', error)
+    })
+}
+
+// Watch for search and rows per page changes
+watch([searchQuery, rowsPerPage], () => {
+  currentPage.value = 1
+  fetchData()
+})
+
+// Handle page navigation
+const goToPage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page
+    fetchData()
+  }
+}
+
+// Handle rows per page change
+const changeRowsPerPage = (event) => {
+  rowsPerPage.value = event.value
+  currentPage.value = 1
+  fetchData()
+}
+
+// Delete user
 const confirmDelete = (id) => {
   delete_id.value = id
   deleteDialog.value = true
@@ -43,16 +116,16 @@ const confirmDelete = (id) => {
 const deleteUser = () => {
   axios.delete(`/api/user/${delete_id.value}`)
     .then(() => {
-      fetchData()
-      deleteDialog.value = false
       toast.add({
         severity: 'success',
         summary: t('success'),
         detail: t('user.deleteSuccess'),
         life: 3000
       })
+      fetchData()
+      deleteDialog.value = false
     })
-    .catch(error => {
+    .catch((error) => {
       toast.add({
         severity: 'error',
         summary: t('error'),
@@ -62,77 +135,28 @@ const deleteUser = () => {
     })
 }
 
-const initFilters = () => {
-  filters.value = {
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-  }
+// Export CSV
+const exportCSV = () => {
+  dt.value.exportCSV()
 }
 
-onBeforeMount(() => {
-  initFilters()
-})
-
-const fetchData = () => {
-  loading.value = true
-  axios.get("/api/user", {
-    params: {
-      page: currentPage.value,
-      limit: rowsPerPage.value,
-      search: searchQuery.value
-    }
-  }).then((res) => {
-    loading.value = false
-    users.value = res.data.data.data
-    totalRecords.value = res.data.data.total
-    totalPages.value = res.data.data.last_page
-    firstPageUrl.value = res.data.data.first_page_url
-    lastPageUrl.value = res.data.data.last_page_url
-    nextPageUrl.value = res.data.data.next_page_url
-    prevPageUrl.value = res.data.data.prev_page_url
-    from.value = res.data.data.from
-    to.value = res.data.data.to
-    links.value = res.data.data.links
-  }).catch(error => {
-    loading.value = false
-    toast.add({
-      severity: 'error',
-      summary: t('error'),
-      detail: t('user.loadError'),
-      life: 3000
-    })
-    console.error("Error fetching data:", error)
-  })
-}
-
-watch(searchQuery, (newVal) => {
-  currentPage.value = 1
-  fetchData()
-})
-
-const goToPage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page
-    fetchData()
-  }
-}
-
-const changeRowsPerPage = (rows) => {
-  rowsPerPage.value = rows.value
-  currentPage.value = 1
-  fetchData()
-}
-
-onMounted(() => {
-  fetchData()
-})
-
+// Navigation functions
 const openNew = () => {
   router.push({ name: 'user-create' })
 }
 
 const editUser = (id) => {
-  router.push({ name: 'user-edit', params: { id: id } })
+  router.push({ name: 'user-edit', params: { id } })
 }
+
+// Lifecycle hooks
+onBeforeMount(() => {
+  initFilters()
+})
+
+onMounted(() => {
+  fetchData()
+})
 </script>
 
 <template>
@@ -253,68 +277,60 @@ const editUser = (id) => {
           </DataTable>
 
           <!-- Custom Pagination -->
-          <div class="p-paginator p-component p-unselectable-text mt-3">
+          <div class="p-paginator p-component p-unselectable-text p-paginator-bottom">
             <div class="p-paginator-left-content">
-              <span class="p-paginator-current">
-                {{ t('showing') }} {{ from }} {{ t('to') }} {{ to }} {{ t('of') }} {{ totalRecords }} {{ t('entries') }}
-              </span>
+              <span class="p-paginator-current">{{ t('show') }} {{ from }} {{ t('to') }} {{ to }} {{ t('from') }} {{ totalRecords }}</span>
             </div>
             <div class="p-paginator-right-content">
-              <span class="p-paginator-pages">
-                <button
-                  class="p-paginator-first p-paginator-element p-link"
-                  :disabled="currentPage === 1"
-                  @click="goToPage(1)"
-                >
-                  <span class="p-paginator-icon pi pi-angle-double-left"></span>
-                </button>
-                <button
-                  class="p-paginator-prev p-paginator-element p-link"
-                  :disabled="!prevPageUrl"
-                  @click="goToPage(currentPage - 1)"
-                >
-                  <span class="p-paginator-icon pi pi-angle-left"></span>
-                </button>
+              <button
+                class="p-paginator-first p-paginator-element p-link"
+                :disabled="currentPage === 1"
+                @click="goToPage(1)"
+              >
+                <span class="p-paginator-icon pi pi-angle-double-left"></span>
+              </button>
+              <button
+                class="p-paginator-prev p-paginator-element p-link"
+                :disabled="!prevPageUrl"
+                @click="goToPage(currentPage - 1)"
+              >
+                <span class="p-paginator-icon pi pi-angle-left"></span>
+              </button>
 
-                <template v-for="(link, index) in links" :key="index">
-                  <button
-                    v-if="link.label && !isNaN(link.label)"
-                    class="p-paginator-page p-paginator-element p-link"
-                    :class="{ 'p-highlight': link.active }"
-                    @click="goToPage(parseInt(link.label))"
-                  >
-                    {{ link.label }}
-                  </button>
-                  <span v-else-if="link.label === '...'" class="p-paginator-dots">...</span>
-                </template>
-
+              <template v-for="(link, index) in links" :key="index">
                 <button
-                  class="p-paginator-next p-paginator-element p-link"
-                  :disabled="!nextPageUrl"
-                  @click="goToPage(currentPage + 1)"
+                  v-if="link.label && !isNaN(parseInt(link.label))"
+                  class="p-paginator-page p-paginator-element p-link"
+                  :class="{ 'p-highlight': link.active }"
+                  @click="goToPage(parseInt(link.label))"
                 >
-                  <span class="p-paginator-icon pi pi-angle-right"></span>
+                  {{ link.label }}
                 </button>
-                <button
-                  class="p-paginator-last p-paginator-element p-link"
-                  :disabled="currentPage === totalPages"
-                  @click="goToPage(totalPages)"
-                >
-                  <span class="p-paginator-icon pi pi-angle-double-right"></span>
-                </button>
-              </span>
+                <span v-else-if="link.label === '...'" class="p-paginator-dots">...</span>
+              </template>
 
-              <span class="p-paginator-rpp-options">
-                <Dropdown
-                  v-model="rowsPerPage"
-                  :options="[5, 10, 20, 30]"
-                  optionLabel="label"
-                  optionValue="value"
-                  @change="changeRowsPerPage"
-                  class="ml-2"
-                  style="width: 100px"
-                />
-              </span>
+              <button
+                class="p-paginator-next p-paginator-element p-link"
+                :disabled="!nextPageUrl"
+                @click="goToPage(currentPage + 1)"
+              >
+                <span class="p-paginator-icon pi pi-angle-right"></span>
+              </button>
+              <button
+                class="p-paginator-last p-paginator-element p-link"
+                :disabled="currentPage === totalPages"
+                @click="goToPage(totalPages)"
+              >
+                <span class="p-paginator-icon pi pi-angle-double-right"></span>
+              </button>
+
+              <Dropdown
+                v-model="rowsPerPage"
+                :options="[5, 10, 20, 30]"
+                @change="changeRowsPerPage"
+                class="ml-2"
+                style="width: 80px"
+              />
             </div>
           </div>
         </div>
@@ -350,103 +366,6 @@ const editUser = (id) => {
   </div>
 </template>
 
-<style scoped lang="scss">
-:deep(.p-datatable) {
-  font-size: 0.9rem;
-
-  .p-datatable-thead > tr > th {
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    letter-spacing: 0.5px;
-  }
-
-  .p-datatable-tbody > tr {
-    transition: background-color 0.2s;
-
-    &:hover {
-      background-color: var(--surface-hover);
-    }
-  }
-}
-
-.p-paginator {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.5rem;
-  background: var(--surface-card);
-  border: 1px solid var(--surface-border);
-  border-radius: 3px;
-
-  .p-paginator-left-content {
-    color: var(--text-color-secondary);
-  }
-
-  .p-paginator-right-content {
-    display: flex;
-    align-items: center;
-
-    .p-paginator-pages {
-      display: flex;
-      margin: 0 0.5rem;
-
-      button {
-        text-align: center;
-        min-width: 2.357rem;
-        height: 2.357rem;
-        margin: 0.143rem;
-        border: 0 none;
-        color: var(--text-color-secondary);
-        background: transparent;
-        border-radius: 50%;
-        transition: background-color 0.2s;
-
-        &:hover {
-          background: var(--surface-hover);
-        }
-
-        &.p-highlight {
-          color: var(--primary-color-text);
-          background: var(--primary-color);
-        }
-
-        &:disabled {
-          opacity: 0.5;
-          cursor: default;
-        }
-      }
-    }
-
-    .p-paginator-dots {
-      min-width: 2.357rem;
-      height: 2.357rem;
-      margin: 0.143rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-color-secondary);
-    }
-  }
-}
-
-@media screen and (max-width: 960px) {
-  :deep(.p-datatable) {
-    overflow-x: auto;
-    display: block;
-  }
-
-  .p-paginator {
-    flex-direction: column;
-    gap: 1rem;
-
-    .p-paginator-left-content {
-      order: 2;
-    }
-
-    .p-paginator-right-content {
-      order: 1;
-    }
-  }
-}
+<style>
 </style>
+```
