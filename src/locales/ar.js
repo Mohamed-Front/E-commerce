@@ -649,6 +649,8 @@ export default {
     valueRequired: 'يجب ملء جميع القيم باللغتين',
   },
   discount: {
+    select_category :"",
+    select_category :"",
     managementTitle: 'إدارة الخصومات',
     search: 'البحث في الخصومات...',
     export: 'تصدير',
