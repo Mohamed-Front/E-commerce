@@ -19,6 +19,6 @@
     "types": ["vite/client"],
     "allowJs": true
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue", "vite.config.ts"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue", "vite.config.ts", "src/pages/admin/frontend/store/auth.store.ts"],
   "exclude": ["node_modules/**/*"]
 }

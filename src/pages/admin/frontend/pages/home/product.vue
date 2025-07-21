@@ -236,7 +236,7 @@
 
   onMounted(async () => {
    await axios
-      .get(`api/product/${route.query.product}`)
+      .get(`api/home/product-details/${route.query.product}`)
       .then((response) => {
         pro.value = response.data.data
         curantimg.value = pro.value.media[0].url

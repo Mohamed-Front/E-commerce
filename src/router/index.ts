@@ -49,6 +49,11 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../pages/admin/frontend/pages/cart.vue'),
   },
   {
+    name: 'authlog',
+    path: '/authlog',
+    component: () => import('../pages/admin/frontend/pages/auth.vue'),
+  },
+  {
     name: 'admin',
     path: '/admin',
     component: AppLayout,

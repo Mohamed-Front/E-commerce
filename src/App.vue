@@ -2,7 +2,7 @@
   <main
     class="bg-[#FAF7F0] min-h-[100vh]"
     v-if="
-      !route.path.includes('admin') && !route.path.includes('auth') && !route.path.includes('404') && route.name !== 'home'
+      !route.path.includes('admin') && !route.path.includes('auth') && !route.path.includes('404') && route.name !== 'home' && !route.name.includes('auth')
     "
   >
     <header>

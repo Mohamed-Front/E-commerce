@@ -51,7 +51,7 @@ pre {
   border-radius: 3px;
 
 
-  
+
 }
 .p-dropdown-panel .p-dropdown-header .p-dropdown-filter{
   margin: auto !important;
@@ -72,6 +72,10 @@ pre {
   background-color: var(--main-text-color) !important;
   border-color: var(--main-text-color) !important;
   color: #fff;
+}
+.Custombutton {
+    background-color:transparent !important;
+    border-color: white !important;
 }
 .paginatorwrapper{
   direction: rtl !important;
@@ -151,7 +155,7 @@ pre {
 }
 .notification-dropdown__content
 {
-   max-height: 300px !important;
+  max-height: 300px !important;
   width: 300px !important;
   overflow: hidden !important;
 }

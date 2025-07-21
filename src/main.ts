@@ -108,6 +108,7 @@ import TreeSelect from 'primevue/treeselect'
 import TreeTable from 'primevue/treetable'
 import TriStateCheckbox from 'primevue/tristatecheckbox'
 import VirtualScroller from 'primevue/virtualscroller'
+import { createPinia } from 'pinia'
 // @ts-ignore
 import CodeHighlight from '@/components/CodeHighlight.vue'
 // @ts-ignore
@@ -133,6 +134,7 @@ import axios from 'axios';
 // import VueAxios from 'vue-axios'
 const app = createApp(App)
 
+app.use(createPinia())
 app.use(stores)
 app.use(router)
 app.use(i18n)
