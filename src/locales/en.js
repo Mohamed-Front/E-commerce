@@ -633,8 +633,8 @@ export default {
     valueRequired: 'All values must be filled in both languages',
   },
   discount: {
-      select_category :" select category",
-    select_product  :" select product",
+    select_category:" select category",
+    select_product :" select product",
     managementTitle: 'Discounts Management',
     search: 'Search discounts...',
     export: 'Export',

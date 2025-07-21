@@ -140,7 +140,7 @@ onMounted(() => {
         <!-- Model ID (Category or Product selection) -->
         <div class="space-y-2">
           <label for="model_ids" class="block text-sm font-medium text-gray-700">
-            {{ $t(discountData.model_type === 'product' ? 'discount.select_category' : 'discount.select_model') }} <span class="text-red-500">*</span>
+            {{ $t(discountData.model_type === 'product' ? 'discount.select_category' :'discount.select_category') }} <span class="text-red-500">*</span>
           </label>
           <MultiSelect
             filter
@@ -149,7 +149,7 @@ onMounted(() => {
             :options="discountData.model_type === 'product' ? categories : categories"
             :optionLabel="labelField"
             optionValue="id"
-            :placeholder="$t(discountData.model_type === 'product' ? 'discount.select_category' : 'discount.select_model')"
+            :placeholder="$t(discountData.model_type === 'product' ? 'discount.select_category' : 'discount.select_category')"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
             required
           />

@@ -649,8 +649,8 @@ export default {
     valueRequired: 'يجب ملء جميع القيم باللغتين',
   },
   discount: {
-    select_category :"",
-    select_category :"",
+    select_category:"اختر الكاتكورجي",
+    select_product:"اختر المنتجات",
     managementTitle: 'إدارة الخصومات',
     search: 'البحث في الخصومات...',
     export: 'تصدير',
