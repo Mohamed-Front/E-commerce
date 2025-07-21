@@ -134,6 +134,7 @@ const submitForm = async () => {
             {{ $t("coupon.discount_type") }} <span class="text-red-500">*</span>
           </label>
           <Dropdown
+          filter
             id="discount_type"
             v-model="couponData.discount_type"
             :options="[

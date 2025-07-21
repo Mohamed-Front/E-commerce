@@ -176,6 +176,7 @@ const submitForm = async () => {
             Brand <span class="text-red-500">*</span>
           </label>
           <Dropdown
+          filter
           id="brand_id"
           v-model="modelData.brand_id"
           :options="brands"

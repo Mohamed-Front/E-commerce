@@ -91,8 +91,8 @@ const routes: Array<RouteRecordRaw> = [
             component: () => import('../pages/admin/users/users.vue'),
           },
           {
-            name: 'user-edite',
-            path: 'user-edite/:id',
+            name: 'user-edit',
+            path: 'user-edit/:id',
             component: () => import('../pages/admin/users/edite.vue'),
           },
           {

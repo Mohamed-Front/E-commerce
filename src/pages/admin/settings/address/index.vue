@@ -256,7 +256,7 @@ onMounted(() => {
                 <Button
                   v-can="'delete address'"
                   icon="pi pi-trash"
-                  class PlaylistItem="p-delete mx-2"
+                  class ="p-delete mx-2"
                   @click="confirmDelete(slotProps.data.id)"
                   v-tooltip.top="t('delete')"
                 />
@@ -325,6 +325,7 @@ onMounted(() => {
               </button>
 
               <Dropdown
+              
                 v-model="rowsPerPage"
                 :options="[5, 10, 20, 30]"
                 @change="changeRowsPerPage"

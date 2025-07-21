@@ -94,6 +94,7 @@ const submitForm = async () => {
             {{ $t("discount.model_id") }} <span class="text-red-500">*</span>
           </label>
           <Dropdown
+          filter
             id="model_id"
             v-model="discountData.model_id"
             :options="models"
@@ -112,6 +113,7 @@ const submitForm = async () => {
             {{ $t("discount.model_type") }} <span class="text-red-500">*</span>
           </label>
           <Dropdown
+            filter
             id="model_type"
             v-model="discountData.model_type"
             :options="['product', 'category']"
@@ -128,6 +130,7 @@ const submitForm = async () => {
             {{ $t("discount.discount_type") }} <span class="text-red-500">*</span>
           </label>
           <Dropdown
+            filter
             id="discount_type"
             v-model="discountData.discount_type"
             :options="[

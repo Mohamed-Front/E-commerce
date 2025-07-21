@@ -254,7 +254,6 @@ onMounted(() => {
                   v-tooltip.top="t('delete')"
                 />
                 <Button
-                  v-can="'view custom tabs'"
                   icon="pi pi-eye mx-2"
                   class="p-detail"
                   @click="showCustomTab(slotProps.data.id)"

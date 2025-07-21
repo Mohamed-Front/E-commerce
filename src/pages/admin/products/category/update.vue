@@ -251,6 +251,7 @@ onMounted(async () => {
             {{ t('category.parent') }}
           </label>
           <Dropdown
+          filter
             v-model="categoryData.parent_id"
             :options="parentCategories"
             :optionLabel="categoryLabelField"
@@ -266,6 +267,7 @@ onMounted(async () => {
             {{ t('category.store') }} <span class="text-red-500">*</span>
           </label>
           <Dropdown
+          filter
             v-model="categoryData.store_id"
             :options="stores"
             :optionLabel="categoryLabelField"

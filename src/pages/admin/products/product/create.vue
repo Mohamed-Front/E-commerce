@@ -291,6 +291,7 @@ const submitForm = async () => {
             {{ t('product.store') }} <span class="text-red-500">*</span>
           </label>
           <Dropdown
+          filter
             id="store_id"
             v-model="productData.store_id"
             :options="stores"
@@ -306,6 +307,7 @@ const submitForm = async () => {
             {{ t('product.category') }} <span class="text-red-500">*</span>
           </label>
           <Dropdown
+          filter
             id="category_id"
             v-model="productData.category_id"
             :options="categories"
@@ -321,6 +323,7 @@ const submitForm = async () => {
             {{ t('product.brand') }} <span class="text-red-500">*</span>
           </label>
           <Dropdown
+          filter
             id="brand_id"
             v-model="productData.brand_id"
             :options="brands"

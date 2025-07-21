@@ -300,6 +300,7 @@ onMounted(() => {
               </button>
 
               <Dropdown
+              filter
                 v-model="rowsPerPage"
                 :options="[5, 10, 20, 30]"
                 @change="changeRowsPerPage"

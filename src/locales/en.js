@@ -12,6 +12,7 @@ export default {
   cancel: 'Cancel',
   remove: 'Remove',
   navigation: {
+    setting:"Settings",
     custom_tabs:"mange custom tabs",
     quickBooks : 'Quick Books',
     discount: 'discount',
@@ -55,6 +56,24 @@ export default {
     edit_User: 'Edit  User',
     update_User: 'Update User',
     click_or_drag_to_change_photo: 'Click or drag to change photo',
+  },
+  "settings": {
+    "title": "Settings",
+    "updateButton": "Update Settings",
+    "order_tax": "Order Tax (%)",
+    "facebook": "Facebook URL",
+    "snapchat": "Snapchat URL",
+    "instagram": "Instagram URL",
+    "whatsapp": "WhatsApp Number",
+    "address": "Business Address",
+    "phone": "Phone Number",
+    "order_taxPlaceholder": "Enter tax percentage",
+    "facebookPlaceholder": "Enter Facebook URL",
+    "snapchatPlaceholder": "Enter Snapchat URL",
+    "instagramPlaceholder": "Enter Instagram URL",
+    "whatsappPlaceholder": "Enter WhatsApp number",
+    "addressPlaceholder": "Enter business address",
+    "phonePlaceholder": "Enter phone number"
   },
   common: {
     id: 'ID',

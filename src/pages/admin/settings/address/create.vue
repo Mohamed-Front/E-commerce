@@ -56,7 +56,7 @@ const submitForm = async () => {
             {{ $t("user.name") }} <span class="text-red-500">*</span>
           </label>
            <Dropdown
-
+            filter
             v-model="addressData.user_id"
             :options="users"
             optionLabel="name"

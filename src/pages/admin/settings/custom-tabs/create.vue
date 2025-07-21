@@ -220,6 +220,7 @@ onMounted(() => {
               {{ $t('custom_tabs.type') }} <span class="text-red-500">*</span>
             </label>
             <Dropdown
+              filter
               id="type"
               v-model="formData.type"
               :options="typeOptions"
@@ -293,6 +294,7 @@ onMounted(() => {
               {{ $t('custom_tabs.row_type') }} <span class="text-red-500">*</span>
             </label>
             <Dropdown
+              filter
               id="row_type"
               v-model="formData.row_type"
               :options="rowTypeOptions"

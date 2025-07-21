@@ -1,3 +1,4 @@
+import { settings } from 'ionicons/icons'
 import Password from 'primevue/password'
 
 export default {
@@ -13,6 +14,8 @@ export default {
   cancel: 'إلغاء',
   remove: 'إزالة',
   navigation: {
+
+    setting:"الاعدادات",
     custom_tabs:"ادارة علامة التبويب",
     quickBooks: 'Quick Books',
     discount: 'الخصومات',
@@ -59,6 +62,24 @@ export default {
     update_User: 'تحديث المستخدم',
     click_or_drag_to_change_photo: 'انقر أو اسحب لتغيير الصورة',
     select_a_brand: 'اختر علامة تجارية',
+  },
+   "settings": {
+    "title": "الإعدادات",
+    "updateButton": "تحديث الإعدادات",
+    "order_tax": "ضريبة الطلب (%)",
+    "facebook": "رابط فيسبوك",
+    "snapchat": "رابط سناب شات",
+    "instagram": "رابط إنستغرام",
+    "whatsapp": "رقم واتساب",
+    "address": "عنوان العمل",
+    "phone": "رقم الهاتف",
+    "order_taxPlaceholder": "أدخل نسبة الضريبة",
+    "facebookPlaceholder": "أدخل رابط فيسبوك",
+    "snapchatPlaceholder": "أدخل رابط سناب شات",
+    "instagramPlaceholder": "أدخل رابط إنستغرام",
+    "whatsappPlaceholder": "أدخل رقم واتساب",
+    "addressPlaceholder": "أدخل عنوان العمل",
+    "phonePlaceholder": "أدخل رقم الهاتف"
   },
   common: {
     id: 'المعرف',

@@ -1,10 +1,11 @@
 <script setup>
-import { ref, onMounted,computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import axios from 'axios';
 import { useToast } from 'primevue/usetoast';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from "vue-router";
+import { useRouter } from 'vue-router';
 import moment from 'moment';
+
 // Language handling
 const currentLanguage = computed(() => localStorage.getItem('appLang') || 'en');
 const labelField = computed(() => currentLanguage.value === 'en' ? 'name_en' : 'name_ar');
@@ -13,99 +14,172 @@ const toast = useToast();
 const { t } = useI18n();
 const form = ref();
 const loading = ref(false);
-const models =ref([])
+const models = ref([]);
+const categories = ref([]);
+const products = ref([]);
+
 // Form Data
 const discountData = ref({
+  products:'',
   model_id: '',
   model_type: '',
   discount_type: null,
   discount_value: '',
   expires_at: ''
 });
-onMounted(() => {
- getModels()
+
+// Fetch categories when model_type is 'category'
+const fetchCategories = async () => {
+  try {
+    const response = await axios.get('api/category');
+    categories.value = response.data.data.data; // Adjust based on your API response structure
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    toast.add({ severity: 'error', summary: t('error'), detail: t('error_fetching_categories'), life: 3000 });
+  }
+};
+
+// Fetch products when a category is selected
+const fetchProducts = async (categoryId) => {
+  try {
+    const response = await axios.post(`api/category/products`,{
+      ids:categoryId
+    });
+    products.value = response.data.data; // Adjust based on your API response structure
+  } catch (error) {
+    console.error('Error fetching products:', error);
+  }
+};
+
+// Watch for changes in model_type to fetch categories or clear products
+watch(() => discountData.value.model_type, (newType) => {
+  discountData.value.model_id = ''; // Reset model_id when model_type changes
+  products.value = []; // Clear products when model_type changes
+  if (newType === 'category') {
+    fetchCategories();
+  } else if (newType === 'product') {
+    fetchCategories(); // Fetch categories for product selection
+  }
 });
- const getModels=()=>{
-  axios.get('api/model').then((res)=>{
-    models.value=res.data.data.data
-  })
- }
 
+// Watch for changes in model_id when model_type is 'product' to fetch products
+watch(() => discountData.value.model_id, (newModelId) => {
+  if (discountData.value.model_type === 'product' && newModelId) {
+    fetchProducts(newModelId);
+  } else {
+    products.value = []; // Clear products if no category is selected
+  }
+});
 
+// Fetch models on mount (if needed for other purposes)
+const getModels = async () => {
+  try {
+    const response = await axios.get('api/model');
+    models.value = response.data.data.data;
+  } catch (error) {
+    console.error('Error fetching models:', error);
+    toast.add({ severity: 'error', summary: t('error'), detail: t('error_fetching_models'), life: 3000 });
+  }
+};
 
 // Submit form
 const submitForm = async () => {
   loading.value = true;
+  const data={}
   discountData.value.expires_at = moment(discountData.value.expires_at).format('YYYY-MM-DD');
 
-  const formData = new FormData();
-  formData.append('model_id', discountData.value.model_id);
-  formData.append('model_type', discountData.value.model_type);
-  formData.append('discount_type', discountData.value.discount_type);
-  formData.append('discount_value', discountData.value.discount_value);
-  formData.append('expires_at', discountData.value.expires_at);
 
+    data.expires_at=discountData.value.expires_at
+    data.discount_value=discountData.value.discount_value
+    data.discount_type=discountData.value.discount_type
+    data.model_type=discountData.value.model_type
+     if(discountData.value.model_type == 'product')
+    data.model_id=discountData.value.products
   try {
-    await axios.post("/api/discount", formData);
-    router.push({name: 'discount'});
-    toast.add({ severity: 'success', summary: t("success"), detail: t("discount.created_successfully"), life: 3000 });
+    await axios.post('/api/discount', data);
+    router.push({ name: 'discount' });
+    toast.add({ severity: 'success', summary: t('success'), detail: t('discount.created_successfully'), life: 3000 });
   } catch (error) {
-    console.error("Error:", error);
-    toast.add({ severity: 'error', summary: t("error"), detail: error.response?.data?.message || 'An error occurred', life: 3000 });
+    console.error('Error:', error);
+    toast.add({ severity: 'error', summary: t('error'), detail: error.response?.data?.message || t('error_occurred'), life: 3000 });
   } finally {
     loading.value = false;
   }
 };
+
+onMounted(() => {
+  getModels();
+});
 </script>
 
 <template>
   <div v-can="'create discounts'" class="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow-lg">
-    <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">{{ $t("discount.create_new_discount") }}</h1>
+    <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">{{ $t('discount.create_new_discount') }}</h1>
 
     <Form ref="form" @submit.prevent="submitForm" class="space-y-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Model ID -->
-        <div class="space-y-2">
-          <label for="model_id" class="block text-sm font-medium text-gray-700">
-            {{ $t("discount.model_id") }} <span class="text-red-500">*</span>
-          </label>
-
-           <Dropdown
-            id="model_id"
-            v-model="discountData.model_id"
-            :options="models"
-             :optionLabel="labelField"
-            optionValue="id"
-            :placeholder='$t("discount.enter_model_id")'
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-            required
-          />
-          <small class="text-red-500 text-xs" v-if="form?.errors?.model_id">{{ form.errors.model_id[0] }}</small>
-        </div>
-
         <!-- Model Type -->
         <div class="space-y-2">
           <label for="model_type" class="block text-sm font-medium text-gray-700">
-            {{ $t("discount.model_type") }} <span class="text-red-500">*</span>
+            {{ $t('discount.model_type') }} <span class="text-red-500">*</span>
           </label>
-
           <Dropdown
+          filter
             id="model_type"
             v-model="discountData.model_type"
-             :options="['product', 'category']"
-            :placeholder='$t("discount.select_model_type")'
+            :options="['product', 'category']"
+            :placeholder="$t('discount.select_model_type')"
             class="w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
             required
           />
           <small class="text-red-500 text-xs" v-if="form?.errors?.model_type">{{ form.errors.model_type[0] }}</small>
         </div>
 
+        <!-- Model ID (Category or Product selection) -->
+        <div class="space-y-2">
+          <label for="model_id" class="block text-sm font-medium text-gray-700">
+            {{ $t(discountData.model_type === 'product' ? 'discount.select_category' : 'discount.select_model') }} <span class="text-red-500">*</span>
+          </label>
+          <MultiSelect
+            filter
+            id="model_id"
+            v-model="discountData.model_id"
+            :options="discountData.model_type === 'product' ? categories : categories"
+            :optionLabel="labelField"
+            optionValue="id"
+            :placeholder="$t(discountData.model_type === 'product' ? 'discount.select_category' : 'discount.select_model')"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            required
+          />
+          <small class="text-red-500 text-xs" v-if="form?.errors?.model_id">{{ form.errors.model_id[0] }}</small>
+        </div>
+
+        <!-- Product Selection (only shown if model_type is 'product') -->
+        <div v-if="discountData.model_type === 'product'" class="space-y-2">
+          <label for="product_id" class="block text-sm font-medium text-gray-700">
+            {{ $t('discount.select_product') }} <span class="text-red-500">*</span>
+          </label>
+          <MultiSelect
+          filter
+            id="product_id"
+            v-model="discountData.products"
+            :options="products"
+            :optionLabel="labelField"
+            optionValue="id"
+            :placeholder="$t('discount.select_product')"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            required
+          />
+          <small class="text-red-500 text-xs" v-if="form?.errors?.model_id">{{ form.errors.model_id[0] }}</small>
+        </div>
+
         <!-- Discount Type -->
         <div class="space-y-2">
           <label for="discount_type" class="block text-sm font-medium text-gray-700">
-            {{ $t("discount.discount_type") }} <span class="text-red-500">*</span>
+            {{ $t('discount.discount_type') }} <span class="text-red-500">*</span>
           </label>
           <Dropdown
+          filter
             id="discount_type"
             v-model="discountData.discount_type"
             :options="[
@@ -114,7 +188,7 @@ const submitForm = async () => {
             ]"
             optionLabel="label"
             optionValue="value"
-            :placeholder='$t("discount.select_discount_type")'
+            :placeholder="$t('discount.select_discount_type')"
             class="w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             required
           />
@@ -124,19 +198,19 @@ const submitForm = async () => {
         <!-- Discount Value -->
         <div class="space-y-2">
           <label for="discount_value" class="block text-sm font-medium text-gray-700">
-            {{ $t("discount.discount_value") }} <span class="text-red-500">*</span>
+            {{ $t('discount.discount_value') }} <span class="text-red-500">*</span>
           </label>
           <InputNumber
             id="discount_value"
             v-model="discountData.discount_value"
             :min="0"
             :max="discountData.discount_type === 2 ? 100 : null"
-            :placeholder='$t("discount.enter_discount_value")'
-            class="w-full px-4   rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            :placeholder="$t('discount.enter_discount_value')"
+            class="w-full px-4 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
             required
           />
           <small class="text-gray-500 text-xs" v-if="discountData.discount_type === 2">
-            {{ $t("discount.percentage_note") }}
+            {{ $t('discount.percentage_note') }}
           </small>
           <small class="text-red-500 text-xs" v-if="form?.errors?.discount_value">{{ form.errors.discount_value[0] }}</small>
         </div>
@@ -144,21 +218,19 @@ const submitForm = async () => {
         <!-- Expires At -->
         <div class="space-y-2">
           <label for="expires_at" class="block text-sm font-medium text-gray-700">
-            {{ $t("discount.expiration_date") }} <span class="text-red-500">*</span>
+            {{ $t('discount.expiration_date') }} <span class="text-red-500">*</span>
           </label>
           <Calendar
             id="expires_at"
             v-model="discountData.expires_at"
             :minDate="new Date()"
             dateFormat="yy-mm-dd"
-            :placeholder='$t("discount.select_expiration_date")'
+            :placeholder="$t('discount.select_expiration_date')"
             class="w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             required
           />
           <small class="text-red-500 text-xs" v-if="form?.errors?.expires_at">{{ form.errors.expires_at[0] }}</small>
         </div>
-
-
       </div>
 
       <!-- Submit Button -->
@@ -171,7 +243,6 @@ const submitForm = async () => {
           class="px-6 mx-2 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
           :disabled="loading"
         />
-
         <Button
           type="submit"
           :label="$t('discount.create_discount')"
@@ -180,13 +251,13 @@ const submitForm = async () => {
           class="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
           :disabled="loading"
         >
-          <span v-if="!loading">{{ $t("discount.create_discount") }}</span>
+          <span v-if="!loading">{{ $t('discount.create_discount') }}</span>
           <i v-else class="pi pi-spinner pi-spin"></i>
         </Button>
       </div>
     </Form>
   </div>
-  <Toast/>
+  <Toast />
 </template>
 
 <style scoped>

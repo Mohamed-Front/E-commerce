@@ -157,6 +157,7 @@ onMounted(() => {
             {{$t("user.type")}} <span class="text-red-500">*</span>
           </label>
           <Dropdown
+           filter
             id="type"
             v-model="userData.type"
             :options="[
@@ -178,6 +179,7 @@ onMounted(() => {
             {{$t("user.role")}} <span class="text-red-500">*</span>
           </label>
           <Dropdown
+          filter
             id="role"
             v-model="userData.role_id"
             :options="roles"
