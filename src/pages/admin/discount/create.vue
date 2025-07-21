@@ -21,7 +21,7 @@ const products = ref([]);
 // Form Data
 const discountData = ref({
   products:'',
-  model_id: '',
+  model_ids: '',
   model_type: '',
   discount_type: null,
   discount_value: '',
@@ -53,7 +53,7 @@ const fetchProducts = async (categoryId) => {
 
 // Watch for changes in model_type to fetch categories or clear products
 watch(() => discountData.value.model_type, (newType) => {
-  discountData.value.model_id = ''; // Reset model_id when model_type changes
+  discountData.value.model_ids = ''; // Reset model_ids when model_type changes
   products.value = []; // Clear products when model_type changes
   if (newType === 'category') {
     fetchCategories();
@@ -62,8 +62,8 @@ watch(() => discountData.value.model_type, (newType) => {
   }
 });
 
-// Watch for changes in model_id when model_type is 'product' to fetch products
-watch(() => discountData.value.model_id, (newModelId) => {
+// Watch for changes in model_ids when model_type is 'product' to fetch products
+watch(() => discountData.value.model_ids, (newModelId) => {
   if (discountData.value.model_type === 'product' && newModelId) {
     fetchProducts(newModelId);
   } else {
@@ -94,7 +94,9 @@ const submitForm = async () => {
     data.discount_type=discountData.value.discount_type
     data.model_type=discountData.value.model_type
      if(discountData.value.model_type == 'product')
-    data.model_id=discountData.value.products
+      data.model_ids=discountData.value.products
+    else
+    data.model_ids=discountData.value.model_ids
   try {
     await axios.post('/api/discount', data);
     router.push({ name: 'discount' });
@@ -137,13 +139,13 @@ onMounted(() => {
 
         <!-- Model ID (Category or Product selection) -->
         <div class="space-y-2">
-          <label for="model_id" class="block text-sm font-medium text-gray-700">
+          <label for="model_ids" class="block text-sm font-medium text-gray-700">
             {{ $t(discountData.model_type === 'product' ? 'discount.select_category' : 'discount.select_model') }} <span class="text-red-500">*</span>
           </label>
           <MultiSelect
             filter
-            id="model_id"
-            v-model="discountData.model_id"
+            id="model_ids"
+            v-model="discountData.model_ids"
             :options="discountData.model_type === 'product' ? categories : categories"
             :optionLabel="labelField"
             optionValue="id"
@@ -151,7 +153,7 @@ onMounted(() => {
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
             required
           />
-          <small class="text-red-500 text-xs" v-if="form?.errors?.model_id">{{ form.errors.model_id[0] }}</small>
+          <small class="text-red-500 text-xs" v-if="form?.errors?.model_ids">{{ form.errors.model_ids[0] }}</small>
         </div>
 
         <!-- Product Selection (only shown if model_type is 'product') -->
@@ -170,7 +172,7 @@ onMounted(() => {
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
             required
           />
-          <small class="text-red-500 text-xs" v-if="form?.errors?.model_id">{{ form.errors.model_id[0] }}</small>
+          <small class="text-red-500 text-xs" v-if="form?.errors?.model_ids">{{ form.errors.model_ids[0] }}</small>
         </div>
 
         <!-- Discount Type -->

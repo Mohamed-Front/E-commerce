@@ -14,13 +14,7 @@ export default {
   cancel: 'إلغاء',
   remove: 'إزالة',
   navigation: {
-<<<<<<< Updated upstream
-
-    setting:"الاعدادات",
-    custom_tabs:"ادارة علامة التبويب",
-=======
     custom_tabs: 'ادارة علامة التبويب',
->>>>>>> Stashed changes
     quickBooks: 'Quick Books',
     discount: 'الخصومات',
     attributes: 'الخصائص',
