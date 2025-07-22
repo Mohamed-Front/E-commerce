@@ -1,21 +1,44 @@
 <template>
   <!-- main container -->
-    <Toast />
+  <Toast />
   <main class="flex flex-col bg-[#111] min-h-[110vh]">
     <nav><img src="../../../../assets/shiftlogo.png" alt="" width="80" class="m-[2rem]" /></nav>
     <div class="min-h-[80vh] flex justify-evenly items-center">
       <!-- Forms -->
-      <div class="bg-[#2A2A2A] p-8 rounded-md text-white lg:min-w-[40%] min-w-[80%]">
+      <div class="bg-[#2A2A2A] p-8 rounded-md text-white lg:w-[40%] w-[80%]">
         <!-- Login -->
         <div class="">
           <form class="flex flex-col gap-4 items-center" @submit.prevent="checkall()">
-            <h1 class="font-bold">{{ $t('auth.loginnow') }}</h1>
-            <p class="text-[#9F9F9F] mb-6">{{ t('auth.loginnote') }}</p>
+            <!-- Header -->
+            <h1 class="font-bold">
+              {{
+                currentPage == 'login'
+                  ? $t('auth.loginnow')
+                  : currentPage == 'registration'
+                  ? $t('auth.registrationnow')
+                  : currentPage == 'missedPassword'
+                  ? $t('auth.forgotpassword')
+                  : currentPage == 'OTP'
+                  ? $t('auth.Activationcode')
+                  : $t('auth.newpassH')
+              }}
+            </h1>
+            <p class="text-[#9F9F9F] mb-6 text-center text-sm">
+              {{
+                currentPage == 'login' || currentPage == 'registration'
+                  ? t('auth.loginnote')
+                  : currentPage == 'missedPassword'
+                  ? t('auth.forgotpasswordP')
+                  : currentPage == 'OTP'
+                  ? t('auth.donesend') + ` ${otpdata.phone}`
+                  : t('auth.newpassP')
+              }}
+            </p>
+            <span class="text-center text-red-500" v-if="authStore.error">{{ authStore.error }}</span>
 
-            <div class="flex flex-col gap-1 w-full text-white" v-for="value in datalogin">
-              <label v-if="value.page.includes(currentPage)" for="email" class="mb-2">{{
-                t(`auth.${value.type}`)
-              }}</label>
+            <!-- Inputs form -->
+            <div class="flex flex-col gap-1 w-full text-white" v-for="value in datalogin" v-if="currentPage != 'OTP'">
+              <label v-if="value.page.includes(currentPage)" class="mb-2">{{ t(`auth.${value.type}`) }}</label>
               <div
                 v-if="value.page.includes(currentPage)"
                 class="bg-[#9F9F9F26] py-2 rounded-md px-4 flex items-center gap-2"
@@ -32,17 +55,44 @@
                 />
                 <i class="pi" :class="value.showicon ? value.showicon : ''" @click="showpass(value.type)"></i>
               </div>
-              <span v-if="error.type == value.type && error.message" name="email" class="text-red-500 text-xs mx-4">{{
+              <!-- error message -->
+              <span v-if="error.type == value.type && error.message" class="text-red-500 text-xs mx-4">{{
                 error.message
               }}</span>
             </div>
+            <!-- OTP Fome -->
+            <label v-if="currentPage == 'OTP'" class="mb-2">{{ t(`auth.code`) }}</label>
+            <div v-if="currentPage == 'OTP'" class="py-2 rounded-md px-4 flex items-center gap-2 justify-between">
+              <template v-for="(digit, index) in otpDigits" :key="index">
+                <input
+                  v-model="otp[index]"
+                  ref="otpInput"
+                  maxlength="1"
+                  type="text"
+                  inputmode="numeric"
+                  class="w-[50px] h-[50px] text-center rounded border bg-transparent border-gray-300 focus:outline-none focus:border-blue-500"
+                  @input="handleInput(index, $event)"
+                  @keydown.backspace="handleBackspace(index, $event)"
+                />
+              </template>
+            </div>
+            <label v-if="currentPage == 'OTP'">{{ t(`auth.expen`) + ` ${timer}s` }}</label>
+            <label v-if="currentPage == 'OTP'" class="font-bold cursor-pointer">{{ t(`auth.resend`) }}</label>
             <div v-if="currentPage == 'login'" class="flex justify-between w-full">
+              <!--Rememberme  -->
               <div>
                 <input v-model="rememberme" type="checkbox" id="rememberme" class="mx-2" />
                 <label for="rememberme">{{ t('auth.rememberme') }}</label>
               </div>
-              <span class="text-blue-500">{{ t('auth.forgotpassword') }}</span>
+              <!-- Forgot password -->
+              <span
+                class="text-blue-500 cursor-pointer hover:translate-y-[-3px] transition-all"
+                @click="currentPage = 'missedPassword'"
+                >{{ t('auth.forgotpassword') }}</span
+              >
             </div>
+
+            <!--Terms  -->
             <div v-if="currentPage == 'registration'">
               <input v-model="Terms" type="checkbox" id="Terms" class="mx-2 text-xs" />
               <label for="Terms">{{ t('auth.terms') }}</label>
@@ -50,27 +100,42 @@
 
             <Button
               type="submit"
+              :loading="loading"
               :label="
-                currentPage == 'registration' ? t('auth.registration') : currentPage == 'login' ? t('auth.login') : ''
+                currentPage == 'registration'
+                  ? t('auth.registration')
+                  : currentPage == 'login'
+                  ? t('auth.login')
+                  : currentPage == 'missedPassword'
+                  ? $t('auth.ok')
+                  : $t('auth.ok')
               "
               class="outline-none w-full mt-6 focus:!shadow-none"
             />
             <Button
               @click="currentPage == 'registration' ? (currentPage = 'login') : (currentPage = 'registration')"
               :label="
-                currentPage == 'login' ? t('auth.registration') : currentPage == 'registration' ? t('auth.login') : ''
+                currentPage == 'login' || currentPage == 'missedPassword'
+                  ? t('auth.registration')
+                  : currentPage == 'registration'
+                  ? t('auth.login')
+                  : t('auth.registration')
               "
               severity="secondary"
               class="outline-none w-full focus:!shadow-none Custombutton"
             />
-            <span class="text-xs text-[#9F9F9F]">{{ $t('auth.or') }}</span>
+            <span v-if="currentPage != 'OTP' && currentPage != 'newPassword'" class="text-xs text-[#9F9F9F]">{{
+              $t('auth.or')
+            }}</span>
             <Button
+              v-if="currentPage != 'OTP' && currentPage != 'newPassword'"
               :label="t('auth.loginwithfacebock')"
               icon="pi pi-facebook"
               severity="secondary"
               class="text-[#9F9F9F] !text-sm outline-none w-full focus:!shadow-none Custombutton"
             />
             <Button
+              v-if="currentPage != 'OTP' && currentPage != 'newPassword'"
               :label="t('auth.loginwithgoogle')"
               icon="pi pi-google"
               severity="secondary"
@@ -93,15 +158,17 @@
 </template>
 
 <script setup>
-  import { ref } from 'vue'
+  import { ref, reactive, watch, nextTick } from 'vue'
   import { useI18n } from 'vue-i18n'
   import { AuthStore } from '../store/auth.store'
-  import { useToast } from 'primevue/usetoast';
+  import { useToast } from 'primevue/usetoast'
+  import axios from 'axios'
 
-  const toast = useToast();
+  const toast = useToast()
   const authStore = AuthStore()
   const { t } = useI18n()
   const currentPage = ref('login') // 'login', 'register', 'missedPassword', 'OTP', 'newPassword'
+  const loading = ref(false)
 
   const rememberme = ref(true)
   const Terms = ref(false)
@@ -115,18 +182,11 @@
       page: ['registration'],
     },
     {
-      type: 'email',
-      data: '',
-      placeholder: 'test@example.com',
-      inputtype: 'text',
-      page: ['login', 'registration'],
-    },
-    {
       type: 'phone',
       data: '',
       placeholder: '07xxxxxxxx',
       inputtype: 'text',
-      page: ['registration'],
+      page: ['login', 'registration', 'missedPassword'],
     },
     {
       type: 'password',
@@ -134,7 +194,7 @@
       icon: 'pi-lock',
       showicon: 'pi-eye-slash',
       inputtype: 'password',
-      page: ['login', 'registration'],
+      page: ['login', 'registration', 'newPassword'],
     },
     {
       type: 'checkpassword',
@@ -142,33 +202,51 @@
       icon: 'pi-lock',
       showicon: 'pi-eye-slash',
       inputtype: 'password',
-      page: ['registration'],
+      page: ['registration', 'newPassword'],
     },
   ])
 
-  const dataregister = ref([
-    {
-      type: 'email',
-    },
-  ])
+  // otp script
+  const timer = ref(60)
+  const otp = reactive(['', '', '', '', '', ''])
+  const otpdata = ref({
+    phone: '',
+    newpass: '',
+    renewpass: '',
+  })
+  const otpDigits = ref(6)
+
+  const handleInput = (index, event) => {
+    const value = event.target.value
+    if (!/^[0-9]$/.test(value)) {
+      otp[index] = ''
+      return
+    }
+    otp[index] = value
+    if (index < otp.length - 1) {
+      nextTick(() => {
+        const nextInput = document.querySelectorAll('input')[index + 1]
+        nextInput?.focus()
+      })
+    }
+  }
+
+  const handleBackspace = (index, event) => {
+    if (otp[index] === '') {
+      if (index > 0) {
+        nextTick(() => {
+          const prevInput = document.querySelectorAll('input')[index - 1]
+          prevInput?.focus()
+        })
+      }
+    }
+  }
+
+  ////////
   const error = ref({})
   const check = (type) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/
     switch (type) {
-      case 'email':
-        error.value.type = type
-        const emailField = datalogin.value.find((item) => item.type === type)
-        const emailValue = emailField?.data.trim()
-
-        if (!emailValue) {
-          error.value.message = t('auth.emailreq')
-        } else if (!emailRegex.test(emailValue)) {
-          error.value.message = t('auth.emailerr')
-        } else {
-          error.value.message = ''
-        }
-        break
       case 'password':
         error.value.type = type
         const passwordField = datalogin.value.find((item) => item.type === 'password')
@@ -176,10 +254,9 @@
 
         if (!passwordValue) {
           error.value.message = t('auth.passwordreq')
-        } else if(passwordRegex.test(passwordValue)) {
+        } else if (!passwordRegex.test(passwordValue)) {
           error.value.message = t('auth.passworderr')
-        }
-        else {
+        } else {
           error.value.message = ''
         }
         break
@@ -235,27 +312,122 @@
       if (error.value.message) break
     }
     const data = ref({})
+    // login
     if (!error.value.message && currentPage.value == 'login') {
+      loading.value = true
       for (const inf of fields) {
-        data.value.email = inf.type == 'email' ? inf.data : data.value.email
+        data.value.phone = inf.type == 'phone' ? inf.data : data.value.phone
         data.value.password = inf.type == 'password' ? inf.data : data.value.password
       }
-      await authStore.loginUser(data.value,rememberme.value)
-      //  if(authStore.error) {
-      //   console.log(authStore.error)
-      //  }
+      await authStore.loginUser(data.value, rememberme.value).finally(() => {
+        loading.value = false
+      })
+      // registration
     } else if (!error.value.message && currentPage.value == 'registration') {
-      if(!Terms.value) {
-        toast.add({ severity: 'info', summary: t('auth.Terms'), detail: t('auth.Termserror'), life: 3000 });
-        return;
-    }
+      if (!Terms.value) {
+        throw toast.add({ severity: 'info', summary: t('auth.Terms'), detail: t('auth.Termserror'), life: 3000 })
+      }
+      loading.value = true
       for (const inf of fields) {
-        data.value.email = inf.type == 'email' ? inf.data : data.value.email
         data.value.password = inf.type == 'password' ? inf.data : data.value.password
         data.value.name = inf.type == 'username' ? inf.data : data.value.name
         data.value.phone = inf.type == 'phone' ? inf.data : data.value.phone
       }
-      await authStore.registration(data.value)
+      await authStore.registration(data.value).finally(() => {
+        loading.value = false
+      })
+      // missedPassword
+    } else if (!error.value.message && currentPage.value == 'missedPassword') {
+      loading.value = true
+      try {
+        const response = await axios.post('api/send-otp', {
+          phone: datalogin.value.find((obj) => obj.type === 'phone')?.data,
+        })
+
+        if (!error.value.message && currentPage.value == 'missedPassword') {
+          currentPage.value = 'OTP'
+          otpdata.value.phone = datalogin.value.find((obj) => obj.type === 'phone')?.data
+          timer.value = 60
+          setInterval(() => {
+            if (timer.value > 0) {
+              timer.value--
+            } else return
+          }, 1000)
+          toast.add({
+            severity: 'success',
+            summary: 'Send OTP',
+            detail: response.data.message,
+            life: 3000,
+          })
+        }
+      } catch (error) {
+        const message = error?.response?.data?.message
+        toast.add({
+          severity: 'error',
+          summary: 'Send OTP',
+          detail: message,
+          life: 3000,
+        })
+      } finally {
+        loading.value = false
+      }
+      // OTP
+    } else if (!error.value.message && currentPage.value == 'OTP') {
+      loading.value = true
+      try {
+        const response = await axios.post('api/verify-email', {
+          phone: otpdata.value.phone,
+          otp: otp.join(''),
+        })
+        currentPage.value = 'newPassword'
+        toast.add({
+          severity: 'success',
+          summary: 'Verify Email',
+          detail: response.data.message,
+          life: 3000,
+        })
+      } catch (error) {
+        const message = error?.response?.data?.message
+        toast.add({
+          severity: 'error',
+          summary: 'Verify Email',
+          detail: message,
+          life: 3000,
+        })
+      } finally {
+        loading.value = false
+      }
+    } else if (!error.value.message && currentPage.value == 'newPassword') {
+      loading.value = true
+        for (const inf of fields) {
+        data.value.password = inf.type == 'password' ? inf.data : data.value.password
+        data.value.repassword = inf.type == 'checkpassword' ? inf.data : data.value.repassword
+      }
+      try {
+        const response = await axios.post('api/change-password', {
+          phone: otpdata.value.phone,
+          otp: otp.join(''),
+          password : data.value.password,
+          password_confirmation: data.value.repassword
+        })
+        currentPage.value = 'login'
+        toast.add({
+          severity: 'success',
+          summary: 'Change Password',
+          detail: response.data.message,
+          life: 3000,
+        })
+      } catch (error) {
+        const message = error?.response?.data?.message
+        toast.add({
+          severity: 'error',
+          summary: 'Change Password',
+          detail: message,
+          life: 3000,
+        })
+      } finally {
+        loading.value = false
+      }
     }
   }
 
@@ -270,6 +442,10 @@
       repasswordField.showicon = 'pi-eye'
     }
   }
+
+  watch(currentPage, (newVal, oldVal) => {
+    authStore.clear()
+  })
 </script>
 
 <style>

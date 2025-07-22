@@ -7,13 +7,12 @@ export interface User {
 }
 
 export interface LoginPayload {
-  email: string
+  phone: number
   password: string
 }
 
 export interface registrationPayload {
   name: string
-  email: string
   password: string
   phone: number
 }

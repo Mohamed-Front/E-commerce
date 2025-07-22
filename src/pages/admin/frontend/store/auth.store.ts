@@ -18,7 +18,7 @@ export const AuthStore = defineStore('auth', {
   },
 
   actions: {
-    async loginUser(payload: LoginPayload,remmberme : boolean = false) {
+    async loginUser(payload: LoginPayload, remmberme : boolean = false) {
       this.loading = true
       this.error = ''
 
@@ -54,7 +54,6 @@ export const AuthStore = defineStore('auth', {
       } else {
         this.error = t('auth.noneerorr')
       }
-
       throw error
     },
 
@@ -76,7 +75,7 @@ export const AuthStore = defineStore('auth', {
         const response = await axios.post('api/register', data)
         if (response) {
           this.loginUser({
-            email: data.email,
+            phone: data.phone,
             password: data.password,
           })
         }
@@ -87,5 +86,8 @@ export const AuthStore = defineStore('auth', {
         this.loading = false
       }
     },
+    clear() {
+      this.error = ''
+    }
   },
 })
