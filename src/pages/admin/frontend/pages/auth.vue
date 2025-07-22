@@ -2,7 +2,7 @@
   <!-- main container -->
   <Toast />
   <main class="flex flex-col bg-[#111] min-h-[110vh]">
-    <nav><img src="../../../../assets/shiftlogo.png" alt="" width="80" class="m-[2rem]" /></nav>
+    <nav><img src="../../../../assets/shiftlogo.png" alt="" width="80" class="m-[2rem] cursor-pointer" @click="router.push({name: 'home'})"/></nav>
     <div class="min-h-[80vh] flex justify-evenly items-center">
       <!-- Forms -->
       <div class="bg-[#2A2A2A] p-8 rounded-md text-white lg:w-[40%] w-[80%]">
@@ -163,7 +163,9 @@
   import { AuthStore } from '../store/auth.store'
   import { useToast } from 'primevue/usetoast'
   import axios from 'axios'
+  import { useRouter } from 'vue-router'
 
+  const router = useRouter()
   const toast = useToast()
   const authStore = AuthStore()
   const { t } = useI18n()
@@ -447,9 +449,3 @@
     authStore.clear()
   })
 </script>
-
-<style>
-  main {
-    direction: rtl;
-  }
-</style>

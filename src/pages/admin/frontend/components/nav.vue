@@ -112,7 +112,7 @@
       <!-- nav other -->
       <div class="w-[30%] flex md:justify-end md:gap-2 gap-1 justify-evenly items-center place-content-end">
         <span class="icon-container bg-[var(--main-text-color)] cursor-pointer"
-        @click="authlogin ? router.push({name : 'Profile'}) : router.push({name : 'authlog'})"
+        @click="authlogin ? router.push({name : 'profile'}) : router.push({name : 'authlog'})"
           ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 17" fill="none">
             <path
               fill-rule="evenodd"
