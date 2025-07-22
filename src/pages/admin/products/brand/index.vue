@@ -1,3 +1,4 @@
+```vue
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useToast } from 'primevue/usetoast'
@@ -14,12 +15,13 @@ import Tag from 'primevue/tag'
 import Dialog from 'primevue/dialog'
 import ProgressSpinner from 'primevue/progressspinner'
 import Dropdown from 'primevue/dropdown'
+import FileUpload from 'primevue/fileupload'
 
 // Permission directive
 const vCan = {
   mounted(el, binding) {
-    // This is a placeholder for permission checking
-    // Implement actual permission logic based on your auth system
+    // Placeholder for permission checking
+    // Replace with actual permission logic based on your auth system
     const hasPermission = true // Replace with actual permission check
     if (!hasPermission) {
       el.style.display = 'none'
@@ -40,6 +42,9 @@ const dt = ref(null)
 const filters = ref({})
 const searchQuery = ref('')
 const selectedCategories = ref(null)
+const importDialog = ref(false)
+const selectedFile = ref(null)
+const importLoading = ref(false)
 
 // Pagination variables
 const currentPage = ref(1)
@@ -53,6 +58,22 @@ const prevPageUrl = ref('')
 const from = ref(0)
 const to = ref(0)
 const links = ref([])
+
+// Example data for import template based on provided Excel file
+const exampleData = ref([
+  {
+    brand_name_ar: 'ليستر',
+    brand_name_en: 'Luster'
+  },
+  {
+    brand_name_ar: 'لوكس',
+    brand_name_en: 'Lux'
+  },
+  {
+    brand_name_ar: 'مارفلوس',
+    brand_name_en: 'Marvelous'
+  }
+])
 
 // Fetch data
 const fetchData = () => {
@@ -138,9 +159,82 @@ const deleteCategory = () => {
     })
 }
 
-// Export CSV
-const exportCSV = () => {
-  dt.value.exportCSV()
+// Export brands
+const exportBrands = () => {
+  axios.get('/api/export/brands', {
+    responseType: 'blob'
+  })
+    .then((response) => {
+      const blob = new Blob([response.data], { type: 'text/csv' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', 'brands_export.csv')
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+
+    })
+    .catch((error) => {
+      toast.add({
+        severity: 'error',
+        summary: t('error'),
+        detail: t('category.exportError'),
+        life: 3000
+      })
+      console.error('Error exporting brands:', error)
+    })
+}
+
+// Import brands
+const openImportDialog = () => {
+  importDialog.value = true
+  selectedFile.value = null
+}
+
+const onFileSelect = (event) => {
+  selectedFile.value = event.files[0]
+}
+
+const importCategories = () => {
+  if (!selectedFile.value) {
+    toast.add({
+      severity: 'warn',
+      summary: t('warning'),
+      detail: t('category.importNoFile'),
+      life: 3000
+    })
+    return
+  }
+
+  importLoading.value = true
+  const formData = new FormData()
+  formData.append('file', selectedFile.value)
+
+  axios.post('/api/import/brands', formData)
+    .then(() => {
+      toast.add({
+        severity: 'success',
+        summary: t('success'),
+        detail: t('category.importSuccess'),
+        life: 3000
+      })
+      fetchData()
+      importDialog.value = false
+      importLoading.value = false
+      selectedFile.value = null
+    })
+    .catch((error) => {
+      toast.add({
+        severity: 'error',
+        summary: t('error'),
+        detail: t('category.importError'),
+        life: 3000
+      })
+      importLoading.value = false
+      console.error('Error importing brands:', error)
+    })
 }
 
 // Navigation functions
@@ -179,11 +273,18 @@ onMounted(() => {
                 <InputText v-model="searchQuery" :placeholder="t('category.search')" />
               </span>
               <Button
+                v-can="'import brands'"
+                :label="t('category.import')"
+                icon="pi pi-download"
+                class="other"
+                @click="openImportDialog"
+              />
+              <Button
+                v-can="'export brands'"
                 :label="t('category.export')"
                 icon="pi pi-upload"
-                class="p-export"
-                v-can="'list categories'"
-                @click="exportCSV"
+                class="exite"
+                @click="exportBrands"
               />
               <Button
                 v-can="'create categories'"
@@ -216,19 +317,21 @@ onMounted(() => {
             v-can="'list categories'"
           >
             <Column selection-mode="multiple" header-style="width: 3rem"></Column>
-
+            <Column field="name_en" :header="t('id')" :sortable="true">
+              <template #body="slotProps">
+                {{ slotProps.data.id }}
+              </template>
+            </Column>
             <Column field="name_en" :header="t('category.nameEn')" :sortable="true">
               <template #body="slotProps">
                 {{ slotProps.data.name_en }}
               </template>
             </Column>
-
             <Column field="name_ar" :header="t('category.nameAr')" :sortable="true">
               <template #body="slotProps">
                 {{ slotProps.data.name_ar }}
               </template>
             </Column>
-
             <Column field="is_market" :header="t('category.marketType')" :sortable="true">
               <template #body="slotProps">
                 <Tag
@@ -237,45 +340,40 @@ onMounted(() => {
                 />
               </template>
             </Column>
-
             <Column field="parent.name_en" :header="t('category.parent')" :sortable="true">
               <template #body="slotProps">
                 {{ slotProps.data.parent?.name_en || t('category.noParent') }}
               </template>
             </Column>
-
             <Column field="store.name_en" :header="t('category.store')" :sortable="true">
               <template #body="slotProps">
                 {{ slotProps.data.store?.name_en || '' }}
               </template>
             </Column>
-
-            <Column :header="t('actions')" headerStyle="width: 12rem">
+            <Column :header="t('actions')" header-style="width: 12rem">
               <template #body="slotProps">
                 <Button
                   v-can="'edit categories'"
                   icon="pi pi-pencil"
-                  class="p-detail"
+                     class="p-detail"
                   @click="editCategory(slotProps.data.id)"
                   v-tooltip.top="t('edit')"
                 />
                 <Button
                   v-can="'delete categories'"
                   icon="pi pi-trash"
-                  class="p-delete mx-2"
+                  class="p-delete"
                   @click="confirmDelete(slotProps.data.id)"
                   v-tooltip.top="t('delete')"
                 />
               </template>
             </Column>
-
             <template #empty>
               <div class="text-center py-4">
                 <i class="pi pi-exclamation-circle text-2xl mb-2" />
                 <p class="text-xl">{{ t('category.noData') }}</p>
               </div>
             </template>
-
             <template #loading>
               <div class="flex justify-content-center align-items-center py-4">
                 <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="4" />
@@ -284,7 +382,7 @@ onMounted(() => {
           </DataTable>
 
           <div class="p-paginator p-component p-unselectable-text p-paginator-bottom">
-            <div class="p-paginator-left Rd-content">
+            <div class="p-paginator-left-content">
               <span class="p-paginator-current">{{ t('show') }} {{ from }} {{ t('to') }} {{ to }} {{ t('from') }} {{ totalRecords }}</span>
             </div>
             <div class="p-paginator-right-content">
@@ -302,7 +400,6 @@ onMounted(() => {
               >
                 <span class="p-paginator-icon pi pi-angle-left"></span>
               </button>
-
               <template v-for="(link, index) in links" :key="index">
                 <button
                   v-if="link.label && !isNaN(parseInt(link.label))"
@@ -314,7 +411,6 @@ onMounted(() => {
                 </button>
                 <span v-else-if="link.label === '...'" class="p-paginator-dots">...</span>
               </template>
-
               <button
                 class="p-paginator-next p-paginator-element p-link"
                 :disabled="!nextPageUrl"
@@ -329,7 +425,6 @@ onMounted(() => {
               >
                 <span class="p-paginator-icon pi pi-angle-double-right"></span>
               </button>
-
               <Dropdown
                 v-model="rowsPerPage"
                 :options="[5, 10, 20, 30]"
@@ -367,8 +462,65 @@ onMounted(() => {
           </template>
         </Dialog>
 
+        <Dialog
+          v-model:visible="importDialog"
+          :style="{ width: '600px' }"
+          :header="t('category.importInstructions')"
+          :modal="true"
+        >
+          <div class="flex flex-column gap-3">
+            <div>
+              <DataTable
+                :value="exampleData"
+                responsive-layout="scroll"
+                stripedRows
+                showGridlines
+                class="p-datatable-sm"
+              >
+                <Column field="brand_name_ar" :header="t('category.brandNameAr')" />
+                <Column field="brand_name_en" :header="t('category.brandNameEn')" />
+              </DataTable>
+            </div>
+          </div>
+          <template #footer>
+            <FileUpload
+              mode="basic"
+              name="file"
+              accept=".xlsx,.xls,.csv"
+              :maxFileSize="10000000"
+              :chooseLabel="t('category.chooseFile')"
+              @select="onFileSelect"
+              :auto="false"
+              :disabled="importLoading"
+              class="mb-3"
+            />
+            <Button
+              :label="t('cancel')"
+              icon="pi pi-times"
+              class="p-button-text mt-3"
+              @click="importDialog = false"
+            />
+            <Button
+              :label="t('import')"
+              icon="pi pi-check"
+              class="p-button-success"
+              @click="importCategories"
+              :disabled="!selectedFile"
+              :loading="importLoading"
+            />
+          </template>
+        </Dialog>
       </div>
     </div>
   </div>
 </template>
 
+<style scoped>
+:deep(.p-fileupload-choose) {
+  width: 100%;
+}
+.p-button.p-fileupload-choose .p-icon {
+  visibility: hidden !important;
+}
+</style>
+```

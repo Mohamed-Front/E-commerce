@@ -1,4 +1,3 @@
-```vue
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useToast } from 'primevue/usetoast'
@@ -14,7 +13,7 @@ import Toast from 'primevue/toast'
 import Dialog from 'primevue/dialog'
 import ProgressSpinner from 'primevue/progressspinner'
 import Dropdown from 'primevue/dropdown'
-import Tag from 'primevue/tag'
+import FileUpload from 'primevue/fileupload'
 
 const router = useRouter()
 const toast = useToast()
@@ -29,6 +28,9 @@ const dt = ref(null)
 const filters = ref({})
 const searchQuery = ref('')
 const selectedCategories = ref(null)
+const importDialog = ref(false)
+const selectedFile = ref(null)
+const importLoading = ref(false)
 
 // Pagination variables
 const currentPage = ref(1)
@@ -43,7 +45,31 @@ const from = ref(0)
 const to = ref(0)
 const links = ref([])
 
-// Fetch data
+// Example data for import template
+const exampleData = ref([
+  {
+    store_name_ar: 'شفت 7',
+    store_name_en: 'Shift7',
+    category_name_ar: 'الأحذية',
+    category_name_en: 'Shoes',
+    sub_category_name_ar: 'أحذية نسائية رسمية',
+    sub_category_name_en: "Women's Formal Shoes",
+    sub_sub_category_name_ar: 'كريم واقي للشمس',
+    sub_sub_category_name_en: 'Sunblock & Cream'
+  },
+  {
+    store_name_ar: 'شفت مارت',
+    store_name_en: 'Shift Mart',
+    category_name_ar: 'الخضار والفواكة',
+    category_name_en: 'Vegetables & Fruits',
+    sub_category_name_ar: 'الفواكة الطازجة',
+    sub_category_name_en: 'Fresh Fruits',
+    sub_sub_category_name_ar: 'كريم واقي للشمس',
+    sub_sub_category_name_en: 'Sunblock & Cream'
+  }
+])
+
+// Fetch categories data
 const fetchData = () => {
   loading.value = true
   axios.get('/api/category', {
@@ -64,7 +90,7 @@ const fetchData = () => {
       from.value = response.data.data.from
       to.value = response.data.data.to
       links.value = response.data.data.links
-      currentPage.value = response.data.data.current_page // Ensure current page is synced with API
+      currentPage.value = response.data.data.current_page
       loading.value = false
     })
     .catch((error) => {
@@ -81,7 +107,7 @@ const fetchData = () => {
 
 // Watch for pagination and search changes
 watch([searchQuery, rowsPerPage], () => {
-  currentPage.value = 1 // Reset to first page on search or rows per page change
+  currentPage.value = 1
   fetchData()
 })
 
@@ -129,9 +155,84 @@ const deleteCategory = () => {
     })
 }
 
-// Export CSV
-const exportCSV = () => {
-  dt.value.exportCSV()
+// Export categories
+const exportCategories = () => {
+  axios.get('/api/export/category', {
+    responseType: 'blob'
+  })
+    .then((response) => {
+      const blob = new Blob([response.data], { type: 'text/csv' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', 'categories_export.csv')
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+
+    })
+    .catch((error) => {
+      toast.add({
+        severity: 'error',
+        summary: t('error'),
+        detail: t('category.exportError'),
+        life: 3000
+      })
+      console.error('Error exporting categories:', error)
+    })
+}
+
+// Import categories
+const openImportDialog = () => {
+  importDialog.value = true
+  selectedFile.value = null
+}
+
+const onFileSelect = (event) => {
+  selectedFile.value = event.files[0]
+}
+
+const importCategories = () => {
+  if (!selectedFile.value) {
+    toast.add({
+      severity: 'warn',
+      summary: t('warning'),
+      detail: t('category.importNoFile'),
+      life: 3000
+    })
+    return
+  }
+
+  importLoading.value = true
+  const formData = new FormData()
+  formData.append('file', selectedFile.value)
+
+
+
+  axios.post('/api/import/store', formData)
+    .then(() => {
+      toast.add({
+        severity: 'success',
+        summary: t('success'),
+        detail: t('category.importSuccess'),
+        life: 3000
+      })
+      fetchData()
+      importDialog.value = false
+      importLoading.value = false
+      selectedFile.value = null
+    })
+    .catch((error) => {
+      toast.add({
+        severity: 'error',
+        summary: t('error'),
+        detail: t('category.importError'),
+        life: 3000
+      })
+      importLoading.value = false
+      console.error('Error importing categories:', error)
+    })
 }
 
 // Navigation functions
@@ -141,11 +242,6 @@ const createNewCategory = () => {
 
 const editCategory = (id) => {
   router.push({ name: 'category-update', params: { id } })
-}
-
-// Get market type severity
-const getMarketTypeSeverity = (type) => {
-  return type === 1 ? 'success' : 'info'
 }
 
 // Lifecycle hooks
@@ -170,14 +266,18 @@ onMounted(() => {
                 <InputText v-model="searchQuery" :placeholder="t('category.search')" />
               </span>
               <Button
-                :label="t('category.export')"
-                icon="pi pi-upload"
-                class="p-export"
-                v-can="'list categories'"
-                @click="exportCSV"
+                :label="t('category.import')"
+                icon="pi pi-download"
+                class="exite"
+                @click="openImportDialog"
               />
               <Button
-                v-can="'create categories'"
+                :label="t('category.export')"
+                icon="pi pi-upload"
+              class="exite"
+                @click="exportCategories"
+              />
+              <Button
                 :label="t('category.new')"
                 icon="pi pi-plus"
                 class="p-button-success"
@@ -203,28 +303,21 @@ onMounted(() => {
             stripedRows
             showGridlines
             class="p-datatable-sm"
-            v-can="'list categories'"
           >
             <Column selection-mode="multiple" header-style="width: 3rem"></Column>
-
+            <Column field="name_en" :header="t('id')" :sortable="true" header-style="width:5%; min-width:5rem;">
+              <template #body="slotProps">
+                {{ slotProps.data.id }}
+              </template>
+            </Column>
             <Column field="name_en" :header="t('category.nameEn')" :sortable="true" header-style="width:14%; min-width:10rem;">
               <template #body="slotProps">
                 {{ slotProps.data.name_en }}
               </template>
             </Column>
-
             <Column field="name_ar" :header="t('category.nameAr')" :sortable="true" header-style="width:14%; min-width:10rem;">
               <template #body="slotProps">
                 {{ slotProps.data.name_ar }}
-              </template>
-            </Column>
-
-            <Column field="is_market" :header="t('category.marketType')" :sortable="true" header-style="width:14%; min-width:10rem;">
-              <template #body="slotProps">
-                <Tag
-                  :value="slotProps.data.is_market ? t('category.market') : t('category.nonMarket')"
-                  :severity="getMarketTypeSeverity(slotProps.data.is_market)"
-                />
               </template>
             </Column>
 
@@ -233,39 +326,33 @@ onMounted(() => {
                 {{ slotProps.data.parent?.name_en || t('category.noParent') }}
               </template>
             </Column>
-
             <Column field="store.name_en" :header="t('category.store')" :sortable="true" header-style="width:14%; min-width:10rem;">
               <template #body="slotProps">
                 {{ slotProps.data.store?.name_en || t('category.noStore') }}
               </template>
             </Column>
-
             <Column :header="t('actions')" header-style="width:12rem;">
               <template #body="slotProps">
                 <Button
-                  v-can="'edit categories'"
                   icon="pi pi-pencil"
-                  class="p-detail"
+                 class="p-detail"
                   @click="editCategory(slotProps.data.id)"
                   v-tooltip.top="t('edit')"
                 />
                 <Button
-                  v-can="'delete categories'"
-                  icon="pi pi-trash mx-2"
-                  class="p-delete"
-                  @click="confirmDelete(slotProps.data.id)"
+                  icon="pi pi-trash"
+                    class="p-delete"
+                     @click="confirmDelete(slotProps.data.id)"
                   v-tooltip.top="t('delete')"
                 />
               </template>
             </Column>
-
             <template #empty>
               <div class="text-center py-4">
                 <i class="pi pi-exclamation-circle text-2xl mb-2" />
                 <p class="text-xl">{{ t('category.noData') }}</p>
               </div>
             </template>
-
             <template #loading>
               <div class="flex justify-content-center align-items-center py-4">
                 <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="4" />
@@ -293,7 +380,6 @@ onMounted(() => {
               >
                 <span class="p-paginator-icon pi pi-angle-left"></span>
               </button>
-
               <template v-for="(link, index) in links" :key="index">
                 <button
                   v-if="link.label && !isNaN(parseInt(link.label))"
@@ -305,7 +391,6 @@ onMounted(() => {
                 </button>
                 <span v-else-if="link.label === '...'" class="p-paginator-dots">...</span>
               </template>
-
               <button
                 class="p-paginator-next p-paginator-element p-link"
                 :disabled="!nextPageUrl"
@@ -320,7 +405,6 @@ onMounted(() => {
               >
                 <span class="p-paginator-icon pi pi-angle-double-right"></span>
               </button>
-
               <Dropdown
                 v-model="rowsPerPage"
                 :options="[5, 10, 20, 30]"
@@ -345,7 +429,7 @@ onMounted(() => {
           </div>
           <template #footer>
             <Button
-              :label="t('no')"
+              :label="t('cancel')"
               icon="pi pi-times"
               class="p-button-text"
               @click="deleteDialog = false"
@@ -358,8 +442,74 @@ onMounted(() => {
             />
           </template>
         </Dialog>
+
+        <!-- Import Dialog -->
+        <Dialog
+          v-model:visible="importDialog"
+          :style="{ width: '800px' }"
+          :header="t('category.importInstructions')"
+          :modal="true"
+        >
+          <div class="flex flex-column gap-3">
+            <div>
+              <DataTable
+                :value="exampleData"
+                responsive-layout="scroll"
+                stripedRows
+                showGridlines
+                class="p-datatable-sm"
+              >
+                <Column field="store_name_ar" :header="t('category.storeNameAr')" />
+                <Column field="store_name_en" :header="t('category.storeNameEn')" />
+                <Column field="category_name_ar" :header="t('category.nameAr')" />
+                <Column field="category_name_en" :header="t('category.nameEn')" />
+                <Column field="sub_category_name_ar" :header="t('category.subCategoryNameAr')" />
+                <Column field="sub_category_name_en" :header="t('category.subCategoryNameEn')" />
+                <Column field="sub_sub_category_name_ar" :header="t('category.subSubCategoryNameAr')" />
+                <Column field="sub_sub_category_name_en" :header="t('category.subSubCategoryNameEn')" />
+              </DataTable>
+            </div>
+
+          </div>
+          <template #footer>
+
+            <FileUpload
+              mode="basic"
+              name="file"
+              accept=".xlsx,.xls,.csv"
+              :maxFileSize="10000000"
+              :chooseLabel="t('category.chooseFile')"
+              @select="onFileSelect"
+              :auto="false"
+              :disabled="importLoading"
+              class="mb-3"
+            />
+            <Button
+              :label="t('cancel')"
+              icon="pi pi-times"
+              class="p-button-text mt-3"
+              @click="importDialog = false"
+            />
+            <Button
+              :label="t('import')"
+              icon="pi pi-check"
+              class="p-button-success"
+              @click="importCategories"
+              :disabled="!selectedFile"
+              :loading="importLoading"
+            />
+          </template>
+        </Dialog>
       </div>
     </div>
   </div>
 </template>
 
+<style scoped>
+:deep(.p-fileupload-choose) {
+  width: 100%;
+}
+.p-button.p-fileupload-choose .p-icon {
+  visibility: hidden !important;
+}
+</style>

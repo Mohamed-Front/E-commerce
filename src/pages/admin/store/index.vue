@@ -1,10 +1,20 @@
 <script setup>
-import {useToast} from 'primevue/usetoast'
+import { useToast } from 'primevue/usetoast'
 import { FilterMatchMode } from 'primevue/api'
 import { ref, onMounted, onBeforeMount, watch } from 'vue'
 import axios from "axios";
-import {useRouter} from "vue-router";
+import { useRouter } from "vue-router";
 import { useI18n } from 'vue-i18n';
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import Toolbar from 'primevue/toolbar'
+import Toast from 'primevue/toast'
+import Dialog from 'primevue/dialog'
+import ProgressSpinner from 'primevue/progressspinner'
+import Dropdown from 'primevue/dropdown'
+import Tag from 'primevue/tag'
 
 const router = useRouter()
 const toast = useToast()
@@ -34,8 +44,42 @@ const from = ref(0)
 const to = ref(0)
 const links = ref([])
 
-const exportCSV = () => {
-  dt.value.exportCSV()
+// Export stores
+const exportStores = () => {
+  axios.get('/api/export/store', {
+    responseType: 'blob' // Important for handling file downloads
+  })
+    .then((response) => {
+      // Create a blob from the response
+      const blob = new Blob([response.data], { type: 'text/csv' })
+      // Create a temporary URL for the blob
+      const url = window.URL.createObjectURL(blob)
+      // Create a temporary link element
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', 'stores_export.csv') // Set the file name
+      document.body.appendChild(link)
+      link.click()
+      // Clean up
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+
+      toast.add({
+        severity: 'success',
+        summary: t('success'),
+        detail: t('store.exportSuccess'),
+        life: 3000
+      })
+    })
+    .catch((error) => {
+      toast.add({
+        severity: 'error',
+        summary: t('error'),
+        detail: t('store.exportError'),
+        life: 3000
+      })
+      console.error('Error exporting stores:', error)
+    })
 }
 
 const delet = (id) => {
@@ -154,7 +198,7 @@ const formatDate = (dateString) => {
                 icon="pi pi-upload"
                 class="p-export"
                 v-can="'list stores'"
-                @click="exportCSV"
+                @click="exportStores"
               />
               <Button
                 v-can="'create stores'"
@@ -329,6 +373,7 @@ const formatDate = (dateString) => {
               @click="deleteStoresDialog = false"
             />
             <Button
+              :variant="outline"
               :label="t('yes')"
               icon="pi pi-check"
               class="p-button-text p-button-danger"
@@ -340,7 +385,6 @@ const formatDate = (dateString) => {
     </div>
   </div>
 </template>
-
 
 <style scoped lang="scss">
 /* Custom styles for better table display */
@@ -371,4 +415,3 @@ const formatDate = (dateString) => {
   }
 }
 </style>
-

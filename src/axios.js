@@ -1,7 +1,6 @@
 import axios from 'axios'
 import router from '@/router'
 
-axios.defaults.withCredentials = true
 axios.defaults.baseURL = import.meta.env.VITE_URI
 
 axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*'

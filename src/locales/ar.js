@@ -2,6 +2,7 @@ import { settings } from 'ionicons/icons'
 import Password from 'primevue/password'
 
 export default {
+  id:"الفهرس",
   users: 'المستخدمين',
   Settings: 'الاعدادات',
   roles: 'الأدوار',
@@ -345,6 +346,16 @@ export default {
     createError: 'فشل إنشاء الموديل',
   },
   category: {
+    import:"استيراد",
+    storeNameEn:" المتجر (انجليزي)",
+    storeNameAr:" المتجر (عربي)",
+    subCategoryNameEn:"اسم الفئة الفرعية",
+    subSubCategoryNameAr:"اسم الفئة الفرعية",
+    subSubCategoryNameEn:"اسم الفئة الفرعية",
+    importInstructions:"تعليمات الاستيراد",
+    brandNameAr:"البراند (عربي)",
+    brandNameEn:"البراند (انجليزي)",
+    chooseFile:"اختر الملف",
     suggestions: 'أقتراحات تناسبك',
     exclusive: 'عروض حصرية',
     bestsellers: 'الأكثر مبيعاً',

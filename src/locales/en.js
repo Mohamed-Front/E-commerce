@@ -343,6 +343,9 @@ export default {
     createError: 'Failed to create model',
   },
   category: {
+    storeNameEn:"store Name (En)",
+    storeNameAr:"store Name (ar)",
+    storeNameAr:" المتجر (عربي)",
     suggestions: 'Suggestions for you',
     exclusive: 'Exclusive offers',
     bestsellers: 'Bestsellers',
