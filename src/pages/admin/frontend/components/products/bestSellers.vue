@@ -34,7 +34,7 @@ class Data {
 
 const bestSellers = async () => {
   try {
-    const id = props.Stor?.id || props.Stor;
+    const id = props.Stor?.id;
     if (!id) return;
 
     const response = await axios.get(`api/home/best-sellers/${id}`);
@@ -44,7 +44,7 @@ const bestSellers = async () => {
     best_seller.value.products = response.data.data.data.map((product) => {
       return new Data(
         lang === 'en' ? product.name_en : product.name_ar || product.name_en,
-        product.media?.[0]?.url || '', // حماية من null
+        product.media?.[0]?.url || '',
         product.base_price,
         product.id
       );
@@ -54,9 +54,8 @@ const bestSellers = async () => {
   }
 };
 
-// الحل الأمثل: شغل الدالة لما يتوفر Stor.id
 watch(
-  () => props.Stor?.id || props.Stor,
+  () => props.Stor?.id,
   (id) => {
     if (id) bestSellers();
   },

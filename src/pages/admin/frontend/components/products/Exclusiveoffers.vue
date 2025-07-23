@@ -22,7 +22,6 @@ const props = defineProps({
   }
 });
 
-// تأكد أن عندك هذه الدالة (إذا مش موجودة، بدك تعرفها)
 class Data {
   constructor(name, img, price, id) {
     this.name = name;
@@ -34,10 +33,10 @@ class Data {
 
 const Exclusiveoffers = async () => {
   try {
-    const id = props.Stor?.id || props.Stor;
+    const id = props.Stor?.id;
     if (!id) return;
 
-    const response = await axios.get(`api/home/best-sellers/${id}`);
+    const response = await axios.get(`api/home/discounts/${id}`);
 
     const lang = localStorage.getItem('appLang') || 'en';
 
@@ -55,7 +54,7 @@ const Exclusiveoffers = async () => {
 };
 
 watch(
-  () => props.Stor?.id || props.Stor,
+  () => props.Stor?.id,
   (id) => {
     if (id) Exclusiveoffers();
   },

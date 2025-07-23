@@ -143,8 +143,8 @@
     <div class="flex justify-center items-start flex-col mt-4">
       <h2 class="text-[clamp(1rem,2vw,2rem)] font-bold">Related Products</h2>
     </div>
-    <Exclusiveoffers :Stor="pro.store_id" />
-    <bestSellers :Stor="pro.store_id" />
+    <Exclusiveoffers :Stor="pro" />
+    <bestSellers :Stor="pro" />
   </section>
 </template>
 

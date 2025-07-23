@@ -126,11 +126,11 @@
           </div>
         </div>
         <!-- For lady -->
-        <productsSwipertow :products="for_lady" />
+        <for_lady :Stor="Stor"/>
         <!-- Variety we chose for you 2 -->
         <productsSwipertow :products="Variety" />
         <!-- For lady 2-->
-        <productsSwipertow :products="for_lady" />
+        <for_lady :Stor="Stor"/>
         <!-- Other products -->
       </section>
     </div>
@@ -160,6 +160,7 @@
   // components
   import productsSwiper from '../components/SwiperSlide/productsSwiper.vue'
   import productsSwipertow from '../components/SwiperSlide/porductsSwipertow.vue'
+  import for_lady from '../components/categories/for_lady.vue'
   import Exclusiveoffers from '../components/products/Exclusiveoffers.vue'
   import bestSellers from '../components/products/bestSellers.vue'
   import Nav from '../components/nav.vue'
@@ -257,22 +258,6 @@
       new Data('العناية بالبشرة', imge5),
     ],
   })
-  // const Variety2 = Variety.slice(0,4)
-  const for_lady = ref({
-    title: t('lady'),
-    products: [
-      new Data('مستلزمات يومية', prand2_img),
-      new Data('فوانيس رمضان', prand2_img),
-      new Data('أجهزة المطبخ', prand2_img),
-      new Data('العبايات والجلاليب', prand2_img),
-      new Data('العناية بالبشرة', prand2_img),
-      new Data('مستلزمات يومية', prand2_img),
-      new Data('فوانيس رمضان', prand2_img),
-      new Data('أجهزة المطبخ', prand2_img),
-      new Data('العبايات والجلاليب', prand2_img),
-      new Data('العناية بالبشرة', prand2_img),
-    ],
-  })
 
   const scrollContainer = ref(null)
   let isDragging = false
@@ -300,13 +285,15 @@
   const storimg = ref({})
   onMounted(async () => {
     await loaddata()
-    storimg.value = {
+    if(Stor.value.media.length > 0) {
+      storimg.value = {
       store_image: Stor.value.media.find((img) => img.name == 'store_image').url,
       sub_banner_image: Stor.value.media.find((img) => img.name == 'sub_banner_image').url,
       slider_images_one: Stor.value.media.find((img) => img.name == 'slider_images_one').url,
       slider_images_two: Stor.value.media.find((img) => img.name == 'slider_images_two').url,
       slider_images_three: Stor.value.media.find((img) => img.name == 'slider_images_three').url,
       main_banner_image: Stor.value.media.find((img) => img.name == 'main_banner_image').url,
+    }
     }
   })
 </script>
