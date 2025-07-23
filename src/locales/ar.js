@@ -96,6 +96,7 @@ export default {
   warning: 'تحذير',
   loading: 'جارٍ التحميل...',
   custom_tabs: {
+    update_tab:"تحديث",
     create_new_tab: 'إنشاء تبويب جديد',
     store_id: 'معرف المتجر',
     select_store: 'اختر متجرًا',

@@ -104,7 +104,7 @@ const fetchCustomTabs = async () => {
 // Validate form
 const validateForm = () => {
   errors.value = {};
-  if (!formData.value.store_id.length) errors.value.store_id = t('custom_tabs.store_id_required');
+  if (!formData.value.store_id) errors.value.store_id = t('custom_tabs.store_id_required');
   if (![1, 2].includes(formData.value.type)) errors.value.type = t('custom_tabs.type_required');
   if (!formData.value.name_ar) errors.value.name_ar = t('custom_tabs.name_ar_required');
   if (!formData.value.name_en) errors.value.name_en = t('custom_tabs.name_en_required');
@@ -130,7 +130,7 @@ const submitForm = async () => {
       ...formData.value,
       store_id: formData.value.store_id, // API should expect an array
     });
-    router.push({ name: 'custom-tabs' });
+    router.push({ name: 'custom_tabs' });
     toast.add({
       severity: 'success',
       summary: t('success'),
@@ -184,31 +184,29 @@ onMounted(() => {
       <form @submit.prevent="submitForm" class="space-y-6" role="form" aria-labelledby="form-title">
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <!-- Store ID -->
-          <div class="space-y-2">
-            <label
-              for="store_id"
-              class="block text-sm font-medium text-gray-700"
-              :class="{ 'text-right': $t('dir') === 'rtl' }"
-            >
-              {{ $t('custom_tabs.store_id') }} <span class="text-red-500">*</span>
-            </label>
-            <MultiSelect
-              id="store_id"
-              v-model="formData.store_id"
-              :options="stores"
-              :optionLabel="storeNameKey"
-              optionValue="id"
-              :placeholder="storesLoading ? $t('loading') : $t('custom_tabs.select_store')"
-              :disabled="storesLoading"
-              class="w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-              :class="{ 'border-red-500': errors.store_id }"
-              aria-describedby="store_id_error"
-              required
-            />
-            <small v-if="errors.store_id" id="store_id_error" class="text-red-500">
-              {{ errors.store_id }}
-            </small>
-          </div>
+         <div class="space-y-2">
+          <label for="store_id" class="block text-sm font-medium text-gray-700">
+            {{ $t('custom_tabs.store_id') }} <span class="text-red-500">*</span>
+          </label>
+          <Dropdown
+            filter
+            id="store_id"
+            v-model="formData.store_id"
+            :options="stores"
+            optionLabel="name_en"
+            optionValue="id"
+            :placeholder="storesLoading ? $t('loading') : $t('custom_tabs.select_store')"
+            :disabled="storesLoading || loading"
+            class="w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            :class="{ 'border-red-500': errors.store_id }"
+            aria-describedby="store_id_error"
+            required
+          />
+          <small v-if="errors.store_id" id="store_id_error" class="text-red-500">
+            {{ errors.store_id }}
+          </small>
+        </div>
+
 
           <!-- Type -->
           <div class="space-y-2">
@@ -331,7 +329,7 @@ onMounted(() => {
             type="button"
             :label="$t('custom_tabs.cancel')"
             icon="pi pi-times"
-            class="px-8 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
+            class="px-8 py-3 mx-3 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
             :class="{ 'space-x-reverse': $t('dir') === 'rtl' }"
             @click="router.push({ name: 'custom-tabs' }); resetForm()"
             :disabled="loading"

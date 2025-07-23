@@ -84,7 +84,6 @@
   $tabletBreakPointPX: 768px;
 
   .app-layout {
-    height: 100vh;
     display: flex;
     flex-direction: column;
     &__navbar {
@@ -102,7 +101,6 @@
 
       .app-layout__sidebar-wrapper {
         position: relative;
-        height: 100%;
         background: #ffffff;
 
         @media screen and (max-width: $tabletBreakPointPX) {

@@ -89,6 +89,8 @@ export default {
   warning: 'Warning',
   loading: 'Loading...',
   custom_tabs: {
+        update_tab:"update tab",
+
     create_new_tab: 'Create New Tab',
     store_id: 'Store ID',
     select_store: 'Select a Store',
