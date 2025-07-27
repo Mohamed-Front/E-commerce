@@ -4,7 +4,7 @@
 
 <script setup>
   import { ref, watch } from 'vue'
-  import productsSwiper from '../SwiperSlide/productsSwiper.vue'
+  import productsSwipertow from '../SwiperSlide/porductsSwipertow.vue'
   import { useI18n } from 'vue-i18n'
   import axios from 'axios'
 
@@ -32,7 +32,6 @@
       const lang = localStorage.getItem('appLang') || 'en'
 
       response.data.data.data.map((product) => {
-        if (product.type == 1) {
           for_lady.value.products.push({
             name: lang === 'en' ? product.name_en : product.name_ar || product.name_en,
             img: product.details[0]?.media[0]?.url || '',
@@ -40,7 +39,7 @@
             type: product.type,
             ids: product.details[0]?.ids
           })
-        }
+        console.log(for_lady.value)
       })
     } catch (error) {
       console.error('Failed to fetch best sellers:', error)

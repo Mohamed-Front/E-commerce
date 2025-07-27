@@ -2,30 +2,38 @@
   <h1 class="lg:mt-24 xs:mt-12 mx-4 font-bold font-sans xs:text-[.9rem] sm:text-[1.3rem] md:text-[1.8rem]">
     {{ products.title }}
   </h1>
-  <swiper
-    :modules="[Autoplay]"
-    :slides-per-view="5"
-    :space-between="10"
-    :loop="true"
-    :autoplay="{ delay: 0, disableOnInteraction: false }"
-    :speed="25000"
-    grab-cursor
-    class="max-h-[400px] mt-3 p-4"
-    :breakpoints="{
-      0: { slidesPerView: 3 },
-      1024: { slidesPerView: 4 },
-      1280: { slidesPerView: 5 },
-    }"
+<swiper
+  :modules="[Autoplay]"
+  :slides-per-view="5"
+  :space-between="16"
+  :loop="true"
+  :autoplay="{ delay: 0, disableOnInteraction: false }"
+  :speed="20000"
+  grab-cursor
+  class="mt-4 px-2"
+  :breakpoints="{
+    0: { slidesPerView: 3, spaceBetween: 12 },
+    768: { slidesPerView: 4, spaceBetween: 14 },
+    1024: { slidesPerView: 5, spaceBetween: 16 }
+  }"
+>
+  <SwiperSlide
+    v-for="pro in products.products"
+    :key="pro.id"
+    class="bg-white rounded-lg overflow-hidden flex flex-col justify-between shadow-md transition hover:scale-105 duration-300"
   >
-    <SwiperSlide class="bg-white text-center rounded-md pb-3" v-for="pro in products.products">
-      <img :src="pro.img" alt="" class="h-[87%] rounded-md" />
-      <p
-        class="text-[var(--main-text-color)] font-bold m-[calc((13%)/2)] xs:text-[.3rem] sm:text-[.5rem] md:text-[.7rem] lg:text-[1rem] p-2"
-      >
-        {{ pro.name }}
-      </p>
-    </SwiperSlide>
-  </swiper>
+    <img
+      :src="pro.img"
+      alt=""
+      class="w-full object-cover aspect-[3/4] sm:aspect-[4/5] lg:aspect-[1/1] rounded-t-lg"
+    />
+    <p
+      class="text-[var(--main-text-color)] font-bold text-center text-xs sm:text-sm md:text-base lg:text-lg px-3 py-2"
+    >
+      {{ pro.name }}
+    </p>
+  </SwiperSlide>
+</swiper>
 </template>
 
 <script setup>
