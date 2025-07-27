@@ -329,7 +329,7 @@ onMounted(() => {
           type="button"
           :label="$t('cancel')"
           icon="pi pi-times"
-          class="px-8 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
+          class="px-8 py-3 mx-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
           @click="router.push({ name: 'custom-tabs' })"
           :disabled="loading"
         />

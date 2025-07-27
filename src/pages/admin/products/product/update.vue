@@ -11,14 +11,16 @@ const toast = useToast();
 const { t } = useI18n();
 const form = ref();
 const loading = ref(false);
-const imageFile = ref(null);
-const imagePreview = ref(null);
 const isDragging = ref(false);
 const stores = ref([]);
 const categories = ref([]);
 const brands = ref([]);
 const attributes = ref([]);
 const hasVariants = ref(false);
+
+// Image handling
+const mainImages = ref([]);
+const mainImagePreviews = ref([]);
 
 // Language handling
 const currentLanguage = computed(() => localStorage.getItem('appLang') || 'en');
@@ -47,6 +49,7 @@ const productData = ref({
 const formattedAttributes = computed(() => {
   return attributes.value.map(attr => ({
     label: currentLanguage.value === 'en' ? attr.name_en : attr.name_ar,
+    value: attr.id,
     items: attr.values.map(val => ({
       id: val.id,
       [labelField.value]: currentLanguage.value === 'en' ? val.value_en : val.value_ar
@@ -60,7 +63,6 @@ const fetchProduct = async () => {
     const response = await axios.get(`/api/product/${route.params.id}`);
     const data = response.data.data;
 
-    // Map the API response to our form structure
     productData.value = {
       store_id: data.store_id,
       category_id: data.category_id,
@@ -89,9 +91,9 @@ const fetchProduct = async () => {
 
     hasVariants.value = data.has_variants;
 
-    // Set main image preview if available
+    // Set main image previews if available
     if (data.media && data.media.length > 0) {
-      imagePreview.value = data.media[0].url;
+      mainImagePreviews.value = data.media.map(media => media.url);
     }
   } catch (error) {
     toast.add({ severity: 'error', summary: t('error'), detail: t('error.productLoad'), life: 3000 });
@@ -143,7 +145,7 @@ onMounted(() => {
   fetchProduct();
 });
 
-// Handle drag events
+// Handle drag events for main images
 const handleDragOver = (event) => {
   event.preventDefault();
   isDragging.value = true;
@@ -153,36 +155,42 @@ const handleDragLeave = () => {
   isDragging.value = false;
 };
 
-// Handle main image upload
-const handleImageUpload = (file) => {
-  if (file.size > 2 * 1024 * 1024) {
-    toast.add({ severity: 'error', summary: t('error'), detail: t('validation.imageSize'), life: 3000 });
-    return;
+// Handle main images upload
+const handleImageUpload = (files) => {
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.add({ severity: 'error', summary: t('error'), detail: t('validation.imageSize'), life: 3000 });
+      continue;
+    }
+
+    if (!file.type.match('image.*')) {
+      toast.add({ severity: 'error', summary: t('error'), detail: t('validation.imageInvalid'), life: 3000 });
+      continue;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      mainImages.value.push(file);
+      mainImagePreviews.value.push(e.target.result);
+    };
+    reader.readAsDataURL(file);
   }
-  if (!file.type.match('image.*')) {
-    toast.add({ severity: 'error', summary: t('error'), detail: t('validation.imageInvalid'), life: 3000 });
-    return;
-  }
-  imageFile.value = file;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    imagePreview.value = e.target.result;
-  };
-  reader.readAsDataURL(file);
   isDragging.value = false;
 };
 
 const onImageUpload = (event) => {
-  const file = event.target.files?.[0] || event.dataTransfer?.files?.[0];
-  if (file) {
-    handleImageUpload(file);
+  const files = event.target.files || event.dataTransfer?.files;
+  if (files && files.length > 0) {
+    handleImageUpload(files);
   }
 };
 
 // Remove main image
-const removeImage = () => {
-  imageFile.value = null;
-  imagePreview.value = null;
+const removeMainImage = (index) => {
+  mainImages.value.splice(index, 1);
+  mainImagePreviews.value.splice(index, 1);
 };
 
 // Handle variant image upload
@@ -195,6 +203,7 @@ const handleVariantImageUpload = (file, variantIndex) => {
     toast.add({ severity: 'error', summary: t('error'), detail: t('validation.imageInvalid'), life: 3000 });
     return;
   }
+
   productData.value.variants[variantIndex].variant_image = file;
   const reader = new FileReader();
   reader.onload = (e) => {
@@ -220,15 +229,7 @@ const removeVariantImage = (variantIndex) => {
 const toggleVariants = () => {
   hasVariants.value = !hasVariants.value;
   if (hasVariants.value && !productData.value.variants.length) {
-    productData.value.variants.push({
-      sku_ar: '',
-      sku_en: '',
-      price: '',
-      cost_price: null,
-      attribute_value_ids: [],
-      variant_image: null,
-      variant_image_preview: null
-    });
+    addVariant();
   } else if (!hasVariants.value) {
     productData.value.variants = [];
   }
@@ -236,6 +237,7 @@ const toggleVariants = () => {
 
 const addVariant = () => {
   productData.value.variants.push({
+    id: null,
     sku_ar: '',
     sku_en: '',
     price: '',
@@ -266,7 +268,7 @@ const submitForm = async () => {
 
   // Validate variants or base_price
   if (hasVariants.value) {
-    if (productData.value.variants.some(v => !v.sku_en || !v.sku_ar || !v.price || !v.attribute_value_ids?.length)) {
+    if (productData.value.variants.some(v => !v.sku_en || !v.sku_ar || !v.price || v.attribute_value_ids.length === 0)) {
       toast.add({ severity: 'error', summary: t('error'), detail: t('validation.variantRequiredFields'), life: 3000 });
       return;
     }
@@ -277,6 +279,8 @@ const submitForm = async () => {
 
   loading.value = true;
   const formData = new FormData();
+
+  // Append basic product data
   formData.append('store_id', productData.value.store_id);
   formData.append('category_id', productData.value.category_id);
   formData.append('brand_id', productData.value.brand_id);
@@ -289,6 +293,11 @@ const submitForm = async () => {
   formData.append('tax', productData.value.tax);
   formData.append('is_displayed', productData.value.is_displayed ? 1 : 0);
 
+  // Append main images
+  mainImages.value.forEach((image, index) => {
+    formData.append(`main_images[${index}]`, image);
+  });
+
   if (hasVariants.value) {
     productData.value.variants.forEach((variant, index) => {
       formData.append(`variants[${index}][id]`, variant.id || '');
@@ -296,7 +305,14 @@ const submitForm = async () => {
       formData.append(`variants[${index}][sku_ar]`, variant.sku_ar);
       formData.append(`variants[${index}][price]`, variant.price);
       formData.append(`variants[${index}][cost_price]`, variant.cost_price || 0);
-      formData.append(`variants[${index}][attribute_value_ids]`, JSON.stringify(variant.attribute_value_ids));
+
+      // Ensure attribute_value_ids is an array and properly formatted
+      if (Array.isArray(variant.attribute_value_ids)) {
+        variant.attribute_value_ids.forEach((attrId, attrIndex) => {
+          formData.append(`variants[${index}][attribute_value_ids][${attrIndex}]`, attrId);
+        });
+      }
+
       if (variant.variant_image) {
         formData.append(`variants[${index}][variant_image]`, variant.variant_image);
       }
@@ -304,10 +320,6 @@ const submitForm = async () => {
   } else {
     formData.append('base_price', productData.value.base_price);
     formData.append('cost_price', productData.value.cost_price || 0);
-  }
-
-  if (imageFile.value) {
-    formData.append('image', imageFile.value);
   }
 
   try {
@@ -319,7 +331,12 @@ const submitForm = async () => {
     router.push({ name: 'product' });
     toast.add({ severity: 'success', summary: t('success'), detail: t('product.updateSuccess'), life: 3000 });
   } catch (error) {
-    toast.add({ severity: 'error', summary: t('error'), detail: error.response?.data?.message || t('error.updateError'), life: 3000 });
+    toast.add({
+      severity: 'error',
+      summary: t('error'),
+      detail: error.response?.data?.message || t('error.updateError'),
+      life: 3000
+    });
   } finally {
     loading.value = false;
   }
@@ -338,13 +355,14 @@ const submitForm = async () => {
             {{ t('product.store') }} <span class="text-red-500">*</span>
           </label>
           <Dropdown
-           filter
+            filter
             id="store_id"
             v-model="productData.store_id"
             :options="stores"
             :optionLabel="labelField"
             optionValue="id"
             class="w-full"
+            :class="{ 'p-invalid': !productData.store_id }"
           />
         </div>
 
@@ -354,13 +372,14 @@ const submitForm = async () => {
             {{ t('product.category') }} <span class="text-red-500">*</span>
           </label>
           <Dropdown
-          filter
+            filter
             id="category_id"
             v-model="productData.category_id"
             :options="categories"
             :optionLabel="labelField"
             optionValue="id"
             class="w-full"
+            :class="{ 'p-invalid': !productData.category_id }"
           />
         </div>
 
@@ -370,13 +389,14 @@ const submitForm = async () => {
             {{ t('product.brand') }} <span class="text-red-500">*</span>
           </label>
           <Dropdown
-          filter
+            filter
             id="brand_id"
             v-model="productData.brand_id"
             :options="brands"
             :optionLabel="labelField"
             optionValue="id"
             class="w-full"
+            :class="{ 'p-invalid': !productData.brand_id }"
           />
         </div>
 
@@ -388,7 +408,8 @@ const submitForm = async () => {
           <InputText
             id="name_en"
             v-model="productData.name_en"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            class="w-full"
+            :class="{ 'p-invalid': !productData.name_en }"
           />
         </div>
 
@@ -401,7 +422,8 @@ const submitForm = async () => {
             id="name_ar"
             v-model="productData.name_ar"
             dir="rtl"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            class="w-full"
+            :class="{ 'p-invalid': !productData.name_ar }"
           />
         </div>
 
@@ -413,7 +435,7 @@ const submitForm = async () => {
           <InputText
             id="sub_name_en"
             v-model="productData.sub_name_en"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            class="w-full"
           />
         </div>
 
@@ -426,7 +448,7 @@ const submitForm = async () => {
             id="sub_name_ar"
             v-model="productData.sub_name_ar"
             dir="rtl"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            class="w-full"
           />
         </div>
 
@@ -439,7 +461,7 @@ const submitForm = async () => {
             id="description_en"
             v-model="productData.description_en"
             rows="4"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            class="w-full"
           />
         </div>
 
@@ -453,7 +475,7 @@ const submitForm = async () => {
             v-model="productData.description_ar"
             rows="4"
             dir="rtl"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            class="w-full"
           />
         </div>
 
@@ -496,6 +518,7 @@ const submitForm = async () => {
               mode="decimal"
               :minFractionDigits="2"
               class="w-full"
+              :class="{ 'p-invalid': !productData.base_price }"
             />
           </div>
 
@@ -515,22 +538,49 @@ const submitForm = async () => {
 
         <!-- Variants Toggle -->
         <div class="md:col-span-2 space-y-2">
-          <Checkbox
-            v-model="hasVariants"
-            inputId="hasVariants"
-            :binary="true"
-            @click="toggleVariants"
-          />
-          <label for="hasVariants" class="ml-2 text-sm font-medium text-gray-700">
-            {{ t('product.hasVariants') }}
-          </label>
+          <div class="flex items-center">
+            <Checkbox
+              v-model="hasVariants"
+              inputId="hasVariants"
+              :binary="true"
+              @click="toggleVariants"
+              class="mr-2"
+            />
+            <label for="hasVariants" class="text-sm font-medium text-gray-700">
+              {{ t('product.hasVariants') }}
+            </label>
+          </div>
         </div>
 
-        <!-- Variants -->
+        <!-- Variants Section -->
         <div v-if="hasVariants" class="md:col-span-2 space-y-4">
-          <label class="block text-sm font-medium text-gray-700">{{ t('product.variants') }}</label>
-          <div v-for="(variant, index) in productData.variants" :key="index" class="p-4 border rounded-lg space-y-4">
+          <div class="border-b pb-2">
+            <h3 class="text-lg font-semibold text-gray-800">{{ t('product.variants') }}</h3>
+          </div>
+
+          <div v-for="(variant, index) in productData.variants" :key="index" class="p-4 border rounded-lg space-y-4 bg-gray-50">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Attribute Values -->
+              <div class="space-y-2 md:col-span-2">
+                <label :for="'attributes_' + index" class="block text-sm font-medium text-gray-700">
+                  {{ t('product.attributes') }} <span class="text-red-500">*</span>
+                </label>
+                <MultiSelect
+                  :id="'attributes_' + index"
+                  v-model="variant.attribute_value_ids"
+                  :options="formattedAttributes"
+                  optionGroupLabel="label"
+                  optionGroupChildren="items"
+                  :optionLabel="labelField"
+                  optionValue="id"
+                  class="w-full"
+                  :class="{ 'p-invalid': variant.attribute_value_ids.length === 0 }"
+                  display="chip"
+                  :filter="true"
+                  :showToggleAll="false"
+                />
+              </div>
+
               <!-- SKU English -->
               <div class="space-y-2">
                 <label :for="'sku_en_' + index" class="block text-sm font-medium text-gray-700">
@@ -539,7 +589,8 @@ const submitForm = async () => {
                 <InputText
                   :id="'sku_en_' + index"
                   v-model="variant.sku_en"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  class="w-full"
+                  :class="{ 'p-invalid': !variant.sku_en }"
                 />
               </div>
 
@@ -552,7 +603,8 @@ const submitForm = async () => {
                   :id="'sku_ar_' + index"
                   v-model="variant.sku_ar"
                   dir="rtl"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  class="w-full"
+                  :class="{ 'p-invalid': !variant.sku_ar }"
                 />
               </div>
 
@@ -567,6 +619,7 @@ const submitForm = async () => {
                   mode="decimal"
                   :minFractionDigits="2"
                   class="w-full"
+                  :class="{ 'p-invalid': !variant.price }"
                 />
               </div>
 
@@ -584,34 +637,18 @@ const submitForm = async () => {
                 />
               </div>
 
-              <!-- Attribute Values -->
-              <div class="space-y-2">
-                <label :for="'attributes_' + index" class="block text-sm font-medium text-gray-700">
-                  {{ t('product.attributes') }} <span class="text-red-500">*</span>
-                </label>
-                <MultiSelect
-                  :id="'attributes_' + index"
-                  v-model="variant.attribute_value_ids"
-                  :options="formattedAttributes"
-                  optionGroupLabel="label"
-                  optionGroupChildren="items"
-                  :optionLabel="labelField"
-                  optionValue="id"
-                  class="w-full"
-                />
-              </div>
-
               <!-- Variant Image Upload -->
               <div class="space-y-2">
                 <label :for="'variant_image_' + index" class="block text-sm font-medium text-gray-700">
                   {{ t('product.variantImage') }}
                 </label>
                 <label
-                  @dragover.prevent="handleDragOver"
-                  @dragleave="handleDragLeave"
+                  :for="'variant_image_' + index"
+                  @dragover.prevent="isDragging = true"
+                  @dragleave="isDragging = false"
                   @drop.prevent="onVariantImageUpload($event, index)"
                   :class="{'border-blue-500 bg-blue-50': isDragging, 'border-gray-300': !isDragging}"
-                  class="cursor-pointer w-full rounded-lg border-2 border-dashed transition-colors duration-300"
+                  class="cursor-pointer w-full rounded-lg border-2 border-dashed transition-colors duration-300 block"
                 >
                   <input
                     type="file"
@@ -619,32 +656,23 @@ const submitForm = async () => {
                     @change="onVariantImageUpload($event, index)"
                     accept="image/*"
                     class="hidden"
-                  >
+                  />
                   <div v-if="variant.variant_image_preview" class="p-4">
                     <div class="relative group">
                       <img
                         :src="variant.variant_image_preview"
                         alt="Variant Preview"
-                        class="w-full h-32 object-contain rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"
+                        class="w-full h-32 object-contain rounded-lg shadow-md"
                       />
                       <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
-                        <div class="opacity-0 group-hover:opacity-100 space-x-3 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
-                          <button
-                            type="button"
-                            @click.stop="removeVariantImage(index)"
-                            class="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
-                            :title="t('product.deleteImage')"
-                          >
-                            <i class="pi pi-trash text-sm"></i>
-                          </button>
-                          <button
-                            type="button"
-                            class="bg-white text-gray-700 p-2 rounded-full hover:bg-gray-100 transition"
-                            :title="t('product.editImage')"
-                          >
-                            <i class="pi pi-pencil text-sm"></i>
-                          </button>
-                        </div>
+                        <button
+                          type="button"
+                          @click.stop="removeVariantImage(index)"
+                          class="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                          :title="t('product.deleteImage')"
+                        >
+                          <i class="pi pi-trash text-sm"></i>
+                        </button>
                       </div>
                     </div>
                     <p class="mt-2 text-center text-sm text-gray-500">{{ t('product.changeImage') }}</p>
@@ -661,86 +689,90 @@ const submitForm = async () => {
                 </label>
               </div>
             </div>
-            <Button
-              type="button"
-              icon="pi pi-trash"
-              class="p-button-danger"
-              @click="removeVariant(index)"
-              :disabled="productData.variants.length === 1"
-            />
+
+            <div class="flex justify-end">
+              <Button
+                type="button"
+                icon="pi pi-trash"
+                class="p-button-danger p-button-sm"
+                @click="removeVariant(index)"
+                :disabled="productData.variants.length === 1"
+                :label="t('product.removeVariant')"
+              />
+            </div>
           </div>
+
           <Button
             type="button"
             :label="t('product.addVariant')"
             icon="pi pi-plus"
-            class="p-button-secondary"
+            class="p-button-outlined p-button-secondary"
             @click="addVariant"
           />
         </div>
 
-        <!-- Main Image Upload -->
+        <!-- Main Images Upload -->
         <div class="md:col-span-2 space-y-2">
-          <label class="block text-sm font-medium text-gray-700">{{ t('product.image') }}</label>
-          <div class="flex justify-center">
-            <label
-              @dragover.prevent="handleDragOver"
-              @dragleave="handleDragLeave"
-              @drop.prevent="onImageUpload"
-              :class="{'border-blue-500 bg-blue-50': isDragging, 'border-gray-300': !isDragging}"
-              class="cursor-pointer w-full max-w-md rounded-xl border-2 border-dashed transition-colors duration-300"
-            >
-              <input type="file" @change="onImageUpload" accept="image/*" class="hidden">
-              <div v-if="imagePreview" class="p-4">
-                <div class="relative group">
+          <label class="block text-sm font-medium text-gray-700">{{ t('product.images') }}</label>
+          <label
+            for="main_images_upload"
+            @dragover.prevent="isDragging = true"
+            @dragleave="isDragging = false"
+            @drop.prevent="onImageUpload"
+            :class="{'border-blue-500 bg-blue-50': isDragging, 'border-gray-300': !isDragging}"
+            class="cursor-pointer w-full rounded-xl border-2 border-dashed transition-colors duration-300 p-6 block"
+          >
+            <input
+              type="file"
+              id="main_images_upload"
+              @change="onImageUpload"
+              accept="image/*"
+              multiple
+              class="hidden"
+            />
+            <div v-if="mainImagePreviews.length > 0" class="space-y-4">
+              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                <div v-for="(preview, index) in mainImagePreviews" :key="index" class="relative group">
                   <img
-                    :src="imagePreview"
+                    :src="preview"
                     alt="Preview"
-                    class="w-full h-64 object-contain rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"
+                    class="w-full h-32 object-cover rounded-lg shadow-md"
                   />
                   <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
-                    <div class="opacity-0 group-hover:opacity-100 space-x-3 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
-                      <button
-                        type="button"
-                        @click.stop="removeImage"
-                        class="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
-                        :title="t('product.deleteImage')"
-                      >
-                        <i class="pi pi-trash text-sm"></i>
-                      </button>
-                      <button
-                        type="button"
-                        class="bg-white text-gray-700 p-2 rounded-full hover:bg-gray-100 transition"
-                        :title="t('product.editImage')"
-                      >
-                        <i class="pi pi-pencil text-sm"></i>
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      @click.stop="removeMainImage(index)"
+                      class="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                      :title="t('product.deleteImage')"
+                    >
+                      <i class="pi pi-trash text-sm"></i>
+                    </button>
                   </div>
                 </div>
-                <p class="mt-2 text-center text-sm text-gray-500">{{ t('product.changeImage') }}</p>
               </div>
-              <div v-else class="p-8 flex flex-col items-center justify-center">
-                <div class="bg-blue-100 p-4 rounded-full mb-4">
-                  <i class="pi pi-image text-blue-500 text-2xl"></i>
-                </div>
-                <p class="text-sm text-center text-gray-600 mb-1">
-                  <span class="text-blue-500 font-medium">{{ t('product.uploadClick') }}</span> {{ t('product.uploadDrag') }}
-                </p>
-                <p class="text-xs text-gray-400">{{ t('product.imageFormat') }}</p>
+              <p class="text-center text-sm text-gray-500">{{ t('product.addMoreImages') }}</p>
+            </div>
+            <div v-else class="flex flex-col items-center justify-center space-y-3">
+              <div class="bg-blue-100 p-3 rounded-full">
+                <i class="pi pi-images text-blue-500 text-2xl"></i>
               </div>
-            </label>
-          </div>
+              <p class="text-sm text-center text-gray-600">
+                <span class="text-blue-500 font-medium">{{ t('product.uploadClick') }}</span> {{ t('product.uploadDrag') }}
+              </p>
+              <p class="text-xs text-gray-400">{{ t('product.imageFormat') }}</p>
+            </div>
+          </label>
         </div>
       </div>
 
-      <!-- Submit Button -->
+      <!-- Submit Buttons -->
       <div class="pt-4 flex justify-center space-x-4">
         <Button
           type="button"
           :label="t('product.cancelButton')"
           icon="pi pi-times"
           @click="router.go(-1)"
-          class="px-6 py-3 mx-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
+          class="p-button-outlined p-button-secondary"
           :disabled="loading"
         />
         <Button
@@ -748,14 +780,37 @@ const submitForm = async () => {
           :label="t('product.updateButton')"
           icon="pi pi-check"
           :loading="loading"
-          class="px-8 mx-2 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
-          :disabled="loading"
-        >
-          <span v-if="!loading">{{ t('product.updateButton') }}</span>
-          <i v-else class="pi pi-spinner pi-spin"></i>
-        </Button>
+          class="p-button-success"
+        />
       </div>
     </form>
+
     <Toast />
   </div>
 </template>
+
+<style scoped>
+.p-dropdown, .p-multiselect, .p-inputtext, .p-inputnumber, .p-inputtextarea {
+  width: 100%;
+}
+
+.p-card {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.p-invalid {
+  border-color: #f44336 !important;
+}
+
+.group:hover .group-hover\:opacity-100 {
+  opacity: 1;
+}
+
+.transition-all {
+  transition-property: all;
+}
+
+.duration-300 {
+  transition-duration: 300ms;
+}
+</style>
