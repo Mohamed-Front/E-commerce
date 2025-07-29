@@ -37,6 +37,7 @@ export const useAuthStore = defineStore('Auth', {
       try {
         const response = await axios.post('/api/login', {
           email: data.email,
+          phone: data.phone,
           password: data.password,
         })
 
@@ -83,6 +84,7 @@ export const useAuthStore = defineStore('Auth', {
         const response = await axios.post('/api/register', {
           name: data.name,
           email: data.email,
+          phone: data.phone,
           password: data.password,
           password_confirmation: data.password_confirmation,
         })

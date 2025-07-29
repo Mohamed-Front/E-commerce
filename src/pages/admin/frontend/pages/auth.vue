@@ -34,7 +34,7 @@
                   : t('auth.newpassP')
               }}
             </p>
-            <span class="text-center text-red-500" v-if="authStore.error">{{ authStore.error }}</span>
+            <span class="text-center text-red-500" v-if="authStore.authErrors">{{ authStore.authErrors[0] }}</span>
 
             <!-- Inputs form -->
             <div class="flex flex-col gap-1 w-full text-white" v-for="value in datalogin" v-if="currentPage != 'OTP'">
@@ -160,14 +160,14 @@
 <script setup>
   import { ref, reactive, watch, nextTick } from 'vue'
   import { useI18n } from 'vue-i18n'
-  import { AuthStore } from '../store/auth.store'
+  import { useAuthStore } from '../../../../stores/WebAuth'
   import { useToast } from 'primevue/usetoast'
   import axios from 'axios'
   import { useRouter } from 'vue-router'
 
   const router = useRouter()
   const toast = useToast()
-  const authStore = AuthStore()
+  const authStore = useAuthStore()
   const { t } = useI18n()
   const currentPage = ref('login') // 'login', 'register', 'missedPassword', 'OTP', 'newPassword'
   const loading = ref(false)
@@ -321,7 +321,7 @@
         data.value.phone = inf.type == 'phone' ? inf.data : data.value.phone
         data.value.password = inf.type == 'password' ? inf.data : data.value.password
       }
-      await authStore.loginUser(data.value, rememberme.value).finally(() => {
+      await authStore.handleLogin(data.value).finally(() => {
         loading.value = false
       })
       // registration
@@ -335,7 +335,7 @@
         data.value.name = inf.type == 'username' ? inf.data : data.value.name
         data.value.phone = inf.type == 'phone' ? inf.data : data.value.phone
       }
-      await authStore.registration(data.value).finally(() => {
+      await authStore.handleRegister(data.value).finally(() => {
         loading.value = false
       })
       // missedPassword
@@ -445,7 +445,4 @@
     }
   }
 
-  watch(currentPage, (newVal, oldVal) => {
-    authStore.clear()
-  })
 </script>
