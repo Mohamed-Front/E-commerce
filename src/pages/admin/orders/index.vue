@@ -224,19 +224,13 @@ onMounted(() => {
             <Column :header="t('actions')" header-style="min-width:10rem;">
               <template #body="slotProps">
                 <Button
-                  v-can="'view orders'"
+                  v-can="'show orders'"
                   icon="pi pi-eye"
                   class="p-detail"
                   @click="viewOrder(slotProps.data.id)"
                   v-tooltip.top="t('view')"
                 />
-                <Button
-                  v-can="'delete orders'"
-                  icon="pi pi-trash mx-2"
-                  class="p-delete"
-                  @click="confirmDelete(slotProps.data.id)"
-                  v-tooltip.top="t('delete')"
-                />
+
               </template>
             </Column>
 
