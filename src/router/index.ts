@@ -229,6 +229,17 @@ const routes: Array<RouteRecordRaw> = [
             component: () => import('../pages/admin/store/index.vue'),
           },
           {
+            name: 'order',
+            path: 'order',
+            component: () => import('../pages/admin/orders/index.vue'),
+          },
+           {
+            name: 'order-show',
+            path: 'order-show/:id',
+            component: () => import('../pages/admin/orders/show.vue'),
+          },
+
+          {
             name: 'store-create',
             path: 'store-create',
             component: () => import('../pages/admin/store/create.vue'),

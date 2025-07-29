@@ -162,6 +162,14 @@ export default {
         icon: 'dashboard',
       },
     },
+     {
+      name: 'order',
+      displayName: 'navigation.orders',
+      show: ['dashboard'],
+      meta: {
+        icon: 'dashboard',
+      },
+    },
     {
       name: 'setting',
       displayName: 'navigation.settings',

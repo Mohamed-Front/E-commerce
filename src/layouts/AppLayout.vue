@@ -100,6 +100,7 @@
       }
 
       .app-layout__sidebar-wrapper {
+        min-height: 100vh;
         position: relative;
         background: #ffffff;
 
