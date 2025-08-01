@@ -241,6 +241,7 @@ onMounted(() => {
       </div>
     </Form>
   </div>
+  <!-- sovle problem -->
   <Toast />
 </template>
 
@@ -291,4 +292,6 @@ button.bg-gradient-to-r:hover {
   background-color: #3b82f6;
   border-radius: 3px;
 }
+
+
 </style>
