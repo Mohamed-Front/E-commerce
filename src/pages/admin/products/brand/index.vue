@@ -1,4 +1,3 @@
-```vue
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useToast } from 'primevue/usetoast'
@@ -35,13 +34,13 @@ const { t } = useI18n()
 
 // State variables
 const loading = ref(true)
-const categories = ref([])
+const brands = ref([])
 const deleteDialog = ref(false)
 const deleteId = ref(null)
 const dt = ref(null)
 const filters = ref({})
 const searchQuery = ref('')
-const selectedCategories = ref(null)
+const selectedBrands = ref(null)
 const importDialog = ref(false)
 const selectedFile = ref(null)
 const importLoading = ref(false)
@@ -78,7 +77,7 @@ const exampleData = ref([
 // Fetch data
 const fetchData = () => {
   loading.value = true
-  axios.get('/api/category', {
+  axios.get('/api/brand', {
     params: {
       page: currentPage.value,
       limit: rowsPerPage.value,
@@ -86,7 +85,7 @@ const fetchData = () => {
     }
   })
     .then((response) => {
-      categories.value = response.data.data.data
+      brands.value = response.data.data.data
       totalRecords.value = response.data.data.total
       totalPages.value = response.data.data.last_page
       firstPageUrl.value = response.data.data.first_page_url
@@ -102,11 +101,11 @@ const fetchData = () => {
       toast.add({
         severity: 'error',
         summary: t('error'),
-        detail: t('category.loadError'),
+        detail: t('brand.loadError'),
         life: 3000
       })
       loading.value = false
-      console.error('Error fetching categories:', error)
+      console.error('Error fetching brands:', error)
     })
 }
 
@@ -131,19 +130,19 @@ const changeRowsPerPage = (event) => {
   fetchData()
 }
 
-// Delete category
+// Delete brand
 const confirmDelete = (id) => {
   deleteId.value = id
   deleteDialog.value = true
 }
 
-const deleteCategory = () => {
-  axios.delete(`/api/category/${deleteId.value}`)
+const deleteBrand = () => {
+  axios.delete(`/api/brand/${deleteId.value}`)
     .then(() => {
       toast.add({
         severity: 'success',
         summary: t('success'),
-        detail: t('category.deleteSuccess'),
+        detail: t('brand.deleteSuccess'),
         life: 3000
       })
       fetchData()
@@ -153,7 +152,7 @@ const deleteCategory = () => {
       toast.add({
         severity: 'error',
         summary: t('error'),
-        detail: t('category.deleteError'),
+        detail: t('brand.deleteError'),
         life: 3000
       })
     })
@@ -174,13 +173,12 @@ const exportBrands = () => {
       link.click()
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
-
     })
     .catch((error) => {
       toast.add({
         severity: 'error',
         summary: t('error'),
-        detail: t('category.exportError'),
+        detail: t('brand.exportError'),
         life: 3000
       })
       console.error('Error exporting brands:', error)
@@ -197,12 +195,12 @@ const onFileSelect = (event) => {
   selectedFile.value = event.files[0]
 }
 
-const importCategories = () => {
+const importBrands = () => {
   if (!selectedFile.value) {
     toast.add({
       severity: 'warn',
       summary: t('warning'),
-      detail: t('category.importNoFile'),
+      detail: t('brand.importNoFile'),
       life: 3000
     })
     return
@@ -217,7 +215,7 @@ const importCategories = () => {
       toast.add({
         severity: 'success',
         summary: t('success'),
-        detail: t('category.importSuccess'),
+        detail: t('brand.importSuccess'),
         life: 3000
       })
       fetchData()
@@ -229,7 +227,7 @@ const importCategories = () => {
       toast.add({
         severity: 'error',
         summary: t('error'),
-        detail: t('category.importError'),
+        detail: t('brand.importError'),
         life: 3000
       })
       importLoading.value = false
@@ -238,12 +236,12 @@ const importCategories = () => {
 }
 
 // Navigation functions
-const createNewCategory = () => {
-  router.push({ name: 'category-create' })
+const createNewBrand = () => {
+  router.push({ name: 'brand-create' })
 }
 
-const editCategory = (id) => {
-  router.push({ name: 'category-update', params: { id } })
+const editBrand = (id) => {
+  router.push({ name: 'brand-edit', params: { id } })
 }
 
 // Get market type severity
@@ -263,35 +261,35 @@ onMounted(() => {
       <div class="card p-4 shadow-2 border-round">
         <Toolbar class="mb-4">
           <template #start>
-            <h2 class="text-2xl font-bold">{{ t('category.managementTitle') }}</h2>
+            <h2 class="text-2xl font-bold">{{ t('brand.managementTitle') }}</h2>
           </template>
 
           <template #end>
             <div class="flex gap-2">
               <span class="p-input-icon-left">
                 <i class="pi pi-search" />
-                <InputText v-model="searchQuery" :placeholder="t('category.search')" />
+                <InputText v-model="searchQuery" :placeholder="t('brand.search')" />
               </span>
               <Button
                 v-can="'import brands'"
-                :label="t('category.import')"
+                :label="t('brand.import')"
                 icon="pi pi-download"
                 class="other"
                 @click="openImportDialog"
               />
               <Button
                 v-can="'export brands'"
-                :label="t('category.export')"
+                :label="t('brand.export')"
                 icon="pi pi-upload"
                 class="exite"
                 @click="exportBrands"
               />
               <Button
-                v-can="'create categories'"
-                :label="t('category.new')"
+                v-can="'create brands'"
+                :label="t('brand.new')"
                 icon="pi pi-plus"
                 class="p-button-success"
-                @click="createNewCategory"
+                @click="createNewBrand"
               />
             </div>
           </template>
@@ -302,8 +300,8 @@ onMounted(() => {
         <div class="card shadow-1 surface-0">
           <DataTable
             ref="dt"
-            :value="categories"
-            v-model:selection="selectedCategories"
+            :value="brands"
+            v-model:selection="selectedBrands"
             :loading="loading"
             data-key="id"
             :paginator="false"
@@ -314,7 +312,7 @@ onMounted(() => {
             stripedRows
             showGridlines
             class="p-datatable-sm"
-            v-can="'list categories'"
+            v-can="'list brands'"
           >
             <Column selection-mode="multiple" header-style="width: 3rem"></Column>
             <Column field="name_en" :header="t('id')" :sortable="true">
@@ -322,45 +320,28 @@ onMounted(() => {
                 {{ slotProps.data.id }}
               </template>
             </Column>
-            <Column field="name_en" :header="t('category.nameEn')" :sortable="true">
+            <Column field="name_en" :header="t('brand.nameEn')" :sortable="true">
               <template #body="slotProps">
                 {{ slotProps.data.name_en }}
               </template>
             </Column>
-            <Column field="name_ar" :header="t('category.nameAr')" :sortable="true">
+            <Column field="name_ar" :header="t('brand.nameAr')" :sortable="true">
               <template #body="slotProps">
                 {{ slotProps.data.name_ar }}
               </template>
             </Column>
-            <Column field="is_market" :header="t('category.marketType')" :sortable="true">
-              <template #body="slotProps">
-                <Tag
-                  :value="slotProps.data.is_market ? t('category.market') : t('category.nonMarket')"
-                  :severity="getMarketTypeSeverity(slotProps.data.is_market)"
-                />
-              </template>
-            </Column>
-            <Column field="parent.name_en" :header="t('category.parent')" :sortable="true">
-              <template #body="slotProps">
-                {{ slotProps.data.parent?.name_en || t('category.noParent') }}
-              </template>
-            </Column>
-            <Column field="store.name_en" :header="t('category.store')" :sortable="true">
-              <template #body="slotProps">
-                {{ slotProps.data.store?.name_en || '' }}
-              </template>
-            </Column>
+
             <Column :header="t('actions')" header-style="width: 12rem">
               <template #body="slotProps">
                 <Button
-                  v-can="'edit categories'"
+                  v-can="'edit brands'"
                   icon="pi pi-pencil"
-                     class="p-detail"
-                  @click="editCategory(slotProps.data.id)"
+                  class="p-detail"
+                  @click="editBrand(slotProps.data.id)"
                   v-tooltip.top="t('edit')"
                 />
                 <Button
-                  v-can="'delete categories'"
+                  v-can="'delete brands'"
                   icon="pi pi-trash"
                   class="p-delete"
                   @click="confirmDelete(slotProps.data.id)"
@@ -371,7 +352,7 @@ onMounted(() => {
             <template #empty>
               <div class="text-center py-4">
                 <i class="pi pi-exclamation-circle text-2xl mb-2" />
-                <p class="text-xl">{{ t('category.noData') }}</p>
+                <p class="text-xl">{{ t('brand.noData') }}</p>
               </div>
             </template>
             <template #loading>
@@ -439,12 +420,12 @@ onMounted(() => {
         <Dialog
           v-model:visible="deleteDialog"
           :style="{ width: '450px' }"
-          :header="t('category.deleteConfirmTitle')"
+          :header="t('brand.deleteConfirmTitle')"
           :modal="true"
         >
           <div class="flex align-items-center justify-content-center">
             <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem; color: var(--red-500)" />
-            <span>{{ t('category.deleteConfirmMessage') }}</span>
+            <span>{{ t('brand.deleteConfirmMessage') }}</span>
           </div>
           <template #footer>
             <Button
@@ -457,7 +438,7 @@ onMounted(() => {
               :label="t('yes')"
               icon="pi pi-check"
               class="p-button-text p-button-danger"
-              @click="deleteCategory"
+              @click="deleteBrand"
             />
           </template>
         </Dialog>
@@ -465,7 +446,7 @@ onMounted(() => {
         <Dialog
           v-model:visible="importDialog"
           :style="{ width: '600px' }"
-          :header="t('category.importInstructions')"
+          :header="t('brand.importInstructions')"
           :modal="true"
         >
           <div class="flex flex-column gap-3">
@@ -477,8 +458,8 @@ onMounted(() => {
                 showGridlines
                 class="p-datatable-sm"
               >
-                <Column field="brand_name_ar" :header="t('category.brandNameAr')" />
-                <Column field="brand_name_en" :header="t('category.brandNameEn')" />
+                <Column field="brand_name_ar" :header="t('brand.brandNameAr')" />
+                <Column field="brand_name_en" :header="t('brand.brandNameEn')" />
               </DataTable>
             </div>
           </div>
@@ -488,7 +469,7 @@ onMounted(() => {
               name="file"
               accept=".xlsx,.xls,.csv"
               :maxFileSize="10000000"
-              :chooseLabel="t('category.chooseFile')"
+              :chooseLabel="t('brand.chooseFile')"
               @select="onFileSelect"
               :auto="false"
               :disabled="importLoading"
@@ -504,7 +485,7 @@ onMounted(() => {
               :label="t('import')"
               icon="pi pi-check"
               class="p-button-success"
-              @click="importCategories"
+              @click="importBrands"
               :disabled="!selectedFile"
               :loading="importLoading"
             />
@@ -523,4 +504,3 @@ onMounted(() => {
   visibility: hidden !important;
 }
 </style>
-```

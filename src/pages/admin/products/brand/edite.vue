@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useToast } from 'primevue/usetoast';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from "vue-router";
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
 const router = useRouter();
@@ -20,7 +20,6 @@ const brandId = ref(route.params.id);
 const brandData = ref({
   name_en: '',
   name_ar: '',
-  image: null
 });
 
 // Fetch brand data
@@ -28,28 +27,26 @@ const fetchBrand = async () => {
   try {
     loading.value = true;
     const response = await axios.get(`/api/brand/${brandId.value}`);
-    brandData.value = response.data.data;
-
-    if (response.data.data.media[0]?.url) {
-      imagePreview.value = response.data.data.media[0].url; // Assuming your API returns image_url
+    brandData.value = {
+      name_en: response.data.data.name_en,
+      name_ar: response.data.data.name_ar,
+    };
+    if (response.data.data.image) {
+      imagePreview.value = response.data.data.image; // Assuming API returns image URL
     }
-
-    loading.value = false;
   } catch (error) {
-    console.error("Error fetching brand:", error);
+    console.error('Error fetching brand:', error);
     toast.add({
       severity: 'error',
-      summary: t("error"),
-      detail: error.response?.data?.message || 'Failed to fetch brand',
+      summary: t('error'),
+      detail: error.response?.data?.message || t('brand.loadError'),
       life: 3000
     });
+    router.push({ name: 'brand' });
+  } finally {
     loading.value = false;
   }
 };
-
-onMounted(() => {
-  fetchBrand();
-});
 
 // Handle drag events
 const handleDragOver = (event) => {
@@ -83,7 +80,6 @@ const onImageUpload = (event) => {
 const removeImage = () => {
   imageFile.value = null;
   imagePreview.value = null;
-  brandData.value.image = null; // This will tell the backend to remove the image
 };
 
 // Submit form
@@ -93,84 +89,88 @@ const submitForm = async () => {
   const formData = new FormData();
   formData.append('name_en', brandData.value.name_en);
   formData.append('name_ar', brandData.value.name_ar);
-  formData.append('_method', 'post'); // For Laravel to handle as PUT request
+  formData.append('_method', 'PATCH'); // For Laravel to handle as PATCH request
 
   if (imageFile.value) {
     formData.append('image', imageFile.value);
-  } else if (brandData.value.image === null) {
+  } else if (!imagePreview.value) {
     formData.append('remove_image', 'true');
   }
 
-  axios.post(`/api/brand/${brandId.value}`, formData)
-    .then(response => {
-      router.push({name: 'brand'});
-      toast.add({
-        severity: 'success',
-        summary: t("success"),
-        detail: 'Brand updated successfully',
-        life: 3000
-      });
-      loading.value = false;
-    })
-    .catch(error => {
-      console.error("Error:", error);
-      toast.add({
-        severity: 'error',
-        summary: t("error"),
-        detail: error.response?.data?.message || 'An error occurred',
-        life: 3000
-      });
-      loading.value = false;
+  try {
+    await axios.post(`/api/brand/${brandId.value}`, formData);
+    router.push({ name: 'brand' });
+    toast.add({
+      severity: 'success',
+      summary: t('success'),
+      detail: t('brand.updateSuccess'),
+      life: 3000
     });
+  } catch (error) {
+    console.error('Error updating brand:', error);
+    toast.add({
+      severity: 'error',
+      summary: t('error'),
+      detail: error.response?.data?.message || t('brand.updateError'),
+      life: 3000
+    });
+  } finally {
+    loading.value = false;
+  }
 };
+
+// Lifecycle hook
+onMounted(() => {
+  fetchBrand();
+});
 </script>
 
 <template>
-  <div  v-can="'edit brands'" class="max-w-5xl p-6 mx-auto bg-white shadow-lg rounded-xl">
-    <h1 class="mb-8 text-3xl font-bold text-center text-gray-800">Edit Brand</h1>
+  <div v-can="'edit brands'" class="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow-lg">
+    <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">{{ t('brand.editTitle') }}</h1>
 
     <Form ref="form" @submit.prevent="submitForm" class="space-y-6">
-      <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- English Name -->
         <div class="space-y-2">
           <label for="name_en" class="block text-sm font-medium text-gray-700">
-            English Name <span class="text-red-500">*</span>
+            {{ t('brand.nameEn') }} <span class="text-red-500">*</span>
           </label>
           <InputText
             id="name_en"
             v-model="brandData.name_en"
-            placeholder="Enter brand name in English"
-            class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            :placeholder="t('brand.enterNameEn')"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           />
-          <small class="text-xs text-red-500" v-if="form?.errors?.name_en">{{ form.errors.name_en[0] }}</small>
+          <small class="text-red-500 text-xs" v-if="form?.errors?.name_en">{{ form.errors.name_en[0] }}</small>
         </div>
 
         <!-- Arabic Name -->
         <div class="space-y-2">
           <label for="name_ar" class="block text-sm font-medium text-gray-700">
-            Arabic Name <span class="text-red-500">*</span>
+            {{ t('brand.nameAr') }} <span class="text-red-500">*</span>
           </label>
           <InputText
             id="name_ar"
             v-model="brandData.name_ar"
-            placeholder="أدخل اسم العلامة التجارية بالعربية"
+            :placeholder="t('brand.enterNameAr')"
             dir="rtl"
-            class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           />
-          <small class="text-xs text-red-500" v-if="form?.errors?.name_ar">{{ form.errors.name_ar[0] }}</small>
+          <small class="text-red-500 text-xs" v-if="form?.errors?.name_ar">{{ form.errors.name_ar[0] }}</small>
         </div>
 
         <!-- Image Upload -->
-        <div class="space-y-2 md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700">Brand Logo</label>
+        <div class="md:col-span-2 space-y-2">
+          <label class="block text-sm font-medium text-gray-700">{{ t('brand.logo') }}</label>
 
           <div class="flex justify-center">
             <label
               @dragover.prevent="handleDragOver"
               @dragleave="handleDragLeave"
               @drop.prevent="onImageUpload"
-              :class="{'border-blue-500 bg-blue-50': isDragging, 'border-gray-300': !isDragging}"
-              class="w-full max-w-md transition-colors duration-300 border-2 border-dashed cursor-pointer rounded-xl"
+              :class="{ 'border-blue-500 bg-blue-50': isDragging, 'border-gray-300': !isDragging }"
+              class="cursor-pointer w-full max-w-md rounded-xl border-2 border-dashed transition-colors duration-300"
             >
               <input type="file" @change="onImageUpload" accept="image/*" class="hidden">
 
@@ -179,37 +179,37 @@ const submitForm = async () => {
                   <img
                     :src="imagePreview"
                     alt="Preview"
-                    class="object-contain w-full h-64 transition-transform duration-300 rounded-lg shadow-md group-hover:scale-105"
+                    class="w-full h-64 object-contain rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"
                   >
-                  <div class="absolute inset-0 flex items-center justify-center transition-all duration-300 bg-black bg-opacity-0 rounded-lg group-hover:bg-opacity-30">
-                    <div class="space-x-3 transition-all duration-300 transform translate-y-4 opacity-0 group-hover:opacity-100 group-hover:translate-y-0">
+                  <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
+                    <div class="opacity-0 group-hover:opacity-100 space-x-3 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
                       <button
                         type="button"
                         @click.stop="removeImage"
-                        class="p-2 text-white transition bg-red-500 rounded-full hover:bg-red-600"
+                        class="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
                       >
-                        <i class="text-sm pi pi-trash"></i>
+                        <i class="pi pi-trash text-sm"></i>
                       </button>
                       <label
-                        class="p-2 text-gray-700 transition bg-white rounded-full cursor-pointer hover:bg-gray-100"
+                        class="bg-white text-gray-700 p-2 rounded-full hover:bg-gray-100 transition cursor-pointer"
                       >
-                        <i class="text-sm pi pi-pencil"></i>
+                        <i class="pi pi-pencil text-sm"></i>
                         <input type="file" @change="onImageUpload" accept="image/*" class="hidden">
                       </label>
                     </div>
                   </div>
                 </div>
-                <p class="mt-2 text-sm text-center text-gray-500">Click or drag to change logo</p>
+                <p class="mt-2 text-center text-sm text-gray-500">{{ t('brand.changeLogo') }}</p>
               </div>
 
-              <div v-else class="flex flex-col items-center justify-center p-8">
-                <div class="p-4 mb-4 bg-blue-100 rounded-full">
-                  <i class="text-2xl text-blue-500 pi pi-image"></i>
+              <div v-else class="p-8 flex flex-col items-center justify-center">
+                <div class="bg-blue-100 p-4 rounded-full mb-4">
+                  <i class="pi pi-image text-blue-500 text-2xl"></i>
                 </div>
-                <p class="mb-1 text-sm text-center text-gray-600">
-                  <span class="font-medium text-blue-500">Click to upload</span> or drag and drop
+                <p class="text-sm text-center text-gray-600 mb-1">
+                  <span class="text-blue-500 font-medium">{{ t('brand.upload') }}</span> {{ t('brand.orDragDrop') }}
                 </p>
-                <p class="text-xs text-gray-400">SVG, PNG, JPG or GIF (max. 2MB)</p>
+                <p class="text-xs text-gray-400">{{ t('brand.fileTypes') }}</p>
               </div>
             </label>
           </div>
@@ -217,32 +217,31 @@ const submitForm = async () => {
       </div>
 
       <!-- Submit Button -->
-      <div class="flex justify-center pt-4 space-x-4">
+      <div class="pt-4 flex justify-center space-x-4">
         <Button
           type="button"
-          label="Cancel"
+          :label="t('cancel')"
           icon="pi pi-times"
-
           @click="router.go(-1)"
-          class="flex items-center justify-center px-6 py-3 mx-2 space-x-2 text-gray-700 transition-all duration-300 bg-gray-200 rounded-lg shadow-md hover:bg-gray-300 hover:shadow-lg"
+          class="px-6 mx-2 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
           :disabled="loading"
         />
 
         <Button
           type="submit"
-          label="Update Brand"
+          :label="t('brand.update')"
           icon="pi pi-check"
           :loading="loading"
-          class="flex items-center justify-center px-8 py-3 space-x-2 text-white transition-all duration-300 rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 hover:shadow-lg"
+          class="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
           :disabled="loading"
         >
-          <span v-if="!loading">Update Brand</span>
+          <span v-if="!loading">{{ t('brand.update') }}</span>
           <i v-else class="pi pi-spinner pi-spin"></i>
         </Button>
       </div>
     </Form>
   </div>
-  <Toast/>
+  <Toast />
 </template>
 
 <style scoped>
