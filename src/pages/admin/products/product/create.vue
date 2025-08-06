@@ -18,8 +18,10 @@ const attributes = ref([]);
 const hasVariants = ref(false);
 
 // Image handling
-const mainImages = ref([]);
-const mainImagePreviews = ref([]);
+const mainImage = ref(null);
+const mainImagePreview = ref(null);
+const additionalImages = ref([]);
+const additionalImagePreviews = ref([]);
 
 // Language handling
 const currentLanguage = computed(() => localStorage.getItem('appLang') || 'en');
@@ -31,6 +33,7 @@ const productData = ref({
   store_id: null,
   category_id: null,
   brand_id: null,
+  sku: '',
   name_en: '',
   name_ar: '',
   sub_name_en: '',
@@ -100,7 +103,7 @@ onMounted(() => {
   fetchAttributes();
 });
 
-// Handle drag events for main images
+// Handle drag events for images
 const handleDragOver = (event) => {
   event.preventDefault();
   isDragging.value = true;
@@ -110,8 +113,42 @@ const handleDragLeave = () => {
   isDragging.value = false;
 };
 
-// Handle main images upload
-const handleImageUpload = (files) => {
+// Handle main image upload
+const handleMainImageUpload = (file) => {
+  if (file.size > 2 * 1024 * 1024) {
+    toast.add({ severity: 'error', summary: t('error'), detail: t('validation.imageSize'), life: 3000 });
+    return;
+  }
+
+  if (!file.type.match('image.*')) {
+    toast.add({ severity: 'error', summary: t('error'), detail: t('validation.imageInvalid'), life: 3000 });
+    return;
+  }
+
+  mainImage.value = file;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    mainImagePreview.value = e.target.result;
+  };
+  reader.readAsDataURL(file);
+};
+
+const onMainImageUpload = (event) => {
+  const file = event.target.files?.[0] || event.dataTransfer?.files?.[0];
+  if (file) {
+    handleMainImageUpload(file);
+  }
+  isDragging.value = false;
+};
+
+// Remove main image
+const removeMainImage = () => {
+  mainImage.value = null;
+  mainImagePreview.value = null;
+};
+
+// Handle additional images upload
+const handleAdditionalImagesUpload = (files) => {
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
 
@@ -127,25 +164,25 @@ const handleImageUpload = (files) => {
 
     const reader = new FileReader();
     reader.onload = (e) => {
-      mainImages.value.push(file);
-      mainImagePreviews.value.push(e.target.result);
+      additionalImages.value.push(file);
+      additionalImagePreviews.value.push(e.target.result);
     };
     reader.readAsDataURL(file);
   }
   isDragging.value = false;
 };
 
-const onImageUpload = (event) => {
+const onAdditionalImagesUpload = (event) => {
   const files = event.target.files || event.dataTransfer?.files;
   if (files && files.length > 0) {
-    handleImageUpload(files);
+    handleAdditionalImagesUpload(files);
   }
 };
 
-// Remove main image
-const removeMainImage = (index) => {
-  mainImages.value.splice(index, 1);
-  mainImagePreviews.value.splice(index, 1);
+// Remove additional image
+const removeAdditionalImage = (index) => {
+  additionalImages.value.splice(index, 1);
+  additionalImagePreviews.value.splice(index, 1);
 };
 
 // Handle variant image upload
@@ -192,8 +229,7 @@ const toggleVariants = () => {
 
 const addVariant = () => {
   productData.value.variants.push({
-    sku_ar: '',
-    sku_en: '',
+    sku: '',
     price: '',
     cost_price: null,
     attribute_value_ids: [],
@@ -212,7 +248,7 @@ const removeVariant = (index) => {
 
 // Submit form
 const submitForm = async () => {
-  const requiredFields = ['store_id', 'category_id', 'brand_id', 'name_en', 'name_ar'];
+  const requiredFields = ['store_id', 'category_id', 'brand_id', 'name_en', 'name_ar', 'sku'];
 
   // Validate required fields
   if (requiredFields.some(field => !productData.value[field])) {
@@ -220,9 +256,15 @@ const submitForm = async () => {
     return;
   }
 
+  // Validate main image
+  if (!mainImage.value) {
+    toast.add({ severity: 'error', summary: t('error'), detail: t('validation.mainImageRequired'), life: 3000 });
+    return;
+  }
+
   // Validate variants or base_price
   if (hasVariants.value) {
-    if (productData.value.variants.some(v => !v.sku_en || !v.sku_ar || !v.price || v.attribute_value_ids.length === 0)) {
+    if (productData.value.variants.some(v => !v.sku || !v.price || v.attribute_value_ids.length === 0)) {
       toast.add({ severity: 'error', summary: t('error'), detail: t('validation.variantRequiredFields'), life: 3000 });
       return;
     }
@@ -238,6 +280,7 @@ const submitForm = async () => {
   formData.append('store_id', productData.value.store_id);
   formData.append('category_id', productData.value.category_id);
   formData.append('brand_id', productData.value.brand_id);
+  formData.append('sku', productData.value.sku);
   formData.append('name_en', productData.value.name_en);
   formData.append('name_ar', productData.value.name_ar);
   formData.append('sub_name_en', productData.value.sub_name_en || '');
@@ -247,15 +290,17 @@ const submitForm = async () => {
   formData.append('tax', productData.value.tax);
   formData.append('is_displayed', productData.value.is_displayed ? 1 : 0);
 
-  // Append main images
-  mainImages.value.forEach((image, index) => {
-    formData.append(`main_images[${index}]`, image);
+  // Append main image
+  formData.append('main_image', mainImage.value);
+
+  // Append additional images
+  additionalImages.value.forEach((image, index) => {
+    formData.append(`images[${index}]`, image);
   });
 
   if (hasVariants.value) {
     productData.value.variants.forEach((variant, index) => {
-      formData.append(`variants[${index}][sku_en]`, variant.sku_en);
-      formData.append(`variants[${index}][sku_ar]`, variant.sku_ar);
+      formData.append(`variants[${index}][sku]`, variant.sku);
       formData.append(`variants[${index}][price]`, variant.price);
       formData.append(`variants[${index}][cost_price]`, variant.cost_price || 0);
 
@@ -350,6 +395,19 @@ const submitForm = async () => {
             optionValue="id"
             class="w-full"
             :class="{ 'p-invalid': !productData.brand_id }"
+          />
+        </div>
+
+        <!-- SKU -->
+        <div class="space-y-2">
+          <label for="sku" class="block text-sm font-medium text-gray-700">
+            {{ t('product.sku') }} <span class="text-red-500">*</span>
+          </label>
+          <InputText
+            id="sku"
+            v-model="productData.sku"
+            class="w-full"
+            :class="{ 'p-invalid': !productData.sku }"
           />
         </div>
 
@@ -534,30 +592,16 @@ const submitForm = async () => {
                 />
               </div>
 
-              <!-- SKU English -->
+              <!-- SKU -->
               <div class="space-y-2">
-                <label :for="'sku_en_' + index" class="block text-sm font-medium text-gray-700">
-                  {{ t('product.skuEn') }} <span class="text-red-500">*</span>
+                <label :for="'sku_' + index" class="block text-sm font-medium text-gray-700">
+                  {{ t('product.sku') }} <span class="text-red-500">*</span>
                 </label>
                 <InputText
-                  :id="'sku_en_' + index"
-                  v-model="variant.sku_en"
+                  :id="'sku_' + index"
+                  v-model="variant.sku"
                   class="w-full"
-                  :class="{ 'p-invalid': !variant.sku_en }"
-                />
-              </div>
-
-              <!-- SKU Arabic -->
-              <div class="space-y-2">
-                <label :for="'sku_ar_' + index" class="block text-sm font-medium text-gray-700">
-                  {{ t('product.skuAr') }} <span class="text-red-500">*</span>
-                </label>
-                <InputText
-                  :id="'sku_ar_' + index"
-                  v-model="variant.sku_ar"
-                  dir="rtl"
-                  class="w-full"
-                  :class="{ 'p-invalid': !variant.sku_ar }"
+                  :class="{ 'p-invalid': !variant.sku }"
                 />
               </div>
 
@@ -664,37 +708,89 @@ const submitForm = async () => {
           />
         </div>
 
-        <!-- Main Images Upload -->
+        <!-- Main Image Upload -->
         <div class="md:col-span-2 space-y-2">
-          <label class="block text-sm font-medium text-gray-700">{{ t('product.images') }}</label>
+          <label class="block text-sm font-medium text-gray-700">
+            {{ t('product.mainImage') }} <span class="text-red-500">*</span>
+          </label>
           <label
-            for="main_images_upload"
+            for="main_image_upload"
             @dragover.prevent="isDragging = true"
             @dragleave="isDragging = false"
-            @drop.prevent="onImageUpload"
+            @drop.prevent="onMainImageUpload"
             :class="{'border-blue-500 bg-blue-50': isDragging, 'border-gray-300': !isDragging}"
             class="cursor-pointer w-full rounded-xl border-2 border-dashed transition-colors duration-300 p-6 block"
           >
             <input
               type="file"
-              id="main_images_upload"
-              @change="onImageUpload"
+              id="main_image_upload"
+              @change="onMainImageUpload"
+              accept="image/*"
+              class="hidden"
+            />
+            <div v-if="mainImagePreview" class="flex flex-col items-center">
+              <div class="relative group">
+                <img
+                  :src="mainImagePreview"
+                  alt="Main Preview"
+                  class="w-full h-48 object-contain rounded-lg shadow-md"
+                />
+                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
+                  <button
+                    type="button"
+                    @click.stop="removeMainImage"
+                    class="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                    :title="t('product.deleteImage')"
+                  >
+                    <i class="pi pi-trash text-sm"></i>
+                  </button>
+                </div>
+              </div>
+              <p class="mt-2 text-center text-sm text-gray-500">{{ t('product.changeImage') }}</p>
+            </div>
+            <div v-else class="flex flex-col items-center justify-center space-y-3">
+              <div class="bg-blue-100 p-3 rounded-full">
+                <i class="pi pi-image text-blue-500 text-2xl"></i>
+              </div>
+              <p class="text-sm text-center text-gray-600">
+                <span class="text-blue-500 font-medium">{{ t('product.uploadClick') }}</span> {{ t('product.uploadDrag') }}
+              </p>
+              <p class="text-xs text-gray-400">{{ t('product.imageFormat') }}</p>
+            </div>
+          </label>
+        </div>
+
+        <!-- Additional Images Upload -->
+        <div class="md:col-span-2 space-y-2">
+          <label class="block text-sm font-medium text-gray-700">{{ t('product.additionalImages') }}</label>
+          <label
+            for="additional_images_upload"
+            @dragover.prevent="isDragging = true"
+            @dragleave="isDragging = false"
+            @drop.prevent="onAdditionalImagesUpload"
+            :class="{'border-blue-500 bg-blue-50': isDragging, 'border-gray-300': !isDragging}"
+            class="cursor-pointer w-full rounded-xl border-2 border-dashed transition-colors duration-300 p-6 block"
+          >
+            <input
+              type="file"
+              id="additional_images_upload"
+              @change="onAdditionalImagesUpload"
               accept="image/*"
               multiple
               class="hidden"
             />
-            <div v-if="mainImagePreviews.length > 0" class="space-y-4">
+            <div v-if="additionalImagePreviews.length > 0" class="space-y-4">
               <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                <div v-for="(preview, index) in mainImagePreviews" :key="index" class="relative group">
+                <div v-for="(preview, index) in additionalImagePreviews" :key="index" class="relative group">
                   <img
                     :src="preview"
-                    alt="Preview"
+                    alt="Additional Preview"
                     class="w-full h-32 object-cover rounded-lg shadow-md"
                   />
                   <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
                     <button
                       type="button"
-                      @click.stop="removeMainImage(index)"
+                      @click.stop="removeAdditionalImage(index)"
                       class="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
                       :title="t('product.deleteImage')"
                     >

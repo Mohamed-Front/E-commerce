@@ -2,24 +2,33 @@
   <!-- main body -->
   <main class="bg-[#FAF7F0] min-h-[100vh]">
     <header>
-      <Nav></Nav>
-      <!-- products titels -->
-      <div
-        class="h-[58px] flex items-center place-content-evenly overflow-x-auto flex-nowrap text-white scrollbar-hide cursor-grab active:cursor-grabbing"
-        @mousedown="startDrag"
-        @mousemove="onDrag"
-        @mouseup="stopDrag"
-        @mouseleave="stopDrag"
-        ref="scrollContainer"
+      <!-- products titles slider -->
+      <swiper
+        :modules="[Autoplay, Navigation]"
+        :slides-per-view="5"
+        :space-between="25"
+        :loop="true"
+        :autoplay="{ delay: 3000, disableOnInteraction: false }"
+        :speed="3000"
+        :navigation="false"
+        grab-cursor
+        class="titles-swiper h-[58px] mt-2"
+        :breakpoints="{
+          0: { slidesPerView: 4 },
+          480: { slidesPerView: 3 },
+          768: { slidesPerView: 4 },
+          1024: { slidesPerView: 10 }
+        }"
       >
-        <div
-          class="cursor-pointer titels font-sans bg-[var(--main-text-color)] h-[25px] min-w-[60px] sm:h-[28px] sm:min-w-[80px] md:h-[32px] md:min-w-[128px] text-[.5rem] sm:text-[.7rem] md:text-[.8rem] text-center place-content-center font-bold rounded-md mr-1 md:mr-3"
-          v-for="title in titels"
-          @click="router.push({ path: '/SubCategory', query: { activetap: title.id, stor: Stor.id } })"
-        >
-          {{ title.name }}
-        </div>
-      </div>
+        <swiper-slide v-for="title in computedTitles" :key="title.id" class="flex items-center justify-center">
+          <div
+            class="titels font-sans bg-[#1F3A93] h-[40px] min-w-[80px] sm:h-[44px] sm:min-w-[100px] md:h-[48px] md:min-w-[140px] text-[.5rem] sm:text-[.8rem] md:text-[.8rem] text-center place-content-center font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer text-white"
+            @click="router.push({ path: '/SubCategory', query: { activetap: title.id, stor: Stor.id } })"
+          >
+            {{ title.name }}
+          </div>
+        </swiper-slide>
+      </swiper>
       <!-- main banner -->
       <swiper
         :modules="[Autoplay]"
@@ -33,14 +42,14 @@
         class="my-swiper mt-2"
       >
         <swiper-slide v-for="(pro, index) in banners_slider" :key="index" class="flex justify-center">
-          <img :src="pro" class="w-full h-auto max-w-[1200px] max-h-[600px] object-contain mb-2" />
+          <img :src="pro.url" class="w-full h-auto max-w-[1200px] max-h-[600px] object-contain mb-2 rounded-lg" />
         </swiper-slide>
       </swiper>
     </header>
     <!-- main content -->
     <div class="contaner">
       <!-- section 1 -->
-      <section class="mx-auto mt-16 w-[70%]">
+      <section class="mx-auto mt-16 w-[100%] max-w-7xl">
         <!-- produts -->
         <div class="flex place-content-between pt-[35px]">
           <!-- img 1 -->
@@ -55,7 +64,7 @@
                 Discover our exclusive deals
               </p>
               <button
-                class="font-sans lg:px-[16px] lg:py-[8px] px-[8px] py-[4px] text-[8px] sm:text-[1rem] lg:text-[1.2rem] bg-[var(--main-text-color)] rounded-md"
+                class="font-sans lg:px-[16px] lg:py-[8px] px-[8px] py-[4px] text-[8px] sm:text-[1rem] lg:text-[1.2rem] bg-[var(--main-text-color)] rounded-md hover:bg-opacity-80 transition-colors"
               >
                 Shop Now
               </button>
@@ -98,7 +107,7 @@
         </div>
         <!-- banner -->
         <div class="h-[143px] flex place-content-center items-center">
-          <img :src="storimg.main_banner_image" alt="" class="w-[70%]" />
+          <img :src="storimg.main_banner_image" alt="" class="w-[70%] rounded-lg" />
         </div>
         <!-- more products -->
         <!-- Exclusive_offers -->
@@ -136,27 +145,26 @@
     </div>
 
     <!-- footer -->
-    <Footer></Footer>
   </main>
 </template>
 
 <script setup>
-  import { onMounted, ref } from 'vue'
+  import { onMounted, ref, computed } from 'vue'
   import imge1 from '../imges/prand 1.png'
   import imge3 from '../imges/prand 3.png'
   import imge2 from '../imges/prand 2.png'
   import imge4 from '../imges/prand 4.png'
   import imge5 from '../imges/prand 5.png'
-  import prand2_img from '../imges/prand 1.png'
-  import banners_sliderimg from '../imges/banner slider.png'
 
   import axios from 'axios'
   import { Swiper, SwiperSlide } from 'swiper/vue'
-  import { Autoplay } from 'swiper/modules'
+  import { Autoplay, Navigation } from 'swiper/modules'
   import { useRouter } from 'vue-router'
   import { useI18n } from 'vue-i18n'
 
   import 'swiper/css'
+  import 'swiper/css/navigation'
+
   // components
   import productsSwiper from '../components/SwiperSlide/productsSwiper.vue'
   import productsSwipertow from '../components/SwiperSlide/porductsSwipertow.vue'
@@ -168,6 +176,7 @@
 
   const { t } = useI18n()
   const router = useRouter()
+
   // constructor
   class Data {
     constructor(name = 'No name', img = '', price = '$$', id) {
@@ -178,35 +187,12 @@
     }
   }
 
-  // api shift7
+  // api data
   const Stor = ref({})
-  const loaddata = async () => {
-    await axios
-      .get('api/home/get-stores')
-      .then((response) => {
-        const data = response.data.data.data
-        data.forEach((stor) => {
-          if (stor.is_default) {
-            Stor.value = stor
-          }
-        })
-      })
-      .catch((error) => {
-        console.error('Error fetching data:', error)
-      })
-
-    await axios.get(`api/home/get-categories/${Stor.value.id}`).then((response) => {
-      response.data.data.data.forEach((category) => {
-        titels.value[category.id] = {
-          name: localStorage.getItem('appLang') == 'en' ? category.name_en : category.name_ar || category.name_en,
-          id: category.id,
-        }
-      })
-    })
-  }
-
-  const banners_slider = ref([banners_sliderimg, banners_sliderimg, banners_sliderimg, banners_sliderimg])
+  const banners_slider = ref([])
   const titels = ref({})
+  const storimg = ref({})
+
   const product_titels = ref([
     new Data('العناية الشخصية', 'imges/personal-care.png'),
     new Data('أزياء النساء', 'imges/women-fashion.png'),
@@ -243,6 +229,7 @@
       new Data('Product', imge1, '42.00 JD'),
     ],
   })
+
   const Variety = ref({
     title: t('Miscellaneous'),
     products: [
@@ -259,43 +246,55 @@
     ],
   })
 
-  const scrollContainer = ref(null)
-  let isDragging = false
-  let startX
-  let scrollLeft
-
-  const startDrag = (e) => {
-    isDragging = true
-    startX = e.pageX - scrollContainer.value.offsetLeft
-    scrollLeft = scrollContainer.value.scrollLeft
-  }
-
-  const onDrag = (e) => {
-    if (!isDragging) return
-    e.preventDefault()
-    const x = e.pageX - scrollContainer.value.offsetLeft
-    const walk = (x - startX) * 1.5 // السرعة
-    scrollContainer.value.scrollLeft = scrollLeft - walk
-  }
-
-  const stopDrag = () => {
-    isDragging = false
-  }
-
-  const storimg = ref({})
-  onMounted(async () => {
-    await loaddata()
-    if(Stor.value.media.length > 0) {
-      storimg.value = {
-      store_image: Stor.value.media.find((img) => img.name == 'store_image').url,
-      sub_banner_image: Stor.value.media.find((img) => img.name == 'sub_banner_image').url,
-      slider_images_one: Stor.value.media.find((img) => img.name == 'slider_images_one').url,
-      slider_images_two: Stor.value.media.find((img) => img.name == 'slider_images_two').url,
-      slider_images_three: Stor.value.media.find((img) => img.name == 'slider_images_three').url,
-      main_banner_image: Stor.value.media.find((img) => img.name == 'main_banner_image').url,
-    }
-    }
+  // Computed property for titles
+  const computedTitles = computed(() => {
+    return Object.values(titels.value)
   })
+
+  const loaddata = async () => {
+    try {
+      // Fetch store data
+      const storeResponse = await axios.get('api/home/get-stores')
+      const data = storeResponse.data.data.data
+      data.forEach((stor) => {
+        if (stor.is_default) {
+          Stor.value = stor
+        }
+      })
+
+      // Fetch categories
+      const categoryResponse = await axios.get(`api/home/get-categories/${Stor.value.id}`)
+      categoryResponse.data.data.data.forEach((category) => {
+        titels.value[category.id] = {
+          name: localStorage.getItem('appLang') == 'en' ? category.name_en : category.name_ar || category.name_en,
+          id: category.id,
+        }
+      })
+
+      // Fetch banner slider images
+      const bannerResponse = await axios.get('api/home/get-media-link')
+      banners_slider.value = bannerResponse.data.data.map(item => ({
+        url: item.url,
+        id: item.id
+      }))
+
+      // Fetch store images
+      if (Stor.value.media.length > 0) {
+        storimg.value = {
+          store_image: Stor.value.media.find((img) => img.name == 'store_image')?.url,
+          sub_banner_image: Stor.value.media.find((img) => img.name == 'sub_banner_image')?.url,
+          slider_images_one: Stor.value.media.find((img) => img.name == 'slider_images_one')?.url,
+          slider_images_two: Stor.value.media.find((img) => img.name == 'slider_images_two')?.url,
+          slider_images_three: Stor.value.media.find((img) => img.name == 'slider_images_three')?.url,
+          main_banner_image: Stor.value.media.find((img) => img.name == 'main_banner_image')?.url,
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error)
+    }
+  }
+
+  onMounted(loaddata)
 </script>
 
 <style scoped>
@@ -324,5 +323,48 @@
 
   .Variety div:hover {
     filter: blur(0px);
+  }
+
+  /* Fancy titles slider styles */
+  .titles-swiper {
+    padding: 0 10px;
+  }
+
+  .titles-swiper :deep(.swiper-button-next),
+  .titles-swiper :deep(.swiper-button-prev) {
+    color: var(--main-text-color);
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .titles-swiper :deep(.swiper-button-next:hover),
+  .titles-swiper :deep(.swiper-button-prev:hover) {
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
+  }
+
+  .titles-swiper :deep(.swiper-button-next:after),
+  .titles-swiper :deep(.swiper-button-prev:after) {
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  .titels {
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .titels:hover {
+    background: linear-gradient(45deg, #6B7280, var(--main-text-color));
   }
 </style>

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 
 import AuthLayout from '../layouts/AuthLayout.vue'
 import AppLayout from '../layouts/AppLayout.vue'
+import WebLayout from '../layouts/WebLayout.vue'
 import Page404Layout from '../layouts/Page404Layout.vue'
 
 import RouteViewComponent from '../layouts/RouterBypass.vue'
@@ -12,17 +13,39 @@ const routes: Array<RouteRecordRaw> = [
     path: '/:catchAll(.*)',
     redirect: { name: 'dashboard' },
   },
+    {
+    name: '',
+    path: '/',
+    component: WebLayout,
+    beforeEnter: auth,
+    children: [
+      {
+        name: 'home',
+        path: '/',
+        component: () => import('../pages/admin/frontend/pages/home.vue'),
+      },
+        {
+          name: 'Product',
+          path: '/product',
+          component: () => import('../pages/admin/frontend/pages/home/product.vue'),
+        },
+         {
+          name: 'Product-details',
+          path: '/product-details/:id',
+          component: () => import('../pages/admin/frontend/pages/products/product-details.vue'),
+        },
+    ]
+
+
+
+  },
 
   // {
   //   name: 'invioce',
   //   path: '/invioce/:id',
   //   component: () => import('../pages/admin/settings/order/invioce.vue'),
   // },
-  {
-    name: 'home',
-    path: '/',
-    component: () => import('../pages/admin/frontend/pages/home.vue'),
-  },
+
   {
     name: 'stores-page',
     path: '/stores',
@@ -38,11 +61,7 @@ const routes: Array<RouteRecordRaw> = [
     path: '/SubSubCategory',
     component: () => import('../pages/admin/frontend/pages/home/SubSubCategory.vue'),
   },
-  {
-    name: 'Product',
-    path: '/product',
-    component: () => import('../pages/admin/frontend/pages/home/product.vue'),
-  },
+
   {
     name: 'Cart',
     path: '/Cart',

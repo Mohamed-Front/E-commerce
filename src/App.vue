@@ -1,23 +1,6 @@
 <template>
-  <main
-    class="bg-[#FAF7F0] min-h-[100vh]"
-    v-if="
-      !route.path.includes('admin') && !route.path.includes('auth') && !route.path.includes('404') && route.name !== 'home' && !route.name.includes('auth')
-    "
-  >
-    <header>
-      <!-- Navbar -->
-      <Nav></Nav>
-      <!-- stores markets and mall -->
-    </header>
-    <!-- contaner -->
-<div class="mx-auto mt-16 w-[65%] md:w-[75%] sm:w-[90%] xs:w-[96%]">
-      <router-view />
-    </div>
-    <!-- footer -->
-    <Footer></Footer>
-  </main>
-  <router-view v-else />
+
+  <router-view  />
 </template>
 
 <script setup>
