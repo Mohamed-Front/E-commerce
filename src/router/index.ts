@@ -17,7 +17,6 @@ const routes: Array<RouteRecordRaw> = [
     name: '',
     path: '/',
     component: WebLayout,
-    beforeEnter: auth,
     children: [
       {
         name: 'home',
@@ -34,6 +33,21 @@ const routes: Array<RouteRecordRaw> = [
           path: '/product-details/:id',
           component: () => import('../pages/admin/frontend/pages/products/product-details.vue'),
         },
+          {
+          name: 'stores-hasmarket',
+          path: '/stores-hasmarket/:id',
+          component: () => import('../pages/admin/frontend/pages/stores/hasmarket.vue'),
+        },
+             {
+          name: 'stores-nothasmarket',
+          path: '/stores-nothasmarket/:id',
+          component: () => import('../pages/admin/frontend/pages/stores/nothasmarket.vue'),
+        },
+        {
+          name: 'stores-page',
+          path: '/stores',
+          component: () => import('../pages/admin/frontend/pages/stores.vue'),
+        },
     ]
 
 
@@ -46,11 +60,7 @@ const routes: Array<RouteRecordRaw> = [
   //   component: () => import('../pages/admin/settings/order/invioce.vue'),
   // },
 
-  {
-    name: 'stores-page',
-    path: '/stores',
-    component: () => import('../pages/admin/frontend/pages/stores.vue'),
-  },
+
   {
     name: 'SubCategory',
     path: '/SubCategory',
