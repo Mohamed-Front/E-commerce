@@ -1,6 +1,6 @@
 <template>
   <!-- container -->
-  <div class="mx-auto mt-16 max-w-7xl px-4">
+  <div class="mx-auto bg-[#FAF7F0] mt-16 max-w-7xl px-4">
     <!-- Loading State -->
     <div v-if="isLoading" class="text-center py-10">
       <p class="text-gray-600">{{ t('category.loading') }}</p>

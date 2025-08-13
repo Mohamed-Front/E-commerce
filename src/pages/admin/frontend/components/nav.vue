@@ -154,6 +154,12 @@ const fetchStores = async () => {
   try {
     const response = await axios.get('api/home/get-stores');
     stores.value = response.data.data.data;
+
+    // Find the store with is_default: 1 and store its ID in localStorage
+    const defaultStore = stores.value.find(store => store.is_default === 1);
+    if (defaultStore) {
+      localStorage.setItem('defaultStoreId', defaultStore.id);
+    }
   } catch (error) {
     console.error('Error fetching stores:', error);
   }
@@ -162,9 +168,11 @@ const fetchStores = async () => {
 const toggleDropdown = () => {
   isDropdownOpen.value = !isDropdownOpen.value;
 };
-const showstore =(id)=>{
-  router.push({ name: 'stores-hasmarket', params: { id } })
-}
+
+const showstore = (id) => {
+  router.push({ name: 'stores-hasmarket', params: { id } });
+};
+
 const toggleLang = () => {
   const currentLang = localStorage.getItem('appLang') || 'en';
   const newLang = currentLang === 'en' ? 'ar' : 'en';
@@ -176,7 +184,6 @@ onMounted(() => {
   fetchStores();
 });
 </script>
-
 <style scoped>
 .icon-container {
   @apply flex place-content-center p-2 rounded-md items-center text-[0.5rem] h-[28px] w-[28px] sm:h-[32px] sm:w-[32px] md:h-[36px] md:w-[36px] transition-all duration-200;

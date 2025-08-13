@@ -1,0 +1,184 @@
+<!-- src/views/Home.vue -->
+<template>
+  <div class="mx-auto px-4 max-w-[1500px] ">
+    <!-- Custom Tabs -->
+    <div v-for="tab in customTabs" :key="tab.id">
+      <div class="flex items-center justify-between">
+        <h2
+          class="font-bold font-sans text-gray-800 lg:mt-4 xs:mt-2 xs:text-lg sm:text-xl md:text-2xl lg:text-3xl"
+        >
+          {{ locale === 'ar' ? tab.name_ar : tab.name_en }}
+        </h2>
+      </div>
+
+      <!-- Swiper for Both Row Types -->
+      <swiper
+        :modules="[Autoplay, Grid]"
+        :slides-per-view="tab.row_type === 1 ? 4 : 2"
+        :grid="tab.row_type === 2 ? { rows: 2, fill: 'row' } : null"
+        :space-between="tab.row_type === 1 ? 8 : 16"
+        :loop="true"
+        :autoplay="{ delay: 0, disableOnInteraction: false }"
+        :speed="25000"
+        :grab-cursor="true"
+        class="mt-6 pb-1"
+        :breakpoints="
+          tab.row_type === 1
+            ? {
+                320: { slidesPerView: 2, spaceBetween: 8 },
+                640: { slidesPerView: 2, spaceBetween: 12 },
+                768: { slidesPerView: 3, spaceBetween: 16 },
+                1024: { slidesPerView: 4, spaceBetween: 20 }
+              }
+            : {
+                320: { slidesPerView: 2, spaceBetween: 8, grid: { rows: 2 } },
+                640: { slidesPerView: 2, spaceBetween: 12, grid: { rows: 2 } },
+                768: { slidesPerView: 3, spaceBetween: 16, grid: { rows: 2 } },
+                1024: { slidesPerView: 4, spaceBetween: 20, grid: { rows: 2 } }
+              }
+        "
+      >
+        <SwiperSlide
+          v-for="(detail, i) in tab.details"
+          :key="i"
+          class="group flex flex-col items-start cursor-pointer transition-all pb-[1%] rounded-lg shadow-lg duration-300 hover:-translate-y-2"
+          @click="router.push({ name: 'Product-details', params: { id: detail.ids[0] } })"
+        >
+          <div class="w-full aspect-square overflow-hidden rounded-xl shadow-sm relative">
+            <img
+              :src="detail.media[0]?.url || '/placeholder.jpg'"
+              :alt="locale === 'ar' ? detail.name_ar : detail.name_en"
+              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+            <div
+              class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300"
+            ></div>
+          </div>
+          <p
+            class="font-sans mt-4 mb-1 mx-3 text-gray-800 font-medium xs:text-sm sm:text-base md:text-lg"
+          >
+            {{ locale === 'ar' ? detail.name_ar : detail.name_en }}
+          </p>
+
+        </SwiperSlide>
+      </swiper>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { Swiper, SwiperSlide } from 'swiper/vue'
+import { Autoplay, Grid } from 'swiper/modules'
+import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import axios from 'axios'
+import 'swiper/css'
+import 'swiper/css/grid'
+
+const locale = ref(localStorage.getItem('appLang') || 'ar')
+const stores = ref([])
+const customTabs = ref([])
+const isDropdownOpen = ref(false)
+const storeId = ref(localStorage.getItem('defaultStoreId') || null)
+const router = useRouter()
+
+// Computed property to get the selected store
+const selectedStore = computed(() => {
+  return stores.value.find(store => store.id === parseInt(storeId.value)) || null
+})
+
+// Helper function to get the store image URL
+const getStoreImage = (store) => {
+  const storeImage = store.media?.find(mediaItem => mediaItem.name === 'store_image')
+  return storeImage ? storeImage.url : null
+}
+
+// Fetch stores
+const fetchStores = async () => {
+  try {
+    const response = await axios.get(`api/home/get-stores/${storeId.value}`)
+    stores.value = response.data.data.data
+    const defaultStore = stores.value.find(store => store.is_default === 1)
+    if (defaultStore) {
+      localStorage.setItem('defaultStoreId', defaultStore.id)
+      storeId.value = defaultStore.id
+    }
+  } catch (error) {
+    console.error('Error fetching stores:', error)
+  }
+}
+
+// Fetch custom tabs
+const fetchCustomTabs = async () => {
+  try {
+    const response = await axios.get(`/api/home/get-custom-tab/${storeId.value}`)
+    customTabs.value = response.data.data.data
+  } catch (error) {
+    console.error('Error fetching custom tabs:', error)
+  }
+}
+
+// Toggle dropdown
+const toggleDropdown = () => {
+  isDropdownOpen.value = !isDropdownOpen.value
+}
+
+// Select store and fetch custom tabs
+const selectStore = (id) => {
+  storeId.value = id
+  localStorage.setItem('defaultStoreId', id)
+  isDropdownOpen.value = false
+  fetchCustomTabs()
+  router.push({ name: 'stores-hasmarket', params: { id } })
+}
+
+// Toggle language
+const toggleLang = () => {
+  const currentLang = localStorage.getItem('appLang') || 'en'
+  const newLang = currentLang === 'en' ? 'ar' : 'en'
+  localStorage.setItem('appLang', newLang)
+  locale.value = newLang
+  window.location.reload()
+}
+
+// Add to cart placeholder
+const addToCart = (detail) => {
+  console.log('Added to cart:', detail)
+}
+
+// Initialize data on mount
+onMounted(() => {
+  fetchStores()
+  if (storeId.value) {
+    fetchCustomTabs()
+  }
+})
+</script>
+
+<style scoped>
+/* Custom scrollbar for swiper */
+.swiper {
+  @apply w-full pb-8;
+}
+
+.swiper-slide {
+  @apply flex flex-col h-auto; /* Ensure slides have auto height for grid layout */
+}
+
+/* Optional: Custom scrollbar for the container */
+::-webkit-scrollbar {
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400;
+}
+</style>

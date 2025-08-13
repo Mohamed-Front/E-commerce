@@ -1,7 +1,7 @@
 <template>
   <div class="mx-auto px-4 max-w-7xl">
-    <div class="flex items-center justify-between mb-6">
-      <h2 class="font-bold font-sans text-gray-800 lg:mt-20 xs:mt-10 xs:text-lg sm:text-xl md:text-2xl lg:text-3xl">
+    <div class="flex items-center justify-between ">
+      <h2 class="font-bold font-sans text-gray-800 lg:mt-4 xs:mt-2 xs:text-lg sm:text-xl md:text-2xl lg:text-3xl">
         {{ products.title }}
       </h2>
 
@@ -15,7 +15,7 @@
       :autoplay="{ delay: 0, disableOnInteraction: false }"
       :speed="25000"
       :grab-cursor="true"
-      class="mt-6 pb-8"
+      class="mt-6 pb-1"
       :breakpoints="{
         320: { slidesPerView: 2, spaceBetween: 8 },
         640: { slidesPerView: 2, spaceBetween: 12 },
@@ -26,10 +26,10 @@
       <SwiperSlide
         v-for="(pro, i) in products.products"
         :key="i"
-        class="group flex flex-col items-start cursor-pointer transition-all duration-300 hover:-translate-y-2"
+        class="group flex flex-col items-start cursor-pointer transition-all pb-[1%] rounded-lg shadow-lg duration-300 hover:-translate-y-2"
         @click="router.push({ name: 'Product-details', params: { id: pro.id } })"
       >
-        <div class="w-full aspect-square overflow-hidden rounded-xl shadow-md relative">
+        <div class="w-full aspect-square overflow-hidden rounded-xl shadow-sm relative">
           <img
             :src="pro.img"
             :alt="pro.name"
@@ -37,21 +37,14 @@
           />
           <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300"></div>
         </div>
-        <p class="font-sans mt-4 mb-1 text-gray-800 font-medium xs:text-sm sm:text-base md:text-lg">
+        <p class="font-sans mt-4 mb-1 mx-3 text-gray-800 font-medium xs:text-sm sm:text-base md:text-lg">
           {{ pro.name }}
         </p>
-        <div class="flex items-center w-full justify-between">
-          <span class="font-sans text-gray-900 font-semibold xs:text-base sm:text-lg">
+        <div class="flex items-center w-full justify-between mx-3">
+          <span class="font-sans text-[#A6853B] font-semibold xs:text-base sm:text-lg">
             {{ pro.price }}
           </span>
-          <button
-            class="text-primary hover:text-primary-dark opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            @click.stop="addToCart(pro)"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-          </button>
+
         </div>
       </SwiperSlide>
     </swiper>

@@ -46,110 +46,31 @@
         </swiper-slide>
       </swiper>
     </header>
+      <StoreDetails></StoreDetails>
+
     <!-- main content -->
     <div class="contaner">
       <!-- section 1 -->
       <section class="mx-auto mt-16 w-[100%] max-w-7xl">
-        <!-- produts -->
-        <div class="flex place-content-between pt-[35px]">
-          <!-- img 1 -->
-          <div class="produt-img w-[48%] bg-cover place-content-center items-center p-6 lg:p-12">
-            <div class="text-white font-sans flex flex-col items-center gap-6 sm:gap-10 md:gap-12 lg:gap-16 xl:gap-20">
-              <h2
-                class="font-bold font-sans text-[.6rem] sm:text-[1rem] md:text-[1.5rem] lg:text-[2rem] xl:text-[3rem]"
-              >
-                Home Slider
-              </h2>
-              <p class="text-center font-sans text-[8px] sm:text-[1rem] lg:text-[1.2rem]">
-                Discover our exclusive deals
-              </p>
-              <button
-                class="font-sans lg:px-[16px] lg:py-[8px] px-[8px] py-[4px] text-[8px] sm:text-[1rem] lg:text-[1.2rem] bg-[var(--main-text-color)] rounded-md hover:bg-opacity-80 transition-colors"
-              >
-                Shop Now
-              </button>
-            </div>
-          </div>
-          <!-- img 2 -->
-          <div class="produt-img w-[48%] bg-cover"></div>
-        </div>
-        <!-- products -->
-        <div class="bg-[var(--main-text-color)/15] w-full overflow-x-auto py-4 scrollbar-hide">
-          <swiper
-            :modules="[Autoplay]"
-            :loop="true"
-            :autoplay="{ delay: 0, disableOnInteraction: false }"
-            :speed="3000"
-            grab-cursor
-            :space-between="10"
-            :breakpoints="{
-              0: { slidesPerView: 3 },
-              480: { slidesPerView: 4 },
-              768: { slidesPerView: 6 },
-              1024: { slidesPerView: 8 },
-              1280: { slidesPerView: 10 },
-            }"
-            class="px-4"
-          >
-            <swiper-slide
-              v-for="(pro, index) in product_titels"
-              :key="index"
-              class="flex-shrink-0 text-center flex flex-col items-center"
-            >
-              <div class="w-20 h-20 xs:w-16 xs:h-16 flex items-center justify-center">
-                <img src="../imges/image.png" :alt="pro.name" class="w-full h-full object-contain" />
-              </div>
-              <p class="font-sans text-xs font-bold truncate w-full mt-1">
-                {{ pro.name }}
-              </p>
-            </swiper-slide>
-          </swiper>
-        </div>
-        <!-- banner -->
-        <div class="h-[143px] flex place-content-center items-center">
-          <img :src="storimg.main_banner_image" alt="" class="w-[70%] rounded-lg" />
-        </div>
+
+
         <!-- more products -->
         <!-- Exclusive_offers -->
-        <Exclusiveoffers :Stor="Stor" />
+        <productsSwiper :products="exclusive_offers" />
         <!-- best_seller -->
-        <bestSellers :Stor="Stor" />
+        <productsSwiper :products="Best_seller" />
         <!-- New_arrival -->
         <productsSwiper :products="New_arrival" />
-      </section>
-      <section class="max-w-full">
-        <!-- Variety we chose for you -->
-        <h1 class="lg:mt-24 xs:mt-12 mx-4 font-bold font-sans xs:text-[.9rem] sm:text-[1.3rem] md:text-[1.8rem]">
-          {{ $t('Miscellaneous') }}
-        </h1>
-        <div
-          class="max-h-[873px] bg-[var(--main-text-color)] mt-3 grid grid-flow-row-2 grid-cols-5 gap-2 cursor-pointer p-4 Variety transition"
-        >
-          <div class="bg-white text-center rounded-md pb-3 transition" v-for="pro in Variety.products">
-            <img :src="pro.img" alt="" class="h-[87%] rounded-md" />
-            <p
-              class="text-[var(--main-text-color)] font-bold m-[calc((12%)/2)] xs:text-[.3rem] sm:text-[.5rem] md:text-[.7rem] lg:text-[1rem] p-2"
-            >
-              {{ pro.name }}
-            </p>
-          </div>
-        </div>
-        <!-- For lady -->
-        <for_lady :Stor="Stor"/>
-        <!-- Variety we chose for you 2 -->
-        <productsSwipertow :products="Variety" />
-        <!-- For lady 2-->
-        <for_lady :Stor="Stor"/>
-        <!-- Other products -->
-      </section>
-    </div>
 
-    <!-- footer -->
+
+      </section>
+       <CustomTaps></CustomTaps>
+    </div>
   </main>
 </template>
 
 <script setup>
-  import { onMounted, ref, computed } from 'vue'
+  import { onBeforeMount, ref, computed } from 'vue'
   import imge1 from '../imges/prand 1.png'
   import imge3 from '../imges/prand 3.png'
   import imge2 from '../imges/prand 2.png'
@@ -159,7 +80,7 @@
   import axios from 'axios'
   import { Swiper, SwiperSlide } from 'swiper/vue'
   import { Autoplay, Navigation } from 'swiper/modules'
-  import { useRouter } from 'vue-router'
+  import { useRouter, useRoute } from 'vue-router'
   import { useI18n } from 'vue-i18n'
 
   import 'swiper/css'
@@ -167,16 +88,18 @@
 
   // components
   import productsSwiper from '../components/SwiperSlide/productsSwiper.vue'
+  import CustomTaps from '../components/CustomTaps.vue'
+  import StoreDetails from '../components/StoreDetails.vue'
   import productsSwipertow from '../components/SwiperSlide/porductsSwipertow.vue'
   import for_lady from '../components/categories/for_lady.vue'
   import Exclusiveoffers from '../components/products/Exclusiveoffers.vue'
   import bestSellers from '../components/products/bestSellers.vue'
-  import Nav from '../components/nav.vue'
-  import Footer from '../components/footer.vue'
 
   const { t } = useI18n()
   const router = useRouter()
+  const route = useRoute()
 
+   const exclusive_offers = ref({ title: '', products: [] })
   // constructor
   class Data {
     constructor(name = 'No name', img = '', price = '$$', id) {
@@ -186,12 +109,16 @@
       this.id = id
     }
   }
-
+  const Best_seller = ref({ title: '', products: [] })
   // api data
   const Stor = ref({})
   const banners_slider = ref([])
   const titels = ref({})
   const storimg = ref({})
+  const New_arrival = ref({ title: '', products: [] })
+  const isLoading = ref(false)
+  const error = ref(null)
+  const locale = ref(localStorage.getItem('appLang') || 'ar')
 
   const product_titels = ref([
     new Data('العناية الشخصية', 'imges/personal-care.png'),
@@ -215,55 +142,87 @@
     new Data('ألعاب الأطفال', 'imges/kids-toys.png'),
     new Data('العروض اليومية', 'imges/daily-deals.png'),
   ])
+    const stor_id= ref(localStorage.getItem('defaultStoreId'))
 
-  const New_arrival = ref({
-    title: t('category.newlyarrived'),
-    products: [
-      new Data('Product', imge1, '12.00 JD'),
-      new Data('Product', imge1, '22.00 JD'),
-      new Data('Product', imge1, '32.00 JD'),
-      new Data('Product', imge1, '42.00 JD'),
-      new Data('Product', imge1, '12.00 JD'),
-      new Data('Product', imge1, '22.00 JD'),
-      new Data('Product', imge1, '32.00 JD'),
-      new Data('Product', imge1, '42.00 JD'),
-    ],
-  })
 
-  const Variety = ref({
-    title: t('Miscellaneous'),
-    products: [
-      new Data('مستلزمات يومية', imge1),
-      new Data('فوانيس رمضان', imge2),
-      new Data('أجهزة المطبخ', imge3),
-      new Data('العبايات والجلاليب', imge4),
-      new Data('العناية بالبشرة', imge5),
-      new Data('مستلزمات يومية', imge1),
-      new Data('فوانيس رمضان', imge2),
-      new Data('أجهزة المطبخ', imge3),
-      new Data('العبايات والجلاليب', imge4),
-      new Data('العناية بالبشرة', imge5),
-    ],
-  })
 
   // Computed property for titles
   const computedTitles = computed(() => {
     return Object.values(titels.value)
   })
 
+  const fetchBestSeller = async () => {
+    try {
+      const response = await axios.get(`api/home/best-sellers/${stor_id.value}`)
+      const data = response.data.data.data || []
+    Best_seller.value = {
+        title: t('category.bestsellers') || 'New Arrivals',
+        products: data.map((product) => ({
+          id: product.id,
+          name: locale.value === 'ar' ? product.name_ar : product.name_en,
+          price: parseFloat(product.base_price).toFixed(2),
+          img: product.media.find((media) => media.name === 'product_main_image')?.url || product.key_default_image,
+        }))
+      }
+    } catch (err) {
+      console.error('Error fetching new arrivals:', err)
+      error.value = t('category.errorLoading') || 'Failed to load new arrivals.'
+    } finally {
+      isLoading.value = false
+    }
+  }
+    const fetchNewArrivals = async () => {
+    isLoading.value = true
+    error.value = null
+    try {
+      const response = await axios.get(`api/home/new-arrivals/${stor_id.value}`)
+      const data = response.data.data.data || []
+      New_arrival.value = {
+        title: t('category.newlyarrived') || 'New Arrivals',
+        products: data.map((product) => ({
+          id: product.id,
+          name: locale.value === 'ar' ? product.name_ar : product.name_en,
+          price: parseFloat(product.base_price).toFixed(2),
+          img: product.media.find((media) => media.name === 'product_main_image')?.url || product.key_default_image,
+
+        })),
+      }
+    } catch (err) {
+      console.error('Error fetching new arrivals:', err)
+      error.value = t('category.errorLoading') || 'Failed to load new arrivals.'
+    } finally {
+      isLoading.value = false
+    }
+  }
+ const fetchExclusiveOffers = async () => {
+    isLoading.value = true
+    error.value = null
+    try {
+      const response = await axios.get(`api/home/exclusive-offers/${stor_id.value}`)
+      const data = response.data.data || []
+      exclusive_offers.value = {
+        title: t('category.exclusive') || 'New Arrivals',
+        products: data.map((product) => ({
+          id: product.id,
+          name: locale.value === 'ar' ? product.name_ar : product.name_en,
+          price: parseFloat(product.base_price).toFixed(2),
+          img: product.media.find((media) => media.name === 'product_main_image')?.url || product.key_default_image,
+
+        })),
+      }
+    } catch (err) {
+      console.error('Error fetching new arrivals:', err)
+      error.value = t('category.errorLoading') || 'Failed to load new arrivals.'
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   const loaddata = async () => {
     try {
-      // Fetch store data
-      const storeResponse = await axios.get('api/home/get-stores')
-      const data = storeResponse.data.data.data
-      data.forEach((stor) => {
-        if (stor.is_default) {
-          Stor.value = stor
-        }
-      })
 
       // Fetch categories
-      const categoryResponse = await axios.get(`api/home/get-categories/${Stor.value.id}`)
+      const categoryResponse = await axios.get(`api/home/get-categories/${stor_id.value}`)
       categoryResponse.data.data.data.forEach((category) => {
         titels.value[category.id] = {
           name: localStorage.getItem('appLang') == 'en' ? category.name_en : category.name_ar || category.name_en,
@@ -279,7 +238,7 @@
       }))
 
       // Fetch store images
-      if (Stor.value.media.length > 0) {
+      if (Stor.value.media?.length > 0) {
         storimg.value = {
           store_image: Stor.value.media.find((img) => img.name == 'store_image')?.url,
           sub_banner_image: Stor.value.media.find((img) => img.name == 'sub_banner_image')?.url,
@@ -294,7 +253,9 @@
     }
   }
 
-  onMounted(loaddata)
+  onBeforeMount(async () => {
+    await Promise.all([fetchNewArrivals() ,fetchBestSeller(),loaddata(),fetchExclusiveOffers()])
+  });
 </script>
 
 <style scoped>

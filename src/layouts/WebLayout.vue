@@ -9,7 +9,7 @@
 
       </div>
       <div class="app-layout__page">
-        <div class="p-2 md:px-6 md:py-9">
+        <div class="p-2  bg-[#FAF7F0]">
           <router-view />
         </div>
       </div>
@@ -99,7 +99,7 @@
       .app-layout__sidebar-wrapper {
         min-height: 100vh;
         position: relative;
-        background: #ffffff;
+        background: #0000;
 
         @media screen and (max-width: $tabletBreakPointPX) {
           &:not(.minimized) {

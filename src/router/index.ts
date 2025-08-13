@@ -48,6 +48,16 @@ const routes: Array<RouteRecordRaw> = [
           path: '/stores',
           component: () => import('../pages/admin/frontend/pages/stores.vue'),
         },
+          {
+          name: 'SubCategory',
+          path: '/SubCategory',
+          component: () => import('../pages/admin/frontend/pages/home/SubCategory.vue'),
+          },
+          {
+            name: 'SubSubCategory',
+            path: '/SubSubCategory',
+            component: () => import('../pages/admin/frontend/pages/home/SubSubCategory.vue'),
+          },
     ]
 
 
@@ -61,16 +71,7 @@ const routes: Array<RouteRecordRaw> = [
   // },
 
 
-  {
-    name: 'SubCategory',
-    path: '/SubCategory',
-    component: () => import('../pages/admin/frontend/pages/home/SubCategory.vue'),
-  },
-  {
-    name: 'SubSubCategory',
-    path: '/SubSubCategory',
-    component: () => import('../pages/admin/frontend/pages/home/SubSubCategory.vue'),
-  },
+
 
   {
     name: 'Cart',
