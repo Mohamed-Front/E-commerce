@@ -23,7 +23,7 @@
         <swiper-slide v-for="title in computedTitles" :key="title.id" class="flex items-center justify-center">
           <div
             class="titels font-sans bg-[#1F3A93] h-[40px] min-w-[80px] sm:h-[44px] sm:min-w-[100px] md:h-[48px] md:min-w-[140px] text-[.5rem] sm:text-[.8rem] md:text-[.8rem] text-center place-content-center font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer text-white"
-            @click="router.push({ path: '/SubCategory', query: { activetap: title.id, stor: Stor.id } })"
+            @click="goCatgory(title)"
           >
             {{ title.name }}
           </div>
@@ -217,7 +217,9 @@
       isLoading.value = false
     }
   }
-
+  const goCatgory =(data)=>{
+    router.push({name:'Product_category',params:{id:data.id}})
+  }
   const loaddata = async () => {
     try {
 
