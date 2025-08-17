@@ -399,6 +399,7 @@ export default {
     createError: 'فشل إنشاء الموديل',
   },
   category: {
+    subCategories:"الفئات",
     import:"استيراد",
     storeNameEn:" المتجر (انجليزي)",
     storeNameAr:" المتجر (عربي)",

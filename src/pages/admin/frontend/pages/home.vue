@@ -194,7 +194,7 @@
       isLoading.value = false
     }
   }
- const fetchExclusiveOffers = async () => {
+    const fetchExclusiveOffers = async () => {
     isLoading.value = true
     error.value = null
     try {
@@ -218,7 +218,7 @@
     }
   }
   const goCatgory =(data)=>{
-    router.push({name:'Product_category',params:{id:data.id}})
+    router.push({name:'Product',params:{id:data.id}})
   }
   const loaddata = async () => {
     try {

@@ -26,7 +26,7 @@
       <SwiperSlide
         v-for="(pro, i) in products.products"
         :key="i"
-        class="group flex flex-col items-start cursor-pointer transition-all pb-[1%] rounded-lg shadow-lg duration-300 hover:-translate-y-2"
+        class="group flex flex-col items-start cursor-pointer bg-white transition-all pb-[1%] rounded-lg shadow-lg duration-300 hover:-translate-y-2"
         @click="router.push({ name: 'Product-details', params: { id: pro.id } })"
       >
         <div class="w-full aspect-square overflow-hidden rounded-xl shadow-sm relative">
