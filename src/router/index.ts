@@ -24,9 +24,9 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../pages/admin/frontend/pages/home.vue'),
       },
         {
-          name: 'Product',
-          path: '/product/:id',
-          component: () => import('../pages/admin/frontend/pages/products/products.vue'),
+          name: 'subcategory',
+          path: '/subcategory/:id',
+          component: () => import('../pages/admin/frontend/pages/products/SubCategory.vue'),
         },
          {
           name: 'Product-details',
@@ -49,11 +49,7 @@ const routes: Array<RouteRecordRaw> = [
           component: () => import('../pages/admin/frontend/pages/stores.vue'),
         },
 
-          {
-          name: 'SubCategory',
-          path: '/SubCategory/:id',
-          component: () => import('../pages/admin/frontend/pages/home/SubCategory.vue'),
-          },
+
 
     ]
 

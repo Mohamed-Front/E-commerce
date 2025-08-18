@@ -218,7 +218,7 @@
     }
   }
   const goCatgory =(data)=>{
-    router.push({name:'Product',params:{id:data.id}})
+    router.push({name:'subcategory',params:{id:data.id}})
   }
   const loaddata = async () => {
     try {
