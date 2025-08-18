@@ -1,10 +1,9 @@
 <template>
   <div class="mx-auto px-4 max-w-7xl">
-    <div class="flex items-center justify-between ">
+    <div class="flex items-center justify-between">
       <h2 class="font-bold font-sans text-gray-800 lg:mt-4 xs:mt-2 xs:text-lg sm:text-xl md:text-2xl lg:text-3xl">
         {{ products.title }}
       </h2>
-
     </div>
 
     <swiper
@@ -26,10 +25,10 @@
       <SwiperSlide
         v-for="(pro, i) in products.products"
         :key="i"
-        class="group flex flex-col items-start cursor-pointer bg-white transition-all pb-[1%] rounded-lg shadow-lg duration-300 hover:-translate-y-2"
+        class="group flex flex-col items-start cursor-pointer h-full bg-white transition-all pb-[1%] rounded-lg shadow-lg duration-300 hover:-translate-y-2"
         @click="router.push({ name: 'Product-details', params: { id: pro.id } })"
       >
-        <div class="w-full aspect-square overflow-hidden rounded-xl shadow-sm relative">
+        <div class="w-full h-full aspect-square overflow-hidden rounded-xl shadow-sm relative">
           <img
             :src="pro.img"
             :alt="pro.name"
@@ -37,14 +36,13 @@
           />
           <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300"></div>
         </div>
-        <p class="font-sans mt-4 mb-1 mx-3 text-gray-800 font-medium xs:text-sm sm:text-base md:text-lg">
-          {{ pro.name }}
+        <p class="font-sans mt-4 mb-1 mx-3 text-gray-800 font-medium xs:text-sm sm:text-base md:text-lg truncate w-full">
+          {{ truncateName(pro.name, 30) }}
         </p>
         <div class="flex items-center w-full justify-between mx-3">
           <span class="font-sans text-[#A6853B] font-semibold xs:text-base sm:text-lg">
             {{ pro.price }}
           </span>
-
         </div>
       </SwiperSlide>
     </swiper>
@@ -80,6 +78,12 @@ const addToCart = (product) => {
   // Implement your add to cart logic here
   console.log('Added to cart:', product)
 }
+
+// Method to truncate product name to a specific length
+const truncateName = (name, maxLength) => {
+  if (name.length <= maxLength) return name
+  return name.slice(0, maxLength) + '...'
+}
 </script>
 
 <style scoped>
@@ -90,6 +94,13 @@ const addToCart = (product) => {
 
 .swiper-slide {
   @apply flex flex-col;
+}
+
+/* Ensure text truncation for long names */
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Optional: Custom scrollbar for the container */

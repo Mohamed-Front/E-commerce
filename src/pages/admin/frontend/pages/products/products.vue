@@ -16,11 +16,9 @@
         <h1 class="text-4xl sm:text-4xl font-extrabold text-gray-800 tracking-tight animate-fade-in">
           {{ categoryName(category) }}
         </h1>
-
       </div>
-
       <!-- Sub-Categories Section with Swiper -->
-      <div  class="">
+      <div>
         <h2 class="font-bold font-sans text-gray-800 text-2xl sm:text-3xl lg:text-4xl mb-8 animate-slide-up">
           {{ t('category.subCategories') }}
         </h2>
@@ -49,7 +47,7 @@
           >
             <div class="w-full h-48 overflow-hidden rounded-xl shadow-md relative">
               <img
-                :src="subCategory.media?.[0]?.url || defaultCategoryImage"
+                :src="subCategory.media[0]?.url"
                 :alt="`${categoryName(subCategory)} image`"
                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 loading="lazy"
@@ -65,8 +63,23 @@
         </swiper>
       </div>
 
+      <!-- First Banner Section -->
+      <div v-if="category.media?.find(media => media.name === 'banner_one_image')" class="my-8">
+        <div class="relative overflow-hidden rounded-2xl shadow-lg animate-banner-slide">
+          <img
+            :src="category.media.find(media => media.name === 'banner_one_image').url"
+            :alt="`${categoryName(category)} banner one`"
+            class="w-full h-64 sm:h-70 md:h-76 object-cover transition-transform duration-700 hover:scale-105"
+            loading="lazy"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end justify-center p-6">
+
+          </div>
+        </div>
+      </div>
+
       <!-- Products Section -->
-      <section class=" ">
+      <section>
         <!-- Category Products Row -->
         <productsSwiper
           v-if="categoryProducts.products.length"
@@ -76,8 +89,8 @@
 
         <!-- Subcategory Products Row -->
         <div v-if="subCategoryProducts.length" class="mt-16">
-          <h2 class="font-bold font-sans text-gray-800 text-2xl sm:text-3xl lg:text-4xl mb-8 ">
-            {{ t('category.subCategoryProducts') }}
+          <h2 class="font-bold font-sans text-gray-800 text-2xl sm:text-3xl lg:text-4xl mb-8">
+            {{ t('منتجات الفئة') }}
           </h2>
           <swiper
             :modules="[Autoplay, Navigation]"
@@ -87,7 +100,7 @@
             :autoplay="{ delay: 3000, disableOnInteraction: false }"
             :speed="1000"
             :grab-cursor="true"
-            :navigation="true"
+            :navigation="false"
             class="mt-6 pb-12"
             :breakpoints="{
               320: { slidesPerView: 1, spaceBetween: 8 },
@@ -119,7 +132,10 @@
             </SwiperSlide>
           </swiper>
         </div>
-
+        <productsSwiper
+          :products="subCategoryProducts"
+          :title="exclusiveOffers.title"
+        />
         <!-- Other Product Sections -->
         <productsSwiper
           v-if="exclusiveOffers.products.length"
@@ -137,8 +153,23 @@
           :title="newArrivals.title"
         />
       </section>
+
+      <!-- Second Banner Section -->
+      <div v-if="category.media?.find(media => media.name === 'banner_two_image')" class="my-8">
+        <div  class="relative overflow-hidden rounded-2xl shadow-lg animate-banner-slide">
+          <img
+            :src="category.media.find(media => media.name === 'banner_two_image').url"
+            :alt="`${categoryName(category)} banner two`"
+            class="w-full h-64 sm:h-70 md:h-76 object-cover transition-transform duration-700 hover:scale-105"
+            loading="lazy"
+          />
+          <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/50 flex items-center justify-center p-6">
+
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
+       <CustomTaps></CustomTaps>  </div>
 </template>
 
 <script setup>
@@ -153,6 +184,7 @@ import productsSwiper from '../../components/SwiperSlide/productsSwiper.vue';
 import defaultCategoryImage from '../../imges/banner-addtion.png';
 import defaultProductImage from '../../imges/banner-addtion.png';
 import axios from 'axios';
+import CustomTaps from '../../components/CustomTaps.vue';
 
 // Initialize Vue utilities
 const route = useRoute();
@@ -191,14 +223,14 @@ const fetchCategoryData = async () => {
       id: sub.id,
       name_ar: sub.name_ar || sub.name_en,
       name_en: sub.name_en || sub.name_ar,
-      media: sub.media || [{ url: defaultCategoryImage, name: 'default' }],
+      media: sub.media.length ? sub.media : [{ url: defaultCategoryImage, name: 'default' }],
     }));
     categoryProducts.value = {
       title: categoryName(category.value),
       products: (data.products.data || []).map(product => ({
         id: product.id,
         name: locale.value === 'ar' ? product.name_ar || product.name_en : product.name_en || product.name_ar,
-        tax: product.tax,
+        tax: product.tax || 0,
         price: parseFloat(product.base_price || 0).toFixed(2),
         img: product.media?.find(media => media.name === 'product_main_image')?.url || product.key_default_image || defaultProductImage,
       })),
@@ -218,7 +250,7 @@ const fetchSubCategoryProducts = async () => {
       return products.map(product => ({
         id: product.id,
         name: locale.value === 'ar' ? product.name_ar || product.name_en : product.name_en || product.name_ar,
-        tax: product.tax,
+        tax: product.tax || 0,
         price: parseFloat(product.base_price || 0).toFixed(2),
         img: product.media?.find(media => media.name === 'product_main_image')?.url || product.key_default_image || defaultProductImage,
       }));
@@ -243,7 +275,7 @@ const fetchBestSellers = async () => {
       products: data.map(product => ({
         id: product.id,
         name: locale.value === 'ar' ? product.name_ar || product.name_en : product.name_en || product.name_ar,
-        tax: product.tax,
+        tax: product.tax || 0,
         price: parseFloat(product.base_price || 0).toFixed(2),
         img: product.media?.find(media => media.name === 'product_main_image')?.url || product.key_default_image || defaultProductImage,
       })),
@@ -264,7 +296,7 @@ const fetchNewArrivals = async () => {
       products: data.map(product => ({
         id: product.id,
         name: locale.value === 'ar' ? product.name_ar || product.name_en : product.name_en || product.name_ar,
-        tax: product.tax,
+        tax: product.tax || 0,
         price: parseFloat(product.base_price || 0).toFixed(2),
         img: product.media?.find(media => media.name === 'product_main_image')?.url || product.key_default_image || defaultProductImage,
       })),
@@ -285,7 +317,7 @@ const fetchExclusiveOffers = async () => {
       products: data.map(product => ({
         id: product.id,
         name: locale.value === 'ar' ? product.name_ar || product.name_en : product.name_en || product.name_ar,
-        tax: product.tax,
+        tax: product.tax || 0,
         price: parseFloat(product.base_price || 0).toFixed(2),
         img: product.media?.find(media => media.name === 'product_main_image')?.url || product.key_default_image || defaultProductImage,
       })),
@@ -334,12 +366,21 @@ onBeforeMount(() => {
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes banner-slide {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
 .animate-fade-in {
   animation: fade-in 0.8s ease-out forwards;
 }
 
 .animate-slide-up {
   animation: slide-up 0.8s ease-out forwards;
+}
+
+.animate-banner-slide {
+  animation: banner-slide 1s ease-out forwards;
 }
 
 /* Swiper custom styles */
