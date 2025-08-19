@@ -89,7 +89,7 @@
           320: { slidesPerView: 2 },
           640: { slidesPerView: 2 },
           768: { slidesPerView: 5 },
-          1024: { slidesPerView: 8 }
+          1024: { slidesPerView: 7 }
         }"
       >
         <SwiperSlide v-for="(category, index) in categories" :key="index">
