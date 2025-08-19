@@ -145,13 +145,13 @@
 import { useRouter } from 'vue-router';
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import route from '../../ui/route';
+
 
 const authlogin = ref(false);
 const stores = ref([]);
 const router = useRouter();
 const isDropdownOpen = ref(false);
-const defaultStoreId = ref(null);
+const defaultStoreId = ref(4);
 const defaultStore = ref(null);
 const hasMarket = ref(null);
 
@@ -202,8 +202,14 @@ const selectStore = (store) => {
   localStorage.setItem('defaultStoreId', store.id);
   localStorage.setItem('hasMarket', store.has_market);
   isDropdownOpen.value = false;
+console.log()
+  if(store.has_market){
+   router.push({name:'stores-hasmarket'})
+  }
+  else{
+     router.push({name:'home'})
 
-  window.location.reload()
+  }
 };
 
 const toggleDropdown = () => {

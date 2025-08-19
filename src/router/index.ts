@@ -22,6 +22,14 @@ const routes: Array<RouteRecordRaw> = [
         name: 'home',
         path: '/',
         component: () => import('../pages/admin/frontend/pages/home.vue'),
+        beforeEnter: (to, from, next) => {
+          const hasMarket = localStorage.getItem('has-market') === 'true';
+          if ( hasMarket) {
+            next({ name: 'stores-hasmarket'}); // Replace 'some-id' with the appropriate ID or logic to get it
+          } else {
+            next(); // Proceed to home route
+          }
+        },
       },
         {
           name: 'subcategory',
@@ -40,9 +48,15 @@ const routes: Array<RouteRecordRaw> = [
         },
           {
           name: 'stores-hasmarket',
-          path: '/stores-hasmarket/:id',
+          path: '/stores-hasmarket',
           component: () => import('../pages/admin/frontend/pages/stores/hasmarket.vue'),
         },
+           {
+          name: 'stores-nomarket',
+          path: '/stores-nomarket',
+          component: () => import('../pages/admin/frontend/pages/stores/nothasmarket.vue'),
+        },
+
              {
           name: 'stores-nothasmarket',
           path: '/stores-nothasmarket/:id',

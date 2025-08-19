@@ -1,7 +1,6 @@
-```vue
 <template>
   <!-- Container -->
-  <div class="mx-auto bg-gradient-to-b from-[#FAF7F0] to-white mt-16 max-w-7xl px-4 sm:px-6 lg:px-8">
+  <div class="mx-auto mt-16 max-w-7xl px-4 sm:px-6 lg:px-8">
     <!-- Loading State -->
     <div v-if="isLoading" class="text-center py-16 animate-pulse">
       <p class="text-gray-600 text-lg font-medium">{{ t('category.loading') }}</p>
@@ -17,94 +16,11 @@
         <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-800 tracking-tight animate-fade-in">
           {{ storeName }}
         </h1>
-        <p class="mt-2 text-gray-500 text-sm sm:text-base">
-          {{ t('category.explore') }} {{ storeName }}
-        </p>
       </div>
-
-      <!-- Banner Slider -->
-      <div class="relative mb-16">
-        <swiper
-          :modules="[Autoplay,]"
-          :slides-per-view="1"
-          :space-between="0"
-          :loop="true"
-          :autoplay="{ delay: 4000, disableOnInteraction: false }"
-          :speed="1200"
-          :navigation="false"
-          :pagination="{ clickable: true }"
-          class="rounded-2xl shadow-xl overflow-hidden"
-           :breakpoints="{
-            320: { slidesPerView: 1, spaceBetween: 8 },
-            640: { slidesPerView: 2, spaceBetween: 12 },
-            768: { slidesPerView: 2, spaceBetween: 16 },
-            1024: { slidesPerView: 3, spaceBetween: 20 }
-          }"
-        >
-          <SwiperSlide v-for="(media, index) in sliderImages" :key="index">
-            <div class="relative w-full h-[300px] sm:h-[400px] lg:h-[500px]">
-              <img
-                :src="media.url"
-                :alt="`Slider image ${index + 1}`"
-                class="w-full h-full object-cover transition-transform duration-700 ease-out transform hover:scale-105"
-              />
-              <div class="absolute inset-0 bg-black bg-opacity-20 transition-opacity duration-300 hover:bg-opacity-10"></div>
-            </div>
-          </SwiperSlide>
-        </swiper>
-      </div>
-
-      <!-- Categories Section with Swiper -->
-      <div class="mt-16">
-
-        <swiper
-          :modules="[Autoplay]"
-          :slides-per-view="3"
-          :space-between="20"
-          :loop="categories.length > 3"
-          :autoplay="{ delay: 3000, disableOnInteraction: false }"
-          :speed="1000"
-          :grab-cursor="true"
-          :navigation="false"
-          class="mt-6 pb-12"
-          :breakpoints="{
-            320: { slidesPerView: 1, spaceBetween: 8 },
-            640: { slidesPerView: 2, spaceBetween: 12 },
-            768: { slidesPerView: 2, spaceBetween: 16 },
-            1024: { slidesPerView: 7, spaceBetween: 20 }
-          }"
-        >
-          <SwiperSlide
-            v-for="category in categories"
-            :key="category.id"
-            class="group flex flex-col items-center cursor-pointer transition-all duration-300 hover:-translate-y-2"
-            @click="router.push(`/categories/${category.id}`)"
-          >
-            <div class="w-full h-48 overflow-hidden rounded-xl shadow-md relative">
-              <img
-                :src="category.media?.[0]?.url || defaultCategoryImage"
-                :alt="`${categoryName(category)} image`"
-                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              <div
-                class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300"
-              ></div>
-            </div>
-            <h3 class="font-sans mt-4 mb-1 text-gray-800 font-semibold text-sm sm:text-base md:text-lg">
-              {{ categoryName(category) }}
-            </h3>
-          </SwiperSlide>
-        </swiper>
-      </div>
-
       <!-- Markets Section with Swiper -->
-      <div v-if="markets.length" class="mt-16">
-        <h2 class="font-bold font-sans text-gray-800 text-2xl sm:text-3xl lg:text-4xl mb-8 animate-slide-up">
-          {{ t('category.markets') }}
-        </h2>
+      <div v-if="markets.length" class="my-10">
         <swiper
           :modules="[Autoplay]"
-          :slides-per-view="3"
           :space-between="20"
           :loop="markets.length > 3"
           :autoplay="{ delay: 3000, disableOnInteraction: false }"
@@ -125,7 +41,7 @@
             class="group flex flex-col items-center cursor-pointer transition-all duration-300 hover:-translate-y-2"
             @click="router.push(`/markets/${market.id}`)"
           >
-            <div class="w-full h-48 overflow-hidden rounded-xl shadow-md relative">
+            <div class="w-full h-58 overflow-hidden rounded-lg shadow-md relative">
               <swiper
                 :modules="[Autoplay]"
                 :slides-per-view="1"
@@ -144,18 +60,132 @@
                     :src="media.url"
                     :alt="`${market.title} image ${index + 1}`"
                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    loading="lazy"
+                    :aria-label="`${market.title} image ${index + 1}`"
                   />
                 </SwiperSlide>
               </swiper>
-              <div
-                class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300"
-              ></div>
             </div>
-            <h3 class="font-sans mt-4 mb-1 text-gray-800 font-semibold text-sm sm:text-base md:text-lg">
+            <h3 class="font-sans mt-4 mb-1 text-black font-bold text-sm sm:text-base md:text-lg">
               {{ market.title }}
             </h3>
           </SwiperSlide>
         </swiper>
+      </div>
+      <!-- Main Slider -->
+      <Swiper
+        v-if="sliderImages.length"
+        :modules="[Autoplay, Navigation]"
+        :breakpoints="{
+          320: { slidesPerView: 1 },
+          640: { slidesPerView: 1 },
+          768: { slidesPerView: 1 },
+          1024: { slidesPerView: 1 }
+        }"
+        :space-between="10"
+        :autoplay="{ delay: 3000, disableOnInteraction: false }"
+        :navigation="false"
+        class="w-full rounded-2xl shadow-xl overflow-hidden mb-10"
+      >
+        <SwiperSlide v-for="(image, index) in sliderImages" :key="index">
+          <div class="flex w-full max-h-[50vh] items-center justify-center bg-gradient-to-br from-gray-50 to-gray-300 rounded-xl shadow-lg overflow-hidden">
+            <img
+              :src="image.url"
+              :alt="`Slider Image ${index + 1}`"
+              class="w-full h-full object-cover rounded-xl transform hover:scale-105 transition-transform duration-500"
+              loading="lazy"
+              :aria-label="`Promotional banner ${index + 1}`"
+            />
+          </div>
+        </SwiperSlide>
+      </Swiper>
+
+      <!-- Dual Sliders Section -->
+      <div v-if="sliderImagesTwo.length || sliderImagesThree.length" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+        <!-- Slider for sliderImagesTwo -->
+        <div class="rounded-xl shadow-lg overflow-hidden">
+          <Swiper
+            v-if="sliderImagesTwo.length"
+            :modules="[Autoplay]"
+            :slides-per-view="1"
+            :space-between="10"
+            :autoplay="{ delay: 2500, disableOnInteraction: false }"
+            class="w-full h-full"
+          >
+            <SwiperSlide v-for="(image, index) in sliderImagesTwo" :key="'two-' + index">
+              <div class="flex w-full max-h-64 items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl overflow-hidden">
+                <img
+                  :src="image.url"
+                  :alt="`Slider Two Image ${index + 1}`"
+                  class="w-full h-64 object-cover rounded-xl transform hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                  :aria-label="`Secondary banner ${index + 1}`"
+                />
+              </div>
+            </SwiperSlide>
+          </Swiper>
+        </div>
+
+        <!-- Slider for sliderImagesThree -->
+        <div class="rounded-xl shadow-lg overflow-hidden">
+          <Swiper
+            v-if="sliderImagesThree.length"
+            :modules="[Autoplay]"
+            :slides-per-view="1"
+            :space-between="10"
+            :autoplay="{ delay: 2500, disableOnInteraction: false }"
+            class="w-full h-full"
+          >
+            <SwiperSlide v-for="(image, index) in sliderImagesThree" :key="'three-' + index">
+              <div class="flex w-full h-64 items-center justify-center bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl overflow-hidden">
+                <img
+                  :src="image.url"
+                  :alt="`Slider Three Image ${index + 1}`"
+                  class="w-full h-full object-cover rounded-xl transform hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                  :aria-label="`Tertiary banner ${index + 1}`"
+                />
+              </div>
+            </SwiperSlide>
+          </Swiper>
+        </div>
+      </div>
+
+      <!-- Categories Slider -->
+      <div v-if="categories.length" class="mt-8 hidden py-2 rounded-sm px-2 bg-[#1F3A932B] mx-auto max-w-7xl">
+        <Swiper
+          :modules="[Navigation, Autoplay]"
+          :slides-per-view="8"
+          :space-between="10"
+          :navigation="false"
+          :autoplay="{ delay: 2000, disableOnInteraction: false }"
+          :pagination="{ clickable: true }"
+          class="w-full"
+          :breakpoints="{
+            320: { slidesPerView: 2 },
+            640: { slidesPerView: 2 },
+            768: { slidesPerView: 5 },
+            1024: { slidesPerView: 7 }
+          }"
+        >
+          <SwiperSlide v-for="category in categories" :key="category.id">
+            <div
+              @click="router.push(`/categories/${category.id}`)"
+              class="flex flex-col items-center justify-center rounded-xl h-full w-full cursor-pointer"
+            >
+              <img
+                :src="category.media?.[0]?.url || defaultCategoryImage"
+                :alt="`${categoryName(category)} image`"
+                class="w-full h-full max-h-36 object-cover rounded-xl"
+                loading="lazy"
+                :aria-label="`${categoryName(category)} category image`"
+              />
+              <div class="p-3 w-full text-center rounded-xl">
+                <span class="font-bold text-sm text-black">{{ categoryName(category).slice(0, 20) }}</span>
+              </div>
+            </div>
+          </SwiperSlide>
+        </Swiper>
       </div>
 
       <!-- Products Sections -->
@@ -207,6 +237,8 @@ const { t, locale } = useI18n();
 const storeData = ref({});
 const storeName = ref('');
 const sliderImages = ref([]);
+const sliderImagesTwo = ref([]);
+const sliderImagesThree = ref([]);
 const categories = ref([]);
 const markets = ref([]);
 const exclusiveOffers = ref({ title: 'Exclusive Offers', products: [] });
@@ -215,9 +247,17 @@ const newArrivals = ref({ title: 'New Arrivals', products: [] });
 const isLoading = ref(false);
 const error = ref(null);
 
+// Get store ID from localStorage
+const storeId = ref(localStorage.getItem('defaultStoreId') || '');
+
 // Helper function to get category name based on locale
 const categoryName = (category) => {
   return locale.value === 'ar' ? category.name_ar || category.name_en : category.name_en || category.name_ar;
+};
+
+// Helper function to extract slider images
+const getSliderImages = (mediaArray, name) => {
+  return mediaArray?.filter(item => item.name === name) || [];
 };
 
 // Fetch store details
@@ -225,7 +265,7 @@ const fetchStoreDetails = async () => {
   isLoading.value = true;
   error.value = null;
   try {
-    const response = await axios.get(`/api/home/store-details/${route.params.id}`);
+    const response = await axios.get(`/api/home/store-details/${storeId.value}`);
     storeData.value = response.data.data.store || {};
   } catch (err) {
     console.error('Error fetching store details:', err);
@@ -239,9 +279,9 @@ const fetchStoreDetails = async () => {
 const initStoreData = () => {
   if (!storeData.value) return;
   storeName.value = locale.value === 'ar' ? storeData.value.name_ar || storeData.value.name_en : storeData.value.name_en || storeData.value.name_ar;
-  sliderImages.value = (storeData.value.media || []).filter(media =>
-    ['main_banner_image', 'sub_banner_image', 'slider_images_one', 'slider_images_two', 'slider_images_three'].includes(media.name)
-  );
+  sliderImages.value = getSliderImages(storeData.value.media, 'slider_images_one');
+  sliderImagesTwo.value = getSliderImages(storeData.value.media, 'slider_images_two');
+  sliderImagesThree.value = getSliderImages(storeData.value.media, 'slider_images_three');
   categories.value = (storeData.value.categories || []).map(category => ({
     id: category.id,
     name_ar: category.name_ar || category.name_en,
@@ -263,10 +303,10 @@ const fetchBestSellers = async () => {
   isLoading.value = true;
   error.value = null;
   try {
-    const response = await axios.get(`/api/home/best-sellers/${route.params.id}`);
+    const response = await axios.get(`/api/home/best-sellers/${storeId.value}`);
     const data = response.data.data.data || [];
     bestSellers.value = {
-      title: t('category.bestSellers') || 'Best Sellers',
+      title: t('category.bestsellers') || 'Best Sellers',
       products: data.map(product => ({
         id: product.id,
         name: locale.value === 'ar' ? product.name_ar || product.name_en : product.name_en || product.name_ar,
@@ -287,10 +327,10 @@ const fetchNewArrivals = async () => {
   isLoading.value = true;
   error.value = null;
   try {
-    const response = await axios.get(`/api/home/new-arrivals/${route.params.id}`);
+    const response = await axios.get(`/api/home/new-arrivals/${storeId.value}`);
     const data = response.data.data.data || [];
     newArrivals.value = {
-      title: t('category.newArrivals') || 'New Arrivals',
+      title: t('category.newlyarrived') || 'New Arrivals',
       products: data.map(product => ({
         id: product.id,
         name: locale.value === 'ar' ? product.name_ar || product.name_en : product.name_en || product.name_ar,
@@ -306,15 +346,15 @@ const fetchNewArrivals = async () => {
   }
 };
 
-// Fetch exclusive offers (placeholder, replace with actual API call if available)
+// Fetch exclusive offers
 const fetchExclusiveOffers = async () => {
   isLoading.value = true;
   error.value = null;
   try {
-    const response = await axios.get(`/api/home/exclusive-offers/${route.params.id}`);
+    const response = await axios.get(`/api/home/exclusive-offers/${storeId.value}`);
     const data = response.data.data.data || [];
     exclusiveOffers.value = {
-      title: t('category.exclusiveOffers') || 'Exclusive Offers',
+      title: t('category.exclusive') || 'Exclusive Offers',
       products: data.map(product => ({
         id: product.id,
         name: locale.value === 'ar' ? product.name_ar || product.name_en : product.name_en || product.name_ar,
@@ -343,7 +383,7 @@ const fetchAllData = async () => {
 
 // Initialize on mount
 onMounted(() => {
-  if (route.params.id) {
+  if (storeId.value) {
     fetchAllData();
   }
 });
@@ -371,7 +411,7 @@ onMounted(() => {
 
 /* Swiper custom styles */
 .swiper {
-  @apply w-full pb-12;
+  @apply w-full;
 }
 
 .swiper-slide {
@@ -424,5 +464,13 @@ onMounted(() => {
     @apply text-xl;
   }
 }
+
+/* Additional styles from first code for sliders and categories */
+img {
+  @apply transition-all duration-500 ease-in-out;
+}
+
+img:hover {
+  @apply opacity-95 shadow-2xl;
+}
 </style>
-```

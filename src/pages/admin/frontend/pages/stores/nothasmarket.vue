@@ -1,120 +1,477 @@
+```vue
 <template>
-  <!-- contaner -->
-  <div class="mx-auto mt-16 ">
-    <div class="flex justify-between items-center text-center gap-2">
-      <div v-for="market in markets">
-        <img :src="market.img" alt="" class="rounded-lg" />
-        <h1 class="text-[clamp(.6rem,2vw,1.3rem)]">{{ market.title }}</h1>
-        <p class="text-[var(--main-text-color)] text-[clamp(.4rem,1vw,.8rem)]">All Categories</p>
-      </div>
+  <!-- Container -->
+  <div class="mx-auto mt-16 max-w-7xl px-4 sm:px-6 lg:px-8">
+    <!-- Loading State -->
+    <div v-if="isLoading" class="text-center py-16 animate-pulse">
+      <p class="text-gray-600 text-lg font-medium">{{ t('category.loading') }}</p>
     </div>
-    <section>
-      <!-- banner -->
-      <img src="../../imges/banner-addtion.png" alt="" class="mt-28" />
-      <!-- products -->
-      <div class="flex place-content-between pt-[35px]">
-        <!-- img 1 -->
-        <div class="produt-img w-[48%] bg-cover place-content-center items-center p-6 lg:p-12">
-          <div class="text-white font-sans flex flex-col items-center gap-6 sm:gap-10 md:gap-12 lg:gap-16 xl:gap-20">
-            <h2 class="font-bold font-sans text-[.4rem] sm:text-[.7rem] md:text-[1rem] lg:text-[1.3rem] xl:text-[1.8rem]">
-              Home Slider
-            </h2>
-            <p class="text-center font-sans text-[8px] sm:text-[1rem] lg:text-[1.2rem]">Discover our exclusive deals</p>
-            <button
-              class="font-sans lg:px-[16px] lg:py-[8px] px-[8px] py-[4px] text-[8px] sm:text-[1rem] lg:text-[1.2rem] bg-[var(--main-text-color)] rounded-md"
-            >
-              Shop Now
-            </button>
-          </div>
-        </div>
-        <!-- img 2 -->
-        <div class="produt-img w-[48%] bg-cover"></div>
+    <!-- Error State -->
+    <div v-else-if="error" class="text-center py-16 text-red-600">
+      <p class="text-lg font-semibold">{{ error }}</p>
+    </div>
+    <!-- Main Content -->
+    <div v-else>
+      <!-- Store Header -->
+      <div class="text-center mb-12">
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-800 tracking-tight animate-fade-in">
+          {{ storeName }}
+        </h1>
       </div>
-      <!-- Exclusive_offers -->
-      <productsSwiper :products="Exclusive_offers" />
-      <!-- best_seller -->
-      <productsSwiper :products="best_seller" />
-      <!-- New_arrival -->
-      <productsSwiper :products="New_arrival" />
-    </section>
+      <!-- Markets Section with Swiper -->
+      <div v-if="markets.length" class="my-10">
+        <swiper
+          :modules="[Autoplay]"
+          :space-between="20"
+          :loop="markets.length > 3"
+          :autoplay="{ delay: 3000, disableOnInteraction: false }"
+          :speed="1000"
+          :grab-cursor="true"
+          :navigation="false"
+          class="mt-6 pb-12"
+          :breakpoints="{
+            320: { slidesPerView: 1, spaceBetween: 8 },
+            640: { slidesPerView: 2, spaceBetween: 12 },
+            768: { slidesPerView: 2, spaceBetween: 16 },
+            1024: { slidesPerView: 3, spaceBetween: 20 }
+          }"
+        >
+          <SwiperSlide
+            v-for="market in markets"
+            :key="market.id"
+            class="group flex flex-col items-center cursor-pointer transition-all duration-300 hover:-translate-y-2"
+            @click="router.push(`/markets/${market.id}`)"
+          >
+            <div class="w-full h-58 overflow-hidden rounded-lg shadow-md relative">
+              <swiper
+                :modules="[Autoplay]"
+                :slides-per-view="1"
+                :space-between="0"
+                :loop="market.media.length > 1"
+                :autoplay="{ delay: 2000, disableOnInteraction: false }"
+                :speed="800"
+                class="w-full h-full"
+              >
+                <SwiperSlide
+                  v-for="(media, index) in market.media"
+                  :key="index"
+                  class="w-full h-full"
+                >
+                  <img
+                    :src="media.url"
+                    :alt="`${market.title} image ${index + 1}`"
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    loading="lazy"
+                    :aria-label="`${market.title} image ${index + 1}`"
+                  />
+                </SwiperSlide>
+              </swiper>
+            </div>
+            <h3 class="font-sans mt-4 mb-1 text-black font-bold text-sm sm:text-base md:text-lg">
+              {{ market.title }}
+            </h3>
+          </SwiperSlide>
+        </swiper>
+      </div>
+      <!-- Main Slider -->
+      <Swiper
+        v-if="sliderImages.length"
+        :modules="[Autoplay, Navigation]"
+        :breakpoints="{
+          320: { slidesPerView: 1 },
+          640: { slidesPerView: 1 },
+          768: { slidesPerView: 1 },
+          1024: { slidesPerView: 1 }
+        }"
+        :space-between="10"
+        :autoplay="{ delay: 3000, disableOnInteraction: false }"
+        :navigation="false"
+        class="w-full rounded-2xl shadow-xl overflow-hidden mb-10"
+      >
+        <SwiperSlide v-for="(image, index) in sliderImages" :key="index">
+          <div class="flex w-full max-h-[50vh] items-center justify-center bg-gradient-to-br from-gray-50 to-gray-300 rounded-xl shadow-lg overflow-hidden">
+            <img
+              :src="image.url"
+              :alt="`Slider Image ${index + 1}`"
+              class="w-full h-full object-cover rounded-xl transform hover:scale-105 transition-transform duration-500"
+              loading="lazy"
+              :aria-label="`Promotional banner ${index + 1}`"
+            />
+          </div>
+        </SwiperSlide>
+      </Swiper>
+
+      <!-- Dual Sliders Section -->
+      <div v-if="sliderImagesTwo.length || sliderImagesThree.length" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+        <!-- Slider for sliderImagesTwo -->
+        <div class="rounded-xl shadow-lg overflow-hidden">
+          <Swiper
+            v-if="sliderImagesTwo.length"
+            :modules="[Autoplay]"
+            :slides-per-view="1"
+            :space-between="10"
+            :autoplay="{ delay: 2500, disableOnInteraction: false }"
+            class="w-full h-full"
+          >
+            <SwiperSlide v-for="(image, index) in sliderImagesTwo" :key="'two-' + index">
+              <div class="flex w-full max-h-64 items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl overflow-hidden">
+                <img
+                  :src="image.url"
+                  :alt="`Slider Two Image ${index + 1}`"
+                  class="w-full h-64 object-cover rounded-xl transform hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                  :aria-label="`Secondary banner ${index + 1}`"
+                />
+              </div>
+            </SwiperSlide>
+          </Swiper>
+        </div>
+
+        <!-- Slider for sliderImagesThree -->
+        <div class="rounded-xl shadow-lg overflow-hidden">
+          <Swiper
+            v-if="sliderImagesThree.length"
+            :modules="[Autoplay]"
+            :slides-per-view="1"
+            :space-between="10"
+            :autoplay="{ delay: 2500, disableOnInteraction: false }"
+            class="w-full h-full"
+          >
+            <SwiperSlide v-for="(image, index) in sliderImagesThree" :key="'three-' + index">
+              <div class="flex w-full h-64 items-center justify-center bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl overflow-hidden">
+                <img
+                  :src="image.url"
+                  :alt="`Slider Three Image ${index + 1}`"
+                  class="w-full h-full object-cover rounded-xl transform hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                  :aria-label="`Tertiary banner ${index + 1}`"
+                />
+              </div>
+            </SwiperSlide>
+          </Swiper>
+        </div>
+      </div>
+
+
+
+      <!-- Categories Slider -->
+      <div v-if="categories.length" class="mt-8 hidden py-2 rounded-sm px-2 bg-[#1F3A932B] mx-auto max-w-7xl">
+        <Swiper
+          :modules="[Navigation, Autoplay]"
+          :slides-per-view="8"
+          :space-between="10"
+          :navigation="false"
+          :autoplay="{ delay: 2000, disableOnInteraction: false }"
+          :pagination="{ clickable: true }"
+          class="w-full"
+          :breakpoints="{
+            320: { slidesPerView: 2 },
+            640: { slidesPerView: 2 },
+            768: { slidesPerView: 5 },
+            1024: { slidesPerView: 7 }
+          }"
+        >
+          <SwiperSlide v-for="category in categories" :key="category.id">
+            <div
+              @click="router.push(`/categories/${category.id}`)"
+              class="flex flex-col items-center justify-center rounded-xl h-full w-full cursor-pointer"
+            >
+              <img
+                :src="category.media?.[0]?.url || defaultCategoryImage"
+                :alt="`${categoryName(category)} image`"
+                class="w-full h-full max-h-36 object-cover rounded-xl"
+                loading="lazy"
+                :aria-label="`${categoryName(category)} category image`"
+              />
+              <div class="p-3 w-full text-center rounded-xl">
+                <span class="font-bold text-sm text-black">{{ categoryName(category).slice(0, 20) }}</span>
+              </div>
+            </div>
+          </SwiperSlide>
+        </Swiper>
+      </div>
+
+      <!-- Products Sections -->
+      <section class="mt-16 space-y-16">
+        <!-- Exclusive Offers -->
+        <productsSwiper
+          v-if="exclusiveOffers.products.length"
+          :products="exclusiveOffers"
+          class="animate-slide-up"
+        />
+        <!-- Best Sellers -->
+        <productsSwiper
+          v-if="bestSellers.products.length"
+          :products="bestSellers"
+          class="animate-slide-up"
+        />
+        <!-- New Arrivals -->
+        <productsSwiper
+          v-if="newArrivals.products.length"
+          :products="newArrivals"
+          class="animate-slide-up"
+        />
+      </section>
+    </div>
   </div>
 </template>
 
 <script setup>
-  // components
-  import productsSwiper from '../../components/SwiperSlide/productsSwiper.vue'
+import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
+import axios from 'axios';
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import { Autoplay, Navigation, Pagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import productsSwiper from '../../components/SwiperSlide/productsSwiper.vue';
+import defaultMarketImage from '../../../../../assets/loginFormImg.png';
+import defaultProductImage from '../../../../../assets/loginFormImg.png';
+import defaultCategoryImage from '../../../../../assets/loginFormImg.png';
 
+// Initialize Vue utilities
+const route = useRoute();
+const router = useRouter();
+const { t, locale } = useI18n();
 
-  import { ref } from 'vue'
-  import { useI18n } from 'vue-i18n'
+// Reactive state for store data
+const storeData = ref({});
+const storeName = ref('');
+const sliderImages = ref([]);
+const sliderImagesTwo = ref([]);
+const sliderImagesThree = ref([]);
+const categories = ref([]);
+const markets = ref([]);
+const exclusiveOffers = ref({ title: 'Exclusive Offers', products: [] });
+const bestSellers = ref({ title: 'Best Sellers', products: [] });
+const newArrivals = ref({ title: 'New Arrivals', products: [] });
+const isLoading = ref(false);
+const error = ref(null);
 
-  const { t } = useI18n()
-  class Data {
-    constructor(name = 'No name', img = '', price = '$$') {
-      this.name = name
-      this.img = img
-      this.price = price
-    }
+// Helper function to get category name based on locale
+const categoryName = (category) => {
+  return locale.value === 'ar' ? category.name_ar || category.name_en : category.name_en || category.name_ar;
+};
+
+// Helper function to extract slider images
+const getSliderImages = (mediaArray, name) => {
+  return mediaArray?.filter(item => item.name === name) || [];
+};
+
+// Fetch store details
+const fetchStoreDetails = async () => {
+  isLoading.value = true;
+  error.value = null;
+  try {
+    const response = await axios.get(`/api/home/store-details/${route.params.id}`);
+    storeData.value = response.data.data.store || {};
+  } catch (err) {
+    console.error('Error fetching store details:', err);
+    error.value = t('category.errorLoading') || 'Failed to load store details.';
+  } finally {
+    isLoading.value = false;
   }
+};
 
-  const Exclusive_offers = ref({
-    title: t('category.exclusive'),
-    products: [
-      new Data('Product', imge2, '10.00 JD'),
-      new Data('Product', imge2, '20.00 JD'),
-      new Data('Product', imge2, '30.00 JD'),
-      new Data('Product', imge2, '40.00 JD'),
-      new Data('Product', imge2, '10.00 JD'),
-      new Data('Product', imge2, '20.00 JD'),
-      new Data('Product', imge2, '30.00 JD'),
-      new Data('Product', imge2, '40.00 JD'),
-    ],
-  })
-  const best_seller = ref({
-    title: t('category.bestsellers'),
-    products: [
-      new Data('Product', imge3, '15.00 JD'),
-      new Data('Product', imge3, '25.00 JD'),
-      new Data('Product', imge3, '35.00 JD'),
-      new Data('Product', imge3, '45.00 JD'),
-      new Data('Product', imge3, '15.00 JD'),
-      new Data('Product', imge3, '25.00 JD'),
-      new Data('Product', imge3, '35.00 JD'),
-      new Data('Product', imge3, '45.00 JD'),
-    ],
-  })
+// Initialize store data
+const initStoreData = () => {
+  if (!storeData.value) return;
+  storeName.value = locale.value === 'ar' ? storeData.value.name_ar || storeData.value.name_en : storeData.value.name_en || storeData.value.name_ar;
+  sliderImages.value = getSliderImages(storeData.value.media, 'slider_images_one');
+  sliderImagesTwo.value = getSliderImages(storeData.value.media, 'slider_images_two');
+  sliderImagesThree.value = getSliderImages(storeData.value.media, 'slider_images_three');
+  categories.value = (storeData.value.categories || []).map(category => ({
+    id: category.id,
+    name_ar: category.name_ar || category.name_en,
+    name_en: category.name_en || category.name_ar,
+    media: category.media || [{ url: defaultCategoryImage, name: 'default' }]
+  }));
+  markets.value = (storeData.value.markets || []).map(market => ({
+    id: market.id,
+    title: locale.value === 'ar' ? market.name_ar || market.name_en : market.name_en || market.name_ar,
+    media: (market.media || []).map(media => ({
+      url: media.url || defaultMarketImage,
+      name: media.name || 'default'
+    }))
+  }));
+};
 
-  const New_arrival = ref({
-    title: t('category.newlyarrived'),
-    products: [
-      new Data('Product', imge1, '12.00 JD'),
-      new Data('Product', imge1, '22.00 JD'),
-      new Data('Product', imge1, '32.00 JD'),
-      new Data('Product', imge1, '42.00 JD'),
-      new Data('Product', imge1, '12.00 JD'),
-      new Data('Product', imge1, '22.00 JD'),
-      new Data('Product', imge1, '32.00 JD'),
-      new Data('Product', imge1, '42.00 JD'),
-    ],
-  })
-  const markets = ref([
-    {
-      title: 'Shift market',
-      img: imge5,
-    },
-    {
-      title: 'Centro market',
-      img: imge5,
-    },
-    {
-      title: 'Yasser Mall',
-      img: imge5,
-    },
-  ])
+// Fetch best sellers
+const fetchBestSellers = async () => {
+  isLoading.value = true;
+  error.value = null;
+  try {
+    const response = await axios.get(`/api/home/best-sellers/${route.params.id}`);
+    const data = response.data.data.data || [];
+    bestSellers.value = {
+      title: t('category.bestsellers') || 'Best Sellers',
+      products: data.map(product => ({
+        id: product.id,
+        name: locale.value === 'ar' ? product.name_ar || product.name_en : product.name_en || product.name_ar,
+        price: parseFloat(product.base_price || 0).toFixed(2),
+        img: product.media?.find(media => media.name === 'product_main_image')?.url || defaultProductImage
+      }))
+    };
+  } catch (err) {
+    console.error('Error fetching best sellers:', err);
+    error.value = t('category.errorLoading') || 'Failed to load best sellers.';
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// Fetch new arrivals
+const fetchNewArrivals = async () => {
+  isLoading.value = true;
+  error.value = null;
+  try {
+    const response = await axios.get(`/api/home/new-arrivals/${route.params.id}`);
+    const data = response.data.data.data || [];
+    newArrivals.value = {
+      title: t('category.newlyarrived') || 'New Arrivals',
+      products: data.map(product => ({
+        id: product.id,
+        name: locale.value === 'ar' ? product.name_ar || product.name_en : product.name_en || product.name_ar,
+        price: parseFloat(product.base_price || 0).toFixed(2),
+        img: product.media?.find(media => media.name === 'product_main_image')?.url || defaultProductImage
+      }))
+    };
+  } catch (err) {
+    console.error('Error fetching new arrivals:', err);
+    error.value = t('category.errorLoading') || 'Failed to load new arrivals.';
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// Fetch exclusive offers
+const fetchExclusiveOffers = async () => {
+  isLoading.value = true;
+  error.value = null;
+  try {
+    const response = await axios.get(`/api/home/exclusive-offers/${route.params.id}`);
+    const data = response.data.data.data || [];
+    exclusiveOffers.value = {
+      title: t('category.exclusive') || 'Exclusive Offers',
+      products: data.map(product => ({
+        id: product.id,
+        name: locale.value === 'ar' ? product.name_ar || product.name_en : product.name_en || product.name_ar,
+        price: parseFloat(product.base_price || 0).toFixed(2),
+        img: product.media?.find(media => media.name === 'product_main_image')?.url || defaultProductImage
+      }))
+    };
+  } catch (err) {
+    console.error('Error fetching exclusive offers:', err);
+    error.value = t('category.errorLoading') || 'Failed to load exclusive offers.';
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// Fetch all data
+const fetchAllData = async () => {
+  isLoading.value = true;
+  await fetchStoreDetails();
+  if (!error.value) {
+    initStoreData();
+    await Promise.all([fetchBestSellers(), fetchNewArrivals(), fetchExclusiveOffers()]);
+  }
+  isLoading.value = false;
+};
+
+// Initialize on mount
+onMounted(() => {
+  if (route.params.id) {
+    fetchAllData();
+  }
+});
 </script>
 
 <style scoped>
-  .produt-img {
-    background-image: url(../imges/img1.png);
+/* Custom animations */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.8s ease-out forwards;
+}
+
+/* Swiper custom styles */
+.swiper {
+  @apply w-full;
+}
+
+.swiper-slide {
+  @apply flex flex-col items-center;
+}
+
+/* Navigation buttons */
+:deep(.swiper-button-next),
+:deep(.swiper-button-prev) {
+  @apply bg-indigo-600 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-colors hover:bg-indigo-700;
+}
+
+:deep(.swiper-button-next:after),
+:deep(.swiper-button-prev:after) {
+  @apply text-sm;
+}
+
+/* Pagination bullets */
+:deep(.swiper-pagination-bullet) {
+  @apply bg-gray-300 w-2 h-2;
+}
+
+:deep(.swiper-pagination-bullet-active) {
+  @apply bg-indigo-600 w-3 h-3;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  @apply h-1.5;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 rounded-full;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-indigo-400 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-indigo-500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .text-4xl {
+    @apply text-2xl;
   }
+  .text-3xl {
+    @apply text-xl;
+  }
+}
+
+/* Additional styles from first code for sliders and categories */
+img {
+  @apply transition-all duration-500 ease-in-out;
+}
+
+img:hover {
+  @apply opacity-95 shadow-2xl;
+}
 </style>
+```
