@@ -56,7 +56,7 @@
 
         <!-- more products -->
         <!-- Exclusive_offers -->
-        <productsSwiper :products="exclusive_offers" />
+        <productsSwiper v-if="exclusive_offers.length >=1" :products="exclusive_offers" />
         <!-- best_seller -->
         <productsSwiper :products="Best_seller" />
         <!-- New_arrival -->
@@ -120,28 +120,7 @@
   const error = ref(null)
   const locale = ref(localStorage.getItem('appLang') || 'ar')
 
-  const product_titels = ref([
-    new Data('العناية الشخصية', 'imges/personal-care.png'),
-    new Data('أزياء النساء', 'imges/women-fashion.png'),
-    new Data('أزياء الرجال', 'imges/men-fashion.png'),
-    new Data('العناية بالبشرة', 'imges/skin-care.png'),
-    new Data('العناية بالشعر', 'imges/hair-care.png'),
-    new Data('شنط واكسسوارات', 'imges/bags-accessories.png'),
-    new Data('الإلكترونيات', 'imges/electronics.png'),
-    new Data('المنزل والمطبخ', 'imges/home-kitchen.png'),
-    new Data('ألعاب الأطفال', 'imges/kids-toys.png'),
-    new Data('العروض اليومية', 'imges/daily-deals.png'),
-    new Data('العناية الشخصية', 'imges/personal-care.png'),
-    new Data('أزياء النساء', 'imges/women-fashion.png'),
-    new Data('أزياء الرجال', 'imges/men-fashion.png'),
-    new Data('العناية بالبشرة', 'imges/skin-care.png'),
-    new Data('العناية بالشعر', 'imges/hair-care.png'),
-    new Data('شنط واكسسوارات', 'imges/bags-accessories.png'),
-    new Data('الإلكترونيات', 'imges/electronics.png'),
-    new Data('المنزل والمطبخ', 'imges/home-kitchen.png'),
-    new Data('ألعاب الأطفال', 'imges/kids-toys.png'),
-    new Data('العروض اليومية', 'imges/daily-deals.png'),
-  ])
+
     const stor_id= ref(localStorage.getItem('defaultStoreId'))
 
 
@@ -218,7 +197,10 @@
     }
   }
   const goCatgory =(data)=>{
-    router.push({name:'subcategory',params:{id:data.id}})
+
+           router.push({name:'subcategory',params:{id:data.id}})
+
+
   }
   const loaddata = async () => {
     try {

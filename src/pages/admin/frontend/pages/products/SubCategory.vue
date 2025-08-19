@@ -41,7 +41,7 @@
           :speed="1000"
           :grab-cursor="true"
           :navigation="false"
-          class="mt-6 pb-12"
+          class="mt-6 "
           :breakpoints="{
             320: { slidesPerView: 1, spaceBetween: 8 },
             640: { slidesPerView: 2, spaceBetween: 12 },
@@ -179,7 +179,13 @@ const productcategoryName = (item) => {
 };
 
 const goCatgory = (data) => {
-  router.push({ name: 'subcategory', params: { id: data.id } });
+  if(data.has_subcategories > 0){
+   router.push({ name: 'subcategory', params: { id: data.id } });
+
+  }
+  else
+  router.push({ name: 'produts_category', params: { id: data.id } });
+
 };
 
 // Fetch category and products data

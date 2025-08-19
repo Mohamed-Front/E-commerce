@@ -55,7 +55,7 @@
             ></div>
           </div>
           <p
-            class="font-sans mt-4 mb-1 mx-3 text-gray-800 font-medium xs:text-sm sm:text-base md:text-lg"
+            class="font-sans mt-4 mb-1 text-center mx-3 text-gray-800 font-medium xs:text-sm sm:text-base md:text-lg"
           >
             {{ locale === 'ar' ? detail.name_ar : detail.name_en }}
           </p>
@@ -96,7 +96,7 @@ const getStoreImage = (store) => {
 // Fetch stores
 const fetchStores = async () => {
   try {
-    const response = await axios.get(`api/home/get-stores/${storeId.value}`)
+    const response = await axios.get(`api/home/get-stores`)
     stores.value = response.data.data.data
     const defaultStore = stores.value.find(store => store.is_default === 1)
     if (defaultStore) {

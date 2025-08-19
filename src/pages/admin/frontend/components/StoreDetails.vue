@@ -1,15 +1,14 @@
 <template>
-  <div class="mx-auto max-w-[1500px] px-4">
+  <div class="mx-auto max-w-[1400px] px-4">
     <!-- Main Slider -->
     <Swiper
       v-if="sliderImages.length"
       :modules="[Autoplay, Navigation]"
-      :slides-per-view="2"
       :breakpoints="{
         320: { slidesPerView: 1 },
         640: { slidesPerView: 1 },
         768: { slidesPerView: 1 },
-        1024: { slidesPerView: 2 }
+        1024: { slidesPerView: 1 }
       }"
       :space-between="10"
       :autoplay="{ delay: 3000, disableOnInteraction: false }"
@@ -17,7 +16,7 @@
       class="w-full"
     >
       <SwiperSlide v-for="(image, index) in sliderImages" :key="index">
-        <div class="flex w-full max-h-[50vh] items-center justify-center bg-gradient-to-br from-gray-50 to-gray-200 rounded-xl shadow-lg overflow-hidden">
+        <div class="flex w-full max-h-[50vh] items-center justify-center bg-gradient-to-br from-gray-50 to-gray-300 rounded-xl shadow-lg overflow-hidden">
           <img
             :src="image.url"
             :alt="`Slider Image ${index + 1}`"
@@ -27,28 +26,57 @@
       </SwiperSlide>
     </Swiper>
 
-    <!-- Main Banner and Sponsor Image -->
-    <div class="grid grid-cols-1 md:grid-cols-3 mx-auto gap-6 mt-8 max-w-7xl">
-      <div class="md:col-span-2">
-        <img
-          v-if="mainBannerImage"
-          :src="mainBannerImage.url"
-          alt="Main Banner"
-          class="w-full h-full object-cover rounded-xl shadow-xl transform hover:scale-[1.02] transition-all duration-500"
-        />
+    <!-- Dual Sliders Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 max-w-7xl mx-auto">
+      <!-- Slider for slider_images_two -->
+      <div class=" rounded-xl shadow-lg overflow-hidden">
+        <Swiper
+          v-if="sliderImagesTwo.length"
+          :modules="[Autoplay]"
+          :slides-per-view="1"
+          :space-between="10"
+          :autoplay="{ delay: 2500, disableOnInteraction: false }"
+          class="w-full h-full"
+        >
+          <SwiperSlide v-for="(image, index) in sliderImagesTwo" :key="'two-'+index">
+            <div class="flex w-full max-h-64 items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl overflow-hidden">
+              <img
+                :src="image.url"
+                :alt="`Slider Two Image ${index + 1}`"
+                class="w-full h-64 object-cover rounded-xl transform hover:scale-105 transition-transform duration-500"
+              />
+            </div>
+          </SwiperSlide>
+        </Swiper>
       </div>
-      <div class="md:col-span-1">
-        <img
-          v-if="sponsorImage"
-          :src="sponsorImage.url"
-          alt="Sponsor Image"
-          class="w-full h-auto object-cover rounded-xl shadow-xl transform hover:scale-[1.02] transition-all duration-500"
-        />
+
+      <!-- Slider for slider_images_three -->
+      <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <Swiper
+          v-if="sliderImagesThree.length"
+          :modules="[Autoplay]"
+          :slides-per-view="1"
+          :space-between="10"
+          :autoplay="{ delay: 2500, disableOnInteraction: false }"
+          class="w-full h-full"
+        >
+          <SwiperSlide v-for="(image, index) in sliderImagesThree" :key="'three-'+index">
+            <div class="flex w-full h-64 items-center justify-center bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl overflow-hidden">
+              <img
+                :src="image.url"
+                :alt="`Slider Three Image ${index + 1}`"
+                class="w-full h-full object-cover rounded-xl transform hover:scale-105 transition-transform duration-500"
+              />
+            </div>
+          </SwiperSlide>
+        </Swiper>
       </div>
     </div>
 
+
+
     <!-- Categories Slider -->
-    <div class="mt-8 mx-auto max-w-7xl">
+    <div class="mt-8 py-2 rounded-sm px-2 bg-[#1F3A932B] mx-auto max-w-7xl">
       <Swiper
         :modules="[Navigation]"
         :slides-per-view="8"
@@ -65,28 +93,33 @@
         }"
       >
         <SwiperSlide v-for="(category, index) in categories" :key="index">
-          <div class="flex bg-gradient-to-b from-white to-gray-50 flex-col items-center justify-center rounded-xl shadow-lg h-full w-full cursor-pointer transition-all duration-500 hover:shadow-2xl hover:-translate-y-1">
+          <div  @click="goCatgory(category)" class="flex  flex-col items-center justify-center rounded-xl  h-full w-full cursor-pointer   ">
             <img
               :src="category?.media[0]?.url"
               :alt="category.name_en"
-              class="w-full h-full max-h-36 object-cover rounded-t-xl"
+              class="  w-full h-full max-h-36 object-cover rounded-xl"
             />
-            <div class="p-3 w-full text-center rounded-b-xl bg-gradient-to-t from-gray-100 to-transparent">
-              <span class="text-sm font-semibold text-gray-800">{{ category.name_ar.slice(0, 20) }}</span>
+            <div class="  p-3 w-full text-center rounded-xl  ">
+              <span class="font-bold text-sm  text-black">{{ category.name_ar.slice(0, 20) }}</span>
             </div>
           </div>
         </SwiperSlide>
       </Swiper>
     </div>
+
+     <div v-if="subBannerImage" class="my-8 max-w-5xl mx-auto">
+        <div class="relative overflow-hidden rounded-2xl shadow-lg animate-banner-slide">
+          <img
+             :src="subBannerImage.url"
+            class="w-full h-64 sm:h-40 md:h-46 object-cover transition-transform duration-700 hover:scale-105"
+            loading="lazy"
+          />
+          <div class="absolute inset-0 bg-gradient-to-b from-transparent  flex items-center justify-center p-6">
+          </div>
+        </div>
+      </div>
     <!-- Sub Banner -->
-    <div class="mt-8 mx-auto max-w-7xl">
-      <img
-        v-if="subBannerImage"
-        :src="subBannerImage.url"
-        alt="Sub Banner"
-        class="w-full h-full object-cover rounded-xl shadow-xl transform hover:scale-[1.02] transition-all duration-500"
-      />
-    </div>
+
   </div>
 </template>
 
@@ -98,8 +131,12 @@ import axios from 'axios';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
+import { useRouter, useRoute } from 'vue-router'
+const router = useRouter()
 
 const sliderImages = ref([]);
+const sliderImagesTwo = ref([]);
+const sliderImagesThree = ref([]);
 const mainBannerImage = ref(null);
 const subBannerImage = ref(null);
 const sponsorImage = ref(null);
@@ -112,8 +149,12 @@ const getMediaByName = (mediaArray, name) => {
 };
 
 // Helper function to extract slider images
-const getSliderImages = (mediaArray) => {
-  return mediaArray?.filter(item => item.name === 'slider_images_one') || [];
+const getSliderImages = (mediaArray, name) => {
+  return mediaArray?.filter(item => item.name === name) || [];
+};
+
+const goCatgory = (data) => {
+  router.push({name:'subcategory',params:{id:data.id}})
 };
 
 // Fetch store details and extract images and categories
@@ -121,10 +162,12 @@ const fetchStoreDetails = async () => {
   try {
     const response = await axios.get(`/api/home/store-details/${storeId.value}`);
     const { store } = response.data.data;
-    sliderImages.value = getSliderImages(store.media);
+    sliderImages.value = getSliderImages(store.media, 'slider_images_one');
+    sliderImagesTwo.value = getSliderImages(store.media, 'slider_images_two');
+    sliderImagesThree.value = getSliderImages(store.media, 'slider_images_three');
     mainBannerImage.value = getMediaByName(store.media, 'main_banner_image');
     subBannerImage.value = getMediaByName(store.media, 'sub_banner_image');
-    sponsorImage.value = getMediaByName(store.media, 'store_image'); // Assuming store_image as sponsor image
+    sponsorImage.value = getMediaByName(store.media, 'store_image');
     categories.value = store.categories || [];
   } catch (error) {
     console.error('Error fetching store details:', error);
@@ -142,7 +185,7 @@ onMounted(() => {
 <style scoped>
 /* Fancy Swiper styles */
 .swiper {
-  @apply w-full pb-10 relative overflow-hidden;
+  @apply w-full  relative overflow-hidden;
 }
 
 /* Enhanced Swiper slides */
@@ -157,6 +200,14 @@ img {
 
 img:hover {
   @apply opacity-95 shadow-2xl;
+}
+.swiper {
+  width: 100%;
+}
+.swiper-slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Navigation buttons with elegant design */
@@ -199,5 +250,21 @@ img:hover {
 /* Add subtle container glow and padding */
 div {
   @apply transition-all duration-500;
+}
+
+/* Dual sliders animation */
+.animate-banner-slide {
+  animation: slideIn 0.8s ease-out forwards;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

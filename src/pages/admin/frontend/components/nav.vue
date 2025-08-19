@@ -145,6 +145,7 @@
 import { useRouter } from 'vue-router';
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import route from '../../ui/route';
 
 const authlogin = ref(false);
 const stores = ref([]);
@@ -194,12 +195,15 @@ const setDefaultStore = () => {
 };
 
 const selectStore = (store) => {
+
   defaultStoreId.value = store.id;
   defaultStore.value = store;
   hasMarket.value = store.has_market;
   localStorage.setItem('defaultStoreId', store.id);
   localStorage.setItem('hasMarket', store.has_market);
   isDropdownOpen.value = false;
+
+  window.location.reload()
 };
 
 const toggleDropdown = () => {

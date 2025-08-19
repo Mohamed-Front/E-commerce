@@ -29,6 +29,11 @@ const routes: Array<RouteRecordRaw> = [
           component: () => import('../pages/admin/frontend/pages/products/SubCategory.vue'),
         },
          {
+          name: 'produts_category',
+          path: '/produts-category/:id',
+          component: () => import('../pages/admin/frontend/pages/products/produts-category.vue'),
+        },
+         {
           name: 'Product-details',
           path: '/product-details/:id',
           component: () => import('../pages/admin/frontend/pages/products/product-details.vue'),
