@@ -280,7 +280,7 @@ export const useAuthStore = defineStore('Auth', {
         const response = await axios.post('/api/change-password', payload);
         if (response.data.is_success) {
           this.msg = response.data.message || 'Password reset successfully.';
-          this.router.push({ name: 'Login' });
+          this.router.push({ name: 'authlog' });
         } else {
           this.authErrors['completePasswordReset'] = ['Password reset failed. Please try again.'];
         }
