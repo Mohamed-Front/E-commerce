@@ -36,12 +36,16 @@
           />
           <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300"></div>
         </div>
-        <p class="font-sans mt-4 mb-1 mx-3 text-gray-800 font-medium xs:text-sm sm:text-base md:text-lg truncate w-full">
+        <p class="font-sans mt-4  mx-3 text-gray-800 font-medium xs:text-sm sm:text-base md:text-lg truncate w-full">
           {{ truncateName(pro.name, 30) }}
         </p>
+
+           <p v-if=" pro.sub_name" class="font-sans mx-3 text-gray-600 text-sm truncate w-full ">
+            {{  pro.sub_name.slice(0, 37)}}
+          </p>
         <div class="flex items-center w-full justify-between mx-3">
           <span class="font-sans text-[#A6853B] font-semibold xs:text-base sm:text-lg">
-            {{ pro.price }}
+          {{ pro.price }} {{ $t('currencyLabel') }}
           </span>
         </div>
       </SwiperSlide>
@@ -67,7 +71,7 @@ const props = defineProps({
         typeof products.title === 'string' &&
         Array.isArray(products.products) &&
         products.products.every(
-          (pro) => pro.id && pro.name && pro.price && pro.img
+          (pro) => pro.id &&  pro.name &&  pro.sub_name && pro.price && pro.img
         )
       )
     }
@@ -84,6 +88,8 @@ const truncateName = (name, maxLength) => {
   if (name.length <= maxLength) return name
   return name.slice(0, maxLength) + '...'
 }
+
+
 </script>
 
 <style scoped>

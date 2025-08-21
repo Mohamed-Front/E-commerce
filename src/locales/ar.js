@@ -14,6 +14,7 @@ export default {
   Miscellaneous: 'منوعات اخترناها لكم',
   cancel: 'إلغاء',
   remove: 'إزالة',
+  currencyLabel:"د.أ",
   navigation: {
     orders:"الطلبــــات",
     setting:"الاعدادات",

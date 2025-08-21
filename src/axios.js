@@ -16,7 +16,7 @@ axios.interceptors.request.use((config) => {
     if (currentRoute.path.startsWith('/admin')) {
       token = localStorage.getItem('token');
     } else {
-      token = localStorage.getItem('frontToken') ;
+      token = localStorage.getItem('webToken') ;
     }
 
     if (token) {

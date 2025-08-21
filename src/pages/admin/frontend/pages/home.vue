@@ -71,11 +71,6 @@
 
 <script setup>
   import { onBeforeMount, ref, computed } from 'vue'
-  import imge1 from '../imges/prand 1.png'
-  import imge3 from '../imges/prand 3.png'
-  import imge2 from '../imges/prand 2.png'
-  import imge4 from '../imges/prand 4.png'
-  import imge5 from '../imges/prand 5.png'
 
   import axios from 'axios'
   import { Swiper, SwiperSlide } from 'swiper/vue'
@@ -90,10 +85,6 @@
   import productsSwiper from '../components/SwiperSlide/productsSwiper.vue'
   import CustomTaps from '../components/CustomTaps.vue'
   import StoreDetails from '../components/StoreDetails.vue'
-  import productsSwipertow from '../components/SwiperSlide/porductsSwipertow.vue'
-  import for_lady from '../components/categories/for_lady.vue'
-  import Exclusiveoffers from '../components/products/Exclusiveoffers.vue'
-  import bestSellers from '../components/products/bestSellers.vue'
 
   const { t } = useI18n()
   const router = useRouter()
@@ -138,6 +129,7 @@
         title: t('category.bestsellers') || 'New Arrivals',
         products: data.map((product) => ({
           id: product.id,
+          sub_name: locale.value === 'ar' ? product.sub_name_ar || product.sub_name_en : product.sub_name_en || product.sub_name_ar,
           name: locale.value === 'ar' ? product.name_ar : product.name_en,
           price: parseFloat(product.base_price).toFixed(2),
           img: product.media.find((media) => media.name === 'product_main_image')?.url || product.key_default_image,
@@ -160,6 +152,7 @@
         title: t('category.newlyarrived') || 'New Arrivals',
         products: data.map((product) => ({
           id: product.id,
+          sub_name: locale.value === 'ar' ? product.sub_name_ar || product.sub_name_en : product.sub_name_en || product.sub_name_ar,
           name: locale.value === 'ar' ? product.name_ar : product.name_en,
           price: parseFloat(product.base_price).toFixed(2),
           img: product.media.find((media) => media.name === 'product_main_image')?.url || product.key_default_image,
@@ -183,6 +176,7 @@
         title: t('category.exclusive') || 'New Arrivals',
         products: data.map((product) => ({
           id: product.id,
+          sub_name: locale.value === 'ar' ? product.sub_name_ar || product.sub_name_en : product.sub_name_en || product.sub_name_ar,
           name: locale.value === 'ar' ? product.name_ar : product.name_en,
           price: parseFloat(product.base_price).toFixed(2),
           img: product.media.find((media) => media.name === 'product_main_image')?.url || product.key_default_image,

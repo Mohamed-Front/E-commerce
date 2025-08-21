@@ -306,6 +306,7 @@ export default {
   "to": "to",
   "from": "from",
   "edit": "Edit",
+    currencyLabel:"JOD",
   "delete": "Delete",
   "brand": {
     "managementTitle": "Brand Management",

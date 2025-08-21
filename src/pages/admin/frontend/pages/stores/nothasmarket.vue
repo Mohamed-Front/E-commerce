@@ -309,6 +309,7 @@ const fetchBestSellers = async () => {
       title: t('category.bestsellers') || 'Best Sellers',
       products: data.map(product => ({
         id: product.id,
+        sub_name: locale.value === 'ar' ? product.sub_name_ar || product.sub_name_en : product.sub_name_en || product.sub_name_ar,
         name: locale.value === 'ar' ? product.name_ar || product.name_en : product.name_en || product.name_ar,
         price: parseFloat(product.base_price || 0).toFixed(2),
         img: product.media?.find(media => media.name === 'product_main_image')?.url || defaultProductImage
@@ -333,6 +334,7 @@ const fetchNewArrivals = async () => {
       title: t('category.newlyarrived') || 'New Arrivals',
       products: data.map(product => ({
         id: product.id,
+        sub_name: locale.value === 'ar' ? product.sub_name_ar || product.sub_name_en : product.sub_name_en || product.sub_name_ar,
         name: locale.value === 'ar' ? product.name_ar || product.name_en : product.name_en || product.name_ar,
         price: parseFloat(product.base_price || 0).toFixed(2),
         img: product.media?.find(media => media.name === 'product_main_image')?.url || defaultProductImage
@@ -358,6 +360,7 @@ const fetchExclusiveOffers = async () => {
       products: data.map(product => ({
         id: product.id,
         name: locale.value === 'ar' ? product.name_ar || product.name_en : product.name_en || product.name_ar,
+        sub_name: locale.value === 'ar' ? product.sub_name_ar || product.sub_name_en : product.sub_name_en || product.sub_name_ar,
         price: parseFloat(product.base_price || 0).toFixed(2),
         img: product.media?.find(media => media.name === 'product_main_image')?.url || defaultProductImage
       }))

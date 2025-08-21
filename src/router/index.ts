@@ -68,7 +68,11 @@ const routes: Array<RouteRecordRaw> = [
           component: () => import('../pages/admin/frontend/pages/stores.vue'),
         },
 
-
+        {
+          name: 'cart',
+          path: '/cart',
+          component: () => import('../pages/admin/frontend/pages/cart.vue'),
+        },
 
     ]
 
@@ -76,24 +80,46 @@ const routes: Array<RouteRecordRaw> = [
 
   },
 
-  // {
-  //   name: 'invioce',
-  //   path: '/invioce/:id',
-  //   component: () => import('../pages/admin/settings/order/invioce.vue'),
-  // },
 
 
 
 
   {
-    name: 'Cart',
-    path: '/Cart',
-    component: () => import('../pages/admin/frontend/pages/cart.vue'),
+    name: 'forgetpassword',
+    path: '/forget-password',
+    component: () => import('../pages/admin/frontend/pages/auth/ForgetPassword.vue'),
+  },
+    {
+    name: 'changepassword',
+    path: '/change-password',
+    component: () => import('../pages/admin/frontend/pages/auth/ChnagePassword.vue'),
+     props: (route) => ({
+      email: route.query.email,
+      phone: route.query.phone,
+    }),
+  },
+
+  {
+    name: 'register',
+    path: '/register',
+    component: () => import('../pages/admin/frontend/pages/auth/register.vue'),
+
+  },
+    {
+    name: 'otp',
+    path: '/otp/:type',
+    props: (route) => ({
+      email: route.query.email,
+      phone: route.query.phone,
+      otp_type: route.query.otp_type,
+    }),
+
+    component: () => import('../pages/admin/frontend/pages/auth/otp.vue'),
   },
   {
     name: 'authlog',
     path: '/authlog',
-    component: () => import('../pages/admin/frontend/pages/auth.vue'),
+    component: () => import('../pages/admin/frontend/pages/auth/auth.vue'),
   },
   {
     name: 'admin',

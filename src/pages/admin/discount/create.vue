@@ -21,14 +21,14 @@ const products = ref([]);
 // Form Data
 const discountData = ref({
   products:'',
-  model_ids: '',
-  model_type: '',
+  ids: '',
+  type: '',
   discount_type: null,
   discount_value: '',
   expires_at: ''
 });
 
-// Fetch categories when model_type is 'category'
+// Fetch categories when type is 'category'
 const fetchCategories = async () => {
   try {
     const response = await axios.get('api/category');
@@ -51,10 +51,10 @@ const fetchProducts = async (categoryId) => {
   }
 };
 
-// Watch for changes in model_type to fetch categories or clear products
-watch(() => discountData.value.model_type, (newType) => {
-  discountData.value.model_ids = ''; // Reset model_ids when model_type changes
-  products.value = []; // Clear products when model_type changes
+// Watch for changes in type to fetch categories or clear products
+watch(() => discountData.value.type, (newType) => {
+  discountData.value.ids = ''; // Reset ids when type changes
+  products.value = []; // Clear products when type changes
   if (newType === 'category') {
     fetchCategories();
   } else if (newType === 'product') {
@@ -62,9 +62,9 @@ watch(() => discountData.value.model_type, (newType) => {
   }
 });
 
-// Watch for changes in model_ids when model_type is 'product' to fetch products
-watch(() => discountData.value.model_ids, (newModelId) => {
-  if (discountData.value.model_type === 'product' && newModelId) {
+// Watch for changes in ids when type is 'product' to fetch products
+watch(() => discountData.value.ids, (newModelId) => {
+  if (discountData.value.type === 'product' && newModelId) {
     fetchProducts(newModelId);
   } else {
     products.value = []; // Clear products if no category is selected
@@ -92,11 +92,11 @@ const submitForm = async () => {
     data.expires_at=discountData.value.expires_at
     data.discount_value=discountData.value.discount_value
     data.discount_type=discountData.value.discount_type
-    data.model_type=discountData.value.model_type
-     if(discountData.value.model_type == 'product')
-      data.model_ids=discountData.value.products
+    data.type=discountData.value.type
+     if(discountData.value.type == 'product')
+      data.ids=discountData.value.products
     else
-    data.model_ids=discountData.value.model_ids
+    data.ids=discountData.value.ids
   try {
     await axios.post('/api/discount', data);
     router.push({ name: 'discount' });
@@ -122,42 +122,42 @@ onMounted(() => {
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Model Type -->
         <div class="space-y-2">
-          <label for="model_type" class="block text-sm font-medium text-gray-700">
-            {{ $t('discount.model_type') }} <span class="text-red-500">*</span>
+          <label for="type" class="block text-sm font-medium text-gray-700">
+            {{ $t('discount.type') }} <span class="text-red-500">*</span>
           </label>
           <Dropdown
           filter
-            id="model_type"
-            v-model="discountData.model_type"
+            id="type"
+            v-model="discountData.type"
             :options="['product', 'category']"
-            :placeholder="$t('discount.select_model_type')"
+            :placeholder="$t('discount.select_type')"
             class="w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
             required
           />
-          <small class="text-red-500 text-xs" v-if="form?.errors?.model_type">{{ form.errors.model_type[0] }}</small>
+          <small class="text-red-500 text-xs" v-if="form?.errors?.type">{{ form.errors.type[0] }}</small>
         </div>
 
         <!-- Model ID (Category or Product selection) -->
         <div class="space-y-2">
-          <label for="model_ids" class="block text-sm font-medium text-gray-700">
-            {{ $t(discountData.model_type === 'product' ? 'discount.select_category' :'discount.select_category') }} <span class="text-red-500">*</span>
+          <label for="ids" class="block text-sm font-medium text-gray-700">
+            {{ $t(discountData.type === 'product' ? 'discount.select_category' :'discount.select_category') }} <span class="text-red-500">*</span>
           </label>
           <MultiSelect
             filter
-            id="model_ids"
-            v-model="discountData.model_ids"
-            :options="discountData.model_type === 'product' ? categories : categories"
+            id="ids"
+            v-model="discountData.ids"
+            :options="discountData.type === 'product' ? categories : categories"
             :optionLabel="labelField"
             optionValue="id"
-            :placeholder="$t(discountData.model_type === 'product' ? 'discount.select_category' : 'discount.select_category')"
+            :placeholder="$t(discountData.type === 'product' ? 'discount.select_category' : 'discount.select_category')"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
             required
           />
-          <small class="text-red-500 text-xs" v-if="form?.errors?.model_ids">{{ form.errors.model_ids[0] }}</small>
+          <small class="text-red-500 text-xs" v-if="form?.errors?.ids">{{ form.errors.ids[0] }}</small>
         </div>
 
-        <!-- Product Selection (only shown if model_type is 'product') -->
-        <div v-if="discountData.model_type === 'product'" class="space-y-2">
+        <!-- Product Selection (only shown if type is 'product') -->
+        <div v-if="discountData.type === 'product'" class="space-y-2">
           <label for="product_id" class="block text-sm font-medium text-gray-700">
             {{ $t('discount.select_product') }} <span class="text-red-500">*</span>
           </label>
@@ -172,7 +172,7 @@ onMounted(() => {
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
             required
           />
-          <small class="text-red-500 text-xs" v-if="form?.errors?.model_ids">{{ form.errors.model_ids[0] }}</small>
+          <small class="text-red-500 text-xs" v-if="form?.errors?.ids">{{ form.errors.ids[0] }}</small>
         </div>
 
         <!-- Discount Type -->

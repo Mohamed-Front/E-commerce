@@ -19,10 +19,7 @@
   // Form data for updates
   const formData = ref({
     order_tax: '',
-    facebook: '',
-    snapchat: '',
-    instagram: '',
-    whatsapp: '',
+
     address: '',
     phone: ''
   })
@@ -42,7 +39,7 @@
           realmId: route.query.realmId,
         },
       })
-      
+
       if (response.data.is_success) {
         settings.value = response.data.data
         // Map settings to form data
@@ -51,7 +48,7 @@
             formData.value[item.key] = item.value
           }
         })
-        
+
         toast.add({
           severity: 'success',
           summary: 'Success Message',

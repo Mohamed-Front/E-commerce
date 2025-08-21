@@ -1,6 +1,7 @@
-```vue
 <template>
   <div class="product-page max-w-7xl mx-auto p-4 lg:p-8">
+    <div v-if="isLoading" class="text-center">Loading...</div>
+    <div v-if="error" class="text-red-500 text-center">{{ error }}</div>
     <header class="flex flex-col lg:flex-row items-start gap-8">
       <div class="w-full lg:w-1/2 flex flex-col-reverse lg:flex-row items-center gap-4">
         <div
@@ -12,25 +13,25 @@
             :src="img.url"
             alt="Thumbnail"
             class="h-20 w-20 object-cover rounded-lg cursor-pointer border-2 transition-all duration-200"
-            :class="{ 'border-blue-500': curantimg === img.url, 'border-transparent': curantimg !== img.url }"
-            @click="changeimg(img.url)"
+            :class="{ 'border-blue-500': currentImg === img.url, 'border-transparent': currentImg !== img.url }"
+            @click="changeImg(img.url)"
           />
         </div>
         <div class="w-full lg:w-3/4">
           <div class="w-full aspect-square shadow-lg rounded-md overflow-hidden">
-            <img :src="curantimg" alt="Main product image" class="w-full h-full object-cover" />
+            <img :src="currentImg" alt="Main product image" class="w-full h-full object-cover" />
           </div>
         </div>
       </div>
 
       <div class="w-full lg:w-1/2 flex flex-col justify-between p-4 bg-white rounded-md">
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ locale == 'en' ? pro.name_en : pro.name_ar }}</h1>
-        <h2 v-if="pro.sub_name_en" class="text-xl text-gray-600 mb-4">{{ locale == 'en' ? pro.sub_name_en : pro.sub_name_ar }}</h2>
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ locale === 'en' ? pro.name_en : pro.name_ar }}</h1>
+        <h2 v-if="pro.sub_name_en" class="text-xl text-gray-600 mb-4">{{ locale === 'en' ? pro.sub_name_en : pro.sub_name_ar }}</h2>
 
         <section class="mt-4 flex flex-wrap gap-2 text-center">
-          <span v-if="pro.store_id" class="sub-titles">Store</span>
-          <span v-if="pro.category && (pro.category.name_en || pro.category.name_ar)" class="sub-titles">{{ locale == 'en' ? pro.category.name_en : pro.category.name_ar }}</span>
-          <span v-if="pro.brand_id" class="sub-titles">Brand</span>
+          <span v-if="pro.store_id" class="sub-tiles">Store</span>
+          <span v-if="pro.category && (pro.category.name_en || pro.category.name_ar)" class="sub-tiles">{{ locale === 'en' ? pro.category.name_en : pro.category.name_ar }}</span>
+          <span v-if="pro.brand_id" class="sub-tiles">Brand</span>
         </section>
 
         <section class="mt-6">
@@ -56,7 +57,7 @@
                   v-for="size in variants_details.attributes.size"
                   :key="size.id"
                   class="px-4 py-2 rounded-md border-2 transition-all duration-200"
-                  :class="{ 'border-blue-500 bg-gray-100': selectedSize === size.value_en, 'border-gray-300': selectedSize !== size.value_en }"
+                  :class="{ 'border-blue-500 bg-gray-100': selectedSize === size.value_en, 'border-gray-300': selectedSize !== color.value_en }"
                   @click="selectedSize = size.value_en"
                 >
                   {{ locale === 'en' ? size.value_en : size.value_ar }}
@@ -71,8 +72,8 @@
         <section>
           <div class="flex items-center gap-6 mb-4">
             <span class="text-xl font-bold text-gray-800">Price:</span>
-            <span v-if="currentPrice" class="text-2xl font-bold text-blue-600">{{ currentPrice }} $</span>
-            <span v-else class="text-2xl font-bold text-blue-600">{{ productPrice }}$</span>
+            <span v-if="currentPrice" class="text-2xl font-bold text-blue-600">{{ currentPrice }} JOD</span>
+            <span v-else class="text-2xl font-bold text-blue-600">{{ productPrice }} JOD</span>
           </div>
 
           <div class="flex items-center gap-4 mb-4">
@@ -84,7 +85,7 @@
             </div>
           </div>
 
-          <p class="text-gray-600 my-4">Delivery within : 3 H</p>
+          <p class="text-gray-600 my-4">Delivery within: 3 H</p>
 
           <button
             class="w-full py-3 text-lg font-bold bg-[var(--main-text-color)] rounded-md text-white transition-transform duration-150 ease-in-out active:scale-95 hover:shadow-lg"
@@ -95,14 +96,14 @@
       </div>
     </header>
 
-    <section class="bg-[#E6AC312B] px-6 pt-2 pb-12 rounded-md text-left mt-8">
+    <section class="bg-[#E6AC312B] px-6 pt-2 pb-12 rounded-md  mt-8">
       <p class="leading-relaxed text-sm text-gray-700">
-        {{ locale == 'en' ? pro.description_en : pro.description_ar || 'No description available.' }}
+        {{ locale === 'en' ? pro.description_en : pro.description_ar || 'No description available.' }}
       </p>
       <h3 class="text-[#E39F30] text-sm font-semibold mt-2 cursor-pointer">READ MORE</h3>
     </section>
 
-    <section class="mt-8 p-4 bg-white rounded-md shadow-md">
+    <section class="mt-8 p-4 bg-white rounded-md shadow-md hidden">
       <div class="flex justify-center items-center flex-col">
         <h2 class="text-2xl font-bold text-gray-800 mb-4">Leave A Review</h2>
       </div>
@@ -140,46 +141,10 @@
       </div>
     </section>
 
-    <section class="mt-8 p-4 bg-white rounded-md shadow-md">
-      <h2 class="text-2xl font-bold text-gray-800 mb-4">Latest Reviews</h2>
-      <div class="space-y-6">
-        <div v-for="reviewItem in reviews" :key="reviewItem.id" class="p-4 flex flex-col md:flex-row gap-4 border-b border-gray-200 last:border-b-0">
-          <img :src="reviewItem.img" alt="Profile" class="w-12 h-12 rounded-full object-cover border border-gray-300" />
-
-          <div class="flex-1">
-            <div class="flex flex-col justify-between items-start mb-1">
-              <h3 class="text-lg font-semibold text-gray-800">{{ reviewItem.name }}</h3>
-              <span class="text-xs text-[#A17D1C]">{{ reviewItem.date }}</span>
-            </div>
-
-            <Rating :modelValue="reviewItem.rating" readonly :cancel="false" class="mb-2" />
-
-            <p class="text-gray-700 text-sm">{{ reviewItem.comment }}</p>
-
-            <div class="flex items-center gap-4 mt-2">
-              <button @click="toggleLike(reviewItem)">
-                <i
-                  class="pi text-[#A17D1C] text-lg"
-                  :class="reviewItem.reaction === 'like' ? 'pi-thumbs-up-fill' : 'pi-thumbs-up'"
-                ></i>
-              </button>
-
-              <button @click="toggleDislike(reviewItem)">
-                <i
-                  class="pi text-[#A17D1C] text-lg"
-                  :class="reviewItem.reaction === 'dislike' ? 'pi-thumbs-down-fill' : 'pi-thumbs-down'"
-                ></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <section class="mt-8">
-      <h2 class="text-2xl font-bold text-gray-800 mb-4">Related Products</h2>
-      <Exclusiveoffers :Stor="pro" />
-      <bestSellers :Stor="pro" />
+      <productsSwiper v-if="exclusive_offers.products.length >= 1" :products="exclusive_offers" />
+      <productsSwiper :products="Best_seller" />
+      <productsSwiper :products="New_arrival" />
     </section>
   </div>
 </template>
@@ -189,21 +154,29 @@ import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 import { useI18n } from 'vue-i18n'
-import Exclusiveoffers from '../../components/products/Exclusiveoffers.vue'
-import bestSellers from '../../components/products/bestSellers.vue'
+import productsSwiper from '../../components/SwiperSlide/productsSwiper.vue'
+import Rating from 'primevue/rating'
+import 'primevue/resources/themes/saga-blue/theme.css'
+import 'primevue/resources/primevue.min.css'
+import 'primeicons/primeicons.css'
 
-const { locale } = useI18n()
+const { t, locale } = useI18n()
 const route = useRoute()
 
 const pro = ref({})
 const variants_details = ref(null)
-const curantimg = ref()
+const currentImg = ref('')
 const imgs = ref([])
 const quantity = ref(1)
 const review = ref(null)
-
 const selectedColor = ref(null)
 const selectedSize = ref(null)
+const isLoading = ref(false)
+const error = ref(null)
+const stor_id = ref(localStorage.getItem('defaultStoreId'))
+const exclusive_offers = ref({ title: '', products: [] })
+const Best_seller = ref({ title: '', products: [] })
+const New_arrival = ref({ title: '', products: [] })
 
 const productPrice = computed(() => {
   if (pro.value.variants && pro.value.variants.length > 0) {
@@ -216,23 +189,22 @@ const currentPrice = computed(() => {
   if (!variants_details.value || !variants_details.value.combinations) {
     return null
   }
-
   const combination = variants_details.value.combinations.find(
     (combo) => combo.color === selectedColor.value && combo.size === selectedSize.value
   )
   return combination ? combination.price : null
 })
 
-const changeimg = (imgUrl) => {
-  curantimg.value = imgUrl
+const changeImg = (imgUrl) => {
+  currentImg.value = imgUrl
 }
 
 const allreviews = ref([
-  { starsNumber: 1, rate: 10 },
-  { starsNumber: 2, rate: 30 },
-  { starsNumber: 3, rate: 40 },
-  { starsNumber: 4, rate: 20 },
-  { starsNumber: 5, rate: 70 },
+  { starsNumber: 5, rate: 0 },
+  { starsNumber: 4, rate: 0 },
+  { starsNumber: 3, rate: 0 },
+  { starsNumber: 2, rate: 0 },
+  { starsNumber: 1, rate: 0 },
 ])
 
 const reviews = ref([
@@ -245,47 +217,99 @@ const reviews = ref([
     img: 'https://static.vecteezy.com/system/resources/previews/005/544/718/non_2x/profile-icon-design-free-vector.jpg',
     reaction: null,
   },
-  {
-    id: 2,
-    name: 'Jane Smith',
-    rating: 5,
-    date: '2023-10-01',
-    comment: 'Absolutely love it! Will buy again.',
-    img: 'https://static.vecteezy.com/system/resources/previews/005/544/718/non_2x/profile-icon-design-free-vector.jpg',
-    reaction: null,
-  },
-  {
-    id: 3,
-    name: 'Alice Johnson',
-    rating: 3,
-    date: '2023-10-01',
-    comment: 'It was okay, not what I expected.',
-    img: 'https://static.vecteezy.com/system/resources/previews/005/544/718/non_2x/profile-icon-design-free-vector.jpg',
-    reaction: null,
-  },
 ])
 
 const toggleLike = (review) => {
   review.reaction = review.reaction === 'like' ? null : 'like'
-  if (review.reaction === 'like') review.reaction = 'like'
 }
 
 const toggleDislike = (review) => {
   review.reaction = review.reaction === 'dislike' ? null : 'dislike'
-  if (review.reaction === 'dislike') review.reaction = 'dislike'
-  if (review.reaction === 'dislike' && review.reaction === 'like') review.reaction = 'dislike'
+}
+
+const fetchBestSeller = async () => {
+  isLoading.value = true
+  try {
+    const response = await axios.get(`api/home/best-sellers/${stor_id.value}`)
+    Best_seller.value = {
+      title: t('category.bestsellers') || 'Best Sellers',
+      products: response.data.data.data.map((product) => ({
+        id: product.id,
+        sub_name: locale.value === 'ar' ? product.sub_name_ar || product.sub_name_en : product.sub_name_en || product.sub_name_ar,
+        name: locale.value === 'ar' ? product.name_ar : product.name_en,
+        price: parseFloat(product.base_price).toFixed(2),
+        img: product.media.find((media) => media.name === 'product_main_image')?.url || product.key_default_image,
+      })),
+    }
+  } catch (err) {
+    console.error('Error fetching best sellers:', err)
+    error.value = t('category.errorLoading') || 'Failed to load best sellers.'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const fetchNewArrivals = async () => {
+  isLoading.value = true
+  try {
+    const response = await axios.get(`api/home/new-arrivals/${stor_id.value}`)
+    New_arrival.value = {
+      title: t('category.newlyarrived') || 'New Arrivals',
+      products: response.data.data.data.map((product) => ({
+        id: product.id,
+        sub_name: locale.value === 'ar' ? product.sub_name_ar || product.sub_name_en : product.sub_name_en || product.sub_name_ar,
+        name: locale.value === 'ar' ? product.name_ar : product.name_en,
+        price: parseFloat(product.base_price).toFixed(2),
+        img: product.media.find((media) => media.name === 'product_main_image')?.url || product.key_default_image,
+      })),
+    }
+  } catch (err) {
+    console.error('Error fetching new arrivals:', err)
+    error.value = t('category.errorLoading') || 'Failed to load new arrivals.'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const fetchExclusiveOffers = async () => {
+  isLoading.value = true
+  try {
+    const response = await axios.get(`api/home/exclusive-offers/${stor_id.value}`)
+    exclusive_offers.value = {
+      title: t('category.exclusive') || 'Exclusive Offers',
+      products: response.data.data.map((product) => ({
+        id: product.id,
+        sub_name: locale.value === 'ar' ? product.sub_name_ar || product.sub_name_en : product.sub_name_en || product.sub_name_ar,
+        name: locale.value === 'ar' ? product.name_ar : product.name_en,
+        price: parseFloat(product.base_price).toFixed(2),
+        img: product.media.find((media) => media.name === 'product_main_image')?.url || product.key_default_image,
+      })),
+    }
+  } catch (err) {
+    console.error('Error fetching exclusive offers:', err)
+    error.value = t('category.errorLoading') || 'Failed to load exclusive offers.'
+  } finally {
+    isLoading.value = false
+  }
 }
 
 onMounted(async () => {
+  // Ensure page scrolls to top on load
+  window.scrollTo(0, 0)
+  isLoading.value = true
   try {
-    const response = await axios.get(`api/home/product-details/${route.params.id}`)
-    pro.value = response.data.data.product
-    variants_details.value = response.data.data.variants_details
-    imgs.value = pro.value.media
+    const [productResponse] = await Promise.all([
+      axios.get(`api/home/product-details/${route.params.id}`),
+      fetchNewArrivals(),
+      fetchBestSeller(),
+      fetchExclusiveOffers(),
+    ])
+    pro.value = productResponse.data.data.product
+    variants_details.value = productResponse.data.data.variants_details
+    imgs.value = pro.value.media || []
     if (imgs.value.length > 0) {
-      curantimg.value = imgs.value[0].url
+      currentImg.value = imgs.value[0].url
     }
-
     if (variants_details.value && variants_details.value.attributes) {
       if (variants_details.value.attributes.color && variants_details.value.attributes.color.length > 0) {
         selectedColor.value = variants_details.value.attributes.color[0].value_en
@@ -294,8 +318,11 @@ onMounted(async () => {
         selectedSize.value = variants_details.value.attributes.size[0].value_en
       }
     }
-  } catch (error) {
-    console.error('Error fetching product:', error)
+  } catch (err) {
+    console.error('Error fetching data:', err)
+    error.value = t('category.errorLoading') || 'Failed to load data.'
+  } finally {
+    isLoading.value = false
   }
 })
 </script>
@@ -306,7 +333,7 @@ onMounted(async () => {
   color: #333;
 }
 
-.sub-titles {
+.sub-tiles {
   @apply bg-[#E6AC312B] px-4 py-2 rounded-md font-semibold text-sm text-gray-700 flex-grow;
 }
 
@@ -314,4 +341,3 @@ onMounted(async () => {
   @apply text-[#A17D1C];
 }
 </style>
-```
