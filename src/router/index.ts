@@ -67,7 +67,22 @@ const routes: Array<RouteRecordRaw> = [
           path: '/stores',
           component: () => import('../pages/admin/frontend/pages/stores.vue'),
         },
+       {
+          name: 'editprofile',
+          path: '/edit-profile',
+          component: () => import('../pages/admin/frontend/pages/profile/EditProfile.vue'),
+        },
 
+          {
+          name: 'orders',
+          path: '/orders',
+          component: () => import('../pages/admin/frontend/pages/profile/orders.vue'),
+        },
+        {
+          name: 'profile',
+          path: '/profile',
+          component: () => import('../pages/admin/frontend/pages/profile/profile.vue'),
+        },
         {
           name: 'cart',
           path: '/cart',

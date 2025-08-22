@@ -326,7 +326,7 @@ const submitForm = async () => {
   const formData = new FormData();
 
   // Append basic product data
-  formData.append('_method', 'PUT'); // For Laravel to handle as PUT request
+  formData.append('_method', 'post'); // For Laravel to handle as PUT request
   formData.append('store_id', productData.value.store_id);
   formData.append('category_id', productData.value.category_id);
   formData.append('brand_id', productData.value.brand_id);
@@ -571,7 +571,7 @@ const submitForm = async () => {
         </div>
 
         <!-- Base Price and Cost Price (when no variants) -->
-        <template v-if="!hasVariants">
+
           <div class="space-y-2">
             <label for="base_price" class="block text-sm font-medium text-gray-700">
               {{ t('product.basePrice') }} <span class="text-red-500">*</span>
@@ -598,7 +598,7 @@ const submitForm = async () => {
               class="w-full"
             />
           </div>
-        </template>
+
 
         <!-- Variants Toggle -->
         <div class="md:col-span-2 space-y-2">
