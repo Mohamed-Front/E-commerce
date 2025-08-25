@@ -13,7 +13,7 @@ const routes: Array<RouteRecordRaw> = [
     path: '/:catchAll(.*)',
     redirect: { name: 'dashboard' },
   },
-    {
+  {
     name: '',
     path: '/',
     component: WebLayout,
@@ -24,103 +24,135 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../pages/admin/frontend/pages/home.vue'),
         beforeEnter: (to, from, next) => {
           const hasMarket = localStorage.getItem('has-market') === 'true';
-          if ( hasMarket) {
-            next({ name: 'stores-hasmarket'}); // Replace 'some-id' with the appropriate ID or logic to get it
+          if (hasMarket) {
+            next({ name: 'stores-hasmarket' });
           } else {
-            next(); // Proceed to home route
+            next();
           }
         },
       },
-        {
-          name: 'subcategory',
-          path: '/subcategory/:id',
-          component: () => import('../pages/admin/frontend/pages/products/SubCategory.vue'),
+      {
+        name: 'subcategory',
+        path: '/subcategory/:id',
+        component: () => import('../pages/admin/frontend/pages/products/SubCategory.vue'),
+      },
+      {
+        name: 'produts_category',
+        path: '/produts-category/:id',
+        component: () => import('../pages/admin/frontend/pages/products/produts-category.vue'),
+      },
+      {
+        name: 'Product-details',
+        path: '/product-details/:id',
+        component: () => import('../pages/admin/frontend/pages/products/product-details.vue'),
+      },
+      {
+        name: 'stores-hasmarket',
+        path: '/stores-hasmarket',
+        component: () => import('../pages/admin/frontend/pages/stores/hasmarket.vue'),
+      },
+      {
+        name: 'stores-nomarket',
+        path: '/stores-nomarket',
+        component: () => import('../pages/admin/frontend/pages/stores/nothasmarket.vue'),
+      },
+      {
+        name: 'stores-nothasmarket',
+        path: '/stores-nothasmarket/:id',
+        component: () => import('../pages/admin/frontend/pages/stores/nothasmarket.vue'),
+      },
+      {
+        name: 'stores-page',
+        path: '/stores',
+        component: () => import('../pages/admin/frontend/pages/stores.vue'),
+      },
+      {
+        name: 'editprofile',
+        path: '/edit-profile',
+        component: () => import('../pages/admin/frontend/pages/profile/EditProfile.vue'),
+        beforeEnter: (to, from, next) => {
+          const isAuthenticated = localStorage.getItem('authenticatedweb') === 'true';
+          if (isAuthenticated) {
+            next();
+          } else {
+            next({ name: 'authlog' });
+          }
         },
-         {
-          name: 'produts_category',
-          path: '/produts-category/:id',
-          component: () => import('../pages/admin/frontend/pages/products/produts-category.vue'),
+      },
+      {
+        name: 'addres',
+        path: '/addres',
+        component: () => import('../pages/admin/frontend/pages/profile/adress.vue'),
+        beforeEnter: (to, from, next) => {
+          const isAuthenticated = localStorage.getItem('authenticatedweb') === 'true';
+          if (isAuthenticated) {
+            next();
+          } else {
+            next({ name: 'authlog' });
+          }
         },
-         {
-          name: 'Product-details',
-          path: '/product-details/:id',
-          component: () => import('../pages/admin/frontend/pages/products/product-details.vue'),
+      },
+      {
+        name: 'orders',
+        path: '/orders',
+        component: () => import('../pages/admin/frontend/pages/profile/orders.vue'),
+        beforeEnter: (to, from, next) => {
+          const isAuthenticated = localStorage.getItem('authenticatedweb') === 'true';
+          if (isAuthenticated) {
+            next();
+          } else {
+            next({ name: 'authlog' });
+          }
         },
-          {
-          name: 'stores-hasmarket',
-          path: '/stores-hasmarket',
-          component: () => import('../pages/admin/frontend/pages/stores/hasmarket.vue'),
+      },
+      {
+        name: 'profile',
+        path: '/profile',
+        component: () => import('../pages/admin/frontend/pages/profile/profile.vue'),
+        beforeEnter: (to, from, next) => {
+          const isAuthenticated = localStorage.getItem('authenticatedweb') === 'true';
+          if (isAuthenticated) {
+            next();
+          } else {
+            next({ name: 'authlog' });
+          }
         },
-           {
-          name: 'stores-nomarket',
-          path: '/stores-nomarket',
-          component: () => import('../pages/admin/frontend/pages/stores/nothasmarket.vue'),
+      },
+      {
+        name: 'cart',
+        path: '/cart',
+        component: () => import('../pages/admin/frontend/pages/cart.vue'),
+        beforeEnter: (to, from, next) => {
+          const isAuthenticated = localStorage.getItem('authenticatedweb') === 'true';
+          if (isAuthenticated) {
+            next();
+          } else {
+            next({ name: 'authlog' });
+          }
         },
-
-             {
-          name: 'stores-nothasmarket',
-          path: '/stores-nothasmarket/:id',
-          component: () => import('../pages/admin/frontend/pages/stores/nothasmarket.vue'),
-        },
-        {
-          name: 'stores-page',
-          path: '/stores',
-          component: () => import('../pages/admin/frontend/pages/stores.vue'),
-        },
-       {
-          name: 'editprofile',
-          path: '/edit-profile',
-          component: () => import('../pages/admin/frontend/pages/profile/EditProfile.vue'),
-        },
-
-          {
-          name: 'orders',
-          path: '/orders',
-          component: () => import('../pages/admin/frontend/pages/profile/orders.vue'),
-        },
-        {
-          name: 'profile',
-          path: '/profile',
-          component: () => import('../pages/admin/frontend/pages/profile/profile.vue'),
-        },
-        {
-          name: 'cart',
-          path: '/cart',
-          component: () => import('../pages/admin/frontend/pages/cart.vue'),
-        },
-
-    ]
-
-
-
+      },
+    ],
   },
-
-
-
-
-
   {
     name: 'forgetpassword',
     path: '/forget-password',
     component: () => import('../pages/admin/frontend/pages/auth/ForgetPassword.vue'),
   },
-    {
+  {
     name: 'changepassword',
     path: '/change-password',
     component: () => import('../pages/admin/frontend/pages/auth/ChnagePassword.vue'),
-     props: (route) => ({
+    props: (route) => ({
       email: route.query.email,
       phone: route.query.phone,
     }),
   },
-
   {
     name: 'register',
     path: '/register',
     component: () => import('../pages/admin/frontend/pages/auth/register.vue'),
-
   },
-    {
+  {
     name: 'otp',
     path: '/otp/:type',
     props: (route) => ({
@@ -128,7 +160,6 @@ const routes: Array<RouteRecordRaw> = [
       phone: route.query.phone,
       otp_type: route.query.otp_type,
     }),
-
     component: () => import('../pages/admin/frontend/pages/auth/otp.vue'),
   },
   {
@@ -147,7 +178,6 @@ const routes: Array<RouteRecordRaw> = [
         path: 'dashboard',
         component: () => import('../pages/admin/dashboard/Dashboard.vue'),
       },
-
       {
         name: 'roles',
         path: 'roles',
@@ -171,7 +201,6 @@ const routes: Array<RouteRecordRaw> = [
       {
         name: 'statistics',
         path: 'users_management',
-        // component: RouteViewComponent,
         children: [
           {
             name: 'users',
@@ -193,19 +222,11 @@ const routes: Array<RouteRecordRaw> = [
       {
         name: 'tourism-management',
         path: 'product',
-        // component: RouteViewComponent,
-        children: [
-          // {
-          //   path: '/product/:id?', // optional id parameter
-          //   name: 'product', // this name must match what you're using
-          //   component: () => import('../pages/admin/torist/show.vue'),
-          // },
-        ],
+        children: [],
       },
       {
         name: 'products-management',
         path: 'products',
-        // component: RouteViewComponent,
         children: [
           {
             name: 'product',
@@ -237,7 +258,6 @@ const routes: Array<RouteRecordRaw> = [
             path: 'brand-edit/:id',
             component: () => import('../pages/admin/products/brand/edite.vue'),
           },
-
           {
             name: 'model',
             path: 'model',
@@ -283,7 +303,6 @@ const routes: Array<RouteRecordRaw> = [
             path: 'coupon-update/:id',
             component: () => import('../pages/admin/products/coupon/update.vue'),
           },
-
           {
             name: 'category',
             path: 'category',
@@ -304,7 +323,6 @@ const routes: Array<RouteRecordRaw> = [
       {
         name: 'store-management',
         path: 'store',
-        // component: RouteViewComponent,
         children: [
           {
             name: 'stores',
@@ -316,12 +334,11 @@ const routes: Array<RouteRecordRaw> = [
             path: 'order',
             component: () => import('../pages/admin/orders/index.vue'),
           },
-           {
+          {
             name: 'order-show',
             path: 'order-show/:id',
             component: () => import('../pages/admin/orders/show.vue'),
           },
-
           {
             name: 'store-create',
             path: 'store-create',
@@ -337,9 +354,8 @@ const routes: Array<RouteRecordRaw> = [
       {
         name: 'settings',
         path: 'settings',
-        // component: RouteViewComponent,
         children: [
-           {
+          {
             name: 'setting',
             path: 'setting',
             component: () => import('../pages/admin/settings/setting/update.vue'),
@@ -374,40 +390,36 @@ const routes: Array<RouteRecordRaw> = [
             path: 'address-update/:id',
             component: () => import('../pages/admin/settings/address/update.vue'),
           },
-
-
           {
             name: 'connect',
             path: 'connect',
             component: () => import('../pages/admin/settings/quickBooks/connect.vue'),
           },
-           {
+          {
             name: 'custom_tabs',
             path: 'custom-tabs',
             component: () => import('../pages/admin/settings/custom-tabs/index.vue'),
           },
-           {
+          {
             name: 'custom_tabs_create',
             path: 'custom-tabs-create',
             component: () => import('../pages/admin/settings/custom-tabs/create.vue'),
           },
-           {
+          {
             name: 'custom_tabs_update',
             path: 'custom-tabs-update/:id',
             component: () => import('../pages/admin/settings/custom-tabs/edit.vue'),
           },
-           {
+          {
             name: 'custom_tabs_show',
             path: 'custom-tabs-show/:id',
             component: () => import('../pages/admin/settings/custom-tabs/show.vue'),
           },
         ],
       },
-
       UIRoute,
     ],
   },
-
   {
     path: '/auth',
     component: AuthLayout,
@@ -467,7 +479,6 @@ const router = createRouter({
     if (savedPosition) {
       return savedPosition
     }
-    // For some reason using documentation example doesn't scroll on page navigation.
     if (to.hash) {
       return { el: to.hash, behavior: 'smooth' }
     } else {
@@ -481,7 +492,6 @@ function auth(to: any, from: any, next: any) {
   if (!localStorage.getItem('token')) {
     return next({ name: 'login' })
   }
-
   next()
 }
 

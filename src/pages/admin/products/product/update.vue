@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useToast } from 'primevue/usetoast';
 import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
+import Dropdown from 'primevue/dropdown';
 
 const router = useRouter();
 const route = useRoute();
@@ -297,7 +298,7 @@ const removeVariant = (index) => {
 
 // Submit form
 const submitForm = async () => {
-  const requiredFields = ['store_id', 'category_id', 'brand_id', 'name_en', 'name_ar', 'sku'];
+  const requiredFields = ['store_id', 'category_id', 'brand_id', 'name_en', 'name_ar', 'sku', 'base_price'];
 
   // Validate required fields
   if (requiredFields.some(field => !productData.value[field])) {
@@ -311,15 +312,12 @@ const submitForm = async () => {
     return;
   }
 
-  // Validate variants or base_price
+  // Validate variants if they exist
   if (hasVariants.value) {
     if (productData.value.variants.some(v => !v.sku || !v.price || v.attribute_value_ids.length === 0)) {
       toast.add({ severity: 'error', summary: t('error'), detail: t('validation.variantRequiredFields'), life: 3000 });
       return;
     }
-  } else if (!productData.value.base_price) {
-    toast.add({ severity: 'error', summary: t('error'), detail: t('validation.basePriceRequired'), life: 3000 });
-    return;
   }
 
   loading.value = true;
@@ -339,6 +337,8 @@ const submitForm = async () => {
   formData.append('description_ar', productData.value.description_ar || '');
   formData.append('tax', productData.value.tax);
   formData.append('is_displayed', productData.value.is_displayed ? 1 : 0);
+  formData.append('base_price', productData.value.base_price);
+  formData.append('cost_price', productData.value.cost_price || 0);
 
   // Append main image if new one was uploaded
   if (mainImage.value) {
@@ -350,27 +350,22 @@ const submitForm = async () => {
     formData.append(`images[${index}]`, image);
   });
 
+  // Append variants if they exist
   if (hasVariants.value) {
     productData.value.variants.forEach((variant, index) => {
       formData.append(`variants[${index}][id]`, variant.id || '');
       formData.append(`variants[${index}][sku]`, variant.sku);
       formData.append(`variants[${index}][price]`, variant.price);
       formData.append(`variants[${index}][cost_price]`, variant.cost_price || 0);
-
-      // Ensure attribute_value_ids is an array and properly formatted
       if (Array.isArray(variant.attribute_value_ids)) {
         variant.attribute_value_ids.forEach((attrId, attrIndex) => {
           formData.append(`variants[${index}][attribute_value_ids][${attrIndex}]`, attrId);
         });
       }
-
       if (variant.variant_image) {
         formData.append(`variants[${index}][variant_image]`, variant.variant_image);
       }
     });
-  } else {
-    formData.append('base_price', productData.value.base_price);
-    formData.append('cost_price', productData.value.cost_price || 0);
   }
 
   try {
@@ -543,6 +538,35 @@ const submitForm = async () => {
           />
         </div>
 
+        <!-- Base Price -->
+        <div class="space-y-2">
+          <label for="base_price" class="block text-sm font-medium text-gray-700">
+            {{ t('product.basePrice') }} <span class="text-red-500">*</span>
+          </label>
+          <InputNumber
+            id="base_price"
+            v-model="productData.base_price"
+            mode="decimal"
+            :minFractionDigits="2"
+            class="w-full"
+            :class="{ 'p-invalid': !productData.base_price }"
+          />
+        </div>
+
+        <!-- Cost Price -->
+        <div class="space-y-2">
+          <label for="cost_price" class="block text-sm font-medium text-gray-700">
+            {{ t('product.costPrice') }}
+          </label>
+          <InputNumber
+            id="cost_price"
+            v-model="productData.cost_price"
+            mode="decimal"
+            :minFractionDigits="2"
+            class="w-full"
+          />
+        </div>
+
         <!-- Tax -->
         <div class="space-y-2">
           <label for="tax" class="block text-sm font-medium text-gray-700">
@@ -569,36 +593,6 @@ const submitForm = async () => {
             v-model="productData.is_displayed"
           />
         </div>
-
-        <!-- Base Price and Cost Price (when no variants) -->
-
-          <div class="space-y-2">
-            <label for="base_price" class="block text-sm font-medium text-gray-700">
-              {{ t('product.basePrice') }} <span class="text-red-500">*</span>
-            </label>
-            <InputNumber
-              id="base_price"
-              v-model="productData.base_price"
-              mode="decimal"
-              :minFractionDigits="2"
-              class="w-full"
-              :class="{ 'p-invalid': !productData.base_price }"
-            />
-          </div>
-
-          <div class="space-y-2">
-            <label for="cost_price" class="block text-sm font-medium text-gray-700">
-              {{ t('product.costPrice') }}
-            </label>
-            <InputNumber
-              id="cost_price"
-              v-model="productData.cost_price"
-              mode="decimal"
-              :minFractionDigits="2"
-              class="w-full"
-            />
-          </div>
-
 
         <!-- Variants Toggle -->
         <div class="md:col-span-2 space-y-2">
@@ -629,7 +623,7 @@ const submitForm = async () => {
                 <label :for="'attributes_' + index" class="block text-sm font-medium text-gray-700">
                   {{ t('product.attributes') }} <span class="text-red-500">*</span>
                 </label>
-                <MultiSelect
+                <Dropdown
                   :id="'attributes_' + index"
                   v-model="variant.attribute_value_ids"
                   :options="formattedAttributes"
@@ -874,7 +868,7 @@ const submitForm = async () => {
           :label="t('product.cancelButton')"
           icon="pi pi-times"
           @click="router.go(-1)"
-          class="p-button-outlined p-button-secondary"
+          class="p-button-outlined mx-3 p-button-secondary"
           :disabled="loading"
         />
         <Button

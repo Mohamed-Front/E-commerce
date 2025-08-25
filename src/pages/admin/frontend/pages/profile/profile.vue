@@ -1,10 +1,8 @@
-```vue
 <template>
   <!-- Main container with a light gray background and right-to-left direction for Arabic text -->
-  <div class="min-h-screen p-8 font-inter" dir="rtl">
+  <div class="min-h-screen p-8 font-inter" >
     <!-- Main content area, centered and split into a sidebar and a main section -->
     <div class="max-w-6xl mx-auto flex flex-col md:flex-row gap-6">
-
       <!-- Sidebar section with navigation links -->
       <aside class="w-full md:w-64 bg-white rounded-xl shadow-md p-6 h-fit">
         <ul class="space-y-2">
@@ -23,14 +21,14 @@
             <span>طلباتي</span>
           </li>
           <!-- Addresses link -->
-          <li @click="router.push({ name: 'addresses' })" class="p-3 rounded-lg flex items-center gap-4 text-gray-500 hover:bg-gray-50 cursor-pointer">
+          <li @click="router.push({ name: 'addres' })" class="p-3 rounded-lg flex items-center gap-4 text-gray-500 hover:bg-gray-50 cursor-pointer">
             <svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M9 0C6.61392 0.00245748 4.32637 0.831051 2.63915 2.30402C0.951939 3.77699 0.0028245 5.77405 9.57508e-06 7.85714C-0.00284824 9.55945 0.634084 11.2156 1.8131 12.5714C1.8131 12.5714 2.05855 12.8536 2.09864 12.8943L9 20L15.9046 12.8907C15.9406 12.8529 16.1869 12.5714 16.1869 12.5714L16.1877 12.5693C17.3661 11.214 18.0028 9.55866 18 7.85714C17.9972 5.77405 17.0481 3.77699 15.3608 2.30402C13.6736 0.831051 11.3861 0.00245748 9 0ZM9 10.7143C8.35272 10.7143 7.71997 10.5467 7.18177 10.2328C6.64358 9.91882 6.2241 9.4726 5.9764 8.95052C5.72869 8.42845 5.66388 7.85397 5.79016 7.29974C5.91644 6.74551 6.22814 6.23642 6.68583 5.83684C7.14353 5.43726 7.72668 5.16514 8.36152 5.0549C8.99637 4.94466 9.6544 5.00124 10.2524 5.21749C10.8504 5.43374 11.3616 5.79994 11.7212 6.2698C12.0808 6.73965 12.2727 7.29205 12.2727 7.85714C12.2716 8.61461 11.9265 9.34079 11.313 9.8764C10.6994 10.412 9.86765 10.7133 9 10.7143Z" fill="#807575"/>
             </svg>
             <span>دليل العناوين</span>
           </li>
           <!-- Logout link -->
-          <li @click="logout" class="p-3 rounded-lg flex items-center gap-4 text-red-500 hover:bg-gray-50 cursor-pointer">
+          <li @click="authStore.handleLogout()"  class="p-3 rounded-lg flex items-center gap-4 text-red-500 hover:bg-gray-50 cursor-pointer">
             <svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M0 20V0H9V2.22222H2V17.7778H9V20H0ZM13 15.5556L11.625 13.9444L14.175 11.1111H6V8.88889H14.175L11.625 6.05556L13 4.44444L18 10L13 15.5556Z" fill="#FF1212"/>
             </svg>
@@ -83,9 +81,15 @@
                     </svg>
                   </button>
                 </div>
-                <div class="text-gray-600">
-                  <p class="mb-1">{{ country }}</p>
-                  <p class="mb-1">{{ address }}</p>
+                <div v-if="mainAddress" class="text-gray-600">
+                  <p class="mb-1">{{ mainAddress.address_line_1 || 'غير متوفر' }}</p>
+                  <p v-if="mainAddress.address_line_2" class="mb-1">{{ mainAddress.address_line_2 }}</p>
+                  <p class="mb-1">{{ mainAddress.city || 'غير متوفر' }}</p>
+                  <p class="mb-1">{{ mainAddress.country || 'غير متوفر' }}</p>
+                  <p v-if="mainAddress.zip_code" class="mb-1 ltr:font-inter ltr:direction-ltr">{{ mainAddress.zip_code }}</p>
+                </div>
+                <div v-else class="text-gray-600">
+                  <p class="mb-1">لا يوجد عنوان رئيسي</p>
                 </div>
                 <button @click="router.push({ name: 'addresses' })" class="w-full mt-4 py-3 px-6 bg-transparent border border-blue-500 text-blue-500 rounded-xl font-medium hover:bg-blue-50 transition-colors duration-200">
                   إضافة عنوان جديد
@@ -107,40 +111,48 @@ import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import axios from 'axios';
 import Toast from 'primevue/toast';
-
+import { useAuthStore } from '../../../../../stores/WebAuth';
+const authStore = useAuthStore();
 // Reactive variables for profile data
 const username = ref('');
 const phoneNumber = ref('');
-const country = ref('');
-const address = ref('');
+const mainAddress = ref(null);
 const loading = ref(true);
 
 // Router and toast
 const router = useRouter();
 const toast = useToast();
 
-// Fetch profile data from API
+// Fetch profile and address data from APIs
 const fetchProfile = async () => {
   try {
     loading.value = true;
-    const response = await axios.get('/api/profile');
-    username.value = response.data.data.name || 'غير متوفر';
-    phoneNumber.value = response.data.data.phone || 'غير متوفر';
-    country.value = response.data.data.country || 'غير متوفر';
-    address.value = response.data.data.address || 'غير متوفر';
+
+    // Fetch profile data
+    const profileResponse = await axios.get('/api/profile');
+    username.value = profileResponse.data.data.name || 'غير متوفر';
+    phoneNumber.value = profileResponse.data.data.phone || 'غير متوفر';
+
+    // Fetch address data
+    const addressResponse = await axios.get('/api/address');
+    if (addressResponse.data.is_success) {
+      const addresses = addressResponse.data.data.data;
+      mainAddress.value = addresses.find(address => address.is_default === 1) || null;
+    } else {
+      throw new Error('Failed to fetch addresses');
+    }
   } catch (error) {
     toast.add({
       severity: 'error',
       summary: 'خطأ',
-      detail: 'فشل تحميل بيانات الملف الشخصي',
+      detail: 'فشل تحميل بيانات الملف الشخصي أو العنوان',
       life: 3000
     });
-    console.error('Error fetching profile:', error);
+    console.error('Error fetching data:', error);
     // Set fallback values
     username.value = 'غير متوفر';
     phoneNumber.value = 'غير متوفر';
-    country.value = 'غير متوفر';
-    address.value = 'غير متوفر';
+    mainAddress.value = null;
   } finally {
     loading.value = false;
   }
@@ -168,7 +180,7 @@ const logout = async () => {
   }
 };
 
-// Fetch profile data on mount
+// Fetch profile and address data on mount
 onMounted(() => {
   fetchProfile();
 });
@@ -179,4 +191,3 @@ onMounted(() => {
  * Scoped styles for this component
  */
 </style>
-```

@@ -120,17 +120,16 @@ export const useAuthStore = defineStore('Auth', {
       }
     },
     async handleLogout() {
-      this.loading = true;
-      try {
-        await axios.post('/api/logout', {}, {
-          headers: { Authorization: `Bearer ${this.webToken}` },
-        });
-      } catch (error) {
-        this.authErrors['logout'] = [error.response?.data?.message || 'Logout failed.'];
-      } finally {
-        this.clearAllData();
-        this.router.push({ name: 'Login' });
-      }
+      this.webUser = {};
+      this.webToken = null;
+      this.authenticatedweb = false;
+      this.authErrors = {};
+      this.msg = '';
+      this.loading = false;
+      this.role = '';
+      this.verify = false;
+      this.router.push({ name: 'authlog' });
+
     },
     async forgotPassword(data) {
       try {

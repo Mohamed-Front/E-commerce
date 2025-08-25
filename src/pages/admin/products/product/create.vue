@@ -1,9 +1,11 @@
+```vue
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { useToast } from 'primevue/usetoast';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import Dropdown from 'primevue/dropdown';
 
 const router = useRouter();
 const toast = useToast();
@@ -239,7 +241,7 @@ const addVariant = () => {
 };
 
 const removeVariant = (index) => {
-  if (productData.value.variants.length > 1) {
+  if (productData.variants.length > 1) {
     productData.value.variants.splice(index, 1);
   } else {
     toast.add({ severity: 'warn', summary: t('error'), detail: t('validation.atLeastOneVariant'), life: 3000 });
@@ -248,7 +250,7 @@ const removeVariant = (index) => {
 
 // Submit form
 const submitForm = async () => {
-  const requiredFields = ['store_id', 'category_id', 'brand_id', 'name_en', 'name_ar', 'sku'];
+  const requiredFields = ['store_id', 'category_id', 'brand_id', 'name_en', 'name_ar', 'sku', 'base_price'];
 
   // Validate required fields
   if (requiredFields.some(field => !productData.value[field])) {
@@ -262,15 +264,12 @@ const submitForm = async () => {
     return;
   }
 
-  // Validate variants or base_price
+  // Validate variants if they exist
   if (hasVariants.value) {
     if (productData.value.variants.some(v => !v.sku || !v.price || v.attribute_value_ids.length === 0)) {
       toast.add({ severity: 'error', summary: t('error'), detail: t('validation.variantRequiredFields'), life: 3000 });
       return;
     }
-  } else if (!productData.value.base_price) {
-    toast.add({ severity: 'error', summary: t('error'), detail: t('validation.basePriceRequired'), life: 3000 });
-    return;
   }
 
   loading.value = true;
@@ -289,6 +288,8 @@ const submitForm = async () => {
   formData.append('description_ar', productData.value.description_ar || '');
   formData.append('tax', productData.value.tax);
   formData.append('is_displayed', productData.value.is_displayed ? 1 : 0);
+  formData.append('base_price', productData.value.base_price);
+  formData.append('cost_price', productData.value.cost_price || 0);
 
   // Append main image
   formData.append('main_image', mainImage.value);
@@ -298,26 +299,21 @@ const submitForm = async () => {
     formData.append(`images[${index}]`, image);
   });
 
+  // Append variants if they exist
   if (hasVariants.value) {
     productData.value.variants.forEach((variant, index) => {
       formData.append(`variants[${index}][sku]`, variant.sku);
       formData.append(`variants[${index}][price]`, variant.price);
       formData.append(`variants[${index}][cost_price]`, variant.cost_price || 0);
-
-      // Ensure attribute_value_ids is an array and properly formatted
       if (Array.isArray(variant.attribute_value_ids)) {
         variant.attribute_value_ids.forEach((attrId, attrIndex) => {
           formData.append(`variants[${index}][attribute_value_ids][${attrIndex}]`, attrId);
         });
       }
-
       if (variant.variant_image) {
         formData.append(`variants[${index}][variant_image]`, variant.variant_image);
       }
     });
-  } else {
-    formData.append('base_price', productData.value.base_price);
-    formData.append('cost_price', productData.value.cost_price || 0);
   }
 
   try {
@@ -490,6 +486,35 @@ const submitForm = async () => {
           />
         </div>
 
+        <!-- Base Price -->
+        <div class="space-y-2">
+          <label for="base_price" class="block text-sm font-medium text-gray-700">
+            {{ t('product.basePrice') }} <span class="text-red-500">*</span>
+          </label>
+          <InputNumber
+            id="base_price"
+            v-model="productData.base_price"
+            mode="decimal"
+            :minFractionDigits="2"
+            class="w-full"
+            :class="{ 'p-invalid': !productData.base_price }"
+          />
+        </div>
+
+        <!-- Cost Price -->
+        <div class="space-y-2">
+          <label for="cost_price" class="block text-sm font-medium text-gray-700">
+            {{ t('product.costPrice') }}
+          </label>
+          <InputNumber
+            id="cost_price"
+            v-model="productData.cost_price"
+            mode="decimal"
+            :minFractionDigits="2"
+            class="w-full"
+          />
+        </div>
+
         <!-- Tax -->
         <div class="space-y-2">
           <label for="tax" class="block text-sm font-medium text-gray-700">
@@ -517,36 +542,6 @@ const submitForm = async () => {
           />
         </div>
 
-        <!-- Base Price and Cost Price (when no variants) -->
-        <template v-if="!hasVariants">
-          <div class="space-y-2">
-            <label for="base_price" class="block text-sm font-medium text-gray-700">
-              {{ t('product.basePrice') }} <span class="text-red-500">*</span>
-            </label>
-            <InputNumber
-              id="base_price"
-              v-model="productData.base_price"
-              mode="decimal"
-              :minFractionDigits="2"
-              class="w-full"
-              :class="{ 'p-invalid': !productData.base_price }"
-            />
-          </div>
-
-          <div class="space-y-2">
-            <label for="cost_price" class="block text-sm font-medium text-gray-700">
-              {{ t('product.costPrice') }}
-            </label>
-            <InputNumber
-              id="cost_price"
-              v-model="productData.cost_price"
-              mode="decimal"
-              :minFractionDigits="2"
-              class="w-full"
-            />
-          </div>
-        </template>
-
         <!-- Variants Toggle -->
         <div class="md:col-span-2 space-y-2">
           <div class="flex items-center">
@@ -569,14 +564,14 @@ const submitForm = async () => {
             <h3 class="text-lg font-semibold text-gray-800">{{ t('product.variants') }}</h3>
           </div>
 
-          <div v-for="(variant, index) in productData.variants" :key="index" class="p-4 border rounded-lg space-y-4 bg-gray-50">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div v-for="(variant, index) in productData.variants" :key="index" class="p-3 border rounded-lg space-y-3 bg-gray-50">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
               <!-- Attribute Values -->
               <div class="space-y-2 md:col-span-2">
-                <label :for="'attributes_' + index" class="block text-sm font-medium text-gray-700">
+                <label :for="'attributes_' + index" class="block text-xs font-medium text-gray-700">
                   {{ t('product.attributes') }} <span class="text-red-500">*</span>
                 </label>
-                <MultiSelect
+                <Dropdown
                   :id="'attributes_' + index"
                   v-model="variant.attribute_value_ids"
                   :options="formattedAttributes"
@@ -594,7 +589,7 @@ const submitForm = async () => {
 
               <!-- SKU -->
               <div class="space-y-2">
-                <label :for="'sku_' + index" class="block text-sm font-medium text-gray-700">
+                <label :for="'sku_' + index" class="block text-xs font-medium text-gray-700">
                   {{ t('product.sku') }} <span class="text-red-500">*</span>
                 </label>
                 <InputText
@@ -607,7 +602,7 @@ const submitForm = async () => {
 
               <!-- Price -->
               <div class="space-y-2">
-                <label :for="'price_' + index" class="block text-sm font-medium text-gray-700">
+                <label :for="'price_' + index" class="block text-xs font-medium text-gray-700">
                   {{ t('product.price') }} <span class="text-red-500">*</span>
                 </label>
                 <InputNumber
@@ -622,7 +617,7 @@ const submitForm = async () => {
 
               <!-- Cost Price -->
               <div class="space-y-2">
-                <label :for="'cost_price_' + index" class="block text-sm font-medium text-gray-700">
+                <label :for="'cost_price_' + index" class="block text-xs font-medium text-gray-700">
                   {{ t('product.costPrice') }}
                 </label>
                 <InputNumber
@@ -636,7 +631,7 @@ const submitForm = async () => {
 
               <!-- Variant Image Upload -->
               <div class="space-y-2">
-                <label :for="'variant_image_' + index" class="block text-sm font-medium text-gray-700">
+                <label :for="'variant_image_' + index" class="block text-xs font-medium text-gray-700">
                   {{ t('product.variantImage') }}
                 </label>
                 <label
@@ -645,7 +640,7 @@ const submitForm = async () => {
                   @dragleave="isDragging = false"
                   @drop.prevent="onVariantImageUpload($event, index)"
                   :class="{'border-blue-500 bg-blue-50': isDragging, 'border-gray-300': !isDragging}"
-                  class="cursor-pointer w-full rounded-lg border-2 border-dashed transition-colors duration-300 block"
+                  class="cursor-pointer w-full rounded-md border-2 border-dashed transition-colors duration-200 block p-2"
                 >
                   <input
                     type="file"
@@ -653,35 +648,35 @@ const submitForm = async () => {
                     @change="onVariantImageUpload($event, index)"
                     accept="image/*"
                     class="hidden"
-                  >
-                  <div v-if="variant.variant_image_preview" class="p-4">
+                  />
+                  <div v-if="variant.variant_image_preview" class="p-2">
                     <div class="relative group">
                       <img
                         :src="variant.variant_image_preview"
                         alt="Variant Preview"
-                        class="w-full h-32 object-contain rounded-lg shadow-md"
+                        class="w-full h-20 object-contain rounded-md shadow-sm"
                       />
-                      <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
+                      <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 flex items-center justify-center transition-all duration-200 rounded-md">
                         <button
                           type="button"
                           @click.stop="removeVariantImage(index)"
-                          class="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                          class="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition"
                           :title="t('product.deleteImage')"
                         >
-                          <i class="pi pi-trash text-sm"></i>
+                          <i class="pi pi-trash text-xs"></i>
                         </button>
                       </div>
                     </div>
-                    <p class="mt-2 text-center text-sm text-gray-500">{{ t('product.changeImage') }}</p>
+                    <p class="mt-1 text-center text-xs text-gray-500">{{ t('product.changeImage') }}</p>
                   </div>
-                  <div v-else class="p-4 flex flex-col items-center justify-center">
-                    <div class="bg-blue-100 p-2 rounded-full mb-2">
-                      <i class="pi pi-image text-blue-500 text-xl"></i>
+                  <div v-else class="flex flex-col items-center justify-center p-2">
+                    <div class="bg-blue-100 p-1 rounded-full mb-1">
+                      <i class="pi pi-image text-blue-500 text-sm"></i>
                     </div>
-                    <p class="text-xs text-center text-gray-600">
+                    <p class="text-[10px] text-center text-gray-600">
                       <span class="text-blue-500 font-medium">{{ t('product.uploadClick') }}</span> {{ t('product.uploadDrag') }}
                     </p>
-                    <p class="text-xs text-gray-400">{{ t('product.imageFormat') }}</p>
+                    <p class="text-[9px] text-gray-400">{{ t('product.imageFormat') }}</p>
                   </div>
                 </label>
               </div>
@@ -691,7 +686,7 @@ const submitForm = async () => {
               <Button
                 type="button"
                 icon="pi pi-trash"
-                class="p-button-danger p-button-sm"
+                class="p-button-danger p-button-sm text-xs"
                 @click="removeVariant(index)"
                 :disabled="productData.variants.length === 1"
                 :label="t('product.removeVariant')"
@@ -703,7 +698,7 @@ const submitForm = async () => {
             type="button"
             :label="t('product.addVariant')"
             icon="pi pi-plus"
-            class="p-button-outlined p-button-secondary"
+            class="p-button-outlined p-button-secondary text-sm"
             @click="addVariant"
           />
         </div>
@@ -719,7 +714,7 @@ const submitForm = async () => {
             @dragleave="isDragging = false"
             @drop.prevent="onMainImageUpload"
             :class="{'border-blue-500 bg-blue-50': isDragging, 'border-gray-300': !isDragging}"
-            class="cursor-pointer w-full rounded-xl border-2 border-dashed transition-colors duration-300 p-6 block"
+            class="cursor-pointer w-full rounded-md border-2 border-dashed transition-colors duration-200 p-3 block"
           >
             <input
               type="file"
@@ -733,29 +728,29 @@ const submitForm = async () => {
                 <img
                   :src="mainImagePreview"
                   alt="Main Preview"
-                  class="w-full h-48 object-contain rounded-lg shadow-md"
+                  class="w-full h-24 object-contain rounded-md shadow-sm"
                 />
-                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
+                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 flex items-center justify-center transition-all duration-200 rounded-md">
                   <button
                     type="button"
                     @click.stop="removeMainImage"
-                    class="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                    class="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition"
                     :title="t('product.deleteImage')"
                   >
-                    <i class="pi pi-trash text-sm"></i>
+                    <i class="pi pi-trash text-xs"></i>
                   </button>
                 </div>
               </div>
-              <p class="mt-2 text-center text-sm text-gray-500">{{ t('product.changeImage') }}</p>
+              <p class="mt-1 text-center text-xs text-gray-500">{{ t('product.changeImage') }}</p>
             </div>
-            <div v-else class="flex flex-col items-center justify-center space-y-3">
-              <div class="bg-blue-100 p-3 rounded-full">
-                <i class="pi pi-image text-blue-500 text-2xl"></i>
+            <div v-else class="flex flex-col items-center justify-center space-y-2 p-2">
+              <div class="bg-blue-100 p-2 rounded-full">
+                <i class="pi pi-image text-blue-500 text-base"></i>
               </div>
-              <p class="text-sm text-center text-gray-600">
+              <p class="text-xs text-center text-gray-600">
                 <span class="text-blue-500 font-medium">{{ t('product.uploadClick') }}</span> {{ t('product.uploadDrag') }}
               </p>
-              <p class="text-xs text-gray-400">{{ t('product.imageFormat') }}</p>
+              <p class="text-[10px] text-gray-400">{{ t('product.imageFormat') }}</p>
             </div>
           </label>
         </div>
@@ -769,7 +764,7 @@ const submitForm = async () => {
             @dragleave="isDragging = false"
             @drop.prevent="onAdditionalImagesUpload"
             :class="{'border-blue-500 bg-blue-50': isDragging, 'border-gray-300': !isDragging}"
-            class="cursor-pointer w-full rounded-xl border-2 border-dashed transition-colors duration-300 p-6 block"
+            class="cursor-pointer w-full rounded-md border-2 border-dashed transition-colors duration-200 p-3 block"
           >
             <input
               type="file"
@@ -779,36 +774,36 @@ const submitForm = async () => {
               multiple
               class="hidden"
             />
-            <div v-if="additionalImagePreviews.length > 0" class="space-y-4">
-              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <div v-if="additionalImagePreviews.length > 0" class="space-y-3">
+              <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                 <div v-for="(preview, index) in additionalImagePreviews" :key="index" class="relative group">
                   <img
                     :src="preview"
                     alt="Additional Preview"
-                    class="w-full h-32 object-cover rounded-lg shadow-md"
+                    class="w-full h-20 object-cover rounded-md shadow-sm"
                   />
-                  <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
+                  <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 flex items-center justify-center transition-all duration-200 rounded-md">
                     <button
                       type="button"
                       @click.stop="removeAdditionalImage(index)"
-                      class="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                      class="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition"
                       :title="t('product.deleteImage')"
                     >
-                      <i class="pi pi-trash text-sm"></i>
+                      <i class="pi pi-trash text-xs"></i>
                     </button>
                   </div>
                 </div>
               </div>
-              <p class="text-center text-sm text-gray-500">{{ t('product.addMoreImages') }}</p>
+              <p class="text-center text-xs text-gray-500">{{ t('product.addMoreImages') }}</p>
             </div>
-            <div v-else class="flex flex-col items-center justify-center space-y-3">
-              <div class="bg-blue-100 p-3 rounded-full">
-                <i class="pi pi-images text-blue-500 text-2xl"></i>
+            <div v-else class="flex flex-col items-center justify-center space-y-2 p-2">
+              <div class="bg-blue-100 p-2 rounded-full">
+                <i class="pi pi-images text-blue-500 text-base"></i>
               </div>
-              <p class="text-sm text-center text-gray-600">
+              <p class="text-xs text-center text-gray-600">
                 <span class="text-blue-500 font-medium">{{ t('product.uploadClick') }}</span> {{ t('product.uploadDrag') }}
               </p>
-              <p class="text-xs text-gray-400">{{ t('product.imageFormat') }}</p>
+              <p class="text-[10px] text-gray-400">{{ t('product.imageFormat') }}</p>
             </div>
           </label>
         </div>
@@ -821,7 +816,7 @@ const submitForm = async () => {
           :label="t('product.cancelButton')"
           icon="pi pi-times"
           @click="router.go(-1)"
-          class="p-button-outlined p-button-secondary"
+          class="p-button-outlined mx-3 p-button-secondary text-sm"
           :disabled="loading"
         />
         <Button
@@ -829,7 +824,7 @@ const submitForm = async () => {
           :label="t('product.createButton')"
           icon="pi pi-check"
           :loading="loading"
-          class="p-button-success"
+          class="p-button-success text-sm"
         />
       </div>
     </form>
@@ -859,7 +854,8 @@ const submitForm = async () => {
   transition-property: all;
 }
 
-.duration-300 {
-  transition-duration: 300ms;
+.duration-200 {
+  transition-duration: 200ms;
 }
 </style>
+```
