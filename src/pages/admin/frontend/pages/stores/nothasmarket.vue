@@ -193,24 +193,7 @@
 
       <!-- Products Sections -->
       <section class="mt-16 space-y-16">
-        <!-- Exclusive Offers -->
-        <productsSwiper
-          v-if="exclusiveOffers.products.length"
-          :products="exclusiveOffers"
-          class="animate-slide-up"
-        />
-        <!-- Best Sellers -->
-        <productsSwiper
-          v-if="bestSellers.products.length"
-          :products="bestSellers"
-          class="animate-slide-up"
-        />
-        <!-- New Arrivals -->
-        <productsSwiper
-          v-if="newArrivals.products.length"
-          :products="newArrivals"
-          class="animate-slide-up"
-        />
+       <ProductOffers></ProductOffers>
       </section>
     </div>
   </div>
@@ -230,6 +213,7 @@ import productsSwiper from '../../components/SwiperSlide/productsSwiper.vue';
 import defaultMarketImage from '../../../../../assets/loginFormImg.png';
 import defaultProductImage from '../../../../../assets/loginFormImg.png';
 import defaultCategoryImage from '../../../../../assets/loginFormImg.png';
+import ProductOffers from '../../components/ProductOffers.vue';
 
 // Initialize Vue utilities
 const route = useRoute();
@@ -298,80 +282,9 @@ const initStoreData = () => {
   }));
 };
 
-// Fetch best sellers
-const fetchBestSellers = async () => {
-  isLoading.value = true;
-  error.value = null;
-  try {
-    const response = await axios.get(`/api/home/best-sellers/${route.params.id}`);
-    const data = response.data.data.data || [];
-    bestSellers.value = {
-      title: t('category.bestsellers') || 'Best Sellers',
-      products: data.map(product => ({
-        id: product.id,
-        sub_name: locale.value === 'ar' ? product.sub_name_ar || product.sub_name_en : product.sub_name_en || product.sub_name_ar,
-        name: locale.value === 'ar' ? product.name_ar || product.name_en : product.name_en || product.name_ar,
-        price: parseFloat(product.base_price || 0).toFixed(2),
-        img: product.media?.find(media => media.name === 'product_main_image')?.url || defaultProductImage
-      }))
-    };
-  } catch (err) {
-    console.error('Error fetching best sellers:', err);
-    error.value = t('category.errorLoading') || 'Failed to load best sellers.';
-  } finally {
-    isLoading.value = false;
-  }
-};
 
-// Fetch new arrivals
-const fetchNewArrivals = async () => {
-  isLoading.value = true;
-  error.value = null;
-  try {
-    const response = await axios.get(`/api/home/new-arrivals/${route.params.id}`);
-    const data = response.data.data.data || [];
-    newArrivals.value = {
-      title: t('category.newlyarrived') || 'New Arrivals',
-      products: data.map(product => ({
-        id: product.id,
-        sub_name: locale.value === 'ar' ? product.sub_name_ar || product.sub_name_en : product.sub_name_en || product.sub_name_ar,
-        name: locale.value === 'ar' ? product.name_ar || product.name_en : product.name_en || product.name_ar,
-        price: parseFloat(product.base_price || 0).toFixed(2),
-        img: product.media?.find(media => media.name === 'product_main_image')?.url || defaultProductImage
-      }))
-    };
-  } catch (err) {
-    console.error('Error fetching new arrivals:', err);
-    error.value = t('category.errorLoading') || 'Failed to load new arrivals.';
-  } finally {
-    isLoading.value = false;
-  }
-};
 
-// Fetch exclusive offers
-const fetchExclusiveOffers = async () => {
-  isLoading.value = true;
-  error.value = null;
-  try {
-    const response = await axios.get(`/api/home/exclusive-offers/${route.params.id}`);
-    const data = response.data.data.data || [];
-    exclusiveOffers.value = {
-      title: t('category.exclusive') || 'Exclusive Offers',
-      products: data.map(product => ({
-        id: product.id,
-        name: locale.value === 'ar' ? product.name_ar || product.name_en : product.name_en || product.name_ar,
-        sub_name: locale.value === 'ar' ? product.sub_name_ar || product.sub_name_en : product.sub_name_en || product.sub_name_ar,
-        price: parseFloat(product.base_price || 0).toFixed(2),
-        img: product.media?.find(media => media.name === 'product_main_image')?.url || defaultProductImage
-      }))
-    };
-  } catch (err) {
-    console.error('Error fetching exclusive offers:', err);
-    error.value = t('category.errorLoading') || 'Failed to load exclusive offers.';
-  } finally {
-    isLoading.value = false;
-  }
-};
+
 
 // Fetch all data
 const fetchAllData = async () => {
@@ -379,7 +292,7 @@ const fetchAllData = async () => {
   await fetchStoreDetails();
   if (!error.value) {
     initStoreData();
-    await Promise.all([fetchBestSellers(), fetchNewArrivals(), fetchExclusiveOffers()]);
+
   }
   isLoading.value = false;
 };

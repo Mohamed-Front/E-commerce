@@ -202,7 +202,7 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 const selectedTab = ref('phone');
 const phoneNumber = ref('');
-const countryCode = ref('');
+const countryCode = ref('+20');
 const email = ref('');
 const password = ref('');
 const isPasswordVisible = ref(false);

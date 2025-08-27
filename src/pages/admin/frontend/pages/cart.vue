@@ -11,35 +11,32 @@
         </div>
         <!-- Cart content -->
         <div v-else>
-          <img src="../imges/banner2.png" alt="Cart Banner" class="w-full h-40 object-cover rounded-lg mb-4" />
-          <div class="flex gap-3 flex-wrap">
-            <div
-              v-for="option in options"
-              :key="option.value"
-              @click="selectedOption = option.value"
-              class="cursor-pointer border rounded-lg px-4 py-2 flex items-center justify-between gap-3 transition-all duration-300 hover:shadow-md hover:scale-105"
-              :class="selectedOption === option.value ? 'border-yellow-600 bg-yellow-600 text-white' : 'border-gray-300 bg-white'"
+          <!-- Address Selection -->
+          <div class="mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">اختر عنوان التوصيل</h3>
+            <select
+              v-model="selectedAddress"
+              class="w-full bg-amber-50 border border-amber-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-600 transition-all"
             >
-              <span class="font-medium text-sm">{{ option.label }}</span>
-              <div
-                class="w-5 h-5 border rounded flex items-center justify-center bg-white"
-                :class="selectedOption === option.value ? 'border-white' : 'border-gray-400'"
-              >
-                <svg
-                  v-if="selectedOption === option.value"
-                  class="w-3 h-3 text-yellow-600"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-            </div>
+              <option :value="null" disabled>اختر عنوان</option>
+              <option v-for="address in addresses" :key="address.id" :value="address.id">
+                {{ address.name }} - {{ address.street }}, {{ address.city }}
+              </option>
+            </select>
           </div>
-          <div class="py-4 border border-yellow-600 rounded-lg text-center text-yellow-600 font-semibold text-lg mt-4 bg-gradient-to-r from-yellow-50 to-amber-100">
-            {{ selectedOption }}
+          <!-- Express Delivery Toggle -->
+          <div class="flex items-center gap-4 mb-6">
+            <label class="text-gray-800 font-medium">توصيل سريع</label>
+            <button
+              @click="isExpressed = !isExpressed"
+              class="relative inline-flex items-center h-6 rounded-full transition-colors duration-200"
+              :class="isExpressed ? 'bg-yellow-600' : 'bg-gray-300'"
+            >
+              <span
+                class="inline-block  h-4 transform bg-white rounded-full transition-transform duration-200"
+                :class="isExpressed ? 'translate-x-6' : 'translate-x-1'"
+              ></span>
+            </button>
           </div>
           <div v-if="products.length === 0" class="text-center text-gray-600 py-4">
             سلة التسوق فارغة
@@ -56,11 +53,11 @@
               <div class="flex items-center justify-between">
                 <p class="text-yellow-600 text-sm">الكمية: {{ product.quantity }}</p>
                 <div class="border border-gray-300 p-2 rounded-md flex items-center gap-3">
-                  <button @click="updateQuantity('minus', product.id)" class="text-lg font-semibold text-gray-700 hover:text-yellow-600 transition-colors">-</button>
+                  <button @click="updateQuantity('minus', product.id, product.product_id, product.variant_id, product.quantity)" class="text-lg font-semibold text-gray-700 hover:text-yellow-600 transition-colors">-</button>
                   <span class="text-sm font-medium">{{ product.quantity }}</span>
-                  <button @click="updateQuantity('plus', product.id)" class="text-lg font-semibold text-gray-700 hover:text-yellow-600 transition-colors">+</button>
+                  <button @click="updateQuantity('plus', product.id, product.product_id, product.variant_id, product.quantity)" class="text-lg font-semibold text-gray-700 hover:text-yellow-600 transition-colors">+</button>
                 </div>
-                <button @click="removeProduct(product.id)" class="text-white bg-yellow-600 px-3 py-1 text-sm rounded-md hover:bg-yellow-700 transition-all">
+                <button @click="clearProduct(product.id, product.product_id, product.variant_id)" class="text-white bg-yellow-600 px-3 py-1 text-sm rounded-md hover:bg-yellow-700 transition-all">
                   {{ $t('remove') }}
                 </button>
               </div>
@@ -70,7 +67,7 @@
             <div class="flex flex-col gap-4">
               <span class="flex justify-between items-center">
                 <h4 class="text-yellow-600 font-semibold">مدة الشحن</h4>
-                <p class="text-gray-700">3 ساعات</p>
+                <p class="text-gray-700">{{ isExpressed ? '1 ساعة' : '3 ساعات' }}</p>
               </span>
               <span class="flex justify-between items-center">
                 <h4 class="text-yellow-600 font-semibold">المجموع الفرعي</h4>
@@ -81,7 +78,10 @@
                 <p class="text-gray-700">{{ calculateTotal }} د.أ</p>
               </span>
             </div>
-            <button class="w-full mt-6 py-3 text-sm sm:text-base lg:text-lg bg-gray-800 rounded-md text-white font-semibold transition-transform duration-150 hover:shadow-lg active:scale-95">
+            <button
+              :disabled="!selectedAddress"
+              class="w-full mt-6 py-3 text-sm sm:text-base lg:text-lg bg-gray-800 rounded-md text-white font-semibold transition-transform duration-150 hover:shadow-lg active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
               إتمام الشراء
             </button>
           </div>
@@ -91,7 +91,7 @@
         <div class="flex flex-col gap-4">
           <span class="flex justify-between items-center">
             <h4 class="text-yellow-600 font-semibold">المجموع الفرعي</h4>
-            <p class="text-gray-700">{{ calculateSubTotal }}  د.أ</p>
+            <p class="text-gray-700">{{ calculateSubTotal }} د.أ</p>
           </span>
           <span class="flex justify-between items-center">
             <h4 class="text-yellow-600 font-semibold">رسوم الشحن</h4>
@@ -109,18 +109,22 @@
             placeholder="كود الخصم"
             class="bg-amber-50 placeholder-yellow-600 border border-amber-200 rounded-md w-full px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-600 transition-all"
           />
-          <button class="w-full mt-4 py-2 text-sm bg-amber-100 rounded-md text-yellow-600 font-semibold hover:bg-amber-200 transition-all active:scale-95">
+          <button
+            @click="applyCoupon"
+            class="w-full mt-4 py-2 text-sm bg-amber-100 rounded-md text-yellow-600 font-semibold hover:bg-amber-200 transition-all active:scale-95"
+          >
             تطبيق
           </button>
-          <button class="w-full mt-4 py-2 text-sm bg-gray-800 rounded-md text-white font-semibold hover:shadow-lg transition-all active:scale-95">
+          <button
+            :disabled="!selectedAddress"
+            class="w-full mt-4 py-2 text-sm bg-gray-800 rounded-md text-white font-semibold hover:shadow-lg transition-all active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed"
+          >
             إتمام الشراء الكلي
           </button>
         </div>
       </section>
     </div>
-    <div class="w-full mt-8">
-      <Swiper :products="Suggestions" />
-    </div>
+
     <!-- Toast for notifications -->
     <Toast />
   </div>
@@ -128,21 +132,24 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import Swiper from '../components/SwiperSlide/productsSwiper.vue';
 import imge3 from '../imges/prand 1.png';
 import { useI18n } from 'vue-i18n';
 import axios from 'axios';
 import Toast from 'primevue/toast';
-import { useToast } from 'primevue/usetoast'
-
+import { useToast } from 'primevue/usetoast';
 
 const { t } = useI18n();
 const selectedOption = ref('Store 1');
 const couponCode = ref('');
-const shippingFee = ref(5);
+const shippingFee = ref(0);
 const products = ref([]);
 const loading = ref(true);
 const toast = useToast();
+const subTotal = ref(0);
+const total = ref(0);
+const addresses = ref([]);
+const selectedAddress = ref(null);
+const isExpressed = ref(false);
 
 const options = [
   { label: 'المتجر 1', value: 'Store 1' },
@@ -150,17 +157,42 @@ const options = [
   { label: 'المتجر 3', value: 'Store 3' },
 ];
 
+const fetchAddresses = async () => {
+  try {
+    const response = await axios.get('/api/address');
+    if (response.data.is_success) {
+      addresses.value = response.data.data.data;
+      if (addresses.value.length > 0) {
+        selectedAddress.value = addresses.value[0].id; // Select first address by default
+      }
+    }
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'خطأ',
+      detail: 'فشل تحميل العناوين',
+      life: 3000
+    });
+    console.error('Error fetching addresses:', error);
+  }
+};
+
 const fetchCart = async () => {
   try {
     loading.value = true;
     const response = await axios.get('/api/cart');
-    products.value = response.data.data.map(item => ({
-      id: item.id,
-      name: item.name,
-      img: item.img || imge3, // Fallback to default image if none provided
-      price: parseFloat(item.price),
-      quantity: item.quantity
-    }));
+    if (response.data.is_success) {
+      products.value = response.data.data.items.map(item => ({
+        id: item.id,
+        product_id: item.product.id,
+        variant_id: item.variant.id,
+        name: item.product.name_ar || item.product.name_en,
+        img: item.product.key_default_image || imge3,
+        price: parseFloat(item.variant.price) || parseFloat(item.product.base_price) || 0.00,
+        quantity: item.quantity
+      }));
+      await fetchOrderTotals();
+    }
   } catch (error) {
     toast.add({
       severity: 'error',
@@ -174,10 +206,97 @@ const fetchCart = async () => {
   }
 };
 
-const removeProduct = async (id) => {
+const fetchOrderTotals = async () => {
   try {
-    await axios.delete(`/api/cart/${id}`);
+    const payload = {
+      is_expressed: isExpressed.value,
+      address_id: selectedAddress.value,
+      view: true,
+      items: products.value.map(product => ({
+        product_id: product.product_id,
+        variant_id: product.variant_id,
+        quantity: product.quantity
+      }))
+    };
+    if (couponCode.value) {
+      payload.coupon = couponCode.value;
+    }
+    const response = await axios.post('/api/order/view', payload);
+    if (response.data.is_success) {
+      subTotal.value = parseFloat(response.data.data.subtotal || 0).toFixed(2);
+      shippingFee.value = parseFloat(response.data.data.shipping_fee || 0).toFixed(2);
+      total.value = parseFloat(response.data.data.total || 0).toFixed(2);
+    }
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'خطأ',
+      detail: 'فشل تحميل إجمالي الطلب',
+      life: 3000
+    });
+    console.error('Error fetching order totals:', error);
+  }
+};
+
+const applyCoupon = async () => {
+  try {
+    await fetchOrderTotals();
+    toast.add({
+      severity: 'success',
+      summary: 'نجاح',
+      detail: 'تم تطبيق كود الخصم',
+      life: 3000
+    });
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'خطأ',
+      detail: 'فشل تطبيق كود الخصم',
+      life: 3000
+    });
+    console.error('Error applying coupon:', error);
+  }
+};
+
+const updateQuantity = async (type, id, product_id, variant_id, quantity) => {
+  const product = products.value.find((p) => p.id === id);
+  if (!product) return;
+
+  try {
+    if (type === 'plus') {
+      await axios.post(`/api/cart/update`, {
+        product_id: product_id,
+        variant_id: variant_id,
+        quantity: quantity + 1
+      });
+      product.quantity += 1;
+    } else if (type === 'minus' && product.quantity > 1) {
+      await axios.post(`/api/cart/update`, {
+        product_id: product_id,
+        variant_id: variant_id,
+        quantity: quantity - 1
+      });
+      product.quantity -= 1;
+    }
+    await fetchOrderTotals();
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'خطأ',
+      detail: `فشل ${type === 'plus' ? 'زيادة' : 'تقليل'} الكمية`,
+      life: 3000
+    });
+    console.error(`Error ${type === 'plus' ? 'increasing' : 'decreasing'} quantity:`, error);
+  }
+};
+
+const clearProduct = async (id, product_id, variant_id) => {
+  try {
+    await axios.delete(`/api/cart/clear`, {
+      data: { product_id, variant_id }
+    });
     products.value = products.value.filter((product) => product.id !== id);
+    await fetchOrderTotals();
     toast.add({
       severity: 'success',
       summary: 'نجاح',
@@ -191,68 +310,20 @@ const removeProduct = async (id) => {
       detail: 'فشل إزالة المنتج من السلة',
       life: 3000
     });
-    console.error('Error removing product:', error);
-  }
-};
-
-const updateQuantity = async (type, id) => {
-  const product = products.value.find((p) => p.id === id);
-  if (!product) return;
-
-  const newQuantity = type === 'plus' ? product.quantity + 1 : product.quantity - 1;
-  if (newQuantity < 1) return;
-
-  try {
-    await axios.put(`/api/cart/${id}`, { quantity: newQuantity });
-    product.quantity = newQuantity;
-    toast.add({
-      severity: 'success',
-      summary: 'نجاح',
-      detail: 'تم تحديث الكمية بنجاح',
-      life: 3000
-    });
-  } catch (error) {
-    toast.add({
-      severity: 'error',
-      summary: 'خطأ',
-      detail: 'فشل تحديث الكمية',
-      life: 3000
-    });
-    console.error('Error updating quantity:', error);
+    console.error('Error clearing product:', error);
   }
 };
 
 const calculateSubTotal = computed(() => {
-  return products.value.reduce((total, product) => total + product.price * product.quantity, 0).toFixed(2);
+  return subTotal.value;
 });
 
 const calculateTotal = computed(() => {
-  return (parseFloat(calculateSubTotal.value) + shippingFee.value).toFixed(2);
-});
-
-class Data {
-  constructor(name = 'بدون اسم', img = imge3, price = '15.00') {
-    this.name = name;
-    this.img = img;
-    this.price = price;
-  }
-}
-
-const Suggestions = ref({
-  title: t('category.suggestions'),
-  products: [
-    new Data('منتج', imge3, '15.00'),
-    new Data('منتج', imge3, '25.00'),
-    new Data('منتج', imge3, '35.00'),
-    new Data('منتج', imge3, '45.00'),
-    new Data('منتج', imge3, '15.00'),
-    new Data('منتج', imge3, '25.00'),
-    new Data('منتج', imge3, '35.00'),
-    new Data('منتج', imge3, '45.00'),
-  ],
+  return total.value;
 });
 
 onMounted(() => {
+  fetchAddresses();
   fetchCart();
 });
 </script>

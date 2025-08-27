@@ -181,7 +181,8 @@ export const useAuthStore = defineStore('Auth', {
         this.loading = false;
       }
     },
-    async verifyOtp({ email, phone, otp }) {
+
+       async verifyOtp({ email, phone, otp }) {
       this.authErrors['verifyOtp'] = [];
       this.loading = true;
       try {
@@ -190,6 +191,40 @@ export const useAuthStore = defineStore('Auth', {
         if (response.data.is_success) {
 
           this.verify = true;
+          setTimeout(() => {
+            if (this.verify) {
+              this.verify = false;
+              console.log('Verify state reset to false after 1 minute');
+            }
+          }, 1000);
+        } else {
+          this.authErrors['verifyOtp'] = ['Invalid OTP. Please try again.'];
+          return false;
+        }
+      } catch (error) {
+        if (error.response?.status === 422) {
+          this.authErrors['verifyOtp'] = error.response.data.errors
+            ? Object.values(error.response.data.errors).flat()
+            : ['Invalid OTP. Please check your input.'];
+        } else {
+          this.authErrors['verifyOtp'] = [error.response?.data?.message || 'OTP verification failed.'];
+        }
+        return false;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async verifyEmail({ email, phone, otp }) {
+
+      this.authErrors['verifyOtp'] = [];
+      this.loading = true;
+      try {
+        const payload = { email, phone, otp };
+        const response = await axios.post('/api/verify-email', payload);
+        if (response.data.is_success) {
+         this.router.push({ name: 'authlog' });
+
           setTimeout(() => {
             if (this.verify) {
               this.verify = false;

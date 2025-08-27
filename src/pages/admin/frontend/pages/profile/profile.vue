@@ -38,7 +38,6 @@
       </aside>
 
       <main class="flex-1">
-        <h1 class="text-2xl font-bold text-center text-gray-700 md:hidden mb-4">حسابي الشخصي</h1>
         <div class="bg-white rounded-xl shadow-md p-8">
           <!-- Loading spinner -->
           <div v-if="loading" class="flex justify-center items-center py-4">
@@ -49,6 +48,8 @@
           </div>
           <!-- Profile content -->
           <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
+           <h1 class="text-2xl font-bold col-span-2 text-center text-gray-700  mb-4">حسابي الشخصي</h1>
+
             <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- Account Overview -->
               <div class="bg-white border border-gray-200 rounded-xl p-6 flex flex-col items-start gap-4 shadow-sm">
@@ -91,7 +92,7 @@
                 <div v-else class="text-gray-600">
                   <p class="mb-1">لا يوجد عنوان رئيسي</p>
                 </div>
-                <button @click="router.push({ name: 'addresses' })" class="w-full mt-4 py-3 px-6 bg-transparent border border-blue-500 text-blue-500 rounded-xl font-medium hover:bg-blue-50 transition-colors duration-200">
+                <button @click="router.push({ name: 'add-addres' })" class="w-full mt-4 py-3 px-6 bg-transparent border border-blue-500 text-blue-500 rounded-xl font-medium hover:bg-blue-50 transition-colors duration-200">
                   إضافة عنوان جديد
                 </button>
               </div>

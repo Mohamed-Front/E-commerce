@@ -67,6 +67,20 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../pages/admin/frontend/pages/stores.vue'),
       },
       {
+        name: 'favorites',
+        path: '/favorites',
+        component: () => import('../pages/admin/frontend/pages/favorites.vue'),
+         beforeEnter: (to, from, next) => {
+          const isAuthenticated = localStorage.getItem('authenticatedweb') === 'true';
+          if (isAuthenticated) {
+            next();
+          } else {
+            next({ name: 'authlog' });
+          }
+        },
+      },
+
+      {
         name: 'editprofile',
         path: '/edit-profile',
         component: () => import('../pages/admin/frontend/pages/profile/EditProfile.vue'),
@@ -83,6 +97,23 @@ const routes: Array<RouteRecordRaw> = [
         name: 'addres',
         path: '/addres',
         component: () => import('../pages/admin/frontend/pages/profile/adress.vue'),
+        beforeEnter: (to, from, next) => {
+          const isAuthenticated = localStorage.getItem('authenticatedweb') === 'true';
+          if (isAuthenticated) {
+            next();
+          } else {
+            next({ name: 'authlog' });
+          }
+        },
+      },
+       {
+        name: 'add-addres',
+        path: '/add-addres',
+         props: (route) => ({
+           id: route.query.id,
+
+        }),
+        component: () => import('../pages/admin/frontend/pages/profile/add-addres.vue'),
         beforeEnter: (to, from, next) => {
           const isAuthenticated = localStorage.getItem('authenticatedweb') === 'true';
           if (isAuthenticated) {
@@ -360,6 +391,12 @@ const routes: Array<RouteRecordRaw> = [
             path: 'setting',
             component: () => import('../pages/admin/settings/setting/update.vue'),
           },
+            {
+            name: 'template-notification',
+            path: 'template-notification',
+            component: () => import('../pages/admin/template-notification/index.vue'),
+          },
+
           {
             name: 'attributes',
             path: 'attributes',

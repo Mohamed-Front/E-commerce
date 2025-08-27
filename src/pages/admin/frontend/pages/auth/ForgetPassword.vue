@@ -86,7 +86,7 @@ const router = useRouter()
 const authStore = useAuthStore();
 const selectedTab = ref('phone');
 const phoneNumber = ref('');
-const countryCode = ref('');
+const countryCode = ref('+20');
 const email = ref('');
 
 const countries = [

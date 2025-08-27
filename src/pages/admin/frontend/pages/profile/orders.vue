@@ -1,8 +1,6 @@
 <template>
   <div class="min-h-screen p-8 font-tajawal">
-    <h1 class="text-2xl font-bold text-center mb-8 text-gray-700">طلباتي</h1>
     <div class="max-w-6xl mx-auto flex flex-col md:flex-row gap-6">
-
       <aside class="w-full md:w-64 bg-white rounded-xl shadow-md p-6 h-fit">
         <ul class="space-y-2">
           <li
@@ -70,6 +68,7 @@
       </aside>
 
       <main class="flex-1 bg-white rounded-xl shadow-md p-8">
+
         <div v-if="loading" class="text-center text-gray-500">جاري تحميل الطلبات...</div>
 
         <div v-if="error" class="text-center text-red-500">
@@ -87,7 +86,9 @@
           لا توجد طلبات مسجلة بعد
         </div>
 
-        <div v-if=" orders " class="space-y-6">
+        <div v-if="orders.length > 0" class="space-y-6">
+              <h1 class="text-2xl font-bold text-center mb-4 text-gray-700">طلباتي</h1>
+
           <div
             v-for="order in orders"
             :key="order.id"
@@ -100,7 +101,7 @@
                 class="bg-gray-100 rounded-lg p-2 w-16 h-16 flex items-center justify-center"
               >
                 <img
-                  :src="item.product.key_default_image || 'https://placehold.co/40x40/f1f1e7/585858?text=🍲'"
+                  :src="getProductImage(item.product)"
                   :alt="item.product.name_ar || 'صورة المنتج'"
                   class="w-full h-full object-contain"
                 />
@@ -119,7 +120,6 @@
               </p>
               <p class="text-gray-500 text-sm">رقم الطلب #{{ order.id }}</p>
             </div>
-
           </div>
         </div>
 
@@ -200,6 +200,14 @@ const getStatusMessage = (status, createdAt, cancelledAt) => {
   }
 };
 
+// Get product image, prioritizing media array if available
+const getProductImage = (product) => {
+  if (product.media && product.media.length > 0) {
+    return product.media[0].url;
+  }
+  return product.key_default_image || 'https://placehold.co/40x40/f1f1e7/585858?text=🍲';
+};
+
 // Extract page number from URL
 const getPageNumber = (url) => {
   if (!url) return null;
@@ -211,30 +219,24 @@ const getPageNumber = (url) => {
   }
 };
 
-// Fetch orders from API
+// Fetch orders from API with page and limit parameters
 const fetchOrders = async (page = 1) => {
   try {
     loading.value = true;
     error.value = null;
-    const response = await axios.get(`/api/profile/orders?page=${page}`);
-      orders.value =response.data.data.orders.data;
-    if (response.data.data.orders) {
-
-      pagination.value = {
-        current_page: response.data.data.orders.current_page || 1,
-        last_page: response.data.data.orders.last_page || 1,
-        links: response.data.data.orders.links || [],
-      };
-    } else {
-      throw new Error('Invalid API response format');
-    }
+    const response = await axios.get(`/api/profile/orders?page=${page}&limit=4`);
+    orders.value = response.data.data.data;
+    pagination.value = {
+      current_page: response.data.data.current_page || 1,
+      last_page: response.data.data.last_page || 1,
+      links: response.data.data.links || [],
+    };
   } catch (err) {
     error.value =
       err.response?.status === 404
         ? 'لا توجد طلبات متاحة'
         : 'فشل في تحميل الطلبات، يرجى المحاولة لاحقًا';
     console.error('Error fetching orders:', err);
-
   } finally {
     loading.value = false;
   }

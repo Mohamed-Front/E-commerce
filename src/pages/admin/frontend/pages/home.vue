@@ -54,14 +54,8 @@
       <section class="mx-auto mt-16 w-[100%] max-w-7xl">
 
 
-        <!-- more products -->
-        <!-- Exclusive_offers -->
-        <productsSwiper v-if="exclusive_offers.length >=1" :products="exclusive_offers" />
-        <!-- best_seller -->
-        <productsSwiper :products="Best_seller" />
-        <!-- New_arrival -->
-        <productsSwiper :products="New_arrival" />
 
+        <ProductOffers></ProductOffers>
 
       </section>
        <CustomTaps></CustomTaps>
@@ -71,7 +65,7 @@
 
 <script setup>
   import { onBeforeMount, ref, computed } from 'vue'
-
+   import ProductOffers from '../components/ProductOffers.vue'
   import axios from 'axios'
   import { Swiper, SwiperSlide } from 'swiper/vue'
   import { Autoplay, Navigation } from 'swiper/modules'
@@ -121,80 +115,12 @@
     return Object.values(titels.value)
   })
 
-  const fetchBestSeller = async () => {
-    try {
-      const response = await axios.get(`api/home/best-sellers/${stor_id.value}`)
-      const data = response.data.data.data || []
-    Best_seller.value = {
-        title: t('category.bestsellers') || 'New Arrivals',
-        products: data.map((product) => ({
-          id: product.id,
-          sub_name: locale.value === 'ar' ? product.sub_name_ar || product.sub_name_en : product.sub_name_en || product.sub_name_ar,
-          name: locale.value === 'ar' ? product.name_ar : product.name_en,
-          price: parseFloat(product.base_price).toFixed(2),
-          img: product.media.find((media) => media.name === 'product_main_image')?.url || product.key_default_image,
-        }))
-      }
-    } catch (err) {
-      console.error('Error fetching new arrivals:', err)
-      error.value = t('category.errorLoading') || 'Failed to load new arrivals.'
-    } finally {
-      isLoading.value = false
-    }
-  }
-    const fetchNewArrivals = async () => {
-    isLoading.value = true
-    error.value = null
-    try {
-      const response = await axios.get(`api/home/new-arrivals/${stor_id.value}`)
-      const data = response.data.data.data || []
-      New_arrival.value = {
-        title: t('category.newlyarrived') || 'New Arrivals',
-        products: data.map((product) => ({
-          id: product.id,
-          sub_name: locale.value === 'ar' ? product.sub_name_ar || product.sub_name_en : product.sub_name_en || product.sub_name_ar,
-          name: locale.value === 'ar' ? product.name_ar : product.name_en,
-          price: parseFloat(product.base_price).toFixed(2),
-          img: product.media.find((media) => media.name === 'product_main_image')?.url || product.key_default_image,
 
-        })),
-      }
-    } catch (err) {
-      console.error('Error fetching new arrivals:', err)
-      error.value = t('category.errorLoading') || 'Failed to load new arrivals.'
-    } finally {
-      isLoading.value = false
-    }
-  }
-    const fetchExclusiveOffers = async () => {
-    isLoading.value = true
-    error.value = null
-    try {
-      const response = await axios.get(`api/home/exclusive-offers/${stor_id.value}`)
-      const data = response.data.data || []
-      exclusive_offers.value = {
-        title: t('category.exclusive') || 'New Arrivals',
-        products: data.map((product) => ({
-          id: product.id,
-          sub_name: locale.value === 'ar' ? product.sub_name_ar || product.sub_name_en : product.sub_name_en || product.sub_name_ar,
-          name: locale.value === 'ar' ? product.name_ar : product.name_en,
-          price: parseFloat(product.base_price).toFixed(2),
-          img: product.media.find((media) => media.name === 'product_main_image')?.url || product.key_default_image,
 
-        })),
-      }
-    } catch (err) {
-      console.error('Error fetching new arrivals:', err)
-      error.value = t('category.errorLoading') || 'Failed to load new arrivals.'
-    } finally {
-      isLoading.value = false
-    }
-  }
+
   const goCatgory =(data)=>{
 
            router.push({name:'subcategory',params:{id:data.id}})
-
-
   }
   const loaddata = async () => {
     try {
@@ -232,7 +158,7 @@
   }
 
   onBeforeMount(async () => {
-    await Promise.all([fetchNewArrivals() ,fetchBestSeller(),loaddata(),fetchExclusiveOffers()])
+    await Promise.all([loaddata(),])
   });
 </script>
 

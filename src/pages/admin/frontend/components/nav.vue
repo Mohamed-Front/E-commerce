@@ -44,43 +44,6 @@
 
         <!-- Right Icons -->
         <div class="flex items-center gap-2">
-          <span @click="router.push({ name: 'Cart' })" class="icon-container bg-[#E6AC31] cursor-pointer hover:bg-[#d89b2a] transition-colors">
-            <svg width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path fill-rule="evenodd" clip-rule="evenodd" d="M17.3547 4.09922C17.2359 3.95709 17.0602 3.87497 16.875 3.875H4.27187L3.88984 1.77656C3.78186 1.18219 3.26426 0.750087 2.66016 0.75H2.66016C0.904822 0.75 0.625 1.02982 0.625 1.375C0.625 1.72018 0.904822 2 1.25 2H2.65625L4.65312 12.9602C4.71195 13.2852 4.8556 13.5889 5.06953 13.8406C4.24996 14.6061 4.14205 15.8674 4.81967 16.761C5.49729 17.6546 6.74093 17.891 7.69916 17.3084C8.6574 16.7257 9.01981 15.5128 8.53828 14.5H12.0867C11.9469 14.7927 11.8745 15.1131 11.875 15.4375C11.875 16.6456 12.8544 17.625 14.0625 17.625C15.2706 17.625 16.25 16.6456 16.25 15.4375C16.25 14.2294 15.2706 13.25 14.0625 13.25H6.49766C6.1956 13.25 5.9368 13.0339 5.88281 12.7367L5.63516 11.375H14.6977C15.6038 11.3749 16.3802 10.7267 16.5422 9.83516L17.4922 4.61172C17.5247 4.42894 17.4744 4.24115 17.3547 4.09922ZM7.5 15.4375C7.5 15.9553 7.08027 16.375 6.5625 16.375C6.04473 16.375 5.625 15.9553 5.625 15.4375C5.625 14.9197 6.04473 14.5 6.5625 14.5C7.08027 14.5 7.5 14.9197 7.5 15.4375ZM15 15.4375C15 15.9553 14.5803 16.375 14.0625 16.375C13.5447 16.375 13.125 15.9553 13.125 15.4375C13.125 14.9197 13.5447 14.5 14.0625 14.5C14.5803 14.5 15 14.9197 15 15.4375ZM15.3125 9.61172C15.2584 9.90978 14.9982 10.1261 14.6953 10.125H5.40781L4.49922 5.125H16.1258L15.3125 9.61172Z" fill="white"/>
-            </svg>
-          </span>
-          <!-- User Dropdown for Mobile -->
-          <div class="relative">
-            <span class="icon-container bg-[#F2EDDE] cursor-pointer hover:bg-gray-200 transition-colors" @click.stop="toggleUserDropdown">
-              <i class="fa-solid fa-user text-black"></i>
-            </span>
-            <transition name="dropdown-fancy">
-              <div
-                v-if="isUserDropdownOpen && isAuthenticated"
-                class="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl z-50 overflow-hidden dropdown-fancy"
-                ref="userDropdown"
-              >
-                <div class="px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-amber-50 to-amber-100">
-                  <p class="text-sm font-semibold text-gray-700">{{ webUser.name }}</p>
-                  <p class="text-xs text-gray-500">{{ webUser.phone }}</p>
-                </div>
-                <div
-                  @click="router.push({ name: 'profile' })"
-                  class="flex items-center px-4 py-3 transition-all duration-200 cursor-pointer dropdown-item"
-                >
-                  <i class="fa-solid fa-user-circle text-amber-600 mx-2"></i>
-                  <span class="text-sm text-gray-700 mx-2">{{ $t('profile') }}</span>
-                </div>
-                <div
-                  @click="logout"
-                  class="flex items-center px-4 py-3 transition-all duration-200 cursor-pointer dropdown-item"
-                >
-                  <i class="fa-solid fa-sign-out-alt text-amber-600 mx-2"></i>
-                  <span class="text-sm text-gray-700 mx-2">{{ $t('logout') }}</span>
-                </div>
-              </div>
-            </transition>
-          </div>
           <span class="icon-container bg-[#F2EDDE] cursor-pointer hover:bg-gray-200 transition-colors" @click="toggleLang">
             <svg width="8" height="12" viewBox="0 0 9 13" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M0.509563 12.5V0.579999H8.18956V1.78H1.78956V5.924H7.86956V7.124H1.78956V11.3H8.18956V12.5H0.509563Z" fill="black"/>
@@ -169,6 +132,10 @@
               <path fill-rule="evenodd" clip-rule="evenodd" d="M17.3547 4.09922C17.2359 3.95709 17.0602 3.87497 16.875 3.875H4.27187L3.88984 1.77656C3.78186 1.18219 3.26426 0.750087 2.66016 0.75H2.66016C0.904822 0.75 0.625 1.02982 0.625 1.375C0.625 1.72018 0.904822 2 1.25 2H2.65625L4.65312 12.9602C4.71195 13.2852 4.8556 13.5889 5.06953 13.8406C4.24996 14.6061 4.14205 15.8674 4.81967 16.761C5.49729 17.6546 6.74093 17.891 7.69916 17.3084C8.6574 16.7257 9.01981 15.5128 8.53828 14.5H12.0867C11.9469 14.7927 11.8745 15.1131 11.875 15.4375C11.875 16.6456 12.8544 17.625 14.0625 17.625C15.2706 17.625 16.25 16.6456 16.25 15.4375C16.25 14.2294 15.2706 13.25 14.0625 13.25H6.49766C6.1956 13.25 5.9368 13.0339 5.88281 12.7367L5.63516 11.375H14.6977C15.6038 11.3749 16.3802 10.7267 16.5422 9.83516L17.4922 4.61172C17.5247 4.42894 17.4744 4.24115 17.3547 4.09922ZM7.5 15.4375C7.5 15.9553 7.08027 16.375 6.5625 16.375C6.04473 16.375 5.625 15.9553 5.625 15.4375C5.625 14.9197 6.04473 14.5 6.5625 14.5C7.08027 14.5 7.5 14.9197 7.5 15.4375ZM15 15.4375C15 15.9553 14.5803 16.375 14.0625 16.375C13.5447 16.375 13.125 15.9553 13.125 15.4375C13.125 14.9197 13.5447 14.5 14.0625 14.5C14.5803 14.5 15 14.9197 15 15.4375ZM15.3125 9.61172C15.2584 9.90978 14.9982 10.1261 14.6953 10.125H5.40781L4.49922 5.125H16.1258L15.3125 9.61172Z" fill="white"/>
             </svg>
           </span>
+          <!-- Favorites Icon -->
+          <span @click="router.push({ name: 'favorites' })" class="icon-container bg-[#F2EDDE] cursor-pointer hover:bg-gray-200 transition-colors">
+            <i class="fa-solid fa-heart text-black"></i>
+          </span>
           <span class="icon-container bg-[#F2EDDE] cursor-pointer hover:bg-gray-200 transition-colors" @click="toggleLang">
             <svg width="9" height="13" viewBox="0 0 9 13" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M0.509563 12.5V0.579999H8.18956V1.78H1.78956V5.924H7.86956V7.124H1.78956V11.3H8.18956V12.5H0.509563Z" fill="black"/>
@@ -185,13 +152,13 @@
           <i class="fa-solid fa-house text-lg mb-0.5"></i>
           <span class="text-[10px]">{{ $t('الرئيسية') }}</span>
         </div>
-        <div @click="router.push('/categories')" class="flex flex-col items-center justify-center text-gray-600 cursor-pointer hover:text-[#E6AC31] transition-colors">
-          <i class="fa-solid fa-grip text-lg mb-0.5"></i>
-          <span class="text-[10px]">{{ $t('الفئات') }}</span>
+        <div @click="router.push('/favorites')" class="flex flex-col items-center justify-center text-gray-600 cursor-pointer hover:text-[#E6AC31] transition-colors">
+          <i class="fa-solid fa-heart text-lg mb-0.5"></i>
+          <span class="text-[10px]">{{ $t('المفضلة') }}</span>
         </div>
-        <div @click="router.push('/fashion')" class="flex flex-col items-center justify-center text-gray-600 cursor-pointer hover:text-[#E6AC31] transition-colors">
-          <i class="fa-solid fa-shirt text-lg mb-0.5"></i>
-          <span class="text-[10px]">{{ $t('الموضة') }}</span>
+        <div @click="router.push('/cart')" class="flex flex-col items-center justify-center text-gray-600 cursor-pointer hover:text-[#E6AC31] transition-colors">
+          <i class="fa-solid fa-cart-shopping text-lg mb-0.5"></i>
+          <span class="text-[10px]">{{ $t('السلة') }}</span>
         </div>
         <div
           @click="UserPage"
@@ -213,7 +180,9 @@
 import { useRouter, useRoute } from 'vue-router';
 import { ref, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
+import { useAuthStore } from '../../../../stores/WebAuth';
 
+const authStore = useAuthStore();
 const stores = ref([]);
 const router = useRouter();
 const isDropdownOpen = ref(false);
@@ -226,7 +195,6 @@ const webUser = ref({});
 
 // Refs for dropdown elements
 const storesDropdown = ref(null);
-const userDropdown = ref(null);
 const userDropdownDesktop = ref(null);
 
 // Helper function to get the store image URL
@@ -308,12 +276,7 @@ const UserPage = () => {
 };
 
 const logout = () => {
-  localStorage.removeItem('authenticatedweb');
-  localStorage.removeItem('webUser');
-  isAuthenticated.value = false;
-  webUser.value = {};
-  isUserDropdownOpen.value = false;
-  router.push({ name: 'authlog' });
+     authStore.handleLogout()
 };
 
 // Click outside handler
@@ -324,15 +287,6 @@ const handleClickOutside = (event) => {
     const storeIcon = event.target.closest('.icon-container');
     if (!storeIcon || !storeIcon.querySelector('.fa-store')) {
       isDropdownOpen.value = false;
-    }
-  }
-
-  // Check if click is outside user dropdown (mobile)
-  if (isUserDropdownOpen.value && userDropdown.value && !userDropdown.value.contains(event.target)) {
-    // Check if click is on the user icon
-    const userIcon = event.target.closest('.icon-container');
-    if (!userIcon || !userIcon.querySelector('.fa-user')) {
-      isUserDropdownOpen.value = false;
     }
   }
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-auto bg-gradient-to mt-16 max-w-7xl px-4 sm:px-6 lg:px-8">
+  <div class="mx-auto bg-gradient-to mt-16 max-w-7xl   ">
     <!-- Loading State -->
    <!-- Fancy Loading State -->
     <div v-if="isLoading" class="py-16">
@@ -46,7 +46,7 @@
             320: { slidesPerView: 1, spaceBetween: 8 },
             640: { slidesPerView: 2, spaceBetween: 12 },
             768: { slidesPerView: 2, spaceBetween: 16 },
-            1024: { slidesPerView: 4, spaceBetween: 20 }
+            1024: { slidesPerView: 5.5, spaceBetween: 20 }
           }"
         >
           <SwiperSlide
@@ -97,26 +97,7 @@
         />
 
 
-        <productsSwiper
-          :products="subCategoryProducts"
-          :title="exclusiveOffers.title"
-        />
-        <!-- Other Product Sections -->
-        <productsSwiper
-          v-if="exclusiveOffers.products.length"
-          :products="exclusiveOffers"
-          :title="exclusiveOffers.title"
-        />
-        <productsSwiper
-          v-if="bestSellers.products.length"
-          :products="bestSellers"
-          :title="bestSellers.title"
-        />
-        <productsSwiper
-          v-if="newArrivals.products.length"
-          :products="newArrivals"
-          :title="newArrivals.title"
-        />
+        <ProductOffers></ProductOffers>
       </section>
 
       <!-- Second Banner Section -->
@@ -151,6 +132,7 @@ import defaultCategoryImage from '../../imges/banner-addtion.png';
 import defaultProductImage from '../../imges/banner-addtion.png';
 import axios from 'axios';
 import CustomTaps from '../../components/CustomTaps.vue';
+import ProductOffers from '../../components/ProductOffers.vue';
 
 // Initialize Vue utilities
 const route = useRoute();
@@ -163,8 +145,7 @@ const category = ref({});
 const subCategories = ref([]);
 const categoryProducts = ref({ title: '', products: [] });
 const subCategoryProducts = ref([]);
-const bestSellers = ref({ title: '', products: [] });
-const newArrivals = ref({ title: '', products: [] });
+
 const exclusiveOffers = ref({ title: '', products: [] });
 const isLoading = ref(false);
 const error = ref(null);
@@ -245,68 +226,9 @@ const fetchSubCategoryProducts = async () => {
   }
 };
 
-// Fetch Best Sellers
-const fetchBestSellers = async () => {
-  try {
-    const response = await axios.get(`/api/home/best-sellers/${storeId.value}`);
-    const data = response.data.data.data || [];
-    bestSellers.value = {
-      title: t('category.bestsellers') || 'Best Sellers',
-      products: data.map(product => ({
-        id: product.id,
-        name: locale.value === 'ar' ? product.name_ar || product.name_en : product.name_en || product.name_ar,
-        tax: product.tax || 0,
-        price: parseFloat(product.base_price || 0).toFixed(2),
-        img: product.media?.find(media => media.name === 'product_main_image')?.url || product.key_default_image || defaultProductImage,
-      })),
-    };
-  } catch (err) {
-    console.error('Error fetching best sellers:', err);
-    error.value = t('category.errorLoading') || 'Failed to load best sellers.';
-  }
-};
 
-// Fetch New Arrivals
-const fetchNewArrivals = async () => {
-  try {
-    const response = await axios.get(`/api/home/new-arrivals/${storeId.value}`);
-    const data = response.data.data.data || [];
-    newArrivals.value = {
-      title: t('category.newlyarrived') || 'New Arrivals',
-      products: data.map(product => ({
-        id: product.id,
-        name: locale.value === 'ar' ? product.name_ar || product.name_en : product.name_en || product.name_ar,
-        tax: product.tax || 0,
-        price: parseFloat(product.base_price || 0).toFixed(2),
-        img: product.media?.find(media => media.name === 'product_main_image')?.url || product.key_default_image || defaultProductImage,
-      })),
-    };
-  } catch (err) {
-    console.error('Error fetching new arrivals:', err);
-    error.value = t('category.errorLoading') || 'Failed to load new arrivals.';
-  }
-};
 
-// Fetch Exclusive Offers
-const fetchExclusiveOffers = async () => {
-  try {
-    const response = await axios.get(`/api/home/exclusive-offers/${storeId.value}`);
-    const data = response.data.data || [];
-    exclusiveOffers.value = {
-      title: t('category.exclusive') || 'Exclusive Offers',
-      products: data.map(product => ({
-        id: product.id,
-        name: locale.value === 'ar' ? product.name_ar || product.name_en : product.name_en || product.name_ar,
-        tax: product.tax || 0,
-        price: parseFloat(product.base_price || 0).toFixed(2),
-        img: product.media?.find(media => media.name === 'product_main_image')?.url || product.key_default_image || defaultProductImage,
-      })),
-    };
-  } catch (err) {
-    console.error('Error fetching exclusive offers:', err);
-    error.value = t('category.errorLoading') || 'Failed to load exclusive offers.';
-  }
-};
+
 
 // Fetch all data
 const fetchAllData = async () => {
@@ -314,9 +236,7 @@ const fetchAllData = async () => {
   error.value = null;
   await Promise.allSettled([
     fetchCategoryData(),
-    fetchBestSellers(),
-    fetchNewArrivals(),
-    fetchExclusiveOffers(),
+
   ]);
   if (subCategories.value.length) {
     await fetchSubCategoryProducts();

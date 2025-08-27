@@ -157,7 +157,7 @@ export default {
      {
       name: 'custom_tabs',
       displayName: 'navigation.custom_tabs',
-      show: ['dashboard'],
+      show: ['list custom tabs'],
       meta: {
         icon: 'dashboard',
       },
@@ -165,11 +165,20 @@ export default {
      {
       name: 'order',
       displayName: 'navigation.orders',
-      show: ['dashboard'],
+      show: ['list orders'],
       meta: {
         icon: 'dashboard',
       },
     },
+      {
+      name: 'template-notification',
+      displayName: 'navigation.notification',
+      show: ['list notification-templates'],
+      meta: {
+        icon: 'dashboard',
+      },
+    },
+
     {
       name: 'setting',
       displayName: 'navigation.settings',

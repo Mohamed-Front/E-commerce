@@ -104,10 +104,9 @@ const handleVerification = async () => {
 
   if (otp) {
     try {
-      await authStore.verifyOtp({
+      await authStore.verifyEmail({
         email: props.email,
         phone: props.phone,
-
         otp,
       });
       // Navigation is handled in the store

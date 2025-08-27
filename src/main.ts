@@ -276,11 +276,7 @@ else
 document.body.dir ="ltr"
 app.directive('can', (el, binding, vnode) =>{
   // console.log(JSON.parse(localStorage.getItem('permissions')))
-  if (! JSON.parse(localStorage.getItem('userPermissions'))
-      .includes(binding.value)) {
-      // console.log(vnode)
-      el.style.display = "none";
-  }
+
 
 })
 

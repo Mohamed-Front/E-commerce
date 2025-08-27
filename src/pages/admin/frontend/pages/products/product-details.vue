@@ -142,9 +142,8 @@
     </section>
 
     <section class="mt-8">
-      <productsSwiper v-if="exclusive_offers.products.length >= 1" :products="exclusive_offers" />
-      <productsSwiper :products="Best_seller" />
-      <productsSwiper :products="New_arrival" />
+      <ProductOffers></ProductOffers>
+
     </section>
   </div>
 </template>
@@ -154,11 +153,9 @@ import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 import { useI18n } from 'vue-i18n'
-import productsSwiper from '../../components/SwiperSlide/productsSwiper.vue'
 import Rating from 'primevue/rating'
-import 'primevue/resources/themes/saga-blue/theme.css'
-import 'primevue/resources/primevue.min.css'
-import 'primeicons/primeicons.css'
+
+import ProductOffers from '../../components/ProductOffers.vue'
 
 const { t, locale } = useI18n()
 const route = useRoute()
@@ -219,79 +216,13 @@ const reviews = ref([
   },
 ])
 
-const toggleLike = (review) => {
-  review.reaction = review.reaction === 'like' ? null : 'like'
-}
 
-const toggleDislike = (review) => {
-  review.reaction = review.reaction === 'dislike' ? null : 'dislike'
-}
 
-const fetchBestSeller = async () => {
-  isLoading.value = true
-  try {
-    const response = await axios.get(`api/home/best-sellers/${stor_id.value}`)
-    Best_seller.value = {
-      title: t('category.bestsellers') || 'Best Sellers',
-      products: response.data.data.data.map((product) => ({
-        id: product.id,
-        sub_name: locale.value === 'ar' ? product.sub_name_ar || product.sub_name_en : product.sub_name_en || product.sub_name_ar,
-        name: locale.value === 'ar' ? product.name_ar : product.name_en,
-        price: parseFloat(product.base_price).toFixed(2),
-        img: product.media.find((media) => media.name === 'product_main_image')?.url || product.key_default_image,
-      })),
-    }
-  } catch (err) {
-    console.error('Error fetching best sellers:', err)
-    error.value = t('category.errorLoading') || 'Failed to load best sellers.'
-  } finally {
-    isLoading.value = false
-  }
-}
 
-const fetchNewArrivals = async () => {
-  isLoading.value = true
-  try {
-    const response = await axios.get(`api/home/new-arrivals/${stor_id.value}`)
-    New_arrival.value = {
-      title: t('category.newlyarrived') || 'New Arrivals',
-      products: response.data.data.data.map((product) => ({
-        id: product.id,
-        sub_name: locale.value === 'ar' ? product.sub_name_ar || product.sub_name_en : product.sub_name_en || product.sub_name_ar,
-        name: locale.value === 'ar' ? product.name_ar : product.name_en,
-        price: parseFloat(product.base_price).toFixed(2),
-        img: product.media.find((media) => media.name === 'product_main_image')?.url || product.key_default_image,
-      })),
-    }
-  } catch (err) {
-    console.error('Error fetching new arrivals:', err)
-    error.value = t('category.errorLoading') || 'Failed to load new arrivals.'
-  } finally {
-    isLoading.value = false
-  }
-}
 
-const fetchExclusiveOffers = async () => {
-  isLoading.value = true
-  try {
-    const response = await axios.get(`api/home/exclusive-offers/${stor_id.value}`)
-    exclusive_offers.value = {
-      title: t('category.exclusive') || 'Exclusive Offers',
-      products: response.data.data.map((product) => ({
-        id: product.id,
-        sub_name: locale.value === 'ar' ? product.sub_name_ar || product.sub_name_en : product.sub_name_en || product.sub_name_ar,
-        name: locale.value === 'ar' ? product.name_ar : product.name_en,
-        price: parseFloat(product.base_price).toFixed(2),
-        img: product.media.find((media) => media.name === 'product_main_image')?.url || product.key_default_image,
-      })),
-    }
-  } catch (err) {
-    console.error('Error fetching exclusive offers:', err)
-    error.value = t('category.errorLoading') || 'Failed to load exclusive offers.'
-  } finally {
-    isLoading.value = false
-  }
-}
+
+
+
 
 onMounted(async () => {
   // Ensure page scrolls to top on load
@@ -300,9 +231,7 @@ onMounted(async () => {
   try {
     const [productResponse] = await Promise.all([
       axios.get(`api/home/product-details/${route.params.id}`),
-      fetchNewArrivals(),
-      fetchBestSeller(),
-      fetchExclusiveOffers(),
+
     ])
     pro.value = productResponse.data.data.product
     variants_details.value = productResponse.data.data.variants_details
