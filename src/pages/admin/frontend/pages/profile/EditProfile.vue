@@ -1,4 +1,3 @@
-```vue
 <template>
   <!-- Main container with a light gray background and right-to-left direction for Arabic text -->
   <div class="min-h-screen p-8 font-inter">
@@ -30,7 +29,7 @@
             <span>دليل العناوين</span>
           </li>
           <!-- Logout link -->
-          <li  @click="authStore.handleLogout()"  class="p-3 rounded-lg flex items-center gap-4 text-red-500 hover:bg-gray-50 cursor-pointer">
+          <li @click="authStore.handleLogout()" class="p-3 rounded-lg flex items-center gap-4 text-red-500 hover:bg-gray-50 cursor-pointer">
             <svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M0 20V0H9V2.22222H2V17.7778H9V20H0ZM13 15.5556L11.625 13.9444L14.175 11.1111H6V8.88889H14.175L11.625 6.05556L13 4.44444L18 10L13 15.5556Z" fill="#FF1212"/>
             </svg>
@@ -54,12 +53,14 @@
         <!-- Profile Section -->
         <div v-else class="flex flex-col items-center gap-4 mb-8">
           <div class="flex items-center gap-4 flex-row-reverse">
-            <img class="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg" src="https://placehold.co/80x80/606c38/FFF" alt="User Profile Image" />
+            <img class="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg" :src="profileImage || 'https://placehold.co/80x80/606c38/FFF'" alt="User Profile Image" />
             <div class="text-center">
               <h3 class="font-bold text-lg text-gray-800">{{ username }}</h3>
-              <a href="#" class="text-blue-500 text-sm hover:underline">تغيير الصورة الشخصية</a>
+              <label for="profileImage" class="text-blue-500 text-sm hover:underline cursor-pointer">تغيير الصورة الشخصية</label>
+              <input type="file" id="profileImage" @change="handleImageChange" accept="image/*" class="hidden" />
             </div>
           </div>
+          <p v-if="errors.profileImage" class="text-red-500 text-sm mt-1">{{ errors.profileImage }}</p>
         </div>
 
         <!-- Form for updating user details -->
@@ -78,17 +79,18 @@
             </div>
           </div>
 
-          <!-- Password Input -->
+          <!-- Email Input -->
           <div>
-            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">كلمة المرور</label>
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">البريد الإلكتروني</label>
             <div class="relative rounded-md shadow-sm">
               <div class="absolute inset-y-0 left-0 ltr:right-0 px-3 flex items-center pointer-events-none">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2h2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2h2zm2-2a3 3 0 016 0v2H7V7zm6 3H7v5h6v-5z" clip-rule="evenodd" />
+                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                 </svg>
               </div>
-              <input type="password" id="password" v-model="password" class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200" :class="{ 'border-red-500': errors.password }" />
-              <p v-if="errors.password" class="text-red-500 text-sm mt-1">{{ errors.password }}</p>
+              <input type="email" id="email" v-model="email" class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200" :class="{ 'border-red-500': errors.email }" />
+              <p v-if="errors.email" class="text-red-500 text-sm mt-1">{{ errors.email }}</p>
             </div>
           </div>
 
@@ -122,13 +124,16 @@ import { useToast } from 'primevue/usetoast';
 import axios from 'axios';
 import Toast from 'primevue/toast';
 import { useAuthStore } from '../../../../../stores/WebAuth';
+
 const authStore = useAuthStore();
 // Reactive variables for form data
 const username = ref('');
-const password = ref('');
+const email = ref('');
 const phoneNumber = ref('');
+const profileImage = ref(null);
+const selectedImage = ref(null);
 const loading = ref(true);
-const errors = ref({ username: '', password: '', phoneNumber: '' });
+const errors = ref({ username: '', email: '', phoneNumber: '', profileImage: '' });
 
 // Router and route
 const router = useRouter();
@@ -138,14 +143,37 @@ const toast = useToast();
 // Computed property to check if the current route is 'profile' or 'editprofile'
 const isProfileRoute = computed(() => ['profile', 'editprofile'].includes(route.name));
 
+// Handle image selection
+const handleImageChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      errors.value.profileImage = 'يرجى تحميل ملف صورة صالح';
+      selectedImage.value = null;
+      return;
+    }
+    // Validate file size (e.g., max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      errors.value.profileImage = 'حجم الصورة يجب أن يكون أقل من 5 ميغابايت';
+      selectedImage.value = null;
+      return;
+    }
+    errors.value.profileImage = '';
+    selectedImage.value = file;
+    profileImage.value = URL.createObjectURL(file); // Preview the image
+  }
+};
+
 // Fetch profile data from API
 const fetchProfile = async () => {
   try {
     loading.value = true;
     const response = await axios.get('/api/profile');
     username.value = response.data.data.name || '';
+    email.value = response.data.data.email || '';
     phoneNumber.value = response.data.data.phone || '';
-    // Password is typically not returned by the API for security
+    profileImage.value = response.data.data.media[0].url || null; // Assuming API returns image URL
   } catch (error) {
     toast.add({
       severity: 'error',
@@ -161,15 +189,18 @@ const fetchProfile = async () => {
 
 // Validate form data
 const validateForm = () => {
-  errors.value = { username: '', password: '', phoneNumber: '' };
+  errors.value = { username: '', email: '', phoneNumber: '', profileImage: '' };
   let isValid = true;
 
   if (!username.value.trim()) {
     errors.value.username = 'اسم المستخدم مطلوب';
     isValid = false;
   }
-  if (password.value && password.value.length < 6) {
-    errors.value.password = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+  if (!email.value.trim()) {
+    errors.value.email = 'البريد الإلكتروني مطلوب';
+    isValid = false;
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+    errors.value.email = 'البريد الإلكتروني غير صالح';
     isValid = false;
   }
   if (!phoneNumber.value.trim()) {
@@ -179,7 +210,7 @@ const validateForm = () => {
     errors.value.phoneNumber = 'رقم الهاتف غير صالح';
     isValid = false;
   }
-
+  // Image validation already handled in handleImageChange
   return isValid;
 };
 
@@ -189,12 +220,25 @@ const saveChanges = async () => {
 
   try {
     loading.value = true;
-    const payload = {
-      username: username.value,
-      phone_number: phoneNumber.value,
-      ...(password.value && { password: password.value }) // Only send password if provided
-    };
-    await axios.put('/api/profile', payload);
+    const formData = new FormData();
+    formData.append('name', username.value);
+    formData.append('email', email.value);
+    formData.append('phone', phoneNumber.value);
+    if (selectedImage.value) {
+      formData.append('image', selectedImage.value);
+    }
+
+    const response = await axios.post('/api/profile', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    // Update profile image URL if returned by API
+    if (response.data.data.profileImage) {
+      profileImage.value = response.data.data.profileImage;
+    }
+
     toast.add({
       severity: 'success',
       summary: 'نجاح',
@@ -218,6 +262,8 @@ const saveChanges = async () => {
 const cancel = () => {
   // Reset form or navigate back
   fetchProfile(); // Reload original data
+  selectedImage.value = null; // Clear selected image
+  profileImage.value = null; // Reset image preview
   toast.add({
     severity: 'info',
     summary: 'إلغاء',
@@ -225,8 +271,6 @@ const cancel = () => {
     life: 3000
   });
 };
-
-
 
 // Fetch profile data on mount
 onMounted(() => {
@@ -241,4 +285,3 @@ onMounted(() => {
  * these styles only apply to this component.
  */
 </style>
-```

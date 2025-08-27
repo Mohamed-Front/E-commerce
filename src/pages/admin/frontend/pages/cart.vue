@@ -25,15 +25,16 @@
             </select>
           </div>
           <!-- Express Delivery Toggle -->
-          <div class="flex items-center gap-4 mb-6">
+          <div class="flex items-center gap-4 mb-6 " >
             <label class="text-gray-800 font-medium">توصيل سريع</label>
             <button
               @click="isExpressed = !isExpressed"
-              class="relative inline-flex items-center h-6 rounded-full transition-colors duration-200"
+              class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors duration-200"
               :class="isExpressed ? 'bg-yellow-600' : 'bg-gray-300'"
+              style="direction: ltr;"
             >
               <span
-                class="inline-block  h-4 transform bg-white rounded-full transition-transform duration-200"
+                class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform duration-200"
                 :class="isExpressed ? 'translate-x-6' : 'translate-x-1'"
               ></span>
             </button>
@@ -67,19 +68,24 @@
             <div class="flex flex-col gap-4">
               <span class="flex justify-between items-center">
                 <h4 class="text-yellow-600 font-semibold">مدة الشحن</h4>
-                <p class="text-gray-700">{{ isExpressed ? '1 ساعة' : '3 ساعات' }}</p>
+                <p class="text-gray-700">{{ orderDetails.time }} ساعات</p>
               </span>
               <span class="flex justify-between items-center">
                 <h4 class="text-yellow-600 font-semibold">المجموع الفرعي</h4>
-                <p class="text-gray-700">{{ calculateSubTotal }} د.أ</p>
+                <p class="text-gray-700">{{ orderDetails.order_without_tax }} د.أ</p>
+              </span>
+              <span class="flex justify-between items-center">
+                <h4 class="text-yellow-600 font-semibold">الضريبة</h4>
+                <p class="text-gray-700">{{ orderDetails.order_tax }} د.أ</p>
               </span>
               <span class="flex justify-between items-center">
                 <h4 class="text-yellow-600 font-semibold">الإجمالي</h4>
-                <p class="text-gray-700">{{ calculateTotal }} د.أ</p>
+                <p class="text-gray-700">{{ orderDetails.total }} د.أ</p>
               </span>
             </div>
             <button
               :disabled="!selectedAddress"
+              @click="submitOrder"
               class="w-full mt-6 py-3 text-sm sm:text-base lg:text-lg bg-gray-800 rounded-md text-white font-semibold transition-transform duration-150 hover:shadow-lg active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               إتمام الشراء
@@ -91,15 +97,15 @@
         <div class="flex flex-col gap-4">
           <span class="flex justify-between items-center">
             <h4 class="text-yellow-600 font-semibold">المجموع الفرعي</h4>
-            <p class="text-gray-700">{{ calculateSubTotal }} د.أ</p>
+            <p class="text-gray-700">{{ orderDetails.order_without_tax }} د.أ</p>
           </span>
           <span class="flex justify-between items-center">
-            <h4 class="text-yellow-600 font-semibold">رسوم الشحن</h4>
-            <p class="text-gray-700">{{ shippingFee }} د.أ</p>
+            <h4 class="text-yellow-600 font-semibold">الضريبة</h4>
+            <p class="text-gray-700">{{ orderDetails.order_tax }} د.أ</p>
           </span>
           <span class="flex justify-between items-center">
             <h4 class="text-yellow-600 font-semibold">الإجمالي</h4>
-            <p class="text-gray-700">{{ calculateTotal }} د.أ</p>
+            <p class="text-gray-700">{{ orderDetails.total }} د.أ</p>
           </span>
         </div>
         <div class="flex flex-col mt-6">
@@ -117,6 +123,7 @@
           </button>
           <button
             :disabled="!selectedAddress"
+            @click="submitOrder"
             class="w-full mt-4 py-2 text-sm bg-gray-800 rounded-md text-white font-semibold hover:shadow-lg transition-all active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             إتمام الشراء الكلي
@@ -131,7 +138,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import imge3 from '../imges/prand 1.png';
 import { useI18n } from 'vue-i18n';
 import axios from 'axios';
@@ -139,23 +146,21 @@ import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
 
 const { t } = useI18n();
-const selectedOption = ref('Store 1');
 const couponCode = ref('');
-const shippingFee = ref(0);
 const products = ref([]);
 const loading = ref(true);
 const toast = useToast();
-const subTotal = ref(0);
-const total = ref(0);
 const addresses = ref([]);
 const selectedAddress = ref(null);
 const isExpressed = ref(false);
-
-const options = [
-  { label: 'المتجر 1', value: 'Store 1' },
-  { label: 'المتجر 2', value: 'Store 2' },
-  { label: 'المتجر 3', value: 'Store 3' },
-];
+const orderDetails = ref({
+  delivery: 0,
+  time: 0,
+  coupon: 0,
+  order_tax: 0,
+  order_without_tax: 0,
+  total: 0,
+});
 
 const fetchAddresses = async () => {
   try {
@@ -171,7 +176,7 @@ const fetchAddresses = async () => {
       severity: 'error',
       summary: 'خطأ',
       detail: 'فشل تحميل العناوين',
-      life: 3000
+      life: 3000,
     });
     console.error('Error fetching addresses:', error);
   }
@@ -189,7 +194,7 @@ const fetchCart = async () => {
         name: item.product.name_ar || item.product.name_en,
         img: item.product.key_default_image || imge3,
         price: parseFloat(item.variant.price) || parseFloat(item.product.base_price) || 0.00,
-        quantity: item.quantity
+        quantity: item.quantity,
       }));
       await fetchOrderTotals();
     }
@@ -198,7 +203,7 @@ const fetchCart = async () => {
       severity: 'error',
       summary: 'خطأ',
       detail: 'فشل تحميل بيانات سلة التسوق',
-      life: 3000
+      life: 3000,
     });
     console.error('Error fetching cart:', error);
   } finally {
@@ -215,24 +220,29 @@ const fetchOrderTotals = async () => {
       items: products.value.map(product => ({
         product_id: product.product_id,
         variant_id: product.variant_id,
-        quantity: product.quantity
-      }))
+        quantity: product.quantity,
+      })),
     };
     if (couponCode.value) {
       payload.coupon = couponCode.value;
     }
     const response = await axios.post('/api/order/view', payload);
     if (response.data.is_success) {
-      subTotal.value = parseFloat(response.data.data.subtotal || 0).toFixed(2);
-      shippingFee.value = parseFloat(response.data.data.shipping_fee || 0).toFixed(2);
-      total.value = parseFloat(response.data.data.total || 0).toFixed(2);
+      orderDetails.value = {
+        delivery: parseFloat(response.data.data.delivery || 0).toFixed(2),
+        time: response.data.data.time || 0,
+        coupon: parseFloat(response.data.data.coupon || 0).toFixed(2),
+        order_tax: parseFloat(response.data.data.order_tax || 0).toFixed(2),
+        order_without_tax: parseFloat(response.data.data.order_without_tax || 0).toFixed(2),
+        total: parseFloat(response.data.data.total || 0).toFixed(2),
+      };
     }
   } catch (error) {
     toast.add({
       severity: 'error',
       summary: 'خطأ',
       detail: 'فشل تحميل إجمالي الطلب',
-      life: 3000
+      life: 3000,
     });
     console.error('Error fetching order totals:', error);
   }
@@ -245,14 +255,14 @@ const applyCoupon = async () => {
       severity: 'success',
       summary: 'نجاح',
       detail: 'تم تطبيق كود الخصم',
-      life: 3000
+      life: 3000,
     });
   } catch (error) {
     toast.add({
       severity: 'error',
       summary: 'خطأ',
       detail: 'فشل تطبيق كود الخصم',
-      life: 3000
+      life: 3000,
     });
     console.error('Error applying coupon:', error);
   }
@@ -267,14 +277,14 @@ const updateQuantity = async (type, id, product_id, variant_id, quantity) => {
       await axios.post(`/api/cart/update`, {
         product_id: product_id,
         variant_id: variant_id,
-        quantity: quantity + 1
+        quantity: quantity + 1,
       });
       product.quantity += 1;
     } else if (type === 'minus' && product.quantity > 1) {
       await axios.post(`/api/cart/update`, {
         product_id: product_id,
         variant_id: variant_id,
-        quantity: quantity - 1
+        quantity: quantity - 1,
       });
       product.quantity -= 1;
     }
@@ -284,7 +294,7 @@ const updateQuantity = async (type, id, product_id, variant_id, quantity) => {
       severity: 'error',
       summary: 'خطأ',
       detail: `فشل ${type === 'plus' ? 'زيادة' : 'تقليل'} الكمية`,
-      life: 3000
+      life: 3000,
     });
     console.error(`Error ${type === 'plus' ? 'increasing' : 'decreasing'} quantity:`, error);
   }
@@ -293,7 +303,7 @@ const updateQuantity = async (type, id, product_id, variant_id, quantity) => {
 const clearProduct = async (id, product_id, variant_id) => {
   try {
     await axios.delete(`/api/cart/clear`, {
-      data: { product_id, variant_id }
+      data: { product_id, variant_id },
     });
     products.value = products.value.filter((product) => product.id !== id);
     await fetchOrderTotals();
@@ -301,26 +311,74 @@ const clearProduct = async (id, product_id, variant_id) => {
       severity: 'success',
       summary: 'نجاح',
       detail: 'تم إزالة المنتج من السلة',
-      life: 3000
+      life: 3000,
     });
   } catch (error) {
     toast.add({
       severity: 'error',
       summary: 'خطأ',
       detail: 'فشل إزالة المنتج من السلة',
-      life: 3000
+      life: 3000,
     });
     console.error('Error clearing product:', error);
   }
 };
 
-const calculateSubTotal = computed(() => {
-  return subTotal.value;
-});
+const submitOrder = async () => {
+  if (!selectedAddress.value) {
+    toast.add({
+      severity: 'error',
+      summary: 'خطأ',
+      detail: 'يرجى اختيار عنوان للتوصيل',
+      life: 3000,
+    });
+    return;
+  }
 
-const calculateTotal = computed(() => {
-  return total.value;
-});
+  try {
+    const payload = {
+      is_expressed: isExpressed.value,
+      address_id: selectedAddress.value,
+      items: products.value.map(product => ({
+        product_id: product.product_id,
+        variant_id: product.variant_id,
+        quantity: product.quantity,
+      })),
+    };
+    if (couponCode.value) {
+      payload.coupon = couponCode.value;
+    }
+
+    const response = await axios.post('/api/order', payload);
+    if (response.data.is_success) {
+      products.value = []; // Clear cart after successful order
+      orderDetails.value = {
+        delivery: 0,
+        time: 0,
+        coupon: 0,
+        order_tax: 0,
+        order_without_tax: 0,
+        total: 0,
+      };
+      toast.add({
+        severity: 'success',
+        summary: 'نجاح',
+        detail: 'تم إرسال الطلب بنجاح',
+        life: 3000,
+      });
+    } else {
+      throw new Error('Order submission failed');
+    }
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'خطأ',
+      detail: 'فشل إرسال الطلب',
+      life: 3000,
+    });
+    console.error('Error submitting order:', error);
+  }
+};
 
 onMounted(() => {
   fetchAddresses();

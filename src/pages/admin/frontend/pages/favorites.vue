@@ -166,7 +166,7 @@ const fetchFavorites = async (page = 1) => {
     const response = await axios.get('/api/wishlists', {
       params: {
         page,
-        limit: 4, // Fixed limit to match orders page
+        limit: 12, // Fixed limit to match orders page
       },
     });
     const data = response.data.data.data || [];
