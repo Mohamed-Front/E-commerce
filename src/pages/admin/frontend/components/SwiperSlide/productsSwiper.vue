@@ -11,12 +11,17 @@
       :slides-per-view="4"
       :space-between="8"
       :loop="true"
-      :autoplay="{ delay: 0, disableOnInteraction: false }"
-      :speed="25000"
+      :autoplay="{ delay: 3000, disableOnInteraction: true }"
+      :speed="5000"
       :grab-cursor="true"
+      :css-mode="true"
+      :simulate-touch="true"
+      :touch-start-prevent-default="false"
+      :touch-ratio="1.5"
       class="mt-6 pb-1"
       :breakpoints="{
         320: { slidesPerView: 1, spaceBetween: 8 },
+        480: { slidesPerView: 1.5, spaceBetween: 10 },
         640: { slidesPerView: 2, spaceBetween: 12 },
         768: { slidesPerView: 3, spaceBetween: 16 },
         1024: { slidesPerView: 4, spaceBetween: 20 }
@@ -85,9 +90,8 @@
 
 <script setup>
 import { Swiper, SwiperSlide } from 'swiper/vue';
-import { Autoplay, Grid } from 'swiper/modules'
-import 'swiper/css'
-import 'swiper/css/grid'
+import { Autoplay } from 'swiper/modules';
+import 'swiper/css';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { useI18n } from 'vue-i18n';
@@ -132,7 +136,6 @@ const addToCart = async (product) => {
     alert('Product added to cart!');
   } catch (error) {
     console.error('Error adding to cart:', error);
-
   }
 };
 
@@ -181,14 +184,7 @@ const truncateName = (name, maxLength) => {
 }
 
 .swiper-slide {
-  @apply flex flex-col;
-}
-
-/* Ensure text truncation for long names */
-.truncate {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  @apply flex flex-col h-auto; /* Ensure slides have auto height for grid layout */
 }
 
 /* Optional: Custom scrollbar for the container */

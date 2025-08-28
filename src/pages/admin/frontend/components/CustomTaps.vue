@@ -18,7 +18,7 @@
         :grid="tab.row_type === 2 ? { rows: 2, fill: 'row' } : null"
         :space-between="tab.row_type === 1 ? 8 : 16"
         :loop="true"
-        :autoplay="{ delay: 0, disableOnInteraction: false }"
+        :autoplay="{ delay: 0, disableOnInteraction: true }"
         :speed="25000"
         :grab-cursor="true"
         class="mt-6 pb-1"
