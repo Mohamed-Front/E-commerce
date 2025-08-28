@@ -1,3 +1,4 @@
+```vue
 <template>
   <div class="mx-auto mt-16 max-w-7xl px-4 sm:px-6 lg:px-8 pb-16">
     <!-- Loading State -->
@@ -38,15 +39,46 @@
                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                  loading="lazy" />
             <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300"></div>
+            <button
+              v-if="authStore.authenticatedweb"
+              class="absolute top-2 right-2 p-2 rounded-full bg-white text-gray-500 hover:text-red-500 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 z-10"
+              @click.stop="toggleFavorite(pro)"
+              aria-label="Add to wishlist"
+            >
+              <svg
+                class="w-5 h-5"
+                :class="{ 'text-red-500': pro.is_wished }"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                />
+              </svg>
+            </button>
           </div>
           <div class="p-4 w-full">
             <p class="font-sans text-gray-800 font-medium text-base line-clamp-2 h-12">
-              {{ pro.name }}
+              {{ truncateName(pro.name, 30) }}
+            </p>
+            <p v-if="pro.sub_name" class="font-sans text-gray-600 text-sm line-clamp-1 mt-1">
+              {{ pro.sub_name.slice(0, 37) }}
             </p>
             <div class="flex items-center w-full justify-between mt-3">
               <span class="font-sans text-[#A6853B] font-semibold text-lg">
                 ${{ pro.price }}
               </span>
+              <button
+                v-if="authStore.authenticatedweb"
+                class="p-2 rounded-full bg-gray-100 text-[#A6853B] hover:bg-[#A6853B] hover:text-white transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#A6853B] focus:ring-offset-2"
+                @click.stop="addToCart(pro)"
+                aria-label="Add to cart"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.182 1.708.707 1.708H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+              </button>
             </div>
           </div>
         </div>
@@ -73,6 +105,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import axios from 'axios';
 import Paginator from 'primevue/paginator';
+import { useAuthStore } from '../../../../../stores/WebAuth';
 import 'primevue/resources/themes/saga-blue/theme.css';
 import 'primevue/resources/primevue.min.css';
 import defaultProductImage from '../../imges/banner-addtion.png';
@@ -81,6 +114,7 @@ import defaultProductImage from '../../imges/banner-addtion.png';
 const route = useRoute();
 const router = useRouter();
 const { t, locale } = useI18n();
+const authStore = useAuthStore();
 
 // Reactive state
 const storeId = ref(localStorage.getItem('defaultStoreId'));
@@ -114,11 +148,12 @@ const fetchProducts = async (page = 1) => {
       title: locale.value === 'ar' ? `منتجات ${data.category.name_ar || data.category.name_en}` : `Products ${data.category.name_en || data.category.name_ar}`,
       products: (data.products.data || []).map(product => ({
         id: product.id,
-        name: locale.value === 'ar' ?
-          `${product.name_ar || product.name_en} ${product.sub_name_ar || product.sub_name_en}` :
-          `${product.name_en || product.name_ar} ${product.sub_name_en || product.sub_name_ar}`,
+        name: locale.value === 'ar' ? (product.name_ar || product.name_en) : (product.name_en || product.name_ar),
+        sub_name: locale.value === 'ar' ? (product.sub_name_ar || product.sub_name_en) : (product.sub_name_en || product.sub_name_ar),
         price: parseFloat(product.base_price || 0).toFixed(2),
         img: product.media?.find(media => media.name === 'product_main_image')?.url || product.key_default_image || defaultProductImage,
+        is_wished: product.is_wished || false,
+        variant_id: product.variant_id || null,
       })),
     };
     currentPage.value = data.products.current_page;
@@ -140,6 +175,65 @@ const paginatedProducts = computed(() => {
 const onPageChange = (event) => {
   currentPage.value = event.page + 1; // PrimeVue is 0-based, API expects 1-based
   fetchProducts(currentPage.value);
+};
+
+// Method to handle adding a product to the cart via API
+const addToCart = async (product) => {
+  if (!authStore.authenticatedweb) {
+    router.push({ name: 'AuthLogin' });
+    return;
+  }
+
+  try {
+    const payload = {
+      product_id: product.id,
+      variant_id: product.variant_id,
+      quantity: 1,
+    };
+    const response = await axios.post('/api/cart/add', payload);
+    console.log('Added to cart successfully:', response.data);
+    alert('Product added to cart!');
+  } catch (error) {
+    console.error('Error adding to cart:', error);
+    alert('Failed to add product to cart.');
+  }
+};
+
+// Method to handle adding/removing a product from the wishlist
+const toggleFavorite = async (product) => {
+  if (!authStore.authenticatedweb) {
+    router.push({ name: 'AuthLogin' });
+    return;
+  }
+
+  const isCurrentlyFavorited = product.is_wished;
+  const method = isCurrentlyFavorited ? 'delete' : 'post';
+  const url = isCurrentlyFavorited ? `/api/wishlists/${product.id}` : '/api/wishlists';
+  const payload = { product_id: product.id };
+
+  try {
+    let response;
+    if (method === 'post') {
+      response = await axios.post(url, payload);
+    } else {
+      response = await axios.delete(url, { data: payload });
+    }
+
+    // Update the is_wished property
+    product.is_wished = !isCurrentlyFavorited;
+    console.log(`Product ${isCurrentlyFavorited ? 'removed from' : 'added to'} wishlist successfully:`, response.data);
+  } catch (error) {
+    console.error('Error toggling favorite status:', error);
+    // Revert the state if the API call fails
+    product.is_wished = isCurrentlyFavorited;
+    alert('Failed to update wishlist.');
+  }
+};
+
+// Method to truncate product name to a specific length
+const truncateName = (name, maxLength) => {
+  if (name.length <= maxLength) return name;
+  return name.slice(0, maxLength) + '...';
 };
 
 // Handle window resize to update limit
@@ -241,6 +335,13 @@ onUnmounted(() => {
   overflow: hidden;
 }
 
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 /* Responsive adjustments */
 @media (max-width: 640px) {
   .xs\:text-lg {
@@ -272,3 +373,4 @@ onUnmounted(() => {
   }
 }
 </style>
+```

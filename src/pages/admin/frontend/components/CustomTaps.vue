@@ -28,13 +28,13 @@
                 320: { slidesPerView: 2, spaceBetween: 8 },
                 640: { slidesPerView: 2, spaceBetween: 12 },
                 768: { slidesPerView: 3, spaceBetween: 16 },
-                1024: { slidesPerView: 4, spaceBetween: 20 }
+                1024: { slidesPerView: 5, spaceBetween: 20 }
               }
             : {
                 320: { slidesPerView: 2, spaceBetween: 8, grid: { rows: 2 } },
                 640: { slidesPerView: 2, spaceBetween: 12, grid: { rows: 2 } },
                 768: { slidesPerView: 3, spaceBetween: 16, grid: { rows: 2 } },
-                1024: { slidesPerView: 4, spaceBetween: 20, grid: { rows: 2 } }
+                1024: { slidesPerView: 5, spaceBetween: 20, grid: { rows: 2 } }
               }
         "
       >
@@ -44,7 +44,8 @@
           class="group flex flex-col items-start cursor-pointer transition-all pb-[1%] rounded-lg shadow-lg duration-300 hover:-translate-y-2"
           @click="router.push({ name: 'Product-details', params: { id: detail.ids[0] } })"
         >
-          <div class="w-full aspect-square overflow-hidden rounded-xl shadow-sm relative">
+          <!-- تغيير نسبة العرض إلى الارتفاع إلى 4/3 (مستطيل) -->
+          <div class="w-full aspect-[3.3/4] overflow-hidden rounded-xl shadow-sm relative">
             <img
               :src="detail.media[0]?.url || '/placeholder.jpg'"
               :alt="locale === 'ar' ? detail.name_ar : detail.name_en"

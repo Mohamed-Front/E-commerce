@@ -131,7 +131,7 @@ const addToCart = async (product) => {
     alert('Product added to cart!');
   } catch (error) {
     console.error('Error adding to cart:', error);
-    alert('Failed to add product to cart.');
+
   }
 };
 

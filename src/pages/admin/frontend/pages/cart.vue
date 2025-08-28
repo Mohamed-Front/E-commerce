@@ -25,7 +25,7 @@
             </select>
           </div>
           <!-- Express Delivery Toggle -->
-          <div class="flex items-center gap-4 mb-6 " >
+          <div class="flex items-center gap-4 mb-6">
             <label class="text-gray-800 font-medium">توصيل سريع</label>
             <button
               @click="isExpressed = !isExpressed"
@@ -189,11 +189,15 @@ const fetchCart = async () => {
     if (response.data.is_success) {
       products.value = response.data.data.items.map(item => ({
         id: item.id,
-        product_id: item.product.id,
-        variant_id: item.variant.id,
+        product_id: item.product_id,
+        variant_id: item.variant_id,
         name: item.product.name_ar || item.product.name_en,
-        img: item.product.key_default_image || imge3,
-        price: parseFloat(item.variant.price) || parseFloat(item.product.base_price) || 0.00,
+        img: item.product.media && item.product.media.length > 0
+          ? item.product.media[0].url
+          : item.product.key_default_image || imge3,
+        price: item.variant && item.variant.price
+          ? parseFloat(item.variant.price).toFixed(2)
+          : parseFloat(item.product.base_price).toFixed(2) || 0.00,
         quantity: item.quantity,
       }));
       await fetchOrderTotals();
