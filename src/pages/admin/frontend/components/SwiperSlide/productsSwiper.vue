@@ -85,13 +85,14 @@
 
 <script setup>
 import { Swiper, SwiperSlide } from 'swiper/vue';
-import { Autoplay } from 'swiper/modules';
+import { Autoplay, Grid } from 'swiper/modules'
+import 'swiper/css'
+import 'swiper/css/grid'
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../../../../../stores/WebAuth';
 
-import 'swiper/css';
 const authStore = useAuthStore();
 const router = useRouter();
 const { t } = useI18n();

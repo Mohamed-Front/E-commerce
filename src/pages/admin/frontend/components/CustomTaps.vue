@@ -70,11 +70,12 @@
 <script setup>
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Autoplay, Grid } from 'swiper/modules'
+import 'swiper/css'
+import 'swiper/css/grid'
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
-import 'swiper/css'
-import 'swiper/css/grid'
+
 
 const locale = ref(localStorage.getItem('appLang') || 'ar')
 const stores = ref([])
