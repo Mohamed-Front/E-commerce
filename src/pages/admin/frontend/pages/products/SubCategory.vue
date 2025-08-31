@@ -43,10 +43,10 @@
           :navigation="false"
           class="mt-6 "
           :breakpoints="{
-            320: { slidesPerView: 1, spaceBetween: 8 },
+            320: { slidesPerView: 2, spaceBetween: 4 },
             640: { slidesPerView: 2, spaceBetween: 12 },
             768: { slidesPerView: 2, spaceBetween: 16 },
-            1024: { slidesPerView: 5.5, spaceBetween: 20 }
+            1024: { slidesPerView: 5.5, spaceBetween: 10 }
           }"
         >
           <SwiperSlide

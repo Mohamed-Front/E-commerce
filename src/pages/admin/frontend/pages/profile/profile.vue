@@ -135,9 +135,9 @@ const fetchProfile = async () => {
     phoneNumber.value = profileResponse.data.data.phone || 'غير متوفر';
 
     // Fetch address data
-    const addressResponse = await axios.get('/api/address');
+    const addressResponse = await axios.get('/api/home/address');
     if (addressResponse.data.is_success) {
-      const addresses = addressResponse.data.data.data;
+      const addresses = addressResponse.data.data;
       mainAddress.value = addresses.find(address => address.is_default === 1) || null;
     } else {
       throw new Error('Failed to fetch addresses');

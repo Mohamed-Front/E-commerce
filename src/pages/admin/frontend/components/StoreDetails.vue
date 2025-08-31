@@ -97,7 +97,7 @@
             <img
               :src="category?.media[0]?.url"
               :alt="category.name_en"
-              class="  w-full h-full max-h-36 object-cover rounded-xl"
+              class="  w-full h-full  object-cover rounded-xl"
             />
             <div class="  p-3 w-full text-center rounded-xl  ">
               <span class="font-bold text-sm  text-black">{{ category.name_ar.slice(0, 20) }}</span>

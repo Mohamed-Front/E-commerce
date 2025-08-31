@@ -62,7 +62,7 @@ const formattedAttributes = computed(() => {
     label: currentLanguage.value === 'en' ? attr.name_en : attr.name_ar,
     value: attr.id,
     items: attr.values.map(val => ({
-      id: val.id,
+      attribute_value_id: val.id,
       [labelField.value]: currentLanguage.value === 'en' ? val.value_en : val.value_ar
     }))
   }));
@@ -90,10 +90,9 @@ const fetchProduct = async () => {
       tax: data.tax || 0,
       is_displayed: data.is_displayed === 1,
       variants: data.variants.map(variant => ({
-        id: variant.id,
+        id: variant.attribute_values[0]?.pivot?.attribute_value_id,
         sku: variant.sku || '',
         price: variant.price,
-        cost_price: variant.cost_price || null,
         attribute_value_ids: variant.attribute_values.map(av => av.id),
         variant_image: null,
         variant_image_preview: variant.media && variant.media.length > 0 ? variant.media[0].url : null
@@ -288,7 +287,6 @@ const addVariant = () => {
     id: null,
     sku: '',
     price: '',
-    cost_price: null,
     attribute_value_ids: [],
     variant_image: null,
     variant_image_preview: null
@@ -360,12 +358,10 @@ const submitForm = async () => {
   // Append variants if they exist
   if (hasVariants.value) {
     productData.value.variants.forEach((variant, index) => {
-      formData.append(`variants[${index}][id]`, parseInt(variant.id) || 0);
+      formData.append(`variants[${index}][attribute_value_id]`,variant.attribute_value_ids);
       formData.append(`variants[${index}][sku]`, variant.sku);
       formData.append(`variants[${index}][price]`, variant.price);
-      formData.append(`variants[${index}][cost_price]`, variant.cost_price || 0);
       if (Array.isArray(variant.attribute_value_ids)) {
-        Hannah: 1
         variant.attribute_value_ids.forEach((attrId, attrIndex) => {
           formData.append(`variants[${index}][attribute_value_ids][${attrIndex}]`, attrId);
         });
@@ -638,7 +634,7 @@ const submitForm = async () => {
                   optionGroupLabel="label"
                   optionGroupChildren="items"
                   :optionLabel="labelField"
-                  optionValue="id"
+                  optionValue="attribute_value_id"
                   class="w-full"
                   :class="{ 'p-invalid': variant.attribute_value_ids.length === 0 }"
                   display="chip"
@@ -675,20 +671,6 @@ const submitForm = async () => {
                 />
               </div>
 
-              <!-- Cost Price -->
-              <div class="space-y-2">
-                <label :for="'cost_price_' + index" class="block text-sm font-medium text-gray-700">
-                  {{ t('product.costPrice') }}
-                </label>
-                <InputNumber
-                  :id="'cost_price_' + index"
-                  v-model="variant.cost_price"
-                  mode="decimal"
-                  :minFractionDigits="2"
-                  class="w-full"
-                />
-              </div>
-
               <!-- Variant Image Upload -->
               <div class="space-y-2">
                 <label :for="'variant_image_' + index" class="block text-sm font-medium text-gray-700">
@@ -700,7 +682,7 @@ const submitForm = async () => {
                   @dragleave="isDragging = false"
                   @drop.prevent="onVariantImageUpload($event, index)"
                   :class="{'border-blue-500 bg-blue-50': isDragging, 'border-gray-300': !isDragging}"
-                  class="cursor-pointer w-full rounded-lg border-2 border-dashed transition-colors duration-300 block"
+                  class="cursor-pointer w-full rounded border-2 border-dashed transition-colors duration-300 block"
                 >
                   <input
                     type="file"

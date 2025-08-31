@@ -208,23 +208,7 @@
               />
             </div>
 
-            <!-- Longitude -->
-            <div class="space-y-2">
-              <label for="long" class="block text-sm font-medium text-gray-700">
-                {{ $t('address.long') }} <span class="text-red-500">*</span>
-              </label>
-              <InputNumber
-                id="long"
-                v-model="addressData.long"
-                :placeholder="$t('address.enter_long')"
-                :min="-180"
-                :max="180"
-                :step="0.000001"
-                :decimalPlaces="6"
-                class="w-full"
-                required
-              />
-            </div>
+
 
             <!-- Distance -->
 

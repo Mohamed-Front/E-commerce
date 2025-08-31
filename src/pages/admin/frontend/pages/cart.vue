@@ -164,9 +164,9 @@ const orderDetails = ref({
 
 const fetchAddresses = async () => {
   try {
-    const response = await axios.get('/api/address');
+    const response = await axios.get('/api/home/address');
     if (response.data.is_success) {
-      addresses.value = response.data.data.data;
+      addresses.value = response.data.data;
       if (addresses.value.length > 0) {
         selectedAddress.value = addresses.value[0].id; // Select first address by default
       }

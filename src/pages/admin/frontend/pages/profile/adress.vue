@@ -103,9 +103,9 @@ const router = useRouter();
 const fetchAddresses = async () => {
   try {
     loading.value = true;
-    const response = await axios.get('/api/address');
+    const response = await axios.get('/api/home/address');
     if (response.data.is_success) {
-      addresses.value = response.data.data.data; // Access nested data array
+      addresses.value = response.data.data; // Access nested data array
     } else {
       throw new Error('API response indicates failure');
     }
