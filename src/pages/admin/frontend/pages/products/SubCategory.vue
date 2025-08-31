@@ -2,18 +2,13 @@
   <div class="mx-auto bg-gradient-to mt-16 max-w-7xl   ">
     <!-- Loading State -->
    <!-- Fancy Loading State -->
-    <div v-if="isLoading" class="py-16">
-      <div class="flex flex-col items-center justify-center space-y-4">
-        <div class="relative w-24 h-24">
-          <div class="absolute inset-0 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
-          <div class="absolute inset-4 rounded-full border-4 border-pink-500 border-b-transparent animate-spin animation-delay-200"></div>
-          <div class="absolute inset-8 rounded-full border-4 border-purple-500 border-l-transparent animate-spin animation-delay-400"></div>
-        </div>
-        <p class="text-indigo-600 text-xl font-semibold animate-pulse">{{ t('category.loading') }}</p>
-        <div class="w-1/2 h-2 bg-gray-200 rounded-full overflow-hidden">
-          <div class="h-full bg-gradient-to-r from-indigo-500 to-pink-500 animate-progress"></div>
-        </div>
-      </div>
+   <div v-if="isLoading" class="flex flex-col items-center justify-center py-16  rounded-xl animate-pulse">
+      <img
+        src="../../../../../assets/shiftlogo.png"
+        alt="Loading Logo"
+        class="w-32 h-32 object-contain animate-bounce"
+        aria-label="Loading animation"
+      />
     </div>
     <!-- Error State -->
     <div v-else-if="error" class="text-center py-16 text-red-600">

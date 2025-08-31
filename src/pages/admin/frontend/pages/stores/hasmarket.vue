@@ -2,8 +2,13 @@
   <!-- Container -->
   <div class="mx-auto mt-16 max-w-7xl px-4 sm:px-6 lg:px-8">
     <!-- Loading State -->
-    <div v-if="isLoading" class="text-center py-16 animate-pulse">
-      <p class="text-gray-600 text-lg font-medium">{{ t('category.loading') }}</p>
+    <div v-if="isLoading" class="flex flex-col items-center justify-center py-16  rounded-xl animate-pulse">
+      <img
+        src="../../../../../assets/shiftlogo.png"
+        alt="Loading Logo"
+        class="w-32 h-32 object-contain animate-bounce"
+        aria-label="Loading animation"
+      />
     </div>
     <!-- Error State -->
     <div v-else-if="error" class="text-center py-16 text-red-600">
@@ -99,7 +104,6 @@
           </div>
         </SwiperSlide>
       </Swiper>
-
       <!-- Dual Sliders Section -->
       <div v-if="sliderImagesTwo.length || sliderImagesThree.length" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
         <!-- Slider for sliderImagesTwo -->
@@ -125,7 +129,6 @@
             </SwiperSlide>
           </Swiper>
         </div>
-
         <!-- Slider for sliderImagesThree -->
         <div class="rounded-xl shadow-lg overflow-hidden">
           <Swiper
@@ -150,7 +153,6 @@
           </Swiper>
         </div>
       </div>
-
       <!-- Categories Slider -->
       <div v-if="categories.length" class="mt-8 hidden py-2 rounded-sm px-2 bg-[#1F3A932B] mx-auto max-w-7xl">
         <Swiper
@@ -187,10 +189,9 @@
           </SwiperSlide>
         </Swiper>
       </div>
-
       <!-- Products Sections -->
       <section class="mt-16 space-y-16">
-       <ProductOffers></ProductOffers>
+        <ProductOffers></ProductOffers>
       </section>
     </div>
   </div>
@@ -282,17 +283,12 @@ const initStoreData = () => {
   }));
 };
 
-
-
-
-
 // Fetch all data
 const fetchAllData = async () => {
   isLoading.value = true;
   await fetchStoreDetails();
   if (!error.value) {
     initStoreData();
-
   }
   isLoading.value = false;
 };
@@ -317,12 +313,21 @@ onMounted(() => {
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
 .animate-fade-in {
   animation: fade-in 0.8s ease-out forwards;
 }
 
 .animate-slide-up {
   animation: slide-up 0.8s ease-out forwards;
+}
+
+.animate-bounce {
+  animation: bounce 1.5s ease-in-out infinite;
 }
 
 /* Swiper custom styles */
@@ -381,7 +386,7 @@ onMounted(() => {
   }
 }
 
-/* Additional styles from first code for sliders and categories */
+/* Additional styles for sliders and categories */
 img {
   @apply transition-all duration-500 ease-in-out;
 }
