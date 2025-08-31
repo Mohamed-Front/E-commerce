@@ -16,7 +16,10 @@
       class="w-full"
     >
       <SwiperSlide v-for="(image, index) in sliderImages" :key="index">
-        <div class="flex w-full max-h-[50vh] items-center justify-center bg-gradient-to-br from-gray-50 to-gray-300 rounded-xl shadow-lg overflow-hidden">
+        <div
+          @click="handleMediaClick(image)"
+          class="flex w-full max-h-[50vh] items-center justify-center bg-gradient-to-br from-gray-50 to-gray-300 rounded-xl shadow-lg overflow-hidden cursor-pointer"
+        >
           <img
             :src="image.url"
             :alt="`Slider Image ${index + 1}`"
@@ -29,7 +32,7 @@
     <!-- Dual Sliders Section -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 max-w-7xl mx-auto">
       <!-- Slider for slider_images_two -->
-      <div class=" rounded-xl shadow-lg overflow-hidden">
+      <div class="rounded-xl shadow-lg overflow-hidden">
         <Swiper
           v-if="sliderImagesTwo.length"
           :modules="[Autoplay]"
@@ -39,7 +42,10 @@
           class="w-full h-full"
         >
           <SwiperSlide v-for="(image, index) in sliderImagesTwo" :key="'two-'+index">
-            <div class="flex w-full max-h-64 items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl overflow-hidden">
+            <div
+              @click="handleMediaClick(image)"
+              class="flex w-full max-h-64 items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl overflow-hidden cursor-pointer"
+            >
               <img
                 :src="image.url"
                 :alt="`Slider Two Image ${index + 1}`"
@@ -61,7 +67,10 @@
           class="w-full h-full"
         >
           <SwiperSlide v-for="(image, index) in sliderImagesThree" :key="'three-'+index">
-            <div class="flex w-full h-64 items-center justify-center bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl overflow-hidden">
+            <div
+              @click="handleMediaClick(image)"
+              class="flex w-full h-64 items-center justify-center bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl overflow-hidden cursor-pointer"
+            >
               <img
                 :src="image.url"
                 :alt="`Slider Three Image ${index + 1}`"
@@ -72,8 +81,6 @@
         </Swiper>
       </div>
     </div>
-
-
 
     <!-- Categories Slider -->
     <div class="mt-8 py-2 rounded-sm px-2 bg-[#1F3A932B] mx-auto max-w-7xl">
@@ -93,33 +100,37 @@
         }"
       >
         <SwiperSlide v-for="(category, index) in categories" :key="index">
-          <div  @click="goCatgory(category)" class="flex  flex-col items-center justify-center rounded-xl  h-full w-full cursor-pointer   ">
+          <div @click="goCategory(category)" class="flex flex-col items-center justify-center rounded-xl h-full w-full cursor-pointer">
             <img
               :src="category?.media[0]?.url"
               :alt="category.name_en"
-              class="  w-full h-full  object-cover rounded-xl"
+              class="w-full h-full object-cover rounded-xl"
             />
-            <div class="  p-3 w-full text-center rounded-xl  ">
-              <span class="font-bold text-sm  text-black">{{ category.name_ar.slice(0, 20) }}</span>
+            <div class="p-3 w-full text-center rounded-xl">
+              <span class="font-bold text-sm text-black">{{ category.name_ar.slice(0, 20) }}</span>
             </div>
           </div>
         </SwiperSlide>
       </Swiper>
     </div>
 
-     <div v-if="subBannerImage" class="my-8 max-w-5xl mx-auto">
-        <div class="relative overflow-hidden rounded-2xl shadow-lg animate-banner-slide">
-          <img
-             :src="subBannerImage.url"
-            class="w-full h-64 sm:h-40 md:h-46 object-cover transition-transform duration-700 hover:scale-105"
-            loading="lazy"
-          />
-          <div class="absolute inset-0 bg-gradient-to-b from-transparent  flex items-center justify-center p-6">
-          </div>
+
+
+    <!-- Sub Banner -->
+    <div v-if="subBannerImage" class="my-8 max-w-5xl mx-auto">
+      <div
+        @click="handleMediaClick(subBannerImage)"
+        class="relative overflow-hidden rounded-2xl shadow-lg animate-banner-slide cursor-pointer"
+      >
+        <img
+          :src="subBannerImage.url"
+          class="w-full h-64 sm:h-40 md:h-46 object-cover transition-transform duration-700 hover:scale-105"
+          loading="lazy"
+        />
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent flex items-center justify-center p-6">
         </div>
       </div>
-    <!-- Sub Banner -->
-
+    </div>
   </div>
 </template>
 
@@ -128,11 +139,12 @@ import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Autoplay, Navigation, Pagination } from 'swiper/modules';
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import { useRouter } from 'vue-router';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import { useRouter, useRoute } from 'vue-router'
-const router = useRouter()
+
+const router = useRouter();
 
 const sliderImages = ref([]);
 const sliderImagesTwo = ref([]);
@@ -153,8 +165,30 @@ const getSliderImages = (mediaArray, name) => {
   return mediaArray?.filter(item => item.name === name) || [];
 };
 
-const goCatgory = (data) => {
-  router.push({name:'subcategory',params:{id:data.id}})
+// Handle media click based on media link type
+const handleMediaClick = (mediaItem) => {
+
+  if (!mediaItem || !mediaItem.media_links) {
+    console.log(mediaItem);
+    return;
+  }
+
+  const { type, id } = mediaItem.media_links;
+
+  if (type === 1) {
+    // Navigate to category page
+    router.push({ name: 'subcategory', params: { id } });
+  } else if (type === 2) {
+    // Navigate to product details page
+    router.push({ name: 'product-details', params: { id } });
+  } else {
+    console.log('Unknown media link type:', type);
+  }
+};
+
+// Navigate to category page
+const goCategory = (category) => {
+  router.push({ name: 'subcategory', params: { id: category.id } });
 };
 
 // Fetch store details and extract images and categories
@@ -162,12 +196,27 @@ const fetchStoreDetails = async () => {
   try {
     const response = await axios.get(`/api/home/store-details/${storeId.value}`);
     const { store } = response.data.data;
-    sliderImages.value = getSliderImages(store.media, 'slider_images_one');
-    sliderImagesTwo.value = getSliderImages(store.media, 'slider_images_two');
-    sliderImagesThree.value = getSliderImages(store.media, 'slider_images_three');
-    mainBannerImage.value = getMediaByName(store.media, 'main_banner_image');
-    subBannerImage.value = getMediaByName(store.media, 'sub_banner_image');
-    sponsorImage.value = getMediaByName(store.media, 'store_image');
+
+    // Get all media items with their media_links
+    const allMedia = store.media || [];
+    const mediaLinks = store.media_links || [];
+
+    // Enhance media items with their media_links
+    const enhancedMedia = allMedia.map(mediaItem => {
+      // Find the corresponding media_link for this media item
+      const mediaLink = mediaLinks.find(link => link.media_id === mediaItem.id);
+      return {
+        ...mediaItem,
+        media_links: mediaLink || null
+      };
+    });
+
+    sliderImages.value = getSliderImages(enhancedMedia, 'slider_images_one');
+    sliderImagesTwo.value = getSliderImages(enhancedMedia, 'slider_images_two');
+    sliderImagesThree.value = getSliderImages(enhancedMedia, 'slider_images_three');
+    mainBannerImage.value = getMediaByName(enhancedMedia, 'main_banner_image');
+    subBannerImage.value = getMediaByName(enhancedMedia, 'sub_banner_image');
+    sponsorImage.value = getMediaByName(enhancedMedia, 'store_image');
     categories.value = store.categories || [];
   } catch (error) {
     console.error('Error fetching store details:', error);
@@ -185,7 +234,7 @@ onMounted(() => {
 <style scoped>
 /* Fancy Swiper styles */
 .swiper {
-  @apply w-full  relative overflow-hidden;
+  @apply w-full relative overflow-hidden;
 }
 
 /* Enhanced Swiper slides */
@@ -201,9 +250,11 @@ img {
 img:hover {
   @apply opacity-95 shadow-2xl;
 }
+
 .swiper {
   width: 100%;
 }
+
 .swiper-slide {
   display: flex;
   justify-content: center;
@@ -266,5 +317,10 @@ div {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Cursor pointer for clickable elements */
+.cursor-pointer {
+  cursor: pointer;
 }
 </style>

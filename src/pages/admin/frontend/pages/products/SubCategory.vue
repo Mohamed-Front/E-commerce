@@ -155,13 +155,12 @@ const productcategoryName = (item) => {
 };
 
 const goCatgory = (data) => {
-  if(data.has_subcategories > 0){
+  console.log(data)
+  if(data.has_subcategories  ){
    router.push({ name: 'subcategory', params: { id: data.id } });
-
   }
   else
   router.push({ name: 'produts_category', params: { id: data.id } });
-
 };
 
 // Fetch category and products data
@@ -177,6 +176,7 @@ const fetchCategoryData = async () => {
     };
     subCategories.value = data.sub_categories.map(sub => ({
       id: sub.id,
+
       name_ar: sub.name_ar || sub.name_en,
       name_en: sub.name_en || sub.name_ar,
       media: sub.media.length ? sub.media : [{ url: defaultCategoryImage, name: 'default' }],

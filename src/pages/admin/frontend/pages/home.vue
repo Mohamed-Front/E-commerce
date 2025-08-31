@@ -117,11 +117,15 @@
 
 
 
+const goCatgory = (data) => {
+  if(data.has_subcategories ){
+   router.push({ name: 'subcategory', params: { id: data.id } });
 
-  const goCatgory =(data)=>{
-
-           router.push({name:'subcategory',params:{id:data.id}})
   }
+  else
+  router.push({ name: 'produts_category', params: { id: data.id } });
+
+};
   const loaddata = async () => {
     try {
 
@@ -131,6 +135,8 @@
         titels.value[category.id] = {
           name: localStorage.getItem('appLang') == 'en' ? category.name_en : category.name_ar || category.name_en,
           id: category.id,
+           has_subcategories: market.has_subcategories,
+
         }
       })
 

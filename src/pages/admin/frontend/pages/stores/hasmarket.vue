@@ -245,13 +245,12 @@ const fetchStoreDetails = async () => {
   }
 };
 const goCatgory = (data) => {
-  if(data.has_subcategories > 0){
+  console.log(data)
+  if(data.has_subcategories  ){
    router.push({ name: 'subcategory', params: { id: data.id } });
-
   }
   else
   router.push({ name: 'produts_category', params: { id: data.id } });
-
 };
 // Initialize store data
 const initStoreData = () => {
@@ -268,6 +267,7 @@ const initStoreData = () => {
   }));
   markets.value = (storeData.value.markets || []).map(market => ({
     id: market.id,
+      has_subcategories: market.has_subcategories,
     title: locale.value === 'ar' ? market.name_ar || market.name_en : market.name_en || market.name_ar,
     media: (market.media || []).map(media => ({
       url: media.url || defaultMarketImage,
