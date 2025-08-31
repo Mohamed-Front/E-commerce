@@ -33,7 +33,7 @@
       </div>
 
       <!-- Phone Login -->
-      <form @submit.prevent="authStore.handleLogin({ type: 'phone', phoneNumber, password })" v-if="selectedTab === 'phone'" class="space-y-6">
+      <form @submit.prevent="authStore.handleLogin({ type: 'phone', phoneNumber, password ,countryCode })" v-if="selectedTab === 'phone'" class="space-y-6">
         <div class="flex">
           <select
             v-model="countryCode"

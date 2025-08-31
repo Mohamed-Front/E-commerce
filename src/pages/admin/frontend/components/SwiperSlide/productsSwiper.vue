@@ -11,7 +11,7 @@
       :slides-per-view="4"
       :space-between="8"
       :loop="true"
-      :autoplay="{ delay: 3000, disableOnInteraction: true }"
+      :autoplay="{ delay: 3000, disableOnInteraction: false }"
       :speed="5000"
       :grab-cursor="true"
       :css-mode="true"

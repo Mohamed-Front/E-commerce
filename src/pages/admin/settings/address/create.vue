@@ -269,21 +269,6 @@ onMounted(() => {
           />
         </div>
 
-        <!-- Distance -->
-        <div class="space-y-2">
-          <label for="distance" class="block text-sm font-medium text-gray-700">
-            {{ $t('address.distance') }} (meters) <span class="text-red-500">*</span>
-          </label>
-          <InputNumber
-            id="distance"
-            v-model="addressData.distance"
-            :placeholder="$t('address.enter_distance')"
-            :min="0"
-            :step="100"
-            class="w-full"
-            required
-          />
-        </div>
 
         <!-- Default Address -->
         <div class="space-y-2">

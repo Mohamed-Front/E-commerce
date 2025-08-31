@@ -36,6 +36,7 @@ export default {
     addresses: 'Addresses',
   },
   user: {
+    managementTitle:"users Management",
     users: 'Users',
     new: 'New',
     search: 'Search...',
@@ -239,31 +240,77 @@ export default {
       sales: 'Sales',
     },
   },
-  role: {
-    manage_Roles: 'Manage Roles',
-    iD: 'ID',
-    name: 'Name',
-    role_Permissions_Manager: 'Role Permissions Manager',
-    role_Name: 'Role Name ',
-    enter_role_name: 'Enter role name',
-    loading_permissions: 'Loading permissions...',
-    create_Role_with_Selected_Permissions: 'Create Role with Selected Permissions',
-    permission_Description: 'Permission Description',
-    role_Name: ' Role Name',
-    role_Permissions: 'Role Permissions',
-    edit: 'Edit',
-    click_or_drag_to_change_image: 'Click or drag to change image',
-    close: 'Close',
+"role": {
+    "role_Permissions_Manager": "Role Permissions Manager",
+    "role_Name": "Role Name",
+    "enter_role_name": "Enter role name",
+    "loading_permissions": "Loading permissions...",
+    "create_Role_with_Selected_Permissions": "Create Role with Selected Permissions",
+    "permission_Description": "Permission Description",
+    "createSuccess": "Role created successfully",
+    "createError": "Failed to create role",
+    "manage_Roles": "Manage Roles",
+    "search": "Search",
+    "export": "Export",
+    "new": "New",
+    "iD": "ID",
+    "name": "Name",
+    "actions": "Actions",
+    "noData": "No roles found",
+    "show": "Showing",
+    "to": "to",
+    "from": "of",
+    "deleteConfirmTitle": "Confirm Deletion",
+    "deleteConfirmMessage": "Are you sure you want to delete this role?",
+    "deleteSuccess": "Role deleted successfully",
+    "deleteError": "Failed to delete role",
+    "yes": "Yes",
+    "no": "No",
+    "edit": "Edit",
+    "delete": "Delete",
+    "loadError": "Failed to load roles",
+    "loadPermissionsError": "Failed to load permissions",
+    "success": "Success",
+    "error": "Error"
+  },
+  "permissions": {
+    "edit": "Edit Role",
+    "create": "Create Role",
+    "updateWithPermissions": "Update Role with Selected Permissions"
+  },
+  "loading": {
+    "roleData": "Loading role data...",
+    "permissions": "Loading permissions..."
   },
 
-  permission: {
-    permissions_Management: 'Permissions Management',
-    view_and_manage_all_system_permissions_grouped_by_modules:
-      'View and manage all system permissions grouped by modules',
-    refresh: 'Refresh',
-    no_permissions_found_in_this_group: 'No permissions found in this group',
-    permission_Name: 'Permission Name',
+
+  "permissions_management": {
+    "title": "Permissions Management",
+    "subtitle": "View and manage all system permissions grouped by modules",
+    "refresh_button": "Refresh",
+    "table": {
+      "id": "ID",
+      "name": "Name",
+      "description": "Description",
+      "actions": "Actions",
+      "no_permissions": "No permissions found in this group"
+    },
+    "dialog": {
+      "header": "Update Permission Description",
+      "permission_name_label": "Permission Name",
+      "description_label": "Description",
+      "description_placeholder": "Enter permission description...",
+      "cancel_button": "Cancel",
+      "save_button": "Save"
+    },
+    "toasts": {
+      "success_update": "Description updated successfully",
+      "error_update": "Failed to update description",
+      "error_fetch": "Failed to fetch permissions",
+      "error_invalid_data": "Invalid data format"
+    }
   },
+
   coupon: {
     managementTitle: 'Coupons Management',
     search: 'Search coupons...',

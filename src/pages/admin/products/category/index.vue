@@ -48,25 +48,13 @@ const links = ref([])
 // Example data for import template
 const exampleData = ref([
   {
-    store_name_ar: 'شفت 7',
-    store_name_en: 'Shift7',
-    category_name_ar: 'الأحذية',
-    category_name_en: 'Shoes',
-    sub_category_name_ar: 'أحذية نسائية رسمية',
-    sub_category_name_en: "Women's Formal Shoes",
-    sub_sub_category_name_ar: 'كريم واقي للشمس',
-    sub_sub_category_name_en: 'Sunblock & Cream'
+    id: 'شفت 7',
+    arabic_name: 'Shift7',
+    english_name: 'الأحذية',
+    Top_Parent: 'shift7',
+
   },
-  {
-    store_name_ar: 'شفت مارت',
-    store_name_en: 'Shift Mart',
-    category_name_ar: 'الخضار والفواكة',
-    category_name_en: 'Vegetables & Fruits',
-    sub_category_name_ar: 'الفواكة الطازجة',
-    sub_category_name_en: 'Fresh Fruits',
-    sub_sub_category_name_ar: 'كريم واقي للشمس',
-    sub_sub_category_name_en: 'Sunblock & Cream'
-  }
+
 ])
 
 // Fetch categories data
@@ -170,7 +158,6 @@ const exportCategories = () => {
       link.click()
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
-
     })
     .catch((error) => {
       toast.add({
@@ -181,6 +168,26 @@ const exportCategories = () => {
       })
       console.error('Error exporting categories:', error)
     })
+}
+
+// Download example CSV
+const downloadExample = () => {
+  const csvContent = 'id,Arabic Name,English Name,Top Parent / Store\n' +
+    exampleData.value.map(row =>
+      `"${row.id}","${row.arabic_name}","${row.english_name}","${row.Top_Parent}",`
+    ).join('\n')
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  const link = document.createElement('a')
+  if (link.download !== undefined) {
+    const url = URL.createObjectURL(blob)
+    link.setAttribute('href', url)
+    link.setAttribute('download', 'category_import_example.csv')
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+  }
 }
 
 // Import categories
@@ -208,8 +215,6 @@ const importCategories = () => {
   const formData = new FormData()
   formData.append('file', selectedFile.value)
 
-
-
   axios.post('/api/import/store', formData)
     .then(() => {
       toast.add({
@@ -220,8 +225,10 @@ const importCategories = () => {
       })
       fetchData()
       importDialog.value = false
-      importLoading.value = false
       selectedFile.value = null
+      // Reset FileUpload
+      const fileUpload = document.querySelector('.p-fileupload input[type="file"]')
+      if (fileUpload) fileUpload.value = ''
     })
     .catch((error) => {
       toast.add({
@@ -230,8 +237,10 @@ const importCategories = () => {
         detail: t('category.importError'),
         life: 3000
       })
-      importLoading.value = false
       console.error('Error importing categories:', error)
+    })
+    .finally(() => {
+      importLoading.value = false
     })
 }
 
@@ -258,7 +267,6 @@ onMounted(() => {
           <template #start>
             <h2 class="text-2xl font-bold">{{ t('category.managementTitle') }}</h2>
           </template>
-
           <template #end>
             <div class="flex gap-2">
               <span class="p-input-icon-left">
@@ -270,18 +278,21 @@ onMounted(() => {
                 icon="pi pi-download"
                 class="exite"
                 @click="openImportDialog"
+                aria-label="Import categories"
               />
               <Button
                 :label="t('category.export')"
                 icon="pi pi-upload"
-              class="exite"
+                class="exite"
                 @click="exportCategories"
+                aria-label="Export categories"
               />
               <Button
                 :label="t('category.new')"
                 icon="pi pi-plus"
                 class="p-button-success"
                 @click="createNewCategory"
+                aria-label="Create new category"
               />
             </div>
           </template>
@@ -305,7 +316,7 @@ onMounted(() => {
             class="p-datatable-sm"
           >
             <Column selection-mode="multiple" header-style="width: 3rem"></Column>
-            <Column field="name_en" :header="t('id')" :sortable="true" header-style="width:5%; min-width:5rem;">
+            <Column field="id" :header="t('id')" :sortable="true" header-style="width:5%; min-width:5rem;">
               <template #body="slotProps">
                 {{ slotProps.data.id }}
               </template>
@@ -320,7 +331,6 @@ onMounted(() => {
                 {{ slotProps.data.name_ar }}
               </template>
             </Column>
-
             <Column field="parent.name_en" :header="t('category.parent')" :sortable="true" header-style="width:14%; min-width:10rem;">
               <template #body="slotProps">
                 {{ slotProps.data.parent?.name_en || t('category.noParent') }}
@@ -335,15 +345,17 @@ onMounted(() => {
               <template #body="slotProps">
                 <Button
                   icon="pi pi-pencil"
-                 class="p-detail"
+                  class="p-detail"
                   @click="editCategory(slotProps.data.id)"
                   v-tooltip.top="t('edit')"
+                  aria-label="Edit category"
                 />
                 <Button
                   icon="pi pi-trash"
-                    class="p-delete"
-                     @click="confirmDelete(slotProps.data.id)"
+                  class="p-delete"
+                  @click="confirmDelete(slotProps.data.id)"
                   v-tooltip.top="t('delete')"
+                  aria-label="Delete category"
                 />
               </template>
             </Column>
@@ -370,6 +382,7 @@ onMounted(() => {
                 class="p-paginator-first p-paginator-element p-link"
                 :disabled="currentPage === 1"
                 @click="goToPage(1)"
+                aria-label="First page"
               >
                 <span class="p-paginator-icon pi pi-angle-double-left"></span>
               </button>
@@ -377,6 +390,7 @@ onMounted(() => {
                 class="p-paginator-prev p-paginator-element p-link"
                 :disabled="!prevPageUrl"
                 @click="goToPage(currentPage - 1)"
+                aria-label="Previous page"
               >
                 <span class="p-paginator-icon pi pi-angle-left"></span>
               </button>
@@ -386,15 +400,17 @@ onMounted(() => {
                   class="p-paginator-page p-paginator-element p-link"
                   :class="{ 'p-highlight': link.active }"
                   @click="goToPage(parseInt(link.label))"
+                  :aria-label="`Page ${link.label}`"
                 >
                   {{ link.label }}
                 </button>
                 <span v-else-if="link.label === '...'" class="p-paginator-dots">...</span>
               </template>
               <button
-                class="p-paginator-next p-paginator-element p-link"
+                class="p-paginator-next p-pb-paginator-element p-link"
                 :disabled="!nextPageUrl"
                 @click="goToPage(currentPage + 1)"
+                aria-label="Next page"
               >
                 <span class="p-paginator-icon pi pi-angle-right"></span>
               </button>
@@ -402,6 +418,7 @@ onMounted(() => {
                 class="p-paginator-last p-paginator-element p-link"
                 :disabled="currentPage === totalPages"
                 @click="goToPage(totalPages)"
+                aria-label="Last page"
               >
                 <span class="p-paginator-icon pi pi-angle-double-right"></span>
               </button>
@@ -411,6 +428,7 @@ onMounted(() => {
                 @change="changeRowsPerPage"
                 class="ml-2"
                 style="width: 80px"
+                aria-label="Rows per page"
               />
             </div>
           </div>
@@ -429,16 +447,18 @@ onMounted(() => {
           </div>
           <template #footer>
             <Button
-              :label="t('cancel')"
+              :jumlah="t('cancel')"
               icon="pi pi-times"
               class="p-button-text"
               @click="deleteDialog = false"
+              aria-label="Cancel delete"
             />
             <Button
               :label="t('yes')"
               icon="pi pi-check"
               class="p-button-text p-button-danger"
               @click="deleteCategory"
+              aria-label="Confirm delete"
             />
           </template>
         </Dialog>
@@ -446,32 +466,20 @@ onMounted(() => {
         <!-- Import Dialog -->
         <Dialog
           v-model:visible="importDialog"
-          :style="{ width: '800px' }"
+          :style="{ width: '500px' }"
           :header="t('category.importInstructions')"
           :modal="true"
         >
           <div class="flex flex-column gap-3">
             <div>
-              <DataTable
-                :value="exampleData"
-                responsive-layout="scroll"
-                stripedRows
-                showGridlines
-                class="p-datatable-sm"
-              >
-                <Column field="store_name_ar" :header="t('category.storeNameAr')" />
-                <Column field="store_name_en" :header="t('category.storeNameEn')" />
-                <Column field="category_name_ar" :header="t('category.nameAr')" />
-                <Column field="category_name_en" :header="t('category.nameEn')" />
-                <Column field="sub_category_name_ar" :header="t('category.subCategoryNameAr')" />
-                <Column field="sub_category_name_en" :header="t('category.subCategoryNameEn')" />
-                <Column field="sub_sub_category_name_ar" :header="t('category.subSubCategoryNameAr')" />
-                <Column field="sub_sub_category_name_en" :header="t('category.subSubCategoryNameEn')" />
-              </DataTable>
+              <Button
+                :label="t('category.downloadExample')"
+                icon="pi pi-download"
+                class="p-button-outlined"
+                @click="downloadExample"
+                aria-label="Download example CSV"
+              />
             </div>
-
-          </div>
-          <template #footer>
 
             <FileUpload
               mode="basic"
@@ -484,11 +492,17 @@ onMounted(() => {
               :disabled="importLoading"
               class="mb-3"
             />
+            <div v-if="selectedFile" class="mt-2">
+              <p class="font-semibold">{{ t('selectedFile') }}: {{ selectedFile.name }}</p>
+            </div>
+          </div>
+          <template #footer>
             <Button
               :label="t('cancel')"
               icon="pi pi-times"
-              class="p-button-text mt-3"
+              class="p-button-text"
               @click="importDialog = false"
+              aria-label="Cancel import"
             />
             <Button
               :label="t('import')"
@@ -497,6 +511,7 @@ onMounted(() => {
               @click="importCategories"
               :disabled="!selectedFile"
               :loading="importLoading"
+              aria-label="Import categories"
             />
           </template>
         </Dialog>

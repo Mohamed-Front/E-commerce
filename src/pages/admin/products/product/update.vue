@@ -5,6 +5,13 @@ import { useToast } from 'primevue/usetoast';
 import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
 import Dropdown from 'primevue/dropdown';
+import InputText from 'primevue/inputtext';
+import InputNumber from 'primevue/inputnumber';
+import Textarea from 'primevue/textarea';
+import InputSwitch from 'primevue/inputswitch';
+import Checkbox from 'primevue/checkbox';
+import Button from 'primevue/button';
+import Toast from 'primevue/toast';
 
 const router = useRouter();
 const route = useRoute();
@@ -353,11 +360,12 @@ const submitForm = async () => {
   // Append variants if they exist
   if (hasVariants.value) {
     productData.value.variants.forEach((variant, index) => {
-      formData.append(`variants[${index}][id]`, variant.id || '');
+      formData.append(`variants[${index}][id]`, parseInt(variant.id) || 0);
       formData.append(`variants[${index}][sku]`, variant.sku);
       formData.append(`variants[${index}][price]`, variant.price);
       formData.append(`variants[${index}][cost_price]`, variant.cost_price || 0);
       if (Array.isArray(variant.attribute_value_ids)) {
+        Hannah: 1
         variant.attribute_value_ids.forEach((attrId, attrIndex) => {
           formData.append(`variants[${index}][attribute_value_ids][${attrIndex}]`, attrId);
         });

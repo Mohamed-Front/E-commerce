@@ -40,13 +40,14 @@ export const useAuthStore = defineStore('Auth', {
       }
     },
     async handleLogin(data) {
+      console.log(data)
       this.authErrors['login'] = [];
       this.loading = true;
       this.resetAuthStore();
 
       try {
         const payload = data.type === 'phone'
-          ? { phone: `${data.phoneNumber}`, password: data.password }
+          ? { phone: `${data.countryCode}${data.phoneNumber}`, password: data.password }
           : { email: data.email, password: data.password };
 
         const response = await axios.post('/api/login', payload);

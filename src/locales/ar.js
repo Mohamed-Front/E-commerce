@@ -41,6 +41,7 @@ export default {
     addresses: 'العناوين',
   },
   user: {
+    managementTitle:"ادارة المستخدمين",
     new: 'جديد',
     users: 'المستخدمين',
     search: 'بحث...',
@@ -202,21 +203,48 @@ export default {
     permissionName: 'اسم الصلاحية',
     enterDescription: 'أدخل وصف الصلاحية...',
   },
-  role: {
-    manage_Roles: 'إدارة الأدوار',
-    iD: 'الفهرس',
-    name: 'الاسم',
-    role_Permissions_Manager: 'مدير أذونات الأدوار',
-    role_Name: 'اسم الدور',
-    enter_role_name: 'أدخل اسم الدور',
-    loading_permissions: 'جاري تحميل الأذونات...',
-    create_Role_with_Selected_Permissions: 'إنشاء دور بالأذونات المحددة',
-    permission_Description: 'وصف الإذن',
-    role_Name: 'اسم الدور',
-    role_Permissions: 'أذونات الدور',
-    edit: 'تعديل',
-    click_or_drag_to_change_image: 'انقر أو اسحب لتغيير الصورة',
-    close: 'اغلق',
+"role": {
+    "updateWithPermissions":"تحديث الدور",
+    "role_Permissions_Manager": "مدير صلاحيات الأدوار",
+    "role_Name": "اسم الدور",
+    "enter_role_name": "أدخل اسم الدور",
+    "loading_permissions": "جارٍ تحميل الصلاحيات...",
+    "create_Role_with_Selected_Permissions": "إنشاء دور بالصلاحيات المحددة",
+    "permission_Description": "وصف الصلاحية",
+    "createSuccess": "تم إنشاء الدور بنجاح",
+    "createError": "فشل في إنشاء الدور",
+    "manage_Roles": "إدارة الأدوار",
+    "search": "بحث",
+    "export": "تصدير",
+    "new": "جديد",
+    "iD": "المعرف",
+    "name": "الاسم",
+    "actions": "الإجراءات",
+    "noData": "لم يتم العثور على أدوار",
+    "show": "عرض",
+    "to": "إلى",
+    "from": "من",
+    "deleteConfirmTitle": "تأكيد الحذف",
+    "deleteConfirmMessage": "هل أنت متأكد من رغبتك في حذف هذا الدور؟",
+    "deleteSuccess": "تم حذف الدور بنجاح",
+    "deleteError": "فشل في حذف الدور",
+    "yes": "نعم",
+    "no": "لا",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "loadError": "فشل في تحميل الأدوار",
+    "loadPermissionsError": "فشل في تحميل الصلاحيات",
+    "success": "نجاح",
+    "error": "خطأ"
+  },
+  "permissions": {
+    "edit": "تعديل الدور",
+    "create": "إنشاء دور",
+    "updateWithPermissions": "تحديث الدور بالصلاحيات المحددة"
+  },
+  "loading": {
+    "roleData": "جارٍ تحميل بيانات الدور...",
+    "permissions": "جارٍ تحميل الصلاحيات..."
   },
   coupon: {
     managementTitle: 'إدارة الكوبونات',
@@ -297,14 +325,31 @@ export default {
       sales: 'المبيعات',
     },
   },
-  permission: {
-    permissions_Management: 'إدارة الأذونات',
-    view_and_manage_all_system_permissions_grouped_by_modules:
-      'عرض وإدارة جميع أذونات النظام المجمعة حسب الوحدات النمطية',
-    refresh: 'تحديث',
-    no_permissions_found_in_this_group: 'لم يتم العثور على أذونات في هذه المجموعة',
-    permission_Name: 'اسم الإذن',
-    click_or_drag_to_change_image: 'انقر أو اسحب لتغيير الصورة',
+"permissions_management": {
+    "title": "إدارة الأذونات",
+    "subtitle": "عرض وإدارة جميع أذونات النظام المجمعة حسب الوحدات",
+    "refresh_button": "تحديث",
+    "table": {
+      "id": "المعرف",
+      "name": "الاسم",
+      "description": "الوصف",
+      "actions": "الإجراءات",
+      "no_permissions": "لم يتم العثور على أذونات في هذه المجموعة"
+    },
+    "dialog": {
+      "header": "تحديث وصف الإذن",
+      "permission_name_label": "اسم الإذن",
+      "description_label": "الوصف",
+      "description_placeholder": "أدخل وصف الإذن...",
+      "cancel_button": "إلغاء",
+      "save_button": "حفظ"
+    },
+    "toasts": {
+      "success_update": "تم تحديث الوصف بنجاح",
+      "error_update": "فشل تحديث الوصف",
+      "error_fetch": "فشل جلب الأذونات",
+      "error_invalid_data": "تنسيق البيانات غير صالح"
+    }
   },
 
 "error": "خطأ",
@@ -512,9 +557,7 @@ export default {
     "createFirst": "إنشاء العنوان الأول",
     "invalid_id": "معرف العنوان غير صالح"
   },
-  "user": {
-    "name": "المستخدم"
-  },
+
   "error": "خطأ",
   "success": "نجاح",
   "validation_error": "خطأ في التحقق",

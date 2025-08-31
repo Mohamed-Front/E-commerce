@@ -131,9 +131,7 @@ watch([searchQuery, rowsPerPage], () => {
 
 // CRUD operations
 const openNew = () => {
-  role.value = { name: '', permissions: [] }
-  submitted.value = false
-  createDialog.value = true
+ router.push({name:'roles-create'})
 }
 
 const hideDialog = () => {
@@ -383,55 +381,6 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- Create Role Dialog -->
-        <Dialog
-          v-model:visible="createDialog"
-          :style="{ width: '450px' }"
-          :header="t('role.createTitle')"
-          :modal="true"
-          class="p-fluid"
-        >
-          <div class="field mb-5">
-            <label for="name">{{ t('role.name') }}</label>
-            <InputText
-              class="mt-3 w-full"
-              id="name"
-              v-model.trim="role.name"
-              required="true"
-              autofocus
-              :invalid="submitted && !role.name"
-            />
-            <small v-if="submitted && !role.name" class="p-error">{{ t('role.nameRequired') }}</small>
-          </div>
-          <div class="field">
-            <label for="permissions">{{ t('role.permissions') }}</label>
-            <MultiSelect
-              id="permissions"
-              v-model="role.permissions"
-              display="chip"
-              option-value="id"
-              :options="permissions"
-              option-label="name"
-              :placeholder="t('role.selectPermissions')"
-              class="w-full"
-            />
-          </div>
-
-          <template #footer>
-            <Button
-              :label="t('cancel')"
-              icon="pi pi-times"
-              class="p-button-text"
-              @click="hideDialog"
-            />
-            <Button
-              :label="t('save')"
-              icon="pi pi-check"
-              class="p-button-text"
-              @click="save"
-            />
-          </template>
-        </Dialog>
 
         <!-- Delete Confirmation Dialog -->
         <Dialog

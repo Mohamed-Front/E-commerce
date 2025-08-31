@@ -165,17 +165,17 @@ onMounted(() => {
       <div class="card p-4 shadow-2 border-round">
         <Toolbar class="mb-4">
           <template #start>
-            <h2 class="text-2xl font-bold">{{ t('user.managementTitle') }}</h2>
+            <h2 class="text-2xl font-bold">{{ $t('user.managementTitle') }}</h2>
           </template>
 
           <template #end>
             <div class="flex gap-2">
               <span class="p-input-icon-left">
                 <i class="pi pi-search" />
-                <InputText v-model="searchQuery" :placeholder="t('user.search')" />
+                <InputText v-model="searchQuery" :placeholder="$t('user.search')" />
               </span>
               <Button
-                :label="t('user.export')"
+                :label="$t('user.export')"
                 icon="pi pi-upload"
                 class="p-export"
                 v-can="'export users'"
@@ -183,7 +183,7 @@ onMounted(() => {
               />
               <Button
                 v-can="'create users'"
-                :label="t('user.new')"
+                :label="$t('user.new')"
                 icon="pi pi-plus"
                 class="p-button-success"
                 @click="openNew"
@@ -218,7 +218,7 @@ onMounted(() => {
               </template>
             </Column>
 
-            <Column field="email" :header="t('user.email')" :sortable="true" header-style="width:14%; min-width:10rem;">
+            <Column field="email" :header="$t('user.email')" :sortable="true" header-style="width:14%; min-width:10rem;">
               <template #body="slotProps">
                 {{ slotProps.data.email }}
               </template>

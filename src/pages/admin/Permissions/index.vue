@@ -79,38 +79,40 @@ onMounted(() => {
 <template>
   <div v-can="'list permissions'" class="permissions-container">
     <div class="card">
-      <div class="header">
-        <h1>Permissions Management</h1>
-        <p class="subtitle">View and manage all system permissions grouped by modules</p>
+    <div class="flex justify-between">
+        <div class="header">
+        <h1>{{ $t('permissions_management.title') }}</h1>
+        <p class="subtitle">{{ $t('permissions_management.subtitle') }}</p>
       </div>
 
       <div class="toolbar">
-        <Button icon="pi pi-refresh" label="Refresh" @click="fetchData" :loading="loading" />
+        <Button icon="pi pi-refresh" :label="$t('permissions_management.refresh_button')" @click="fetchData" :loading="loading" />
       </div>
+    </div>
 
       <TabView v-model:activeIndex="activeTab" class="grouped-tabs">
         <TabPanel v-for="group in groupedPermissions" :key="group.value" :header="group.name">
           <DataTable :value="group.permissions" stripedRows class="p-datatable-sm"
                     :loading="loading" dataKey="id" scrollable scrollHeight="flex">
-            <Column field="id" header="ID" sortable style="width: 80px"></Column>
-            <Column field="name" header="Name" sortable>
+            <Column field="id" :header="$t('permissions_management.table.id')" sortable style="width: 80px"></Column>
+            <Column field="name" :header="$t('permissions_management.table.name')" sortable>
               <template #body="{data}">
                 <Tag :value="data.name"
                      :severity="data.name.includes('delete') ? 'danger' :
-                              data.name.includes('edit') ? 'warning' :
-                              data.name.includes('create') ? 'success' : 'info'" />
+                               data.name.includes('edit') ? 'warning' :
+                               data.name.includes('create') ? 'success' : 'info'" />
               </template>
             </Column>
-            <Column field="description" header="Description">
+            <Column field="description" :header="$t('permissions_management.table.description')">
               <template #body="{data}">
                 <div class="description-cell">
-                  {{ data.description || 'No description' }}
+                  {{ data.description || $t('permissions_management.table.no_permissions') }}
                   <Button v-can="'edit permissions'" icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm"
                           @click="openEditDialog(data)" />
                 </div>
               </template>
             </Column>
-            <Column header="Actions" style="width: 100px">
+            <Column :header="$t('permissions_management.table.actions')" style="width: 100px">
               <template #body="{data}">
                 <Button icon="pi pi-cog" class="p-button-rounded p-button-text p-button-sm"
                         @click="openEditDialog(data)" />
@@ -119,7 +121,7 @@ onMounted(() => {
             <template #empty>
               <div class="empty-message">
                 <i class="pi pi-database" style="font-size: 2rem"></i>
-                <p>No permissions found in this group</p>
+                <p>{{ $t('permissions_management.table.no_permissions') }}</p>
               </div>
             </template>
           </DataTable>
@@ -127,23 +129,23 @@ onMounted(() => {
       </TabView>
 
       <!-- Update Description Dialog -->
-      <Dialog v-model:visible="visibleDialog" modal header="Update Permission Description"
+      <Dialog v-model:visible="visibleDialog" modal :header="$t('permissions_management.dialog.header')"
               :style="{ width: '50vw' }" :breakpoints="{ '960px': '75vw', '640px': '90vw' }">
         <div class="p-fluid">
           <div class="p-field">
-            <label for="permissionName">Permission Name</label>
+            <label for="permissionName">{{ $t('permissions_management.dialog.permission_name_label') }}</label>
             <InputText id="permissionName" v-model="currentPermission.name" disabled />
           </div>
           <div class="p-field">
-            <label for="description">Description</label>
+            <label for="description">{{ $t('permissions_management.dialog.description_label') }}</label>
             <Textarea id="description" v-model="currentPermission.description"
-                     rows="5" autoResize placeholder="Enter permission description..." />
+                     rows="5" autoResize :placeholder="$t('permissions_management.dialog.description_placeholder')" />
           </div>
         </div>
         <template #footer>
-          <Button label="Cancel" icon="pi pi-times" @click="visibleDialog = false"
+          <Button :label="$t('permissions_management.dialog.cancel_button')" icon="pi pi-times" @click="visibleDialog = false"
                   class="p-button-text" />
-          <Button label="Save" icon="pi pi-check" @click="updateDescription"
+          <Button :label="$t('permissions_management.dialog.save_button')" icon="pi pi-check" @click="updateDescription"
                   :loading="loading" autofocus />
         </template>
       </Dialog>

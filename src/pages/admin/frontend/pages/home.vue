@@ -14,10 +14,10 @@
         grab-cursor
         class="titles-swiper h-[58px] mt-2"
         :breakpoints="{
-          0: { slidesPerView: 4 },
-          480: { slidesPerView: 3 },
-          768: { slidesPerView: 4 },
-          1024: { slidesPerView: 10 }
+          0: { slidesPerView: 4 ,spaceBetween: 5 },
+          480: { slidesPerView: 3,spaceBetween: 5  },
+          768: { slidesPerView: 4 ,spaceBetween: 5},
+           1024: { slidesPerView: 8, spaceBetween:5 }
         }"
       >
         <swiper-slide v-for="title in computedTitles" :key="title.id" class="flex items-center justify-center">
