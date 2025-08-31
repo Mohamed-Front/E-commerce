@@ -335,6 +335,21 @@ const routes: Array<RouteRecordRaw> = [
             component: () => import('../pages/admin/products/coupon/update.vue'),
           },
           {
+            name: 'markets',
+            path: 'markets',
+            component: () => import('../pages/admin/products/markets/index.vue'),
+          },
+          {
+            name: 'market-create',
+            path: 'market-create',
+            component: () => import('../pages/admin/products/markets/create.vue'),
+          },
+          {
+            name: 'market-update',
+            path: 'market-update/:id',
+            component: () => import('../pages/admin/products/markets/update.vue'),
+          },
+          {
             name: 'category',
             path: 'category',
             component: () => import('../pages/admin/products/category/index.vue'),

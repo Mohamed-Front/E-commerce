@@ -2,7 +2,7 @@
   <!-- Container -->
   <div class="mx-auto mt-16 max-w-7xl px-4 sm:px-6 lg:px-8">
     <!-- Loading State -->
-    <div v-if="isLoading" class="flex flex-col items-center justify-center py-16  rounded-xl animate-pulse">
+    <div v-if="isLoading" class="flex flex-col items-center justify-center py-16 rounded-xl animate-pulse">
       <img
         src="../../../../../assets/shiftlogo.png"
         alt="Loading Logo"
@@ -22,7 +22,8 @@
           {{ storeName }}
         </h1>
       </div>
-      <!-- Markets Section with Swiper -->
+
+      <!-- Markets Section -->
       <div v-if="markets.length" class="my-10">
         <swiper
           :modules="[Autoplay]"
@@ -44,32 +45,16 @@
             v-for="market in markets"
             :key="market.id"
             class="group flex flex-col items-center cursor-pointer transition-all duration-300 hover:-translate-y-2"
-            @click="router.push(`/markets/${market.id}`)"
+            @click="goCatgory(market)"
           >
             <div class="w-full h-58 overflow-hidden rounded-lg shadow-md relative">
-              <swiper
-                :modules="[Autoplay]"
-                :slides-per-view="1"
-                :space-between="0"
-                :loop="market.media.length > 1"
-                :autoplay="{ delay: 2000, disableOnInteraction: false }"
-                :speed="800"
-                class="w-full h-full"
-              >
-                <SwiperSlide
-                  v-for="(media, index) in market.media"
-                  :key="index"
-                  class="w-full h-full"
-                >
-                  <img
-                    :src="media.url"
-                    :alt="`${market.title} image ${index + 1}`"
-                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    loading="lazy"
-                    :aria-label="`${market.title} image ${index + 1}`"
-                  />
-                </SwiperSlide>
-              </swiper>
+              <img
+                :src="market.media.find(m => m.name === 'category_image')?.url || defaultMarketImage"
+                :alt="`${market.title} category image`"
+                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                loading="lazy"
+                :aria-label="`${market.title} category image`"
+              />
             </div>
             <h3 class="font-sans mt-4 mb-1 text-black font-bold text-sm sm:text-base md:text-lg">
               {{ market.title }}
@@ -259,7 +244,15 @@ const fetchStoreDetails = async () => {
     isLoading.value = false;
   }
 };
+const goCatgory = (data) => {
+  if(data.has_subcategories > 0){
+   router.push({ name: 'subcategory', params: { id: data.id } });
 
+  }
+  else
+  router.push({ name: 'produts_category', params: { id: data.id } });
+
+};
 // Initialize store data
 const initStoreData = () => {
   if (!storeData.value) return;

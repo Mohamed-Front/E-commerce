@@ -152,6 +152,14 @@ export default {
             icon: 'category'
           }
         },
+         {
+          name: 'markets',
+          displayName: 'navigation.markets',
+          show: 'list categories',
+          meta: {
+            icon: 'category'
+          }
+        },
       ],
     },
      {
