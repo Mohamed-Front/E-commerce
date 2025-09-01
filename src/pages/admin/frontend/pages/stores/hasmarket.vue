@@ -200,7 +200,6 @@ import defaultCategoryImage from '../../../../../assets/loginFormImg.png';
 import ProductOffers from '../../components/ProductOffers.vue';
 
 // Initialize Vue utilities
-const route = useRoute();
 const router = useRouter();
 const { t, locale } = useI18n();
 

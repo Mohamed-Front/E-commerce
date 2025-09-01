@@ -29,42 +29,9 @@
         <h2 v-if="pro.sub_name_en" class="text-xl text-gray-600 mb-4">{{ locale === 'en' ? pro.sub_name_en : pro.sub_name_ar }}</h2>
 
         <section class="mt-4 flex flex-wrap gap-2 text-center">
-          <span v-if="pro.store_id" class="sub-tiles">Store</span>
-          <span v-if="pro.category && (pro.category.name_en || pro.category.name_ar)" class="sub-tiles">{{ locale === 'en' ? pro.category.name_en : pro.category.name_ar }}</span>
-          <span v-if="pro.brand_id" class="sub-tiles">Brand</span>
-        </section>
-
-        <section class="mt-6">
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 flex-wrap">
-            <div v-if="variants_details && variants_details.attributes && variants_details.attributes.color" class="flex-1 flex flex-col">
-              <span class="text-color font-bold mb-2">Color</span>
-              <div class="flex gap-2">
-                <button
-                  v-for="color in variants_details.attributes.color"
-                  :key="color.id"
-                  class="h-8 w-8 rounded-full border-2 transition-all duration-200"
-                  :style="{ backgroundColor: color.value_en.toLowerCase() }"
-                  :class="{ 'border-blue-500': selectedColor === color.value_en, 'border-gray-300': selectedColor !== color.value_en }"
-                  @click="selectedColor = color.value_en"
-                ></button>
-              </div>
-            </div>
-
-            <div v-if="variants_details && variants_details.attributes && variants_details.attributes.size" class="flex-1 flex flex-col">
-              <span class="text-color font-bold mb-2">Size</span>
-              <div class="flex gap-2">
-                <button
-                  v-for="size in variants_details.attributes.size"
-                  :key="size.id"
-                  class="px-4 py-2 rounded-md border-2 transition-all duration-200"
-                  :class="{ 'border-blue-500 bg-gray-100': selectedSize === size.value_en, 'border-gray-300': selectedSize !== color.value_en }"
-                  @click="selectedSize = size.value_en"
-                >
-                  {{ locale === 'en' ? size.value_en : size.value_ar }}
-                </button>
-              </div>
-            </div>
-          </div>
+          <span @click="selectStore(pro.store)" v-if="pro.store_id" class="sub-tiles">{{ pro.store?.name_en || 'Store' }}</span>
+          <span @click="goCatgory(pro.category)" v-if="pro.category && (pro.category.name_en || pro.category.name_ar)" class="sub-tiles cu">{{ locale === 'en' ? pro.category.name_en : pro.category.name_ar }}</span>
+          <span v-if="pro.brand_id" class="sub-tiles">{{ pro.brand?.name_en || 'Brand' }}</span>
         </section>
 
         <hr class="bg-[#A17D1C] my-6 h-[1px] border-0" />
@@ -72,8 +39,7 @@
         <section>
           <div class="flex items-center gap-6 mb-4">
             <span class="text-xl font-bold text-gray-800">Price:</span>
-            <span v-if="currentPrice" class="text-2xl font-bold text-blue-600">{{ currentPrice }} JOD</span>
-            <span v-else class="text-2xl font-bold text-blue-600">{{ productPrice }} JOD</span>
+            <span class="text-2xl font-bold text-blue-600">{{ pro.base_price_after_discount }} JOD</span>
           </div>
 
           <div class="flex items-center gap-4 mb-4">
@@ -96,14 +62,14 @@
       </div>
     </header>
 
-    <section class="bg-[#E6AC312B] px-6 pt-2 pb-12 rounded-md  mt-8">
+    <section class="bg-[#E6AC312B] px-6 pt-2 pb-12 rounded-md mt-8">
       <p class="leading-relaxed text-sm text-gray-700">
         {{ locale === 'en' ? pro.description_en : pro.description_ar || 'No description available.' }}
       </p>
       <h3 class="text-[#E39F30] text-sm font-semibold mt-2 cursor-pointer">READ MORE</h3>
     </section>
 
-    <section class="mt-8 p-4 bg-white rounded-md shadow-md hidden">
+    <section class="mt-8 p-4 bg-white rounded-md shadow-md">
       <div class="flex justify-center items-center flex-col">
         <h2 class="text-2xl font-bold text-gray-800 mb-4">Leave A Review</h2>
       </div>
@@ -143,53 +109,61 @@
 
     <section class="mt-8">
       <ProductOffers></ProductOffers>
-
     </section>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios'
 import { useI18n } from 'vue-i18n'
 import Rating from 'primevue/rating'
-
 import ProductOffers from '../../components/ProductOffers.vue'
 
 const { t, locale } = useI18n()
 const route = useRoute()
+const router = useRouter();
 
 const pro = ref({})
-const variants_details = ref(null)
-const currentImg = ref('')
 const imgs = ref([])
 const quantity = ref(1)
 const review = ref(null)
-const selectedColor = ref(null)
-const selectedSize = ref(null)
+const currentImg = ref('')
 const isLoading = ref(false)
 const error = ref(null)
-const stor_id = ref(localStorage.getItem('defaultStoreId'))
-const exclusive_offers = ref({ title: '', products: [] })
-const Best_seller = ref({ title: '', products: [] })
-const New_arrival = ref({ title: '', products: [] })
-
-const productPrice = computed(() => {
-  if (pro.value.variants && pro.value.variants.length > 0) {
-    return pro.value.variants[0].price
+const goCatgory = (data) => {
+  console.log(data)
+  if(data.has_subcategories  ){
+   router.push({ name: 'subcategory', params: { id: data.id } });
   }
-  return '0.00'
-})
+  else
+  router.push({ name: 'produts_category', params: { id: data.id } });
+};
+const selectStore = (store) => {
 
-const currentPrice = computed(() => {
-  if (!variants_details.value || !variants_details.value.combinations) {
-    return null
+  if (store.has_market) {
+    router.push({ name: 'stores-hasmarket' });
+  } else {
+    router.push({ name: 'home' });
   }
-  const combination = variants_details.value.combinations.find(
-    (combo) => combo.color === selectedColor.value && combo.size === selectedSize.value
-  )
-  return combination ? combination.price : null
+};
+onMounted(async () => {
+  window.scrollTo(0, 0)
+  isLoading.value = true
+  try {
+    const response = await axios.get(`api/home/product-details/${route.params.id}`)
+    pro.value = response.data.data.product
+    imgs.value = pro.value.media || []
+    if (imgs.value.length > 0) {
+      currentImg.value = imgs.value[0].url
+    }
+  } catch (err) {
+    console.error('Error fetching data:', err)
+    error.value = t('category.errorLoading') || 'Failed to load data.'
+  } finally {
+    isLoading.value = false
+  }
 })
 
 const changeImg = (imgUrl) => {
@@ -203,57 +177,6 @@ const allreviews = ref([
   { starsNumber: 2, rate: 0 },
   { starsNumber: 1, rate: 0 },
 ])
-
-const reviews = ref([
-  {
-    id: 1,
-    name: 'John Doe',
-    rating: 4,
-    date: '2023-10-01',
-    comment: 'Great product, highly recommend!',
-    img: 'https://static.vecteezy.com/system/resources/previews/005/544/718/non_2x/profile-icon-design-free-vector.jpg',
-    reaction: null,
-  },
-])
-
-
-
-
-
-
-
-
-
-onMounted(async () => {
-  // Ensure page scrolls to top on load
-  window.scrollTo(0, 0)
-  isLoading.value = true
-  try {
-    const [productResponse] = await Promise.all([
-      axios.get(`api/home/product-details/${route.params.id}`),
-
-    ])
-    pro.value = productResponse.data.data.product
-    variants_details.value = productResponse.data.data.variants_details
-    imgs.value = pro.value.media || []
-    if (imgs.value.length > 0) {
-      currentImg.value = imgs.value[0].url
-    }
-    if (variants_details.value && variants_details.value.attributes) {
-      if (variants_details.value.attributes.color && variants_details.value.attributes.color.length > 0) {
-        selectedColor.value = variants_details.value.attributes.color[0].value_en
-      }
-      if (variants_details.value.attributes.size && variants_details.value.attributes.size.length > 0) {
-        selectedSize.value = variants_details.value.attributes.size[0].value_en
-      }
-    }
-  } catch (err) {
-    console.error('Error fetching data:', err)
-    error.value = t('category.errorLoading') || 'Failed to load data.'
-  } finally {
-    isLoading.value = false
-  }
-})
 </script>
 
 <style scoped>

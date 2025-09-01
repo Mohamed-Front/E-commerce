@@ -688,7 +688,7 @@ export default {
   "to": "إلى",
   "from": "من",
   "edit": "تعديل",
-  "currencyLabel": "د.ر",
+  "currencyLabel": "د.أ",
   show: 'عرض',
   to: 'إلى',
   from: 'من',
