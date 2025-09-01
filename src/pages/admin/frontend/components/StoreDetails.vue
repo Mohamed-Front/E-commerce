@@ -85,7 +85,8 @@
     <!-- Categories Slider -->
     <div class="mt-8 py-2 rounded-sm px-2 bg-[#1F3A932B] mx-auto max-w-7xl">
       <Swiper
-        :modules="[Navigation]"
+        ref="categoriesSwiper"
+        :modules="[Autoplay]"
         :slides-per-view="8"
         :space-between="10"
         :navigation="false"
@@ -153,6 +154,7 @@ const subBannerImage = ref(null);
 const sponsorImage = ref(null);
 const categories = ref([]);
 const storeId = ref(localStorage.getItem('defaultStoreId') || '4');
+const categoriesSwiper = ref(null);
 
 // Helper function to extract media by name
 const getMediaByName = (mediaArray, name) => {
@@ -216,6 +218,12 @@ const fetchStoreDetails = async () => {
     subBannerImage.value = getMediaByName(enhancedMedia, 'sub_banner_image');
     sponsorImage.value = getMediaByName(enhancedMedia, 'store_image');
     categories.value = store.categories || [];
+
+    // Update Swiper after data is fetched
+    if (categoriesSwiper.value && categoriesSwiper.value.swiper) {
+      categoriesSwiper.value.swiper.update();
+      categoriesSwiper.value.swiper.autoplay.start();
+    }
   } catch (error) {
     console.error('Error fetching store details:', error);
   }
