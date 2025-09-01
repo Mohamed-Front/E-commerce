@@ -78,6 +78,7 @@
         products: data.map((product) => ({
           variant_id: product?.variant_id,
           data:product,
+          id: product.id,
           is_wished:product.is_wished,
           sub_name: locale.value === 'ar' ? product.sub_name_ar || product.sub_name_en : product.sub_name_en || product.sub_name_ar,
           name: locale.value === 'ar' ? product.name_ar : product.name_en,

@@ -118,7 +118,8 @@
 
 
 const goCatgory = (data) => {
-  if(data.has_subcategories > 0){
+  console.log(data)
+  if(data.has_subcategories ){
    router.push({ name: 'subcategory', params: { id: data.id } });
 
   }
@@ -135,6 +136,7 @@ const goCatgory = (data) => {
         titels.value[category.id] = {
           name: localStorage.getItem('appLang') == 'en' ? category.name_en : category.name_ar || category.name_en,
           id: category.id,
+          has_subcategories: category.has_subcategories,
 
 
         }

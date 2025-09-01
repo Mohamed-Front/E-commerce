@@ -1,3 +1,4 @@
+```vue
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useToast } from 'primevue/usetoast'
@@ -31,6 +32,8 @@ const selectedCategories = ref(null)
 const importDialog = ref(false)
 const selectedFile = ref(null)
 const importLoading = ref(false)
+const stores = ref([]) // New: List of stores for dropdown
+const selectedStore = ref(null) // New: Selected store for filtering
 
 // Pagination variables
 const currentPage = ref(1)
@@ -52,10 +55,25 @@ const exampleData = ref([
     arabic_name: 'Shift7',
     english_name: 'الأحذية',
     Top_Parent: 'shift7',
-
   },
-
 ])
+
+// Fetch stores for dropdown
+const fetchStores = () => {
+  axios.get('/api/store')
+    .then((response) => {
+      stores.value = response.data.data.data // Adjust based on your API response structure
+    })
+    .catch((error) => {
+      toast.add({
+        severity: 'error',
+        summary: t('error'),
+        detail: t('store.loadError'),
+        life: 3000
+      })
+      console.error('Error fetching stores:', error)
+    })
+}
 
 // Fetch categories data
 const fetchData = () => {
@@ -64,7 +82,8 @@ const fetchData = () => {
     params: {
       page: currentPage.value,
       limit: rowsPerPage.value,
-      search: searchQuery.value || undefined
+      search: searchQuery.value || undefined,
+      store_id: selectedStore.value?.id || undefined // New: Include store_id
     }
   })
     .then((response) => {
@@ -93,8 +112,8 @@ const fetchData = () => {
     })
 }
 
-// Watch for pagination and search changes
-watch([searchQuery, rowsPerPage], () => {
+// Watch for pagination, search, and store changes
+watch([searchQuery, rowsPerPage, selectedStore], () => {
   currentPage.value = 1
   fetchData()
 })
@@ -131,6 +150,7 @@ const deleteCategory = () => {
       })
       fetchData()
       deleteDialog.value = false
+      deleteId.value = null
     })
     .catch((error) => {
       toast.add({
@@ -255,6 +275,7 @@ const editCategory = (id) => {
 
 // Lifecycle hooks
 onMounted(() => {
+  fetchStores() // New: Fetch stores on mount
   fetchData()
 })
 </script>
@@ -273,6 +294,15 @@ onMounted(() => {
                 <i class="pi pi-search" />
                 <InputText v-model="searchQuery" :placeholder="t('category.search')" />
               </span>
+              <Dropdown
+                v-model="selectedStore"
+                :options="stores"
+                optionLabel="name_en"
+                :placeholder="t('category.selectStore')"
+                class="w-12rem"
+                :showClear="true"
+                aria-label="Filter by store"
+              />
               <Button
                 :label="t('category.import')"
                 icon="pi pi-download"
@@ -407,7 +437,7 @@ onMounted(() => {
                 <span v-else-if="link.label === '...'" class="p-paginator-dots">...</span>
               </template>
               <button
-                class="p-paginator-next p-pb-paginator-element p-link"
+                class="p-paginator-next p-paginator-element p-link"
                 :disabled="!nextPageUrl"
                 @click="goToPage(currentPage + 1)"
                 aria-label="Next page"
@@ -447,16 +477,17 @@ onMounted(() => {
           </div>
           <template #footer>
             <Button
-              :jumlah="t('cancel')"
+              :label="t('cancel')"
               icon="pi pi-times"
-              class="p-button-text"
+              text
               @click="deleteDialog = false"
               aria-label="Cancel delete"
             />
             <Button
               :label="t('yes')"
               icon="pi pi-check"
-              class="p-button-text p-button-danger"
+              text
+              severity="danger"
               @click="deleteCategory"
               aria-label="Confirm delete"
             />
@@ -500,7 +531,7 @@ onMounted(() => {
             <Button
               :label="t('cancel')"
               icon="pi pi-times"
-              class="p-button-text"
+              text
               @click="importDialog = false"
               aria-label="Cancel import"
             />
@@ -528,3 +559,4 @@ onMounted(() => {
   visibility: hidden !important;
 }
 </style>
+```
