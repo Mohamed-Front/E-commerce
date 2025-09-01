@@ -10,6 +10,7 @@
         aria-label="Loading animation"
       />
     </div>
+
     <!-- Error State -->
     <div v-else-if="error" class="text-center py-16 text-red-600">
       <p class="text-lg font-semibold">{{ error }}</p>

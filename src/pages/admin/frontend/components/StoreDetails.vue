@@ -102,19 +102,18 @@
         <SwiperSlide v-for="(category, index) in categories" :key="index">
           <div @click="goCategory(category)" class="flex flex-col items-center justify-center rounded-xl h-full w-full cursor-pointer">
             <img
+              v-if="category?.media"
               :src="category?.media[0]?.url"
-              :alt="category.name_en"
+              :alt="category.name_en || 'Category Image'"
               class="w-full h-full object-cover rounded-xl"
             />
             <div class="p-3 w-full text-center rounded-xl">
-              <span class="font-bold text-sm text-black">{{ category.name_ar.slice(0, 20) }}</span>
+              <span class="font-bold text-sm text-black">{{ category?.name_ar ? category.name_ar.slice(0, 20) : 'Category' }}</span>
             </div>
           </div>
         </SwiperSlide>
       </Swiper>
     </div>
-
-
 
     <!-- Sub Banner -->
     <div v-if="subBannerImage" class="my-8 max-w-5xl mx-auto">
@@ -167,7 +166,6 @@ const getSliderImages = (mediaArray, name) => {
 
 // Handle media click based on media link type
 const handleMediaClick = (mediaItem) => {
-
   if (!mediaItem || !mediaItem.media_links) {
     console.log(mediaItem);
     return;
