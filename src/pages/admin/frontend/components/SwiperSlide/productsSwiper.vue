@@ -64,7 +64,7 @@
           {{ truncateName(pro.name, 30) }}
         </p>
 
-        <p v-if="pro.sub_name" class="font-sans mx-3 text-gray-600 text-sm truncate w-full">
+        <p v-if="pro.sub_name" class="font-sans mx-3 text-gray-600 text-sm  w-full">
           {{ pro.sub_name.slice(0, 37) }}
         </p>
         <div class="flex items-center w-full justify-between mx-3 mt-auto">

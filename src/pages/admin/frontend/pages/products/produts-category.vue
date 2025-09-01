@@ -52,13 +52,13 @@
             </button>
           </div>
           <div class="p-4 w-full">
-            <p class="font-sans text-gray-800 font-medium text-base line-clamp-2 h-12">
+            <p class="font-sans text-gray-800 font-medium text-base line-clamp-2 ">
               {{ truncateName(pro.name, 30) }}
             </p>
             <p v-if="pro.sub_name" class="font-sans text-gray-600 text-sm line-clamp-1 mt-1">
               {{ pro.sub_name.slice(0, 37) }}
             </p>
-            <div class="flex items-center w-full justify-between mt-3">
+            <div class="flex items-center w-full justify-between mt-1">
               <span class="font-sans text-[#A6853B] font-semibold text-lg">
                 ${{ pro.price }}
               </span>
