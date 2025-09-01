@@ -60,7 +60,7 @@
             </svg>
           </button>
         </div>
-        <p class="font-sans mt-4 mx-3 text-gray-800 font-medium xs:text-sm sm:text-base md:text-lg truncate w-full">
+        <p class="font-sans mt-4 mx-3 text-gray-800 font-medium xs:text-sm sm:text-base md:text-lg  w-full">
           {{ truncateName(pro.name, 30) }}
         </p>
 
