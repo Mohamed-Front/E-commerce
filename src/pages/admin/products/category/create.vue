@@ -1,24 +1,27 @@
 <script setup>
-import { ref, onMounted ,computed} from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import axios from 'axios';
 import { useToast } from 'primevue/usetoast';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 
 const router = useRouter();
+const route = useRoute();
 const toast = useToast();
 const { t } = useI18n();
 const loading = ref(false);
 
-
+// Computed property for language-specific label field
 const categoryLabelField = computed(() => {
   return localStorage.getItem('appLang') == 'ar' ? 'name_ar' : 'name_en';
 });
+
 // Form Data
 const categoryData = ref({
   name_en: '',
   name_ar: '',
-  is_market: false,
+  linked_to_market: false,
+  market_id: null,
   parent_id: null,
   store_id: null,
   image: null,
@@ -33,6 +36,7 @@ const bannerTwoPreview = ref(null);
 
 // Options
 const parentCategories = ref([]);
+const markets = ref([]);
 const stores = ref([]);
 
 // Drag states
@@ -40,22 +44,92 @@ const isDraggingImage = ref(false);
 const isDraggingBannerOne = ref(false);
 const isDraggingBannerTwo = ref(false);
 
-// Fetch parent categories and stores
+// Fetch parent categories based on linked_to_market
 const fetchParentCategories = async () => {
   try {
-    const response = await axios.get('/api/category');
+    const endpoint = categoryData.value.linked_to_market ? '/api/market' : '/api/category';
+    const response = await axios.get(endpoint);
     parentCategories.value = response.data.data.data;
   } catch (error) {
     console.error("Error fetching parent categories:", error);
+    toast.add({
+      severity: 'error',
+      summary: t("error"),
+      detail: t('category.fetchParentError'),
+      life: 3000
+    });
   }
 };
 
+// Fetch markets
+const fetchMarkets = async () => {
+  try {
+    const response = await axios.get('/api/market');
+    markets.value = response.data.data.data;
+  } catch (error) {
+    console.error("Error fetching markets:", error);
+    toast.add({
+      severity: 'error',
+      summary: t("error"),
+      detail: t('category.fetchMarketsError'),
+      life: 3000
+    });
+  }
+};
+
+// Fetch stores
 const fetchStores = async () => {
   try {
     const response = await axios.get('/api/store');
     stores.value = response.data.data.data;
   } catch (error) {
     console.error("Error fetching stores:", error);
+    toast.add({
+      severity: 'error',
+      summary: t("error"),
+      detail: t('category.fetchStoresError'),
+      life: 3000
+    });
+  }
+};
+
+// Fetch category data by ID
+const fetchCategoryById = async (id) => {
+  try {
+    const response = await axios.get(`/api/category/${id}`);
+    const category = response.data.data;
+
+    // Populate form fields
+    categoryData.value = {
+      name_en: category.name_en || '',
+      name_ar: category.name_ar || '',
+      linked_to_market: !!category.linked_to_market,
+      market_id: category.market_id || null,
+      parent_id: category.parent_id || null,
+      store_id: category.store_id || null,
+      image: null,
+      banner_one_image: null,
+      banner_two_image: null
+    };
+
+    // Set image previews if images exist
+    category.media.forEach(media => {
+      if (media.name === 'category_image') {
+        imagePreview.value = media.url;
+      } else if (media.name === 'banner_one_image') {
+        bannerOnePreview.value = media.url;
+      } else if (media.name === 'banner_two_image') {
+        bannerTwoPreview.value = media.url;
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching category data:", error);
+    toast.add({
+      severity: 'error',
+      summary: t("error"),
+      detail: t('category.fetchError'),
+      life: 3000
+    });
   }
 };
 
@@ -109,14 +183,14 @@ const removeImage = (type) => {
   }
 };
 
-// Submit form
+// Submit form (handles both create and update)
 const submitForm = async () => {
   loading.value = true;
-
   const formData = new FormData();
   formData.append('name_en', categoryData.value.name_en);
   formData.append('name_ar', categoryData.value.name_ar);
-  formData.append('is_market', categoryData.value.is_market ? '1' : '0');
+  formData.append('linked_to_market', categoryData.value.linked_to_market ? '1' : '0');
+  formData.append('market_id', categoryData.value.market_id || '');
   formData.append('parent_id', categoryData.value.parent_id || '');
   formData.append('store_id', categoryData.value.store_id || '');
 
@@ -131,13 +205,17 @@ const submitForm = async () => {
   }
 
   try {
-    const response = await axios.post("/api/category", formData);
+    const categoryId = route.params.id;
+    const method = categoryId ? 'post' : 'post';
+    const url = categoryId ? `/api/category/${categoryId}` : '/api/category';
 
-    router.push({name: 'categories'});
+    const response = await axios[method](url, formData);
+
+    router.push({ name: 'categories' });
     toast.add({
       severity: 'success',
       summary: t("success"),
-      detail: t('category.createSuccess'),
+      detail: categoryId ? t('category.updateSuccess') : t('category.createSuccess'),
       life: 3000
     });
   } catch (error) {
@@ -145,7 +223,7 @@ const submitForm = async () => {
     toast.add({
       severity: 'error',
       summary: t("error"),
-      detail: error.response?.data?.message || t('category.createError'),
+      detail: error.response?.data?.message || (route.params.id ? t('category.updateError') : t('category.createError')),
       life: 3000
     });
   } finally {
@@ -153,17 +231,32 @@ const submitForm = async () => {
   }
 };
 
-// Initialize form
-onMounted(() => {
+// Watch for changes in linked_to_market to refetch parent categories
+watch(() => categoryData.value.linked_to_market, () => {
   fetchParentCategories();
-  fetchStores();
+  // Reset parent_id when switching to avoid invalid selections
+  categoryData.value.parent_id = null;
+});
+
+// Initialize form
+onMounted(async () => {
+  await Promise.all([
+    fetchMarkets(),
+    fetchParentCategories(),
+    fetchStores()
+  ]);
+  const categoryId = route.params.id;
+  if (categoryId) {
+    await fetchCategoryById(categoryId);
+  }
 });
 </script>
 
 <template>
   <div v-can="'create categories'" class="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow-lg">
-    <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">{{ t('category.createTitle') }}</h1>
-
+    <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">
+      {{ route.params.id ? t('category.updateTitle') : t('category.createTitle') }}
+    </h1>
     <form @submit.prevent="submitForm" class="space-y-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- English Name -->
@@ -179,7 +272,6 @@ onMounted(() => {
             required
           />
         </div>
-
         <!-- Arabic Name -->
         <div class="space-y-2">
           <label for="name_ar" class="block text-sm font-medium text-gray-700">
@@ -194,28 +286,25 @@ onMounted(() => {
             required
           />
         </div>
-
         <!-- Parent Category -->
         <div class="space-y-2">
           <label for="parent_id" class="block text-sm font-medium text-gray-700">
             {{ t('category.parent') }}
           </label>
           <Dropdown
-          filter
+            filter
             v-model="categoryData.parent_id"
             :options="parentCategories"
             :optionLabel="categoryLabelField"
             optionValue="id"
             :placeholder="t('category.selectParent')"
             class="w-full"
-            :showClear="true"
           />
         </div>
-
-        <!-- Store -->
+        <!-- Store Selection -->
         <div class="space-y-2">
           <label for="store_id" class="block text-sm font-medium text-gray-700">
-            {{ t('category.store') }} <span class="text-red-500">*</span>
+            {{ t('category.store') }}
           </label>
           <Dropdown
             filter
@@ -225,21 +314,34 @@ onMounted(() => {
             optionValue="id"
             :placeholder="t('category.selectStore')"
             class="w-full"
-            required
           />
         </div>
-
-        <!-- Market Type -->
-        <div class="space-y-2 md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700">{{ t('category.marketType') }}</label>
+        <!-- Linked to Market -->
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">{{ t('category.linkedToMarket') }}</label>
           <div class="flex items-center space-x-4">
-            <InputSwitch v-model="categoryData.is_market" />
+            <InputSwitch v-model="categoryData.linked_to_market" />
             <span class="text-sm text-gray-600">
-              {{ categoryData.is_market ? t('category.market') : t('category.nonMarket') }}
+              {{ categoryData.linked_to_market ? t('category.market') : t('category.nonMarket') }}
             </span>
           </div>
         </div>
-
+        <!-- Market Dropdown (shown when linked_to_market is true) -->
+        <div v-if="categoryData.linked_to_market" class="space-y-2">
+          <label for="market_id" class="block text-sm font-medium text-gray-700">
+            {{ t('category.market') }} <span class="text-red-500">*</span>
+          </label>
+          <Dropdown
+            filter
+            v-model="categoryData.market_id"
+            :options="markets"
+            :optionLabel="categoryLabelField"
+            optionValue="id"
+            :placeholder="t('category.selectMarket')"
+            class="w-full"
+            required
+          />
+        </div>
         <!-- Category Image -->
         <div class="space-y-2">
           <label class="block text-sm font-medium text-gray-700">{{ t('category.image') }}</label>
@@ -252,7 +354,6 @@ onMounted(() => {
               class="cursor-pointer w-full h-48 rounded-xl border-2 border-dashed transition-colors duration-300 flex items-center justify-center"
             >
               <input type="file" @change="onImageUpload($event, 'image')" accept="image/*" class="hidden">
-
               <div v-if="imagePreview" class="p-4 w-full h-full">
                 <div class="relative group w-full h-full">
                   <img
@@ -271,7 +372,6 @@ onMounted(() => {
                   </div>
                 </div>
               </div>
-
               <div v-else class="p-4 flex flex-col items-center justify-center">
                 <div class="bg-blue-100 p-3 rounded-full mb-2">
                   <i class="pi pi-image text-blue-500 text-xl"></i>
@@ -283,7 +383,6 @@ onMounted(() => {
             </label>
           </div>
         </div>
-
         <!-- Banner One Image -->
         <div class="space-y-2">
           <label class="block text-sm font-medium text-gray-700">{{ t('category.bannerOne') }}</label>
@@ -296,7 +395,6 @@ onMounted(() => {
               class="cursor-pointer w-full h-48 rounded-xl border-2 border-dashed transition-colors duration-300 flex items-center justify-center"
             >
               <input type="file" @change="onImageUpload($event, 'banner_one')" accept="image/*" class="hidden">
-
               <div v-if="bannerOnePreview" class="p-4 w-full h-full">
                 <div class="relative group w-full h-full">
                   <img
@@ -315,7 +413,6 @@ onMounted(() => {
                   </div>
                 </div>
               </div>
-
               <div v-else class="p-4 flex flex-col items-center justify-center">
                 <div class="bg-blue-100 p-3 rounded-full mb-2">
                   <i class="pi pi-image text-blue-500 text-xl"></i>
@@ -327,7 +424,6 @@ onMounted(() => {
             </label>
           </div>
         </div>
-
         <!-- Banner Two Image -->
         <div class="space-y-2 md:col-span-2">
           <label class="block text-sm font-medium text-gray-700">{{ t('category.bannerTwo') }}</label>
@@ -340,7 +436,6 @@ onMounted(() => {
               class="cursor-pointer w-full max-w-2xl h-48 rounded-xl border-2 border-dashed transition-colors duration-300 flex items-center justify-center"
             >
               <input type="file" @change="onImageUpload($event, 'banner_two')" accept="image/*" class="hidden">
-
               <div v-if="bannerTwoPreview" class="p-4 w-full h-full">
                 <div class="relative group w-full h-full">
                   <img
@@ -359,7 +454,6 @@ onMounted(() => {
                   </div>
                 </div>
               </div>
-
               <div v-else class="p-4 flex flex-col items-center justify-center">
                 <div class="bg-blue-100 p-3 rounded-full mb-2">
                   <i class="pi pi-image text-blue-500 text-xl"></i>
@@ -372,7 +466,6 @@ onMounted(() => {
           </div>
         </div>
       </div>
-
       <!-- Submit Button -->
       <div class="pt-4 flex justify-center space-x-4">
         <Button
@@ -383,16 +476,15 @@ onMounted(() => {
           class="px-6 py-3 mx-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
           :disabled="loading"
         />
-
         <Button
           type="submit"
-          :label="t('category.createButton')"
+          :label="route.params.id ? t('category.updateButton') : t('category.createButton')"
           icon="pi pi-plus"
           :loading="loading"
           class="px-8 mx-2 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
           :disabled="loading"
         >
-          <span v-if="!loading">{{ t('category.createButton') }}</span>
+          <span v-if="!loading">{{ route.params.id ? t('category.updateButton') : t('category.createButton') }}</span>
           <i v-else class="pi pi-spinner pi-spin"></i>
         </Button>
       </div>
@@ -412,7 +504,6 @@ onMounted(() => {
 .duration-300 {
   transition-duration: 300ms;
 }
-
 /* Image hover effects */
 .group:hover .group-hover\:scale-105 {
   transform: scale(1.05);
@@ -423,7 +514,6 @@ onMounted(() => {
 .group:hover .group-hover\:opacity-100 {
   opacity: 1;
 }
-
 /* Button gradient animation */
 button.bg-gradient-to-r:hover {
   background-size: 150% 100%;

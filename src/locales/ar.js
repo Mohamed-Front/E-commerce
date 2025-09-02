@@ -507,6 +507,7 @@ export default {
   },
   category: {
     subCategories:"الفئات",
+    linkedToMarket:"داخل سوق ",
     import:"استيراد",
     storeNameEn:" المتجر (انجليزي)",
     storeNameAr:" المتجر (عربي)",

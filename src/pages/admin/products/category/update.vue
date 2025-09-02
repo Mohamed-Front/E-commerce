@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import axios from 'axios';
 import { useToast } from 'primevue/usetoast';
 import { useI18n } from 'vue-i18n';
@@ -20,7 +20,7 @@ const categoryLabelField = computed(() => {
 const categoryData = ref({
   name_en: '',
   name_ar: '',
-  is_market: false,
+  linked_to_market: false,
   parent_id: null,
   store_id: null,
   image: null,
@@ -35,6 +35,7 @@ const bannerTwoPreview = ref(null);
 
 // Options
 const parentCategories = ref([]);
+const markets = ref([]);
 const stores = ref([]);
 
 // Drag states
@@ -42,22 +43,46 @@ const isDraggingImage = ref(false);
 const isDraggingBannerOne = ref(false);
 const isDraggingBannerTwo = ref(false);
 
-// Fetch parent categories and stores
+// Fetch parent categories based on linked_to_market
 const fetchParentCategories = async () => {
   try {
-    const response = await axios.get('/api/category');
+    const endpoint = categoryData.value.linked_to_market ? '/api/market' : '/api/category';
+    const response = await axios.get(endpoint);
     parentCategories.value = response.data.data.data;
   } catch (error) {
     console.error("Error fetching parent categories:", error);
+    toast.add({
+      severity: 'error',
+      summary: t("error"),
+      detail: t('category.fetchParentError'),
+      life: 3000
+    });
   }
 };
 
+// Fetch markets
+const fetchMarkets = async () => {
+  try {
+    const response = await axios.get('/api/market');
+    markets.value = response.data.data.data;
+  } catch (error) {
+    console.error("Error fetching markets:", error);
+  }
+};
+
+// Fetch stores
 const fetchStores = async () => {
   try {
     const response = await axios.get('/api/store');
     stores.value = response.data.data.data;
   } catch (error) {
     console.error("Error fetching stores:", error);
+    toast.add({
+      severity: 'error',
+      summary: t("error"),
+      detail: t('category.fetchStoresError'),
+      life: 3000
+    });
   }
 };
 
@@ -71,10 +96,10 @@ const fetchCategoryById = async (id) => {
     categoryData.value = {
       name_en: category.name_en || '',
       name_ar: category.name_ar || '',
-      is_market: !!category.is_market,
+      linked_to_market: !!category.linked_to_market,
       parent_id: category.parent_id || null,
       store_id: category.store_id || null,
-      image: null, // File inputs cannot be pre-filled
+      image: null,
       banner_one_image: null,
       banner_two_image: null
     };
@@ -156,7 +181,7 @@ const submitForm = async () => {
   const formData = new FormData();
   formData.append('name_en', categoryData.value.name_en);
   formData.append('name_ar', categoryData.value.name_ar);
-  formData.append('is_market', categoryData.value.is_market ? '1' : '0');
+  formData.append('linked_to_market', categoryData.value.linked_to_market ? '1' : '0');
   formData.append('parent_id', categoryData.value.parent_id || '');
   formData.append('store_id', categoryData.value.store_id || '');
 
@@ -171,8 +196,8 @@ const submitForm = async () => {
   }
 
   try {
-    const categoryId = route.params.id; // Get ID from route params
-    const method = categoryId ? 'post' : 'post'; // Use PUT for update, POST for create
+    const categoryId = route.params.id;
+    const method = categoryId ? 'post' : 'post';
     const url = categoryId ? `/api/category/${categoryId}` : '/api/category';
 
     const response = await axios[method](url, formData);
@@ -197,15 +222,23 @@ const submitForm = async () => {
   }
 };
 
+// Watch for changes in linked_to_market to refetch parent categories
+watch(() => categoryData.value.linked_to_market, () => {
+  fetchParentCategories();
+  // Reset parent_id when switching to avoid invalid selections
+  categoryData.value.parent_id = null;
+});
+
 // Initialize form
 onMounted(async () => {
-  await fetchParentCategories();
-  await fetchStores();
-
-  // Check if an ID exists in the route params
+  await Promise.all([
+    fetchMarkets(),
+    fetchParentCategories(),
+    fetchStores()
+  ]);
   const categoryId = route.params.id;
   if (categoryId) {
-    await fetchCategoryById(categoryId); // Fetch data for update
+    await fetchCategoryById(categoryId);
   }
 });
 </script>
@@ -216,7 +249,6 @@ onMounted(async () => {
       {{ route.params.id ? t('category.updateTitle') : t('category.createTitle') }}
     </h1>
     <form @submit.prevent="submitForm" class="space-y-6">
-      <!-- Fields remain unchanged -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- English Name -->
         <div class="space-y-2">
@@ -251,39 +283,37 @@ onMounted(async () => {
             {{ t('category.parent') }}
           </label>
           <Dropdown
-          filter
+            filter
             v-model="categoryData.parent_id"
             :options="parentCategories"
             :optionLabel="categoryLabelField"
             optionValue="id"
             :placeholder="t('category.selectParent')"
             class="w-full"
-            :showClear="true"
           />
         </div>
-        <!-- Store -->
+        <!-- Store Selection -->
         <div class="space-y-2">
           <label for="store_id" class="block text-sm font-medium text-gray-700">
-            {{ t('category.store') }} <span class="text-red-500">*</span>
+            {{ t('category.store') }}
           </label>
           <Dropdown
-          filter
+            filter
             v-model="categoryData.store_id"
             :options="stores"
             :optionLabel="categoryLabelField"
             optionValue="id"
             :placeholder="t('category.selectStore')"
             class="w-full"
-            required
           />
         </div>
-        <!-- Market Type -->
-        <div class="space-y-2 md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700">{{ t('category.marketType') }}</label>
+        <!-- Linked to Market -->
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">{{ t('category.linkedToMarket') }}</label>
           <div class="flex items-center space-x-4">
-            <InputSwitch v-model="categoryData.is_market" />
+            <InputSwitch v-model="categoryData.linked_to_market" />
             <span class="text-sm text-gray-600">
-              {{ categoryData.is_market ? t('category.market') : t('category.nonMarket') }}
+              {{ categoryData.linked_to_market ? t('category.market') : t('category.nonMarket') }}
             </span>
           </div>
         </div>

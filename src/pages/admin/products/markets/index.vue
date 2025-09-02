@@ -143,7 +143,7 @@ const deleteMarket = () => {
 
 // Export markets
 const exportMarkets = () => {
-  axios.get('/api/export/markets', {
+  axios.get('/api/export/market', {
     responseType: 'blob'
   })
     .then((response) => {

@@ -505,7 +505,7 @@ export default {
     exclusive: 'Exclusive offers',
     bestsellers: 'Bestsellers',
     newlyarrived: 'Newly arrived',
-
+    linkedToMarket:"linked To Market",
     managementTitle: 'Categories Management',
     search: 'Search categories...',
     export: 'Export',
