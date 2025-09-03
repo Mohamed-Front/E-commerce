@@ -176,6 +176,7 @@ const fetchCategoryData = async () => {
     };
     subCategories.value = data.sub_categories.map(sub => ({
       id: sub.id,
+      has_subcategories: sub.has_subcategories,
 
       name_ar: sub.name_ar || sub.name_en,
       name_en: sub.name_en || sub.name_ar,
