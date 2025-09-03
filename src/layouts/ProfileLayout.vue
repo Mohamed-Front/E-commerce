@@ -117,10 +117,10 @@
               v-model="countryCode"
               class="px-4 py-3 bg-white border-l border-gray-300 rounded-r-xl focus:outline-none"
             >
-              <option value="+20">+20 (مصر)</option>
-              <option value="+966">+966 (السعودية)</option>
-              <option value="+971">+971 (الإمارات)</option>
-            </select>
+               <option v-for="country in countries" :key="country.code" :value="country.code">
+              {{ country.name }} {{ country.code }}
+            </option>
+           </select>
             <input
               type="tel"
               id="phone"
@@ -175,7 +175,30 @@ const isUsernameValid = computed(() => username.value.trim() !== '');
 const isPasswordValid = computed(() => password.value.length >= 8 || password.value === '');
 const isPhoneNumberValid = computed(() => /^\+?\d{10,}$/.test(countryCode.value + phoneNumber.value) || phoneNumber.value === '');
 const isFormValid = computed(() => isUsernameValid.value && isPasswordValid.value && isPhoneNumberValid.value);
-
+const countries = [
+  { name: 'السعودية', code: '+966' },
+  { name: 'الإمارات', code: '+971' },
+  { name: 'مصر', code: '+20' },
+  { name: 'الكويت', code: '+965' },
+  { name: 'قطر', code: '+974' },
+  { name: 'الجزائر', code: '+213' },
+  { name: 'البحرين', code: '+973' },
+  { name: 'جزر القمر', code: '+269' },
+  { name: 'جيبوتي', code: '+253' },
+  { name: 'العراق', code: '+964' },
+  { name: 'الأردن', code: '+962' },
+  { name: 'لبنان', code: '+961' },
+  { name: 'ليبيا', code: '+218' },
+  { name: 'المغرب', code: '+212' },
+  { name: 'موريتانيا', code: '+222' },
+  { name: 'عمان', code: '+968' },
+  { name: 'فلسطين', code: '+970' },
+  { name: 'الصومال', code: '+252' },
+  { name: 'السودان', code: '+249' },
+  { name: 'سوريا', code: '+963' },
+  { name: 'تونس', code: '+216' },
+  { name: 'اليمن', code: '+967' },
+];
 // Handlers
 const saveChanges = async () => {
   if (!isFormValid.value) return;

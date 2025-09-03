@@ -51,7 +51,7 @@
             class="w-1/3 px-4 py-3 rounded-tr-xl rounded-br-xl bg-gray-100 text-gray-700 focus:outline-none transition-shadow text-right"
           >
             <option v-for="country in countries" :key="country.code" :value="country.code">
-              {{ country.flag }} {{ country.code }}
+              {{ country.name }} {{ country.code }}
             </option>
           </select>
           <input
@@ -154,18 +154,34 @@ const authStore = useAuthStore();
 const selectedTab = ref('phone');
 const name = ref('');
 const phoneNumber = ref('');
-const countryCode = ref('+20');
+const countryCode = ref('+962');
 const email = ref('');
 const password = ref('');
 const isPasswordVisible = ref(false);
 
 const countries = [
-  { name: 'الأردن', flag: '🇯🇴', code: '+962' },
-  { name: 'المملكة العربية السعودية', flag: '🇸🇦', code: '+966' },
-  { name: 'الإمارات العربية المتحدة', flag: '🇦🇪', code: '+971' },
-  { name: 'مصر', flag: '🇪🇬', code: '+20' },
-  { name: 'الكويت', flag: '🇰🇼', code: '+965' },
-  { name: 'قطر', flag: '🇶🇦', code: '+974' },
+  { name: 'السعودية', code: '+966' },
+  { name: 'الإمارات', code: '+971' },
+  { name: 'مصر', code: '+20' },
+  { name: 'الكويت', code: '+965' },
+  { name: 'قطر', code: '+974' },
+  { name: 'الجزائر', code: '+213' },
+  { name: 'البحرين', code: '+973' },
+  { name: 'جزر القمر', code: '+269' },
+  { name: 'جيبوتي', code: '+253' },
+  { name: 'العراق', code: '+964' },
+  { name: 'الأردن', code: '+962' },
+  { name: 'لبنان', code: '+961' },
+  { name: 'ليبيا', code: '+218' },
+  { name: 'المغرب', code: '+212' },
+  { name: 'موريتانيا', code: '+222' },
+  { name: 'عمان', code: '+968' },
+  { name: 'فلسطين', code: '+970' },
+  { name: 'الصومال', code: '+252' },
+  { name: 'السودان', code: '+249' },
+  { name: 'سوريا', code: '+963' },
+  { name: 'تونس', code: '+216' },
+  { name: 'اليمن', code: '+967' },
 ];
 
 const handleSignUp = async () => {
