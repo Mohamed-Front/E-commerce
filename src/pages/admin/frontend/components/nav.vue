@@ -24,7 +24,7 @@
                 class="flex items-center px-4 py-3 transition-all duration-300 cursor-pointer dropdown-item"
                 :class="{ 'bg-amber-50 border-r-4 border-amber-500': store.id === defaultStoreId }"
               >
-                <img v-if="getStoreImage(store)" :src="getStoreImage(store)" alt="Store Logo" class="h-6 w-10 object-contain mr-2 rounded-sm" />
+                <img v-if="getStoreImage(store)" :src="getStoreImage(store)" alt="Store Logo" class="w-full h-full object-contain mr-2 rounded-sm" />
                 <span class="text-sm text-gray-700 font-medium">{{ store.name }}</span>
                 <i v-if="store.id === defaultStoreId" class="fa-solid fa-check ml-auto text-amber-600 text-xs"></i>
               </div>
@@ -69,7 +69,7 @@
               <img
                 :src="getStoreImage(store)"
                 alt="Store Logo"
-                class="h-[28px] w-[48px] object-contain transition-transform duration-300 group-hover:scale-105"
+                class=" w-full object-contain transition-transform duration-300 group-hover:scale-105"
               />
               <div class="absolute inset-0 rounded-lg border border-transparent group-hover:border-[#E6AC31] transition-all duration-300"></div>
             </div>
