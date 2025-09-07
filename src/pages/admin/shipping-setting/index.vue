@@ -1,7 +1,7 @@
 <script setup>
 import { useToast } from 'primevue/usetoast'
 import { FilterMatchMode } from 'primevue/api'
-import { ref, onMounted, onBeforeMount, watch } from 'vue'
+import { ref, onMounted, onBeforeMount, watch ,computed} from 'vue'
 import axios from "axios";
 import { useRouter } from "vue-router";
 import { useI18n } from 'vue-i18n';
@@ -46,15 +46,16 @@ const to = ref(0)
 const links = ref([])
 
 // Days options for MultiSelect
-const dayOptions = ref([
-  { label: t('days.monday'), value: 1 },
-  { label: t('days.tuesday'), value: 2 },
-  { label: t('days.wednesday'), value: 3 },
-  { label: t('days.thursday'), value: 4 },
+// Days options for MultiSelect
+const dayOptions = computed(() => [
+  { label: t('days.sunday'), value: 1 },
+  { label: t('days.monday'), value: 2 },
+  { label: t('days.tuesday'), value: 3 },
+  { label: t('days.wednesday'), value: 4 },
+  { label: t('days.thursday'), value: 5 },
   { label: t('days.friday'), value: 5 },
-  { label: t('days.saturday'), value: 6 },
-  { label: t('days.sunday'), value: 7 }
-])
+  { label: t('days.saturday'), value: 7 }
+]);
 
 // Export shipping settings
 const exportShippingSettings = () => {
@@ -187,7 +188,7 @@ const formatDate = (dateString) => {
 
 // Format days for display
 const formatDays = (days) => {
-  return days.map(day => dayOptions.value.find(option => option.value === day)?.label || day).join(', ')
+  return days?.map(day => dayOptions.value.find(option => option.value === day)?.label || day).join(', ')
 }
 </script>
 

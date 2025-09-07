@@ -54,14 +54,15 @@ const circle = computed(() => {
 const stores = ref([]);
 
 // Days options for MultiSelect
+// Days options for MultiSelect
 const dayOptions = computed(() => [
-  { label: t('days.sunday'), value: 0 },
-  { label: t('days.monday'), value: 1 },
-  { label: t('days.tuesday'), value: 2 },
-  { label: t('days.wednesday'), value: 3 },
-  { label: t('days.thursday'), value: 4 },
+  { label: t('days.sunday'), value: 1 },
+  { label: t('days.monday'), value: 2 },
+  { label: t('days.tuesday'), value: 3 },
+  { label: t('days.wednesday'), value: 4 },
+  { label: t('days.thursday'), value: 5 },
   { label: t('days.friday'), value: 5 },
-  { label: t('days.saturday'), value: 6 }
+  { label: t('days.saturday'), value: 7 }
 ]);
 
 // Fetch stores
