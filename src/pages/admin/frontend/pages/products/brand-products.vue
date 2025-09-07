@@ -1,8 +1,7 @@
-```vue
 <template>
   <div class="mx-auto mt-16 max-w-7xl px-4 sm:px-6 lg:px-8 pb-16">
     <!-- Loading State -->
-    <div v-if="isLoading" class="flex flex-col items-center justify-center py-16  rounded-xl animate-pulse">
+    <div v-if="isLoading" class="flex flex-col items-center justify-center py-16 rounded-xl animate-pulse">
       <img
         src="../../../../../assets/shiftlogo.png"
         alt="Loading Logo"
@@ -23,11 +22,11 @@
         {{ products.title }}
       </h2>
       <!-- Product Grid -->
-      <div class="grid grid-cols-1 xs:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-10 mb-10">
+      <div class="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-10 mb-10">
         <div v-for="(pro, i) in paginatedProducts" :key="pro.id"
              class="group flex flex-col items-start cursor-pointer h-full bg-white transition-all pb-4 rounded-lg shadow-lg duration-300 hover:-translate-y-2 hover:shadow-xl"
              @click="router.push({ name: 'Product-details', params: { id: pro.id } })">
-          <div class="w-full h-60 overflow-hidden rounded-t-lg relative">
+          <div class="w-full h-50 overflow-hidden rounded-t-lg relative">
             <img :src="pro.img" :alt="pro.name"
                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                  loading="lazy" />
@@ -52,7 +51,7 @@
             </button>
           </div>
           <div class="p-4 w-full">
-            <p class="font-sans text-gray-800 font-medium text-base line-clamp-2 ">
+            <p class="font-sans text-gray-800 font-medium text-base line-clamp-2">
               {{ truncateName(pro.name, 30) }}
             </p>
             <p v-if="pro.sub_name" class="font-sans text-gray-600 text-sm line-clamp-1 mt-1">
@@ -60,7 +59,7 @@
             </p>
             <div class="flex items-center w-full justify-between mt-1">
               <span class="font-sans text-[#A6853B] font-semibold text-lg">
-                ${{ pro.price }}
+                ${{ pro.price }} {{ $t('currencyLabel') }}
               </span>
               <button
                 v-if="authStore.authenticatedweb"
@@ -130,7 +129,7 @@ const fetchProducts = async (page = 1) => {
   isLoading.value = true;
   error.value = null;
   try {
-    const response = await axios.get(`/api/home/products-by-category/${route.params.id}/${storeId.value}`, {
+    const response = await axios.get(`/api/home/products-by-brand/${route.params.id}`, {
       params: {
         page: page,
         limit: limit.value,
@@ -138,7 +137,7 @@ const fetchProducts = async (page = 1) => {
     });
     const data = response.data.data;
     products.value = {
-      title: locale.value === 'ar' ? `منتجات ${data.category.name_ar || data.category.name_en}` : `Products ${data.category.name_en || data.category.name_ar}`,
+      title: locale.value === 'ar' ? `منتجات ${data.brand.name_ar || data.brand.name_en}` : `Products ${data.brand.name_en || data.brand.name_ar}`,
       products: (data.products.data || []).map(product => ({
         id: product.id,
         name: locale.value === 'ar' ? (product.name_ar || product.name_en) : (product.name_en || product.name_ar),
@@ -146,7 +145,7 @@ const fetchProducts = async (page = 1) => {
         price: parseFloat(product.base_price || 0).toFixed(2),
         img: product.media?.find(media => media.name === 'product_main_image')?.url || product.key_default_image || defaultProductImage,
         is_wished: product.is_wished || false,
-        variant_id: product.variant_id || null,
+        variant_id: product.has_variants ? product.variant_id : null,
       })),
     };
     currentPage.value = data.products.current_page;
@@ -246,7 +245,7 @@ onBeforeMount(() => {
     updateLimit();
     fetchProducts(currentPage.value);
   } else {
-    error.value = t('products.missingParams') || 'Missing category or store ID.';
+    error.value = t('products.missingParams') || 'Missing brand or store ID.';
   }
 });
 
@@ -366,4 +365,3 @@ onUnmounted(() => {
   }
 }
 </style>
-```

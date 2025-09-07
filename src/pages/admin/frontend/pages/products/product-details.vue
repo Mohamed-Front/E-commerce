@@ -56,7 +56,7 @@
           >
             {{ locale === 'en' ? pro.category.name_en : pro.category.name_ar }}
           </span>
-          <span v-if="pro.brand_id" class="sub-tiles">
+          <span @click="goBrand(pro.brand)" v-if="pro.brand_id" class="sub-tiles cursor-pointer">
             {{ locale === 'en' ? pro.brand?.name_en : pro.brand?.name_ar || t('brand.default') }}
           </span>
         </section>
@@ -271,7 +271,9 @@ const goCatgory = (data) => {
     router.push({ name: 'produts_category', params: { id: data.id } });
   }
 };
-
+const goBrand=(data)=>{
+  router.push({ name: 'products-brand', params: { id: data.id } });
+}
 const selectStore = (store) => {
   if (!store) return;
   if (store.has_market) {

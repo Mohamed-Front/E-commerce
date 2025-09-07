@@ -200,15 +200,6 @@ const validationErrors = computed(() => {
   if (name.value && name.value.length < 2) {
     errors.name = 'الاسم يجب أن يكون حرفين على الأقل';
   }
-  if (selectedTab.value === 'phone' && phoneNumber.value && !/^\d{7,15}$/.test(phoneNumber.value)) {
-    errors.phone = 'رقم الهاتف غير صالح';
-  }
-  if (selectedTab.value === 'email' && email.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
-    errors.email = 'البريد الإلكتروني غير صالح';
-  }
-  if (password.value && password.value.length < 6) {
-    errors.password = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
-  }
 
   return errors;
 });

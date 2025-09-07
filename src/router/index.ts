@@ -41,6 +41,11 @@ const routes: Array<RouteRecordRaw> = [
         path: '/produts-category/:id',
         component: () => import('../pages/admin/frontend/pages/products/produts-category.vue'),
       },
+       {
+        name: 'products-brand',
+        path: '/products-brand/:id',
+        component: () => import('../pages/admin/frontend/pages/products/brand-products.vue'),
+      },
       {
         name: 'Product-details',
         path: '/product-details/:id',
