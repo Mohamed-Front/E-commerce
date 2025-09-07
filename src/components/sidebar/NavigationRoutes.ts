@@ -186,6 +186,14 @@ export default {
         icon: 'dashboard',
       },
     },
+     {
+      name: 'shipping-setting',
+      displayName: 'navigation.shipping',
+      show: ['list notification-templates'],
+      meta: {
+        icon: 'dashboard',
+      },
+    },
 
     {
       name: 'setting',

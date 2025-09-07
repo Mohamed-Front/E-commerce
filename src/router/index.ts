@@ -406,6 +406,24 @@ const routes: Array<RouteRecordRaw> = [
             path: 'setting',
             component: () => import('../pages/admin/settings/setting/update.vue'),
           },
+           {
+            name: 'shipping-setting',
+            path: 'shipping-setting',
+            component: () => import('../pages/admin/shipping-setting/index.vue'),
+          },
+          {
+            name: 'shipping-create',
+            path: 'shipping-create',
+            component: () => import('../pages/admin/shipping-setting/create.vue'),
+          },
+          {
+            name: 'shipping-update',
+            path: 'shipping-update/:id',
+            component: () => import('../pages/admin/shipping-setting/update.vue'),
+          },
+
+
+
             {
             name: 'template-notification',
             path: 'template-notification',
