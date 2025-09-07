@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen p-8 font-tajawal">
+  <div class="min-h-screen p-8 font-tajawal" :dir="$i18n.locale === 'ar' ? 'rtl' : 'ltr'">
     <div class="max-w-6xl mx-auto flex flex-col md:flex-row gap-6">
       <aside class="w-full md:w-64 bg-white rounded-xl shadow-md p-6 h-fit">
         <ul class="space-y-2">
@@ -7,7 +7,7 @@
             @click="router.push({ name: 'profile' })"
             class="p-3 rounded-lg flex items-center gap-4 text-gray-500 hover:bg-gray-50 cursor-pointer"
             role="button"
-            aria-label="الانتقال إلى صفحة الحساب"
+            :aria-label="t('profile.account')"
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <path
@@ -17,14 +17,14 @@
                 fill="#807575"
               />
             </svg>
-            <span>حسابي</span>
+            <span>{{ t('profile.account') }}</span>
           </li>
           <li
             @click="router.push({ name: 'orders' })"
             class="p-3 rounded-lg flex items-center gap-4 bg-yellow-100 text-yellow-700 font-medium cursor-pointer"
             role="button"
             aria-current="page"
-            aria-label="صفحة الطلبات"
+            :aria-label="t('profile.orders')"
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <path
@@ -34,13 +34,13 @@
                 fill="#F9C006"
               />
             </svg>
-            <span>طلباتي</span>
+            <span>{{ t('profile.orders') }}</span>
           </li>
           <li
             @click="router.push({ name: 'addres' })"
             class="p-3 rounded-lg flex items-center gap-4 text-gray-500 hover:bg-gray-50 cursor-pointer"
             role="button"
-            aria-label="الانتقال إلى دليل العناوين"
+            :aria-label="t('profile.addresses')"
           >
             <svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <path
@@ -48,13 +48,13 @@
                 fill="#807575"
               />
             </svg>
-            <span>دليل العناوين</span>
+            <span>{{ t('profile.addresses') }}</span>
           </li>
           <li
-            @click="authStore.handleLogout()"
+            @click="logout"
             class="p-3 rounded-lg flex items-center gap-4 text-red-500 hover:bg-gray-50 cursor-pointer"
             role="button"
-            aria-label="تسجيل الخروج"
+            :aria-label="t('profile.logout')"
           >
             <svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <path
@@ -62,33 +62,38 @@
                 fill="#FF1212"
               />
             </svg>
-            <span>تسجيل الخروج</span>
+            <span>{{ t('profile.logout') }}</span>
           </li>
         </ul>
       </aside>
 
       <main class="flex-1 bg-white rounded-xl shadow-md p-8">
+        <!-- Loading state -->
+        <div v-if="loading" class="flex justify-center items-center py-4">
+          <ProgressSpinner style="width: 40px; height: 40px" strokeWidth="4" class="text-blue-600" />
+          <p class="ml-2">{{ t('loading') }}</p>
+        </div>
 
-        <div v-if="loading" class="text-center text-gray-500">جاري تحميل الطلبات...</div>
-
+        <!-- Error state -->
         <div v-if="error" class="text-center text-red-500">
           {{ error }}
           <button
             @click="fetchOrders()"
             class="ml-4 text-blue-500 hover:underline"
-            aria-label="إعادة محاولة تحميل الطلبات"
+            :aria-label="t('orders.retry')"
           >
-            إعادة المحاولة
+            {{ t('orders.retry') }}
           </button>
         </div>
 
+        <!-- Empty state -->
         <div v-if="!loading && !error && orders.length === 0" class="text-center text-gray-500">
-          لا توجد طلبات مسجلة بعد
+          {{ t('orders.noOrders') }}
         </div>
 
+        <!-- Orders list -->
         <div v-if="orders.length > 0" class="space-y-6">
-              <h1 class="text-2xl font-bold text-center mb-4 text-gray-700">طلباتي</h1>
-
+          <h1 class="text-2xl font-bold text-center mb-4 text-gray-700">{{ t('orders.title') }}</h1>
           <div
             v-for="order in orders"
             :key="order.id"
@@ -102,7 +107,7 @@
               >
                 <img
                   :src="getProductImage(item.product)"
-                  :alt="item.product.name_ar || 'صورة المنتج'"
+                  :alt="$i18n.locale === 'ar' ? (item.product.name_ar || t('product.defaultName')) : (item.product.name_en || t('product.defaultName'))"
                   class="w-full h-full object-contain"
                 />
               </div>
@@ -118,19 +123,20 @@
               >
                 {{ getStatusMessage(order.status, order.created_at, order.cancelled_at) }}
               </p>
-              <p class="text-gray-500 text-sm">رقم الطلب #{{ order.id }}</p>
+              <p class="text-gray-500 text-sm">{{ t('orders.orderNumber', { id: order.id }) }}</p>
             </div>
           </div>
         </div>
 
+        <!-- Pagination -->
         <div v-if="pagination.last_page > 1" class="mt-8 flex justify-center items-center gap-2">
           <button
             @click="fetchOrders(pagination.current_page - 1)"
             :disabled="pagination.current_page === 1"
             class="px-4 py-2 rounded-lg text-gray-700 bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300"
-            aria-label="الصفحة السابقة"
+            :aria-label="t('orders.previous')"
           >
-            السابق
+            {{ t('orders.previous') }}
           </button>
           <div class="flex gap-1">
             <button
@@ -140,7 +146,7 @@
               :class="{ 'bg-yellow-500 text-white': page.active, 'bg-gray-200 text-gray-700': !page.active }"
               class="px-4 py-2 rounded-lg"
               :disabled="!page.url"
-              :aria-label="`الصفحة ${page.label}`"
+              :aria-label="t('orders.page', { number: page.label })"
             >
               {{ page.label }}
             </button>
@@ -149,13 +155,14 @@
             @click="fetchOrders(pagination.current_page + 1)"
             :disabled="pagination.current_page === pagination.last_page"
             class="px-4 py-2 rounded-lg text-gray-700 bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300"
-            aria-label="الصفحة التالية"
+            :aria-label="t('orders.next')"
           >
-            التالي
+            {{ t('orders.next') }}
           </button>
         </div>
       </main>
     </div>
+    <Toast />
   </div>
 </template>
 
@@ -163,10 +170,16 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { useToast } from 'primevue/usetoast';
+import Toast from 'primevue/toast';
+import ProgressSpinner from 'primevue/progressspinner';
 import { useAuthStore } from '../../../../../stores/WebAuth';
 
-// Router and Auth
+// Router, i18n, Toast, and Auth
 const router = useRouter();
+const { t, locale } = useI18n();
+const toast = useToast();
 const authStore = useAuthStore();
 
 // Reactive variables for API data
@@ -181,22 +194,26 @@ const pagination = ref({
 
 // Format date for display
 const formatDate = (dateString) => {
-  if (!dateString) return '';
+  if (!dateString) return t('orders.notAvailable');
   const date = new Date(dateString);
-  return date.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
+  return date.toLocaleDateString(locale.value === 'ar' ? 'ar-EG' : 'en-US', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
 };
 
 // Get status message based on status code
 const getStatusMessage = (status, createdAt, cancelledAt) => {
   switch (status) {
     case 0:
-      return `تم الطلب يوم ${formatDate(createdAt)} وجاري التوصيل`;
+      return t('orders.statusPending', { date: formatDate(createdAt) });
     case 1:
-      return 'تم توصيل الطلب بنجاح';
+      return t('orders.statusDelivered');
     case 2:
-      return `تم إلغاء الطلب يوم ${formatDate(cancelledAt)}`;
+      return t('orders.statusCancelled', { date: formatDate(cancelledAt) });
     default:
-      return 'حالة الطلب غير معروفة';
+      return t('orders.statusUnknown');
   }
 };
 
@@ -234,11 +251,40 @@ const fetchOrders = async (page = 1) => {
   } catch (err) {
     error.value =
       err.response?.status === 404
-        ? 'لا توجد طلبات متاحة'
-        : 'فشل في تحميل الطلبات، يرجى المحاولة لاحقًا';
+        ? t('orders.noOrdersAvailable')
+        : t('orders.loadError');
+    toast.add({
+      severity: 'error',
+      summary: t('error'),
+      detail: error.value,
+      life: 3000,
+    });
     console.error('Error fetching orders:', err);
   } finally {
     loading.value = false;
+  }
+};
+
+// Logout function
+const logout = async () => {
+  try {
+    await axios.post('/api/logout');
+    authStore.handleLogout(); // Assuming this clears auth state
+    toast.add({
+      severity: 'success',
+      summary: t('success'),
+      detail: t('profile.logoutSuccess'),
+      life: 3000,
+    });
+    router.push({ name: 'login' });
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: t('error'),
+      detail: t('profile.logoutError'),
+      life: 3000,
+    });
+    console.error('Error logging out:', error);
   }
 };
 
@@ -247,5 +293,15 @@ onMounted(fetchOrders);
 </script>
 
 <style scoped>
-/* Scoped styles are not necessary as all styling is handled by Tailwind CSS */
+[dir="rtl"] .flex {
+  direction: rtl;
+}
+
+[dir="rtl"] .text-right {
+  text-align: right;
+}
+
+[dir="rtl"] .p-progress-spinner {
+  margin-left: 0.5rem;
+}
 </style>

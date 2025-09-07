@@ -1,20 +1,18 @@
 <template>
-  <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 font-inter">
+  <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 font-inter" :dir="$i18n.locale === 'ar' ? 'rtl' : 'ltr'">
     <div class="flex lg:flex-row flex-col gap-10">
       <section class="flex-1 bg-white rounded-2xl shadow-lg p-6">
         <!-- Loading spinner -->
         <div v-if="loading" class="flex justify-center items-center py-4">
-          <svg class="animate-spin h-8 w-8 text-yellow-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
+          <ProgressSpinner style="width: 40px; height: 40px" strokeWidth="4" class="text-yellow-600" />
+          <p class="ml-2">{{ t('loading') }}</p>
         </div>
 
         <!-- Cart content when not loading -->
         <div v-else>
           <!-- Store Selection -->
           <div class="mb-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-2">اختر المتجر</h3>
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ t('cart.selectStore') }}</h3>
             <div class="flex flex-wrap gap-2 mb-4">
               <button
                 v-for="store in stores"
@@ -22,22 +20,31 @@
                 @click="toggleStore(store.store_id)"
                 class="px-4 py-2 rounded-md text-sm font-medium transition-colors"
                 :class="selectedStores.includes(store.store_id) ? 'bg-yellow-600 text-white' : 'bg-amber-50 text-yellow-600'"
+                :aria-label="t('cart.selectStoreAria', { name: store.store_name_ar || store.store_name_en })"
               >
-                {{ store.store_name_ar || store.store_name_en }}
+                {{ $i18n.locale === 'ar' ? store.store_name_ar : store.store_name_en || t('store.default') }}
               </button>
-
+              <button
+                v-if="stores.length > 1"
+                @click="selectAllStores"
+                class="px-4 py-2 rounded-md text-sm font-medium bg-amber-50 text-yellow-600 hover:bg-amber-100 transition-colors"
+                :aria-label="t('cart.selectAllStores')"
+              >
+                {{ t('cart.selectAllStores') }}
+              </button>
             </div>
           </div>
 
           <!-- Address Selection -->
           <div class="mb-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-2">اختر عنوان التوصيل</h3>
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ t('cart.selectAddress') }}</h3>
             <select
               v-model="selectedAddress"
               @change="fetchOrderTotals"
               class="w-full bg-amber-50 border border-amber-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-600 transition-all"
+              :aria-label="t('cart.selectAddressAria')"
             >
-              <option :value="null" disabled>اختر عنوان</option>
+              <option :value="null" disabled>{{ t('cart.selectAddressPlaceholder') }}</option>
               <option v-for="address in addresses" :key="address.id" :value="address.id">
                 {{ address.name }} - {{ address.street }}, {{ address.city }}
               </option>
@@ -46,12 +53,12 @@
 
           <!-- Express Delivery Toggle -->
           <div class="flex items-center gap-4 mb-6">
-            <label class="text-gray-800 font-medium">توصيل سريع</label>
+            <label class="text-gray-800 font-medium">{{ t('cart.expressDelivery') }}</label>
             <button
               @click="toggleExpressDelivery"
               class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors duration-200"
               :class="isExpressed ? 'bg-yellow-600' : 'bg-gray-300'"
-              style="direction: ltr;"
+              :aria-label="t('cart.toggleExpressDeliveryAria', { state: isExpressed ? t('cart.enabled') : t('cart.disabled') })"
             >
               <span
                 class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform duration-200"
@@ -61,11 +68,15 @@
           </div>
 
           <div v-if="filteredProducts.length === 0" class="text-center text-gray-600 py-4">
-            سلة التسوق فارغة
+            {{ t('cart.emptyCart') }}
           </div>
 
           <div v-else>
-            <div v-for="product in filteredProducts" :key="`${product.product_id}-${product.variant_id || 'no-variant'}`" class="flex items-center mt-6 bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div
+              v-for="product in filteredProducts"
+              :key="`${product.product_id}-${product.variant_id || 'no-variant'}`"
+              class="flex items-center mt-6 bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300"
+            >
               <img
                 :src="product.img"
                 :alt="product.name"
@@ -73,53 +84,75 @@
               />
               <div class="flex flex-col mx-4 gap-2 flex-1">
                 <h3 class="text-lg font-bold text-gray-800">{{ product.name }}</h3>
-                <p class="text-yellow-600 text-sm">السعر: {{ product.price }} د.أ</p>
+                <p class="text-yellow-600 text-sm">{{ t('cart.price') }}: {{ product.price }} {{ t('cart.currency') }}</p>
                 <div class="flex items-center justify-between">
-                  <p class="text-yellow-600 text-sm">الكمية: {{ product.quantity }}</p>
+                  <p class="text-yellow-600 text-sm">{{ t('cart.quantity') }}: {{ product.quantity }}</p>
                   <div class="border border-gray-300 p-2 rounded-md flex items-center gap-3">
-                    <button @click="updateQuantity('minus', product.id, product.product_id, product.variant_id, product.quantity)" class="text-lg font-semibold text-gray-700 hover:text-yellow-600 transition-colors">-</button>
+                    <button
+                      @click="updateQuantity('minus', product.id, product.product_id, product.variant_id, product.quantity)"
+                      class="text-lg font-semibold text-gray-700 hover:text-yellow-600 transition-colors"
+                      :disabled="product.quantity <= 1"
+                      :aria-label="t('cart.decreaseQuantity')"
+                    >
+                      -
+                    </button>
                     <span class="text-sm font-medium">{{ product.quantity }}</span>
-                    <button @click="updateQuantity('plus', product.id, product.product_id, product.variant_id, product.quantity)" class="text-lg font-semibold text-gray-700 hover:text-yellow-600 transition-colors">+</button>
+                    <button
+                      @click="updateQuantity('plus', product.id, product.product_id, product.variant_id, product.quantity)"
+                      class="text-lg font-semibold text-gray-700 hover:text-yellow-600 transition-colors"
+                      :aria-label="t('cart.increaseQuantity')"
+                    >
+                      +
+                    </button>
                   </div>
-                  <button @click="clearProduct(product.id, product.product_id, product.variant_id)" class="text-white bg-yellow-600 px-3 py-1 text-sm rounded-md hover:bg-yellow-700 transition-all">
-                    {{ $t('remove') }}
+                  <button
+                    @click="clearProduct(product.id, product.product_id, product.variant_id)"
+                    class="text-white bg-yellow-600 px-3 py-1 text-sm rounded-md hover:bg-yellow-700 transition-all"
+                    :aria-label="t('cart.removeProductAria', { name: product.name })"
+                  >
+                    {{ t('cart.remove') }}
                   </button>
                 </div>
               </div>
             </div>
 
             <!-- Order summary for each store -->
-            <div v-for="storeOrder in storeOrders" :key="storeOrder.store_id" class="bg-gray-100 p-6 mt-6 rounded-lg shadow-inner">
+            <div
+              v-for="storeOrder in storeOrders"
+              :key="storeOrder.store_id"
+              class="bg-gray-100 p-6 mt-6 rounded-lg shadow-inner"
+            >
               <h3 class="text-lg font-semibold text-gray-800 mb-4">
-                طلب من {{ getStoreName(storeOrder.store_id) }}
+                {{ t('cart.orderFrom', { store: getStoreName(storeOrder.store_id) }) }}
               </h3>
               <div v-if="storeOrder.delivery_message" class="mb-4 p-3 bg-yellow-100 text-yellow-800 rounded-md">
                 {{ storeOrder.delivery_message }}
               </div>
               <div class="flex flex-col gap-4">
                 <span class="flex justify-between items-center">
-                  <h4 class="text-yellow-600 font-semibold">مدة الشحن</h4>
-                  <p class="text-gray-700">{{ storeOrder.time || 'غير متوفر' }} ساعات</p>
+                  <h4 class="text-yellow-600 font-semibold">{{ t('cart.shippingTime') }}</h4>
+                  <p class="text-gray-700">{{ storeOrder.time ? `${storeOrder.time} ${t('cart.hours')}` : t('cart.notAvailable') }}</p>
                 </span>
                 <span class="flex justify-between items-center">
-                  <h4 class="text-yellow-600 font-semibold">المجموع الفرعي</h4>
-                  <p class="text-gray-700">{{ storeOrder.order_without_tax }} د.أ</p>
+                  <h4 class="text-yellow-600 font-semibold">{{ t('cart.subtotal') }}</h4>
+                  <p class="text-gray-700">{{ storeOrder.order_without_tax }} {{ t('cart.currency') }}</p>
                 </span>
                 <span class="flex justify-between items-center">
-                  <h4 class="text-yellow-600 font-semibold">الضريبة</h4>
-                  <p class="text-gray-700">{{ storeOrder.order_tax }} د.أ</p>
+                  <h4 class="text-yellow-600 font-semibold">{{ t('cart.tax') }}</h4>
+                  <p class="text-gray-700">{{ storeOrder.order_tax }} {{ t('cart.currency') }}</p>
                 </span>
                 <span class="flex justify-between items-center">
-                  <h4 class="text-yellow-600 font-semibold">الإجمالي</h4>
-                  <p class="text-gray-700">{{ storeOrder.total }} د.أ</p>
+                  <h4 class="text-yellow-600 font-semibold">{{ t('cart.total') }}</h4>
+                  <p class="text-gray-700">{{ storeOrder.total }} {{ t('cart.currency') }}</p>
                 </span>
               </div>
               <button
                 :disabled="!selectedAddress || filteredProducts.length === 0"
                 @click="submitOrder"
                 class="w-full mt-6 py-3 text-sm sm:text-base lg:text-lg bg-gray-800 rounded-md text-white font-semibold transition-transform duration-150 hover:shadow-lg active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                :aria-label="t('cart.checkout')"
               >
-                إتمام الشراء
+                {{ t('cart.checkout') }}
               </button>
             </div>
           </div>
@@ -127,40 +160,43 @@
       </section>
 
       <section class="lg:w-1/4 w-full p-6 bg-white rounded-2xl shadow-lg">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4">ملخص الطلب الكلي</h3>
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">{{ t('cart.orderSummary') }}</h3>
         <div class="flex flex-col gap-4">
           <span class="flex justify-between items-center">
-            <h4 class="text-yellow-600 font-semibold">المجموع الفرعي</h4>
-            <p class="text-gray-700">{{ totalOrderSummary.order_without_tax }} د.أ</p>
+            <h4 class="text-yellow-600 font-semibold">{{ t('cart.subtotal') }}</h4>
+            <p class="text-gray-700">{{ totalOrderSummary.order_without_tax }} {{ t('cart.currency') }}</p>
           </span>
           <span class="flex justify-between items-center">
-            <h4 class="text-yellow-600 font-semibold">الضريبة</h4>
-            <p class="text-gray-700">{{ totalOrderSummary.order_tax }} د.أ</p>
+            <h4 class="text-yellow-600 font-semibold">{{ t('cart.tax') }}</h4>
+            <p class="text-gray-700">{{ totalOrderSummary.order_tax }} {{ t('cart.currency') }}</p>
           </span>
           <span class="flex justify-between items-center">
-            <h4 class="text-yellow-600 font-semibold">الإجمالي</h4>
-            <p class="text-gray-700">{{ totalOrderSummary.total }} د.أ</p>
+            <h4 class="text-yellow-600 font-semibold">{{ t('cart.total') }}</h4>
+            <p class="text-gray-700">{{ totalOrderSummary.total }} {{ t('cart.currency') }}</p>
           </span>
         </div>
         <div class="flex flex-col mt-6">
           <input
             v-model="couponCode"
             type="text"
-            placeholder="كود الخصم"
+            :placeholder="t('cart.couponPlaceholder')"
             class="bg-amber-50 placeholder-yellow-600 border border-amber-200 rounded-md w-full px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-600 transition-all"
+            :aria-label="t('cart.couponPlaceholder')"
           />
           <button
             @click="applyCoupon"
             class="w-full mt-4 py-2 text-sm bg-amber-100 rounded-md text-yellow-600 font-semibold hover:bg-amber-200 transition-all active:scale-95"
+            :aria-label="t('cart.applyCoupon')"
           >
-            تطبيق
+            {{ t('cart.applyCoupon') }}
           </button>
           <button
             :disabled="!selectedAddress || filteredProducts.length === 0"
             @click="submitOrder"
             class="w-full mt-4 py-2 text-sm bg-gray-800 rounded-md text-white font-semibold hover:shadow-lg transition-all active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            :aria-label="t('cart.checkout')"
           >
-            إتمام الشراء الكلي
+            {{ t('cart.checkout') }}
           </button>
         </div>
       </section>
@@ -177,12 +213,13 @@ import { useI18n } from 'vue-i18n';
 import axios from 'axios';
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
+import ProgressSpinner from 'primevue/progressspinner';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const toast = useToast();
 const couponCode = ref('');
 const products = ref([]);
 const loading = ref(true);
-const toast = useToast();
 const addresses = ref([]);
 const selectedAddress = ref(null);
 const isExpressed = ref(false);
@@ -207,7 +244,6 @@ const totalOrderSummary = computed(() => {
     };
   }
 
-  // Calculate totals across all stores
   return storeOrders.value.reduce((acc, storeOrder) => {
     return {
       delivery: acc.delivery + (storeOrder.delivery || 0),
@@ -239,8 +275,8 @@ const fetchAddresses = async () => {
   } catch (error) {
     toast.add({
       severity: 'error',
-      summary: 'خطأ',
-      detail: 'فشل تحميل العناوين',
+      summary: t('error'),
+      detail: t('cart.addressLoadError'),
       life: 3000,
     });
     console.error('Error fetching addresses:', error);
@@ -252,14 +288,11 @@ const fetchCart = async () => {
     loading.value = true;
     const response = await axios.get('/api/cart');
     if (response.data.is_success) {
-      // Map items to products
       products.value = response.data.data.items.map(item => {
-        // Handle variant price logic
         const price = item.variant && item.variant.price
           ? parseFloat(item.variant.price).toFixed(2)
           : parseFloat(item.product.base_price).toFixed(2) || '0.00';
 
-        // Handle image logic
         const img = item.product.media && item.product.media.length > 0
           ? item.product.media[0].url
           : item.product.key_default_image || '/images/placeholder-product.png';
@@ -268,7 +301,7 @@ const fetchCart = async () => {
           id: `${item.product_id}-${item.variant_id || 'no-variant'}`,
           product_id: item.product_id,
           variant_id: item.variant_id,
-          name: item.product.name_ar || item.product.name_en,
+          name: locale.value === 'ar' ? item.product.name_ar : item.product.name_en || t('product.defaultName'),
           img: img,
           price: price,
           quantity: item.quantity,
@@ -276,11 +309,9 @@ const fetchCart = async () => {
         };
       });
 
-      // Extract stores from response
       stores.value = response.data.data.stores;
-
       if (stores.value.length > 0) {
-        selectedStores.value = [stores.value[0].store_id]; // Select first store by default
+        selectedStores.value = [stores.value[0].store_id];
       }
 
       await fetchOrderTotals();
@@ -288,8 +319,8 @@ const fetchCart = async () => {
   } catch (error) {
     toast.add({
       severity: 'error',
-      summary: 'خطأ',
-      detail: 'فشل تحميل بيانات سلة التسوق',
+      summary: t('error'),
+      detail: t('cart.cartLoadError'),
       life: 3000,
     });
     console.error('Error fetching cart:', error);
@@ -322,14 +353,13 @@ const fetchOrderTotals = async () => {
 
     const response = await axios.post('/api/order/view', payload);
     if (response.data.is_success) {
-      // Store orders is an array of store orders
       storeOrders.value = response.data.data;
     }
   } catch (error) {
     toast.add({
       severity: 'error',
-      summary: 'خطأ',
-      detail: 'فشل تحميل إجمالي الطلب',
+      summary: t('error'),
+      detail: t('cart.orderTotalsError'),
       life: 3000,
     });
     console.error('Error fetching order totals:', error);
@@ -338,7 +368,7 @@ const fetchOrderTotals = async () => {
 
 const getStoreName = (storeId) => {
   const store = stores.value.find(s => s.store_id === storeId);
-  return store ? (store.store_name_ar || store.store_name_en) : 'متجر غير معروف';
+  return store ? (locale.value === 'ar' ? store.store_name_ar : store.store_name_en || t('store.default')) : t('store.unknown');
 };
 
 const applyCoupon = async () => {
@@ -346,15 +376,15 @@ const applyCoupon = async () => {
     await fetchOrderTotals();
     toast.add({
       severity: 'success',
-      summary: 'نجاح',
-      detail: 'تم تطبيق كود الخصم',
+      summary: t('success'),
+      detail: t('cart.couponSuccess'),
       life: 3000,
     });
   } catch (error) {
     toast.add({
       severity: 'error',
-      summary: 'خطأ',
-      detail: 'فشل تطبيق كود الخصم',
+      summary: t('error'),
+      detail: t('cart.couponError'),
       life: 3000,
     });
     console.error('Error applying coupon:', error);
@@ -373,6 +403,12 @@ const updateQuantity = async (type, id, product_id, variant_id, quantity) => {
         quantity: quantity + 1,
       });
       product.quantity += 1;
+      toast.add({
+        severity: 'success',
+        summary: t('success'),
+        detail: t('cart.quantityIncreased'),
+        life: 3000,
+      });
     } else if (type === 'minus' && product.quantity > 1) {
       await axios.post(`/api/cart/update`, {
         product_id: product_id,
@@ -380,13 +416,19 @@ const updateQuantity = async (type, id, product_id, variant_id, quantity) => {
         quantity: quantity - 1,
       });
       product.quantity -= 1;
+      toast.add({
+        severity: 'success',
+        summary: t('success'),
+        detail: t('cart.quantityDecreased'),
+        life: 3000,
+      });
     }
     await fetchOrderTotals();
   } catch (error) {
     toast.add({
       severity: 'error',
-      summary: 'خطأ',
-      detail: `فشل ${type === 'plus' ? 'زيادة' : 'تقليل'} الكمية`,
+      summary: t('error'),
+      detail: t(`cart.quantity${type === 'plus' ? 'Increase' : 'Decrease'}Error`),
       life: 3000,
     });
     console.error(`Error ${type === 'plus' ? 'increasing' : 'decreasing'} quantity:`, error);
@@ -402,15 +444,15 @@ const clearProduct = async (id, product_id, variant_id) => {
     await fetchOrderTotals();
     toast.add({
       severity: 'success',
-      summary: 'نجاح',
-      detail: 'تم إزالة المنتج من السلة',
+      summary: t('success'),
+      detail: t('cart.removeSuccess'),
       life: 3000,
     });
   } catch (error) {
     toast.add({
       severity: 'error',
-      summary: 'خطأ',
-      detail: 'فشل إزالة المنتج من السلة',
+      summary: t('error'),
+      detail: t('cart.removeError'),
       life: 3000,
     });
     console.error('Error clearing product:', error);
@@ -421,8 +463,8 @@ const submitOrder = async () => {
   if (!selectedAddress.value) {
     toast.add({
       severity: 'error',
-      summary: 'خطأ',
-      detail: 'يرجى اختيار عنوان للتوصيل',
+      summary: t('error'),
+      detail: t('cart.noAddressSelected'),
       life: 3000,
     });
     return;
@@ -431,8 +473,8 @@ const submitOrder = async () => {
   if (filteredProducts.value.length === 0) {
     toast.add({
       severity: 'error',
-      summary: 'خطأ',
-      detail: 'سلة التسوق فارغة',
+      summary: t('error'),
+      detail: t('cart.emptyCart'),
       life: 3000,
     });
     return;
@@ -455,23 +497,22 @@ const submitOrder = async () => {
 
     const response = await axios.post('/api/order', payload);
     if (response.data.is_success) {
-      // Remove ordered products from cart
       products.value = products.value.filter(p => !filteredProducts.value.includes(p));
       storeOrders.value = [];
       toast.add({
         severity: 'success',
-        summary: 'نجاح',
-        detail: 'تم إرسال الطلب بنجاح',
+        summary: t('success'),
+        detail: t('cart.orderSuccess'),
         life: 3000,
       });
     } else {
-      throw new Error('Order submission failed');
+      throw new Error(t('cart.orderError'));
     }
   } catch (error) {
     toast.add({
       severity: 'error',
-      summary: 'خطأ',
-      detail: 'فشل إرسال الطلب',
+      summary: t('error'),
+      detail: t('cart.orderError'),
       life: 3000,
     });
     console.error('Error submitting order:', error);
@@ -497,7 +538,6 @@ const toggleExpressDelivery = () => {
   fetchOrderTotals();
 };
 
-// Watch for changes in address or express delivery to update totals
 watch([selectedAddress, isExpressed], () => {
   fetchOrderTotals();
 });
@@ -509,13 +549,16 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* RTL support for the entire component */
 [dir="rtl"] .flex {
   direction: rtl;
 }
 
-/* Custom styles for better RTL experience */
 .text-right {
   text-align: right;
+}
+
+/* Ensure buttons and inputs align properly in RTL */
+[dir="rtl"] .p-progress-spinner {
+  margin-left: 0.5rem;
 }
 </style>

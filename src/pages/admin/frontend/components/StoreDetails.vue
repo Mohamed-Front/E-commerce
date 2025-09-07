@@ -90,7 +90,7 @@
         :slides-per-view="8"
         :space-between="10"
         :navigation="false"
-        :autoplay="{ delay: 2000, disableOnInteraction: false }"
+        :autoplay="{ delay: 600, disableOnInteraction: false }"
         :pagination="{ clickable: true }"
         class="w-full"
         :breakpoints="{

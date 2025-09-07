@@ -31,8 +31,9 @@ const fetchBrand = async () => {
       name_en: response.data.data.name_en,
       name_ar: response.data.data.name_ar,
     };
-    if (response.data.data.image) {
-      imagePreview.value = response.data.data.image; // Assuming API returns image URL
+    // Check if media array exists and has an image URL
+    if (response.data.data.media && response.data.data.media.length > 0) {
+      imagePreview.value = response.data.data.media[0].url;
     }
   } catch (error) {
     console.error('Error fetching brand:', error);
@@ -40,7 +41,7 @@ const fetchBrand = async () => {
       severity: 'error',
       summary: t('error'),
       detail: error.response?.data?.message || t('brand.loadError'),
-      life: 3000
+      life: 3000,
     });
     router.push({ name: 'brand' });
   } finally {
@@ -89,7 +90,6 @@ const submitForm = async () => {
   const formData = new FormData();
   formData.append('name_en', brandData.value.name_en);
   formData.append('name_ar', brandData.value.name_ar);
-  formData.append('_method', 'PATCH'); // For Laravel to handle as PATCH request
 
   if (imageFile.value) {
     formData.append('image', imageFile.value);
@@ -104,7 +104,7 @@ const submitForm = async () => {
       severity: 'success',
       summary: t('success'),
       detail: t('brand.updateSuccess'),
-      life: 3000
+      life: 3000,
     });
   } catch (error) {
     console.error('Error updating brand:', error);
@@ -112,7 +112,7 @@ const submitForm = async () => {
       severity: 'error',
       summary: t('error'),
       detail: error.response?.data?.message || t('brand.updateError'),
-      life: 3000
+      life: 3000,
     });
   } finally {
     loading.value = false;
@@ -172,7 +172,7 @@ onMounted(() => {
               :class="{ 'border-blue-500 bg-blue-50': isDragging, 'border-gray-300': !isDragging }"
               class="cursor-pointer w-full max-w-md rounded-xl border-2 border-dashed transition-colors duration-300"
             >
-              <input type="file" @change="onImageUpload" accept="image/*" class="hidden">
+              <input type="file" @change="onImageUpload" accept="image/*" class="hidden" />
 
               <div v-if="imagePreview" class="p-4">
                 <div class="relative group">
@@ -180,9 +180,13 @@ onMounted(() => {
                     :src="imagePreview"
                     alt="Preview"
                     class="w-full h-64 object-contain rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div
+                    class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg"
                   >
-                  <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
-                    <div class="opacity-0 group-hover:opacity-100 space-x-3 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
+                    <div
+                      class="opacity-0 group-hover:opacity-100 space-x-3 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0"
+                    >
                       <button
                         type="button"
                         @click.stop="removeImage"
@@ -194,7 +198,7 @@ onMounted(() => {
                         class="bg-white text-gray-700 p-2 rounded-full hover:bg-gray-100 transition cursor-pointer"
                       >
                         <i class="pi pi-pencil text-sm"></i>
-                        <input type="file" @change="onImageUpload" accept="image/*" class="hidden">
+                        <input type="file" @change="onImageUpload" accept="image/*" class="hidden" />
                       </label>
                     </div>
                   </div>
@@ -207,7 +211,8 @@ onMounted(() => {
                   <i class="pi pi-image text-blue-500 text-2xl"></i>
                 </div>
                 <p class="text-sm text-center text-gray-600 mb-1">
-                  <span class="text-blue-500 font-medium">{{ t('brand.upload') }}</span> {{ t('brand.orDragDrop') }}
+                  <span class="text-blue-500 font-medium">{{ t('brand.upload') }}</span>
+                  {{ t('brand.orDragDrop') }}
                 </p>
                 <p class="text-xs text-gray-400">{{ t('brand.fileTypes') }}</p>
               </div>
@@ -241,7 +246,6 @@ onMounted(() => {
       </div>
     </Form>
   </div>
-  <!-- sovle problem -->
   <Toast />
 </template>
 
@@ -292,6 +296,4 @@ button.bg-gradient-to-r:hover {
   background-color: #3b82f6;
   border-radius: 3px;
 }
-
-
 </style>

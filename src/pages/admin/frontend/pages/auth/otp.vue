@@ -8,7 +8,7 @@
       <div class="space-y-6">
         <h2 class="text-2xl font-bold text-gray-800">ادخل الرمز المرسل</h2>
         <p class="text-sm text-gray-500">
-          تم إرسال رمز التحقق المكون من 4 أرقام
+          تم إرسال رمز التحقق المكون من 6 أرقام
         </p>
 
         <div class="flex justify-center space-x-2 space-x-reverse">
