@@ -380,6 +380,17 @@ const routes: Array<RouteRecordRaw> = [
             path: 'stores',
             component: () => import('../pages/admin/store/index.vue'),
           },
+           {
+            name: 'inventory',
+            path: 'inventory',
+            component: () => import('../pages/admin/inventory/index.vue'),
+          },
+
+            {
+            name: 'inventory-quantity',
+            path: 'inventory-quantity/:id',
+            component: () => import('../pages/admin/inventory/update.vue'),
+          },
           {
             name: 'order',
             path: 'order',

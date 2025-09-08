@@ -162,6 +162,15 @@ export default {
         },
       ],
     },
+
+      {
+      name: 'inventory',
+      displayName: 'navigation.inventory',
+      show: ['list custom tabs'],
+      meta: {
+        icon: 'dashboard',
+      },
+    },
      {
       name: 'custom_tabs',
       displayName: 'navigation.custom_tabs',

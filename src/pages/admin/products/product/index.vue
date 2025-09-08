@@ -30,10 +30,13 @@ const selectedFile = ref(null)
 const importLoading = ref(false)
 const categories = ref([])
 const stores = ref([])
+const markets = ref([]) // New market state
 const selectedCategory = ref(null)
 const selectedStore = ref(null)
-const categorySearchQuery = ref('') // State for category search
-const appLanguage = ref(localStorage.getItem('appLang') || 'en') // Reactive language state
+const selectedMarket = ref(null) // New selected market
+const categorySearchQuery = ref('')
+const marketSearchQuery = ref('') // New market search state
+const appLanguage = ref(localStorage.getItem('appLang') || 'en')
 
 // Pagination variables
 const currentPage = ref(1)
@@ -96,6 +99,32 @@ const fetchStores = async () => {
     }
 }
 
+// Fetch markets with search support
+const fetchMarkets = async () => {
+    try {
+        const response = await axios.get('/api/market', {
+            params: {
+                search: marketSearchQuery.value || undefined
+            }
+        })
+        const lang = appLanguage.value
+        markets.value = response.data.data.data.map(market => ({
+            label: lang === 'en'
+                ? `${market.name_en} `
+                : `${market.name_ar} `,
+            value: market.id
+        }))
+    } catch (error) {
+        toast.add({
+            severity: 'error',
+            summary: t('error'),
+            detail: t('market.loadError'),
+            life: 3000
+        })
+        console.error('Error fetching markets:', error)
+    }
+}
+
 // Fetch data
 const fetchData = () => {
     loading.value = true
@@ -105,7 +134,8 @@ const fetchData = () => {
             limit: rowsPerPage.value,
             search: searchQuery.value || undefined,
             category_id: selectedCategory.value || undefined,
-            store_id: selectedStore.value || undefined
+            store_id: selectedStore.value || undefined,
+            market_id: selectedMarket.value || undefined // Add market filter
         }
     })
     .then((response) => {
@@ -134,7 +164,7 @@ const fetchData = () => {
 }
 
 // Watch for pagination, search, and filter changes
-watch([searchQuery, rowsPerPage, selectedCategory, selectedStore], () => {
+watch([searchQuery, rowsPerPage, selectedCategory, selectedStore, selectedMarket], () => {
     currentPage.value = 1
     fetchData()
 })
@@ -143,12 +173,19 @@ watch([searchQuery, rowsPerPage, selectedCategory, selectedStore], () => {
 watch(appLanguage, () => {
     fetchCategories()
     fetchStores()
+    fetchMarkets()
 })
 
 // Handle category filter input
 const onCategoryFilter = (event) => {
     categorySearchQuery.value = event.value
     fetchCategories()
+}
+
+// Handle market filter input
+const onMarketFilter = (event) => {
+    marketSearchQuery.value = event.value
+    fetchMarkets()
 }
 
 // Handle page navigation
@@ -195,27 +232,60 @@ const deleteProduct = () => {
     })
 }
 
-// Export CSV
+// Export CSV with filters
 const exportCSV = () => {
-    dt.value.exportCSV()
+    const params = new URLSearchParams({
+        search: searchQuery.value || '',
+        category_id: selectedCategory.value || '',
+        store_id: selectedStore.value || '',
+        market_id: selectedMarket.value || '' // Add market filter to export
+    })
+
+    const url = `/api/product/export?${params.toString()}`
+
+    axios.get(url, { responseType: 'blob' })
+        .then((response) => {
+            const blob = new Blob([response.data], { type: 'text/csv' })
+            const link = document.createElement('a')
+            link.href = URL.createObjectURL(blob)
+            link.download = 'products_export.csv'
+            link.click()
+            URL.revokeObjectURL(link.href)
+
+            toast.add({
+                severity: 'success',
+                summary: t('success'),
+                detail: t('product.exportSuccess'),
+                life: 3000
+            })
+        })
+        .catch((error) => {
+            toast.add({
+                severity: 'error',
+                summary: t('error'),
+                detail: t('product.exportError'),
+                life: 3000
+            })
+            console.error('Error exporting products:', error)
+        })
 }
 
 // Download example CSV
 const downloadExample = () => {
-    const csvContent = 'store_id,category_id,name_en,name_ar,sku,brand_id,sub_name_en,sub_name_ar,description_en,description_ar,base_price,cost_price,tax\n' +
-        '1,1,Demo Product 1,منتج تجريبي 1,SKU001,1,Sub Demo 1,تجريبي فرعي 1,Description of Demo Product 1,وصف المنتج التجريبي 1,15.50,10.00,0.05\n' +
-        '2,2,Demo Product 2,منتج تجريبي 2,SKU002,2,Sub Demo 2,تجريبي فرعي 2,Description of Demo Product 2,وصف المنتج التجريبي 2,22.00,15.00,0.05';
+    const csvContent = 'store_id,category_id,market_id,name_en,name_ar,sku,brand_id,sub_name_en,sub_name_ar,description_en,description_ar,base_price,cost_price,tax\n' +
+        '1,1,1,Demo Product 1,منتج تجريبي 1,SKU001,1,Sub Demo 1,تجريبي فرعي 1,Description of Demo Product 1,وصف المنتج التجريبي 1,15.50,10.00,0.05\n' +
+        '2,2,2,Demo Product 2,منتج تجريبي 2,SKU002,2,Sub Demo 2,تجريبي فرعي 2,Description of Demo Product 2,وصف المنتج التجريبي 2,22.00,15.00,0.05';
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
     if (link.download !== undefined) {
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', 'product_import_example.csv');
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const url = URL.createObjectURL(blob)
+        link.setAttribute('href', url)
+        link.setAttribute('download', 'product_import_example.csv')
+        link.style.visibility = 'hidden'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
     }
 }
 
@@ -277,7 +347,7 @@ const editProduct = (id) => {
 
 // Lifecycle hooks
 onMounted(() => {
-    Promise.all([fetchCategories(), fetchStores(), fetchData()])
+    Promise.all([fetchCategories(), fetchStores(), fetchMarkets(), fetchData()])
 })
 </script>
 
@@ -316,6 +386,18 @@ onMounted(() => {
                                 :placeholder="t('product.storeFilter')"
                                 class="w-12rem"
                                 :showClear="true"
+                            />
+                            <Dropdown
+                                v-model="selectedMarket"
+                                :options="markets"
+                                optionLabel="label"
+                                optionValue="value"
+                                :placeholder="t('product.marketFilter')"
+                                class="w-12rem"
+                                :showClear="true"
+                                filter
+                                filterPlaceholder="Search markets"
+                                @filter="onMarketFilter"
                             />
                             <Button
                                 :label="t('product.import')"
