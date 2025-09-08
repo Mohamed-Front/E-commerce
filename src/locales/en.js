@@ -917,6 +917,9 @@ export default {
   to: 'to',
   from: 'of',
    "product": {
+      categoryFilter:" category Filter",
+      storeFilter:"store Filter",
+
     "managementTitle": "Product Management",
     "createTitle": "Create Product",
     "createButton": "Create",

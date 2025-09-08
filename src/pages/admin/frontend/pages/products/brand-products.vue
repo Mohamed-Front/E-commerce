@@ -22,7 +22,7 @@
         {{ products.title }}
       </h2>
       <!-- Product Grid -->
-      <div class="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-10 mb-10">
+      <div class="grid grid-cols-1 xs:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-10 mb-10">
         <div v-for="(pro, i) in paginatedProducts" :key="pro.id"
              class="group flex flex-col items-start cursor-pointer h-full bg-white transition-all pb-4 rounded-lg shadow-lg duration-300 hover:-translate-y-2 hover:shadow-xl"
              @click="router.push({ name: 'Product-details', params: { id: pro.id } })">

@@ -4,17 +4,13 @@ import { useToast } from 'primevue/usetoast'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import axios from 'axios'
-import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
-import Button from 'primevue/button'
-import InputText from 'primevue/inputtext'
 import Toolbar from 'primevue/toolbar'
 import Toast from 'primevue/toast'
-import Dialog from 'primevue/dialog'
-import ProgressSpinner from 'primevue/progressspinner'
-import Dropdown from 'primevue/dropdown'
 import FileUpload from 'primevue/fileupload'
 import Tag from 'primevue/tag'
+import Dropdown from 'primevue/dropdown'
+import InputText from 'primevue/inputtext'
 
 const router = useRouter()
 const toast = useToast()
@@ -32,6 +28,12 @@ const selectedProducts = ref(null)
 const importDialog = ref(false)
 const selectedFile = ref(null)
 const importLoading = ref(false)
+const categories = ref([])
+const stores = ref([])
+const selectedCategory = ref(null)
+const selectedStore = ref(null)
+const categorySearchQuery = ref('') // State for category search
+const appLanguage = ref(localStorage.getItem('appLang') || 'en') // Reactive language state
 
 // Pagination variables
 const currentPage = ref(1)
@@ -46,6 +48,54 @@ const from = ref(0)
 const to = ref(0)
 const links = ref([])
 
+// Fetch categories with search support
+const fetchCategories = async () => {
+    try {
+        const response = await axios.get('/api/category', {
+            params: {
+                search: categorySearchQuery.value || undefined
+            }
+        })
+        const lang = appLanguage.value
+        categories.value = response.data.data.data.map(category => ({
+            label: lang === 'en'
+                ? `${category.name_en} `
+                : `${category.name_ar} `,
+            value: category.id
+        }))
+    } catch (error) {
+        toast.add({
+            severity: 'error',
+            summary: t('error'),
+            detail: t('category.loadError'),
+            life: 3000
+        })
+        console.error('Error fetching categories:', error)
+    }
+}
+
+// Fetch stores
+const fetchStores = async () => {
+    try {
+        const response = await axios.get('/api/store')
+        const lang = appLanguage.value
+        stores.value = response.data.data.data.map(store => ({
+            label: lang === 'en'
+                ? `${store.name_en} `
+                : `${store.name_ar} `,
+            value: store.id
+        }))
+    } catch (error) {
+        toast.add({
+            severity: 'error',
+            summary: t('error'),
+            detail: t('store.loadError'),
+            life: 3000
+        })
+        console.error('Error fetching stores:', error)
+    }
+}
+
 // Fetch data
 const fetchData = () => {
     loading.value = true
@@ -53,7 +103,9 @@ const fetchData = () => {
         params: {
             page: currentPage.value,
             limit: rowsPerPage.value,
-            search: searchQuery.value || undefined
+            search: searchQuery.value || undefined,
+            category_id: selectedCategory.value || undefined,
+            store_id: selectedStore.value || undefined
         }
     })
     .then((response) => {
@@ -81,11 +133,23 @@ const fetchData = () => {
     })
 }
 
-// Watch for pagination and search changes
-watch([searchQuery, rowsPerPage], () => {
+// Watch for pagination, search, and filter changes
+watch([searchQuery, rowsPerPage, selectedCategory, selectedStore], () => {
     currentPage.value = 1
     fetchData()
 })
+
+// Watch for language changes
+watch(appLanguage, () => {
+    fetchCategories()
+    fetchStores()
+})
+
+// Handle category filter input
+const onCategoryFilter = (event) => {
+    categorySearchQuery.value = event.value
+    fetchCategories()
+}
 
 // Handle page navigation
 const goToPage = (page) => {
@@ -136,7 +200,7 @@ const exportCSV = () => {
     dt.value.exportCSV()
 }
 
-// Download example CSV (Client-side generation)
+// Download example CSV
 const downloadExample = () => {
     const csvContent = 'store_id,category_id,name_en,name_ar,sku,brand_id,sub_name_en,sub_name_ar,description_en,description_ar,base_price,cost_price,tax\n' +
         '1,1,Demo Product 1,منتج تجريبي 1,SKU001,1,Sub Demo 1,تجريبي فرعي 1,Description of Demo Product 1,وصف المنتج التجريبي 1,15.50,10.00,0.05\n' +
@@ -213,7 +277,7 @@ const editProduct = (id) => {
 
 // Lifecycle hooks
 onMounted(() => {
-    fetchData()
+    Promise.all([fetchCategories(), fetchStores(), fetchData()])
 })
 </script>
 
@@ -227,11 +291,32 @@ onMounted(() => {
                     </template>
 
                     <template #end>
-                        <div class="flex gap-2">
+                        <div class="flex gap-2 align-items-center">
                             <span class="p-input-icon-left">
                                 <i class="pi pi-search" />
                                 <InputText v-model="searchQuery" :placeholder="t('product.search')" />
                             </span>
+                            <Dropdown
+                                v-model="selectedCategory"
+                                :options="categories"
+                                optionLabel="label"
+                                optionValue="value"
+                                :placeholder="t('product.categoryFilter')"
+                                class="w-12rem"
+                                :showClear="true"
+                                filter
+                                filterPlaceholder="Search categories"
+                                @filter="onCategoryFilter"
+                            />
+                            <Dropdown
+                                v-model="selectedStore"
+                                :options="stores"
+                                optionLabel="label"
+                                optionValue="value"
+                                :placeholder="t('product.storeFilter')"
+                                class="w-12rem"
+                                :showClear="true"
+                            />
                             <Button
                                 :label="t('product.import')"
                                 icon="pi pi-download"

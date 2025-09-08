@@ -948,6 +948,8 @@ export default {
     submitError: 'فشل في إرسال التقييم. حاول مرة أخرى.',
   },
 "product": {
+  categoryFilter:"اختر الفئة",
+  storeFilter:" اختر المتجر",
   thumbnailAlt: 'صورة مصغرة للمنتج',
     mainImageAlt: 'الصورة الرئيسية للمنتج',
     price: 'السعر',
