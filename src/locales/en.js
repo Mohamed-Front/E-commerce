@@ -81,6 +81,7 @@ export default {
     "updateError": "Failed to update delivery setting"
   },
   navigation: {
+    "inventory":"inventory",
     "shipping":" Prepare delivery",
     "markets":"markets",
     orders:"orders",
@@ -1000,6 +1001,7 @@ export default {
     submitError: 'Failed to submit review. Please try again.',
   },
    "inventory": {
+    "total_products":"Total products",
     "product":"product",
     "managementTitle": "Inventory Management",
     "search": "Search Inventories",

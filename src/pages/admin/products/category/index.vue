@@ -1,4 +1,3 @@
-```vue
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useToast } from 'primevue/usetoast'
@@ -32,9 +31,9 @@ const selectedCategories = ref(null)
 const importDialog = ref(false)
 const selectedFile = ref(null)
 const importLoading = ref(false)
-const stores = ref([]) // New: List of stores for dropdown
-const selectedStore = ref(null) // New: Selected store for filtering
-
+const stores = ref([])
+const selectedStore = ref(null)
+const lang=ref(localStorage.getItem('appLang'))
 // Pagination variables
 const currentPage = ref(1)
 const totalRecords = ref(0)
@@ -62,7 +61,7 @@ const exampleData = ref([
 const fetchStores = () => {
   axios.get('/api/store')
     .then((response) => {
-      stores.value = response.data.data.data // Adjust based on your API response structure
+      stores.value = response.data.data.data
     })
     .catch((error) => {
       toast.add({
@@ -83,7 +82,7 @@ const fetchData = () => {
       page: currentPage.value,
       limit: rowsPerPage.value,
       search: searchQuery.value || undefined,
-      store_id: selectedStore.value?.id || undefined // New: Include store_id
+      store_id: selectedStore.value?.id || undefined
     }
   })
     .then((response) => {
@@ -246,7 +245,6 @@ const importCategories = () => {
       fetchData()
       importDialog.value = false
       selectedFile.value = null
-      // Reset FileUpload
       const fileUpload = document.querySelector('.p-fileupload input[type="file"]')
       if (fileUpload) fileUpload.value = ''
     })
@@ -275,7 +273,7 @@ const editCategory = (id) => {
 
 // Lifecycle hooks
 onMounted(() => {
-  fetchStores() // New: Fetch stores on mount
+  fetchStores()
   fetchData()
 })
 </script>
@@ -361,14 +359,9 @@ onMounted(() => {
                 {{ slotProps.data.name_ar }}
               </template>
             </Column>
-            <Column field="parent.name_en" :header="t('category.parent')" :sortable="true" header-style="width:14%; min-width:10rem;">
+            <Column field="belongs_to" :header="t('category.store')" :sortable="true" header-style="width:14%; min-width:10rem;">
               <template #body="slotProps">
-                {{ slotProps.data.parent?.name_en || t('category.noParent') }}
-              </template>
-            </Column>
-            <Column field="store.name_en" :header="t('category.store')" :sortable="true" header-style="width:14%; min-width:10rem;">
-              <template #body="slotProps">
-                {{ slotProps.data.store?.name_en || t('category.noStore') }}
+                {{ lang === 'ar' ? slotProps.data.belongs_to_ar : slotProps.data.belongs_to_en || t('category.noStore') }}
               </template>
             </Column>
             <Column :header="t('actions')" header-style="width:12rem;">
@@ -559,4 +552,3 @@ onMounted(() => {
   visibility: hidden !important;
 }
 </style>
-```

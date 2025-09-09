@@ -16,6 +16,7 @@ export default {
   remove: 'إزالة',
   currencyLabel:"د.أ",
   navigation: {
+    "inventory":"ادارة المخازن",
    "shipping":"إعدادات التوصيل",
     "markets":"الأسواق",
     orders:"الطلبــــات",
@@ -710,7 +711,7 @@ export default {
     nonMarket: 'غير سوق',
     parent: 'الفئة الرئيسية',
     selectParent: 'اختر الفئة الرئيسية',
-    store: 'المتجر',
+    store: ' المتجر او السوق',
     selectStore: 'اختر المتجر',
     image: 'صورة الفئة',
     imagePreview: 'معاينة صورة الفئة',
@@ -948,6 +949,7 @@ export default {
     submitError: 'فشل في إرسال التقييم. حاول مرة أخرى.',
   },
    "inventory": {
+    "total_products":"عدد المنتجات",
     "product":"المنتج ",
     "managementTitle": "إدارة المخزون",
     "search": "البحث في المخزون",

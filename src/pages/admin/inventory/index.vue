@@ -318,6 +318,13 @@ const formatDate = (dateString) => {
                 {{ slotProps.data.store.name_ar }}
               </template>
             </Column>
+             <Column field="total_products" :header="t('inventory.total_products')" :sortable="true">
+              <template #body="slotProps">
+                {{ slotProps.data.total_products }}
+              </template>
+            </Column>
+
+
 
             <Column :header="t('actions')" headerStyle="width: 15rem">
               <template #body="slotProps">
