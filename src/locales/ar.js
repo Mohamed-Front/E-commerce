@@ -996,6 +996,7 @@ export default {
   "yes": "نعم",
   "no": "لا",
 "product": {
+      "marketFilter":"اختر السوق ",
   categoryFilter:"اختر الفئة",
   storeFilter:" اختر المتجر",
   thumbnailAlt: 'صورة مصغرة للمنتج',

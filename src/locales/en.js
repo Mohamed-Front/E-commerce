@@ -919,7 +919,7 @@ export default {
    "product": {
       categoryFilter:" category Filter",
       storeFilter:"store Filter",
-
+     "marketFilter":" market",
     "managementTitle": "Product Management",
     "createTitle": "Create Product",
     "createButton": "Create",

@@ -241,7 +241,7 @@ const exportCSV = () => {
         market_id: selectedMarket.value || '' // Add market filter to export
     })
 
-    const url = `/api/product/export?${params.toString()}`
+    const url = `/api/export/products?${params.toString()}`
 
     axios.get(url, { responseType: 'blob' })
         .then((response) => {
