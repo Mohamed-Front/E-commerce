@@ -1,3 +1,4 @@
+```vue
 <template>
   <div class="product-page max-w-7xl mx-auto p-4 lg:p-8">
     <div v-if="isLoading" class="text-center">
@@ -73,17 +74,18 @@
             <label class="font-bold text-gray-700">{{ t('product.quantity') }}:</label>
             <div class="flex items-center border border-gray-300 rounded-md">
               <button
-                @click="quantity > 1 ? quantity-- : null"
+                @click="updateQuantity('minus')"
                 class="px-3 py-1 text-lg font-bold hover:bg-gray-100 rounded-l-md"
-                :disabled="quantity <= 1"
+                :disabled="quantity <= 0 || isUpdatingQuantity"
                 :aria-label="t('product.decreaseQuantity')"
               >
                 -
               </button>
               <span class="px-4 py-1 border-x border-gray-300">{{ quantity }}</span>
               <button
-                @click="quantity++"
+                @click="updateQuantity('plus')"
                 class="px-3 py-1 text-lg font-bold hover:bg-gray-100 rounded-r-md"
+                :disabled="isUpdatingQuantity || pro.isOutOfStock"
                 :aria-label="t('product.increaseQuantity')"
               >
                 +
@@ -94,15 +96,34 @@
           <p class="text-gray-600 my-4">{{ t('product.deliveryTime') }}</p>
 
           <button
-            :disabled="isAddingToCart || pro.inventories_quantity === 0"
+            :disabled="isAddingToCart || pro.isOutOfStock || (pro.in_cart && !isUpdatingQuantity)"
             @click="addToCart(pro)"
-            class="w-full py-3 text-lg font-bold bg-[var(--main-text-color)] rounded-md text-white transition-transform duration-150 ease-in-out active:scale-95 hover:shadow-lg"
-            :class="{ 'opacity-50 cursor-not-allowed': isAddingToCart || pro.inventories_quantity === 0 }"
-            :aria-label="t('product.addToCart')"
+            class="w-full py-3 text-lg font-bold rounded-md text-white transition-transform duration-150 ease-in-out active:scale-95 hover:shadow-lg"
+            :class="{
+              'bg-[var(--main-text-color)]': !pro.in_cart && !pro.isOutOfStock,
+              'bg-gray-300 text-gray-500 cursor-not-allowed': pro.isOutOfStock || (pro.in_cart && !isUpdatingQuantity),
+            }"
+            :aria-label="pro.in_cart ? t('product.inCart') : pro.isOutOfStock ? t('product.outOfStock') : t('product.addToCart')"
+            :title="pro.in_cart ? t('product.inCart') : pro.isOutOfStock ? t('product.outOfStock') : t('product.addToCart')"
           >
-            {{ isAddingToCart ? t('product.adding') : t('product.addToCart') }}
+            <span v-if="pro.in_cart" class="flex items-center justify-center gap-2">
+              <svg
+                class="w-5 h-5"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M9 16.2l-3.5-3.5a.984.984 0 0 0-1.4 0 .984.984 0 0 0 0 1.4l4.2 4.2c.39.39 1.01.39 1.4 0l8.4-8.4a.984.984 0 0 0 0-1.4.984.984 0 0 0-1.4 0L9 16.2z"
+                />
+              </svg>
+              {{ t('product.inCart') }}
+            </span>
+            <span v-else>
+              {{ isAddingToCart ? t('product.adding') : t('product.addToCart') }}
+            </span>
           </button>
-          <p v-if="pro.inventories_quantity === 0" class="text-red-500 text-sm mt-2">
+          <p v-if="pro.isOutOfStock" class="text-red-500 text-sm mt-2">
             {{ t('product.outOfStock') }}
           </p>
         </section>
@@ -168,7 +189,7 @@
       <div v-else class="text-center mt-6">
         <p class="text-gray-600 mb-4">{{ t('reviews.loginToReview') }}</p>
         <button
-          @click="router.push({ name: 'AuthLogin' })"
+          @click="router.push({ name: 'authlog' })"
           class="py-2 px-6 bg-[var(--main-text-color)] text-white rounded-md hover:bg-opacity-90 transition-colors"
           :aria-label="t('reviews.login')"
         >
@@ -212,21 +233,25 @@ import ProgressSpinner from 'primevue/progressspinner';
 import ProductOffers from '../../components/ProductOffers.vue';
 import { useAuthStore } from '../../../../../stores/WebAuth';
 import { debounce } from 'lodash';
+import { useToast } from 'primevue/usetoast';
+import Toast from 'primevue/toast';
 
-// Initialize i18n, router, and auth store
+// Initialize i18n, router, auth store, and toast
 const { t, locale } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
+const toast = useToast();
 
 // State variables
 const pro = ref({});
 const imgs = ref([]);
-const quantity = ref(1);
+const quantity = ref(0);
 const currentImg = ref('');
 const isLoading = ref(false);
 const error = ref(null);
 const isAddingToCart = ref(false);
+const isUpdatingQuantity = ref(false);
 const reviews = ref([]);
 const isSubmittingReview = ref(false);
 const reviewError = ref(null);
@@ -271,9 +296,13 @@ const goCatgory = (data) => {
     router.push({ name: 'produts_category', params: { id: data.id } });
   }
 };
-const goBrand=(data)=>{
-  router.push({ name: 'products-brand', params: { id: data.id } });
-}
+
+const goBrand = (data) => {
+  if (data) {
+    router.push({ name: 'products-brand', params: { id: data.id } });
+  }
+};
+
 const selectStore = (store) => {
   if (!store) return;
   if (store.has_market) {
@@ -286,10 +315,10 @@ const selectStore = (store) => {
 // Cart functionality
 const addToCart = async (product) => {
   if (!authStore.authenticatedweb) {
-    router.push({ name: 'AuthLogin' });
+    router.push({ name: 'authlog' });
     return;
   }
-  if (isAddingToCart.value || product.inventories_quantity === 0) return;
+  if (isAddingToCart.value || product.isOutOfStock || product.in_cart) return;
 
   isAddingToCart.value = true;
   try {
@@ -299,14 +328,67 @@ const addToCart = async (product) => {
       quantity: quantity.value,
     };
     const response = await axios.post('/api/cart/add', payload);
-    // Assuming a toast notification is available from a previous component
-    // If not, you can add PrimeVue's Toast here
-    console.log('Added to cart successfully:', response.data);
+    if (response.status === 200) {
+      pro.value.in_cart = true; // Update local state
+      toast.add({
+        severity: 'success',
+        summary: t('success'),
+        detail: t('cart.added'),
+        life: 3000,
+      });
+    }
   } catch (err) {
     console.error('Error adding to cart:', err);
-    error.value = err.response?.data?.message || t('product.addToCartError');
+    error.value = err.response?.data?.message || t('cart.error');
+    toast.add({
+      severity: 'error',
+      summary: t('error'),
+      detail: error.value,
+      life: 3000,
+    });
   } finally {
     isAddingToCart.value = false;
+  }
+};
+
+const updateQuantity = async (type) => {
+  if (!authStore.authenticatedweb) {
+    router.push({ name: 'authlog' });
+    return;
+  }
+  if (isUpdatingQuantity.value || pro.value.isOutOfStock) return;
+
+  const newQuantity = type === 'plus' ? quantity.value + 1 : quantity.value - 1;
+  if (newQuantity < 1) return; // Prevent quantity from going below 1
+
+  isUpdatingQuantity.value = true;
+  try {
+    const payload = {
+      product_id: pro.value.id,
+      variant_id: pro.value.variant_id || null,
+      quantity: newQuantity,
+    };
+    const response = await axios.post('/api/cart/update', payload);
+    if (response.status === 200) {
+      quantity.value = newQuantity;
+      if (!pro.value.in_cart) pro.value.in_cart = true; // Mark as in cart if adding
+      toast.add({
+        severity: 'success',
+        summary: t('success'),
+        detail: type === 'plus' ? t('cart.quantityIncreased') : t('cart.quantityDecreased'),
+        life: 3000,
+      });
+    }
+  } catch (err) {
+    console.error(`Error ${type === 'plus' ? 'increasing' : 'decreasing'} quantity:`, err);
+    toast.add({
+      severity: 'error',
+      summary: t('error'),
+      detail: t(`cart.quantity${type === 'plus' ? 'Increase' : 'Decrease'}Error`),
+      life: 3000,
+    });
+  } finally {
+    isUpdatingQuantity.value = false;
   }
 };
 
@@ -325,7 +407,7 @@ const formatDate = (dateString) => {
 // Review submission
 const submitReview = async () => {
   if (!authStore.authenticatedweb) {
-    router.push({ name: 'AuthLogin' });
+    router.push({ name: 'authlog' });
     return;
   }
 
@@ -358,12 +440,24 @@ const submitReview = async () => {
       });
       newReview.value = { rating: 0, comment: '' };
       reviewError.value = null;
+      toast.add({
+        severity: 'success',
+        summary: t('success'),
+        detail: t('reviews.submitSuccess'),
+        life: 3000,
+      });
     } else {
       throw new Error(response.data.message || t('reviews.submitError'));
     }
   } catch (err) {
     console.error('Error submitting review:', err);
     reviewError.value = err.response?.data?.message || t('reviews.submitError');
+    toast.add({
+      severity: 'error',
+      summary: t('error'),
+      detail: reviewError.value,
+      life: 3000,
+    });
   } finally {
     isSubmittingReview.value = false;
   }
@@ -375,16 +469,29 @@ const fetchProductData = debounce(async () => {
   try {
     const response = await axios.get(`/api/home/product-details/${route.params.id}`);
     if (response.data.is_success) {
-      pro.value = response.data.data?.product || {};
-      imgs.value = pro.value.media || [];
+      const productData = response.data.data?.product || {};
+      pro.value = {
+        ...productData,
+        in_cart: productData.in_cart || false,
+        is_stock: productData.is_stock || 0,
+        isOutOfStock: productData.is_stock === 0,
+      };
+      imgs.value = productData.media || [];
       currentImg.value = imgs.value.length > 0 ? imgs.value[0].url : pro.value.key_default_image;
-      reviews.value = pro.value.reviews || [];
+      reviews.value = productData.reviews || [];
+      quantity.value = productData.in_cart ? productData.quantity || 1 : 1; // Set initial quantity
     } else {
       throw new Error(response.data.message || t('product.loadError'));
     }
   } catch (err) {
     console.error('Error fetching data:', err);
     error.value = err.response?.data?.message || t('product.loadError');
+    toast.add({
+      severity: 'error',
+      summary: t('error'),
+      detail: error.value,
+      life: 3000,
+    });
   } finally {
     isLoading.value = false;
   }
@@ -419,3 +526,4 @@ onMounted(() => {
   color: #E39F30;
 }
 </style>
+```

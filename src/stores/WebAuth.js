@@ -1,3 +1,4 @@
+// src/stores/auth.js
 import { defineStore } from 'pinia';
 import axios from 'axios';
 import { useStorage } from '@vueuse/core';
@@ -10,21 +11,20 @@ export const useAuthStore = defineStore('Auth', {
     webToken: useStorage('webToken', null),
     authenticatedweb: useStorage('authenticatedweb', false),
     verify: false,
-    authErrors: ref({}), // Store errors as an object with keys for each action
     role: '',
+    router: useRouter(),
     msg: '',
     loading: ref(false),
-    router: useRouter(),
+    errors: ref([]), // Added errors state
   }),
   getters: {
     user: (state) => state.webUser,
     token: (state) => state.webToken,
-    errors: (state) => state.authErrors, // Returns the entire errors object
-    getErrorsByAction: (state) => (action) => state.authErrors[action] || [], // Get errors for a specific action
     successMsg: (state) => state.msg,
   },
   actions: {
     async getUser() {
+
       if (this.authenticatedweb && this.webToken) {
         try {
           const response = await axios.get('/api/get-user', {
@@ -32,58 +32,63 @@ export const useAuthStore = defineStore('Auth', {
           });
           this.webUser = response.data.user;
           this.role = response.data.user.role || '';
+          return { is_success: true, errors: null };
         } catch (error) {
-          this.authErrors['getUser'] = [error.response?.data?.message || 'Failed to fetch user data.'];
           this.clearAllData();
           this.router.push({ name: 'Login' });
+          return {
+            is_success: false,
+            errors: [error.response?.data?.message || 'Failed to fetch user data.'],
+          };
         }
       }
+      return { is_success: false, errors: ['Not authenticated or no token.'] };
     },
     async handleLogin(data) {
-      console.log(data)
-      this.authErrors['login'] = [];
+     ;
       this.loading = true;
-      this.resetAuthStore();
-
+      this.errors = [];
       try {
         const payload = data.type === 'phone'
           ? { phone: `${data.countryCode}${data.phoneNumber}`, password: data.password }
           : { email: data.email, password: data.password };
-
         const response = await axios.post('/api/login', payload);
-
-        if (response.data.data?.access_token) {
+        if (response.data.is_success) {
           this.authenticatedweb = true;
           this.webToken = response.data.data.access_token;
           this.webUser = response.data.data.user;
           this.router.push({ name: 'home' });
-        } else {
-          this.authErrors['login'] = ['Invalid credentials. Please try again.'];
+          return { is_success: true, errors: null };
         }
+        this.errors = ['Invalid credentials. Please try again.'];
+        return { is_success: false, errors: this.errors };
       } catch (error) {
         if (error.response) {
           if (error.response.status === 422) {
-            this.authErrors['login'] = error.response.data.errors
+            this.errors = error.response.data.errors
               ? Object.values(error.response.data.errors).flat()
               : ['Validation failed. Please check your inputs.'];
+            return { is_success: false, errors: this.errors };
           } else if (error.response.status === 401) {
-            this.authErrors['login'] = ['Invalid credentials.'];
-          } else {
-            this.authErrors['login'] = [error.response.data.message || 'An error occurred during login.'];
+            this.errors = ['Invalid credentials.'];
+            return { is_success: false, errors: this.errors };
           }
+          this.errors = [error.response.data.message || 'An error occurred during login.'];
+          return { is_success: false, errors: this.errors };
         } else if (error.request) {
-          this.authErrors['login'] = ['Network error. Please check your connection.'];
-        } else {
-          this.authErrors['login'] = ['An unexpected error occurred.'];
+          this.errors = ['Network error. Please check your connection.'];
+          return { is_success: false, errors: this.errors };
         }
+        this.errors = ['An unexpected error occurred.'];
+        return { is_success: false, errors: this.errors };
       } finally {
         this.loading = false;
       }
     },
     async handleRegister(data) {
-      if (this.loading) return;
-      this.resetAuthStore();
+      if (this.loading) return { is_success: false, errors: ['Operation in progress.'] };
       this.loading = true;
+      this.errors = [];
       try {
         const payload = {
           name: data.name,
@@ -95,7 +100,6 @@ export const useAuthStore = defineStore('Auth', {
         };
         const response = await axios.post('/api/register', payload);
         if (response.data.is_success) {
-
           this.router.push({
             name: 'otp',
             params: { type: 'register' },
@@ -105,17 +109,19 @@ export const useAuthStore = defineStore('Auth', {
               otp_type: data.otp_type,
             },
           });
-        } else {
-          this.authErrors['register'] = ['Registration failed. Please try again.'];
+          return { is_success: true, errors: null };
         }
+        this.errors = ['Registration failed. Please try again.'];
+        return { is_success: false, errors: this.errors };
       } catch (error) {
         if (error.response?.status === 422) {
-          this.authErrors['register'] = error.response.data.errors
+          this.errors = error.response.data.errors
             ? Object.values(error.response.data.errors).flat()
             : ['Validation failed. Please check your inputs.'];
-        } else {
-          this.authErrors['register'] = [error.response?.data?.message || 'Registration failed. Please try again.'];
+          return { is_success: false, errors: this.errors };
         }
+        this.errors = [error.response?.data?.message || 'Registration failed. Please try again.'];
+        return { is_success: false, errors: this.errors };
       } finally {
         this.loading = false;
       }
@@ -124,154 +130,51 @@ export const useAuthStore = defineStore('Auth', {
       this.webUser = {};
       this.webToken = null;
       this.authenticatedweb = false;
-      this.authErrors = {};
       this.msg = '';
       this.loading = false;
       this.role = '';
       this.verify = false;
+      this.errors = [];
       this.router.push({ name: 'authlog' });
-
+      return { is_success: true, errors: null };
     },
     async forgotPassword(data) {
+      this.errors = [];
       try {
-        this.resetAuthStore();
         const response = await axios.post('/api/forgot-password', {
           email: data.email,
         });
         this.msg = response.data.status;
         this.router.push({ name: 'ResetPassword' });
+        return { is_success: true, errors: null };
       } catch (error) {
         if (error.response?.status === 422) {
-          this.authErrors['forgotPassword'] = Object.values(error.response.data.errors).flat();
-        } else {
-          this.authErrors['forgotPassword'] = [error.response?.data?.message || 'Password reset request failed.'];
+          this.errors = Object.values(error.response.data.errors).flat();
+          return { is_success: false, errors: this.errors };
         }
+        this.errors = [error.response?.data?.message || 'Password reset request failed.'];
+        return { is_success: false, errors: this.errors };
       }
     },
     async resetPassword(data) {
+
+      this.errors = [];
       try {
-        this.resetAuthStore();
         await axios.post('/api/reset-password', data);
         this.router.push({ name: 'Login' });
+        return { is_success: true, errors: null };
       } catch (error) {
         if (error.response?.status === 422) {
-          this.authErrors['resetPassword'] = Object.values(error.response.data.errors).flat();
-        } else {
-          this.authErrors['resetPassword'] = [error.response?.data?.message || 'Password reset failed.'];
+          this.errors = Object.values(error.response.data.errors).flat();
+          return { is_success: false, errors: this.errors };
         }
-      }
-    },
-    async handleGoogleLogin({ token }) {
-      this.authErrors['googleLogin'] = [];
-      this.loading = true;
-      this.resetAuthStore();
-      try {
-        const response = await axios.post('/api/google-login', { token });
-        if (response.data.data?.access_token) {
-
-          this.webToken = response.data.data.access_token;
-          this.webUser = response.data.data.user;
-          this.role = response.data.data.user.role || '';
-          this.router.push({ name: 'Home' });
-        } else {
-          this.authErrors['googleLogin'] = ['Google login failed. Please try again.'];
-        }
-      } catch (error) {
-        this.authErrors['googleLogin'] = [error.response?.data?.message || 'Google login failed.'];
-      } finally {
-        this.loading = false;
-      }
-    },
-
-       async verifyOtp({ email, phone, otp }) {
-      this.authErrors['verifyOtp'] = [];
-      this.loading = true;
-      try {
-        const payload = { email, phone, otp };
-        const response = await axios.post('/api/verify-otp', payload);
-        if (response.data.is_success) {
-
-          this.verify = true;
-          setTimeout(() => {
-            if (this.verify) {
-              this.verify = false;
-              console.log('Verify state reset to false after 1 minute');
-            }
-          }, 1000);
-        } else {
-          this.authErrors['verifyOtp'] = ['Invalid OTP. Please try again.'];
-          return false;
-        }
-      } catch (error) {
-        if (error.response?.status === 422) {
-          this.authErrors['verifyOtp'] = error.response.data.errors
-            ? Object.values(error.response.data.errors).flat()
-            : ['Invalid OTP. Please check your input.'];
-        } else {
-          this.authErrors['verifyOtp'] = [error.response?.data?.message || 'OTP verification failed.'];
-        }
-        return false;
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    async verifyEmail({ email, phone, otp }) {
-
-      this.authErrors['verifyOtp'] = [];
-      this.loading = true;
-      try {
-        const payload = { email, phone, otp };
-        const response = await axios.post('/api/verify-email', payload);
-        if (response.data.is_success) {
-         this.router.push({ name: 'authlog' });
-
-          setTimeout(() => {
-            if (this.verify) {
-              this.verify = false;
-              console.log('Verify state reset to false after 1 minute');
-            }
-          }, 1000);
-        } else {
-          this.authErrors['verifyOtp'] = ['Invalid OTP. Please try again.'];
-          return false;
-        }
-      } catch (error) {
-        if (error.response?.status === 422) {
-          this.authErrors['verifyOtp'] = error.response.data.errors
-            ? Object.values(error.response.data.errors).flat()
-            : ['Invalid OTP. Please check your input.'];
-        } else {
-          this.authErrors['verifyOtp'] = [error.response?.data?.message || 'OTP verification failed.'];
-        }
-        return false;
-      } finally {
-        this.loading = false;
-      }
-    },
-    async resendOtp({ email, phone, otp_type }) {
-      this.authErrors['resendOtp'] = [];
-      this.loading = true;
-      try {
-        const payload = { email, phone, otp_type };
-        const response = await axios.post('/api/resend-otp', payload);
-        this.msg = response.data.message || 'OTP resent successfully.';
-      } catch (error) {
-        if (error.response?.status === 422) {
-          this.authErrors['resendOtp'] = error.response.data.errors
-            ? Object.values(error.response.data.errors).flat()
-            : ['Failed to resend OTP. Please check your inputs.'];
-        } else {
-          this.authErrors['resendOtp'] = [error.response?.data?.message || 'Failed to resend OTP.'];
-        }
-      } finally {
-        this.loading = false;
+        this.errors = [error.response?.data?.message || 'Password reset failed.'];
+        return { is_success: false, errors: this.errors };
       }
     },
     async handleResetPassword(data) {
-      this.authErrors['handleResetPassword'] = [];
       this.loading = true;
-      this.resetAuthStore();
+      this.errors = [];
       try {
         const payload = {
           email: data.email,
@@ -289,21 +192,24 @@ export const useAuthStore = defineStore('Auth', {
             otp_type: data.otp_type,
           },
         });
+        return { is_success: true, errors: null };
       } catch (error) {
+        console.log('Error response:', error.response); // Debugging
         if (error.response?.status === 422) {
-          this.authErrors['handleResetPassword'] = error.response.data.errors
+          this.errors = error.response.data.errors
             ? Object.values(error.response.data.errors).flat()
             : ['Validation failed. Please check your inputs.'];
-        } else {
-          this.authErrors['handleResetPassword'] = [error.response?.data?.message || 'Password reset request failed.'];
+          return { is_success: false, errors: this.errors };
         }
+        this.errors = [error.response?.data?.message || 'Password reset request failed.'];
+        return { is_success: false, errors: this.errors };
       } finally {
         this.loading = false;
       }
     },
     async completePasswordReset({ email, phone, otp, password }) {
-      this.authErrors['completePasswordReset'] = [];
       this.loading = true;
+      this.errors = [];
       try {
         const payload = {
           email,
@@ -316,42 +222,130 @@ export const useAuthStore = defineStore('Auth', {
         if (response.data.is_success) {
           this.msg = response.data.message || 'Password reset successfully.';
           this.router.push({ name: 'authlog' });
-        } else {
-          this.authErrors['completePasswordReset'] = ['Password reset failed. Please try again.'];
+          return { is_success: true, errors: null };
         }
+        this.errors = ['Password reset failed. Please try again.'];
+        return { is_success: false, errors: this.errors };
       } catch (error) {
         if (error.response?.status === 422) {
-          this.authErrors['completePasswordReset'] = error.response.data.errors
+          this.errors = error.response.data.errors
             ? Object.values(error.response.data.errors).flat()
             : ['Validation failed. Please check your inputs.'];
-        } else {
-          this.authErrors['completePasswordReset'] = [error.response?.data?.message || 'Password reset failed.'];
+          return { is_success: false, errors: this.errors };
         }
+        this.errors = [error.response?.data?.message || 'Password reset failed.'];
+        return { is_success: false, errors: this.errors };
       } finally {
         this.loading = false;
       }
     },
-    resetAuthStore() {
-      this.authErrors = {}; // Reset errors to an empty object
-      this.msg = '';
-      this.loading = false;
+    async handleGoogleLogin({ token }) {
+      this.loading = true;
+      this.errors = [];
+      try {
+        const response = await axios.post('/api/google-login', { token });
+        if (response.data.data?.access_token) {
+          this.webToken = response.data.data.access_token;
+          this.webUser = response.data.data.user;
+          this.role = response.data.data.user.role || '';
+          this.router.push({ name: 'Home' });
+          return { is_success: true, errors: null };
+        }
+        this.errors = ['Google login failed. Please try again.'];
+        return { is_success: false, errors: this.errors };
+      } catch (error) {
+        this.errors = [error.response?.data?.message || 'Google login failed.'];
+        return { is_success: false, errors: this.errors };
+      } finally {
+        this.loading = false;
+      }
+    },
+    async verifyOtp({ email, phone, otp }) {
+      this.loading = true;
+      this.errors = [];
+      try {
+        const payload = { email, phone, otp };
+        const response = await axios.post('/api/verify-otp', payload);
+        if (response.data.is_success) {
+          this.verify = true;
+          setTimeout(() => {
+            if (this.verify) {
+              this.verify = false;
+              console.log('Verify state reset to false after 5 minutes');
+            }
+          }, 5 * 60 * 1000); // 5 minutes
+          return { is_success: true, errors: null };
+        }
+        this.errors = ['Invalid OTP. Please try again.'];
+        return { is_success: false, errors: this.errors };
+      } catch (error) {
+        if (error.response?.status === 422) {
+          this.errors = error.response.data.errors
+            ? Object.values(error.response.data.errors).flat()
+            : ['Invalid OTP. Please check your input.'];
+          return { is_success: false, errors: this.errors };
+        }
+        this.errors = [error.response?.data?.message || 'OTP verification failed.'];
+        return { is_success: false, errors: this.errors };
+      } finally {
+        this.loading = false;
+      }
+    },
+    async verifyEmail({ email, phone, otp }) {
+      this.loading = true;
+      this.errors = [];
+      try {
+        const payload = { email, phone, otp };
+        const response = await axios.post('/api/verify-email', payload);
+        if (response.data.is_success) {
+          this.router.push({ name: 'authlog' });
+          return { is_success: true, errors: null };
+        }
+        this.errors = ['Invalid OTP. Please try again.'];
+        return { is_success: false, errors: this.errors };
+      } catch (error) {
+        if (error.response?.status === 422) {
+          this.errors = error.response.data.errors
+            ? Object.values(error.response.data.errors).flat()
+            : ['Invalid OTP. Please check your input.'];
+          return { is_success: false, errors: this.errors };
+        }
+        this.errors = [error.response?.data?.message || 'OTP verification failed.'];
+        return { is_success: false, errors: this.errors };
+      } finally {
+        this.loading = false;
+      }
+    },
+    async resendOtp({ email, phone, otp_type }) {
+      this.loading = true;
+      this.errors = [];
+      try {
+        const payload = { email, phone, otp_type };
+        const response = await axios.post('/api/resend-otp', payload);
+        this.msg = response.data.message || 'OTP resent successfully.';
+        return { is_success: true, errors: null };
+      } catch (error) {
+        if (error.response?.status === 422) {
+          this.errors = error.response.data.errors
+            ? Object.values(error.response.data.errors).flat()
+            : ['Failed to resend OTP. Please check your inputs.'];
+          return { is_success: false, errors: this.errors };
+        }
+        this.errors = [error.response?.data?.message || 'Failed to resend OTP.'];
+        return { is_success: false, errors: this.errors };
+      } finally {
+        this.loading = false;
+      }
     },
     clearAllData() {
       this.webUser = {};
       this.webToken = null;
       this.authenticatedweb = false;
-      this.authErrors = {};
       this.msg = '';
       this.loading = false;
       this.role = '';
       this.verify = false;
-    },
-    clearErrors(action = null) {
-      if (action) {
-        this.authErrors[action] = []; // Clear errors for a specific action
-      } else {
-        this.authErrors = {}; // Clear all errors
-      }
+      this.errors = [];
     },
   },
 });

@@ -1,7 +1,7 @@
 ```vue
 <template>
   <!-- Container -->
-  <div class="mx-auto mt-16 max-w-7xl px-4 sm:px-6 lg:px-8">
+  <div class="mx-auto mt-4 max-w-7xl px-4 sm:px-6 lg:px-8">
     <!-- Loading State -->
     <div v-if="isLoading" class="text-center py-16 animate-pulse">
       <p class="text-gray-600 text-lg font-medium">{{ t('category.loading') }}</p>

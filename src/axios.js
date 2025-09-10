@@ -54,10 +54,10 @@ axios.interceptors.response.use(
         router.push({ name: 'login' });
       } else {
         authStore.clearAllData();
-        router.push({ name: 'authlog' });
+        router.push({ name: 'home' });
       }
     } else if (error.response?.status === 403) {
-      router.push({ name: 'authlog' });
+      router.push({ name: 'home' });
     }
 
     // Enhanced error logging

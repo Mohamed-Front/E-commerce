@@ -1,20 +1,20 @@
 <<template>
   <!-- main body -->
-  <main class="bg-[#FAF7F0] min-h-[100vh]">
+  <main class="bg-[#FAF7F0] ">
 
 
 
     <!-- main content -->
     <div class="">
       <!-- section 1 -->
-      <section class="mx-auto mt-16 w-[100%] max-w-7xl">
+      <section class="mx-auto   max-w-7xl">
 
 
         <!-- more products -->
         <!-- Exclusive_offers -->
         <productsSwiper v-if="exclusive_offers.length >=1" :products="exclusive_offers" />
         <!-- best_seller -->
-        <productsSwiper :products="Best_seller" />
+        <productsSwiper v-if="Best_seller.length >=1" :products="Best_seller" />
         <!-- New_arrival -->
         <productsSwiper :products="New_arrival" />
 
@@ -79,6 +79,8 @@
           variant_id: product?.variant_id,
           data:product,
           id: product.id,
+           data:product.is_stock,
+           in_cart:product.in_cart,
           is_wished:product.is_wished,
           sub_name: locale.value === 'ar' ? product.sub_name_ar || product.sub_name_en : product.sub_name_en || product.sub_name_ar,
           name: locale.value === 'ar' ? product.name_ar : product.name_en,
@@ -104,6 +106,8 @@
         products: data.map((product) => ({
           id: product.id,
           data:product,
+           in_cart:product.in_cart,
+          data:product.is_stock,
           is_wished:product.is_wished,
           variant_id:product.variant_id,
           sub_name: locale.value === 'ar' ? product.sub_name_ar || product.sub_name_en : product.sub_name_en || product.sub_name_ar,
@@ -132,6 +136,8 @@
           variant_id:product.variant_id,
           is_wished:product.is_wished,
           id: product.id,
+           in_cart:product.in_cart,
+           data:product.is_stock,
           data:product,
           sub_name: locale.value === 'ar' ? product.sub_name_ar || product.sub_name_en : product.sub_name_en || product.sub_name_ar,
           name: locale.value === 'ar' ? product.name_ar : product.name_en,

@@ -108,7 +108,9 @@ const initFilters = () => {
 onBeforeMount(() => {
   initFilters()
 })
-
+const goToMediaLinks=(id)=>{
+ router.push({name:'',params:{id:id}})
+}
 const fetchData = () => {
   loading.value = true
   axios.get("/api/store", {
@@ -276,6 +278,13 @@ const formatDate = (dateString) => {
                   class="p-delete mx-2"
                   @click="delet(slotProps.data.id)"
                   v-tooltip.top="t('delete')"
+                />
+                  <Button
+                  v-can="'edit inventory'"
+                  icon="pi pi-images"
+                  class="p-button-info"
+                  @click="goToMediaLinks(slotProps.data.id)"
+
                 />
               </template>
             </Column>

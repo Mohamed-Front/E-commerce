@@ -1,6 +1,6 @@
 <template>
   <!-- Container -->
-  <div class="mx-auto mt-16 max-w-7xl px-4 sm:px-6 lg:px-8">
+  <div class="mx-auto mt-4 max-w-7xl px-4 sm:px-6 lg:px-8">
     <!-- Loading State -->
     <div v-if="isLoading" class="flex flex-col items-center justify-center py-16 rounded-xl animate-pulse">
       <img
@@ -19,7 +19,7 @@
     <div v-else>
       <!-- Store Header -->
       <div class="text-center mb-12">
-        <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-800 tracking-tight animate-fade-in">
+        <h1 class="text-3xl sm:text-5xl font-extrabold text-gray-800 tracking-tight animate-fade-in">
           {{ storeName }}
         </h1>
       </div>

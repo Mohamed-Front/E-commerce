@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-auto px-4 max-w-7xl">
+  <div class="mx-auto max-w-7xl">
     <div class="flex items-center justify-between">
       <h2 class="font-bold font-sans text-gray-800 lg:mt-4 xs:mt-2 xs:text-lg sm:text-xl md:text-2xl lg:text-3xl">
         {{ products.title }}
@@ -60,11 +60,11 @@
             </svg>
           </button>
         </div>
-        <p class="font-sans mt-4 mx-3 text-gray-800 font-medium xs:text-sm sm:text-base md:text-lg  w-full">
+        <p class="font-sans mt-4 mx-3 text-gray-800 font-medium xs:text-sm sm:text-base md:text-lg w-full">
           {{ truncateName(pro.name, 30) }}
         </p>
 
-        <p v-if="pro.sub_name" class="font-sans mx-3 text-gray-600 text-sm  w-full">
+        <p v-if="pro.sub_name" class="font-sans mx-3 text-gray-600 text-sm w-full">
           {{ pro.sub_name.slice(0, 37) }}
         </p>
         <div class="flex items-center w-full justify-between mx-3 mt-auto">
@@ -74,12 +74,41 @@
 
           <button
             v-if="authStore.authenticatedweb"
-            class="p-2 rounded-full mx-6 bg-gray-100 text-[#A6853B] hover:bg-[#A6853B] hover:text-white transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#A6853B] focus:ring-offset-2"
+            class="p-2 rounded-full mx-6 bg-gray-100 text-[#A6853B] transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#A6853B] focus:ring-offset-2"
+            :class="{
+              'hover:bg-[#A6853B] hover:text-white': !pro.in_cart && pro.is_stock !== 1,
+              'bg-gray-300 text-gray-500 cursor-not-allowed': pro.is_stock === 1,
+
+            }"
+            :disabled="pro.is_stock === 1"
             @click.stop="addToCart(pro)"
-            aria-label="Add to cart"
+            :aria-label="pro.in_cart ? 'In cart' : pro.is_stock === 1 ? 'Out of stock' : 'Add to cart'"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.182 1.708.707 1.708H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            <svg
+              v-if="pro.in_cart"
+              class="w-5 h-5"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M9 16.2l-3.5-3.5a.984.984 0 0 0-1.4 0 .984.984 0 0 0 0 1.4l4.2 4.2c.39.39 1.01.39 1.4 0l8.4-8.4a.984.984 0 0 0 0-1.4.984.984 0 0 0-1.4 0L9 16.2z"
+              />
+            </svg>
+            <svg
+              v-else
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.182 1.708.707 1.708H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+              />
             </svg>
           </button>
         </div>
@@ -111,7 +140,15 @@ const props = defineProps({
         typeof products.title === 'string' &&
         Array.isArray(products.products) &&
         products.products.every(
-          (pro) => pro.id && pro.name && pro.sub_name && pro.price && pro.img && typeof pro.is_wished === 'boolean'
+          (pro) =>
+            pro.id &&
+            pro.name &&
+            typeof pro.sub_name === 'string' &&
+            pro.price &&
+            pro.img &&
+            typeof pro.is_wished === 'boolean' &&
+            typeof pro.in_cart === 'boolean' &&
+            typeof pro.is_stock === 'number'
         )
       );
     },
@@ -127,15 +164,15 @@ const addToCart = async (product) => {
 
   try {
     const payload = {
-      product_id: product.data.id,
+      product_id: product.id, // Adjusted to use pro.id directly
       variant_id: product.variant_id,
       quantity: 1,
     };
     const response = await axios.post('/api/cart/add', payload);
-    console.log('Added to cart successfully:', response.data);
-    alert('Product added to cart!');
+    product.in_cart = true; // Update local state
+
   } catch (error) {
-    console.error('Error adding to cart:', error);
+
   }
 };
 
@@ -149,7 +186,7 @@ const toggleFavorite = async (product) => {
   const isCurrentlyFavorited = product.is_wished;
   const method = isCurrentlyFavorited ? 'delete' : 'post';
   const url = isCurrentlyFavorited ? `/api/wishlists/${product.id}` : '/api/wishlists';
-  const payload = { product_id: product.data.id };
+  const payload = { product_id: product.id }; // Adjusted to use pro.id directly
 
   try {
     let response;
@@ -163,10 +200,11 @@ const toggleFavorite = async (product) => {
     product.is_wished = !isCurrentlyFavorited;
 
     console.log(`Product ${isCurrentlyFavorited ? 'removed from' : 'added to'} wishlist successfully:`, response.data);
+    alert(t(isCurrentlyFavorited ? 'wishlist.removed' : 'wishlist.added') || `Product ${isCurrentlyFavorited ? 'removed from' : 'added to'} wishlist!`);
   } catch (error) {
     console.error('Error toggling favorite status:', error);
-    // Revert the state if the API call fails
-    product.is_wished = isCurrentlyFavorited;
+    product.is_wished = isCurrentlyFavorited; // Revert on failure
+    alert(t('wishlist.error') || 'Failed to update wishlist.');
   }
 };
 

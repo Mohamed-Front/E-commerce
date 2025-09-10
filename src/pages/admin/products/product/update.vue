@@ -53,6 +53,7 @@ const productData = ref({
   cost_price: null,
   tax: 0,
   is_displayed: true,
+  is_stock: true, // Added is_stock field
   variants: []
 });
 
@@ -89,6 +90,7 @@ const fetchProduct = async () => {
       cost_price: data.cost_price || null,
       tax: data.tax || 0,
       is_displayed: data.is_displayed === 1,
+      is_stock: data.is_stock === 1, // Added is_stock field
       variants: data.variants.map(variant => ({
         id: variant.attribute_values[0]?.pivot?.attribute_value_id,
         sku: variant.sku || '',
@@ -342,6 +344,7 @@ const submitForm = async () => {
   formData.append('description_ar', productData.value.description_ar || '');
   formData.append('tax', productData.value.tax);
   formData.append('is_displayed', productData.value.is_displayed ? 1 : 0);
+  formData.append('is_stock', productData.value.is_stock ? 1 : 0); // Added is_stock field
   formData.append('base_price', productData.value.base_price);
   formData.append('cost_price', productData.value.cost_price || 0);
 
@@ -358,7 +361,7 @@ const submitForm = async () => {
   // Append variants if they exist
   if (hasVariants.value) {
     productData.value.variants.forEach((variant, index) => {
-      formData.append(`variants[${index}][attribute_value_id]`,variant.attribute_value_ids);
+      formData.append(`variants[${index}][attribute_value_id]`, variant.attribute_value_ids);
       formData.append(`variants[${index}][sku]`, variant.sku);
       formData.append(`variants[${index}][price]`, variant.price);
       if (Array.isArray(variant.attribute_value_ids)) {
@@ -598,6 +601,17 @@ const submitForm = async () => {
           />
         </div>
 
+        <!-- Stock Status -->
+        <div class="space-y-2">
+          <label for="is_stock" class="block text-sm font-medium text-gray-700">
+            {{ t('product.stockStatus') }}
+          </label>
+          <InputSwitch
+            id="is_stock"
+            v-model="productData.is_stock"
+          />
+        </div>
+
         <!-- Variants Toggle -->
         <div class="md:col-span-2 space-y-2">
           <div class="flex items-center">
@@ -605,7 +619,7 @@ const submitForm = async () => {
               v-model="hasVariants"
               inputId="hasVariants"
               :binary="true"
-              @click="toggleVariants"
+              @click="togglevariants"
               class="mr-2"
             />
             <label for="hasVariants" class="text-sm font-medium text-gray-700">

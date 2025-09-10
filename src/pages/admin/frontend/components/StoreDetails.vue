@@ -83,7 +83,7 @@
     </div>
 
     <!-- Categories Slider -->
-    <div class="mt-8 py-2 rounded-sm px-2 bg-[#1F3A932B] mx-auto max-w-7xl">
+    <div v-if="categories.length >1" class=" py-2 rounded-sm px-2 bg-[#1F3A932B] mx-auto max-w-7xl">
       <Swiper
         ref="categoriesSwiper"
         :modules="[Autoplay]"

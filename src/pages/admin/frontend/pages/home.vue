@@ -1,6 +1,6 @@
 <<template>
   <!-- main body -->
-  <main class="bg-[#FAF7F0] min-h-[100vh]">
+  <main class=" min-h-[100vh]">
     <header>
       <!-- products titles slider -->
       <swiper
@@ -12,7 +12,7 @@
         :speed="3000"
         :navigation="false"
         grab-cursor
-        class="titles-swiper h-[58px] mt-2"
+        class=" h-[58px] mt-2"
         :breakpoints="{
           0: { slidesPerView: 4 ,spaceBetween: 5 },
           480: { slidesPerView: 3,spaceBetween: 5  },

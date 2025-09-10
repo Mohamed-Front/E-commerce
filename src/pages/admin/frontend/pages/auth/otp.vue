@@ -1,45 +1,61 @@
 <template>
-  <div class="bg-gray-900 min-h-screen flex items-center justify-center p-4 overflow-hidden" dir="rtl">
+  <div
+    class="bg-gray-900 min-h-screen flex items-center justify-center p-4 overflow-hidden"
+    :dir="$i18n.locale === 'ar' ? 'rtl' : 'ltr'"
+  >
     <div class="bg-white rounded-3xl shadow-2xl p-6 w-full max-w-sm my-8 text-center">
       <div class="flex flex-col items-center mb-8">
         <img src="../../../../../assets/shiftlogo.png" alt="SHIFT7 Logo" class="h-16 w-16 object-contain" />
       </div>
 
       <div class="space-y-6">
-        <h2 class="text-2xl font-bold text-gray-800">ادخل الرمز المرسل</h2>
+        <h2 class="text-2xl font-bold text-gray-800">{{ t('otpVerification.title') }}</h2>
         <p class="text-sm text-gray-500">
-          تم إرسال رمز التحقق المكون من 6 أرقام
+          {{ t('otpVerification.otpSent') }}
         </p>
 
-        <div class="flex justify-center space-x-2 space-x-reverse">
+        <div class="flex justify-center space-x-2" :class="{ 'space-x-reverse': $i18n.locale === 'ar' }">
           <input
             v-for="(digit, index) in otpDigits"
             :key="index"
-            type="tel"
+            type="text"
             maxlength="1"
+            pattern="[0-9]"
             class="w-12 h-12 text-center text-xl font-bold rounded-xl bg-gray-100 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
             v-model="otpDigits[index]"
             @input="handleInput(index, $event)"
             @keydown.backspace="handleBackspace(index)"
             :ref="el => { if (el) otpInputs[index] = el; }"
+            :aria-label="t('otpVerification.otpDigit', { number: index + 1 })"
           />
         </div>
 
-        <div v-if="authStore.errors.length" class="text-red-500 text-sm text-right">
-          <p v-for="error in authStore.errors" :key="error">{{ error }}</p>
+        <div v-if="errors.length" class="text-red-500 text-sm" :class="{ 'text-right': $i18n.locale === 'ar', 'text-left': $i18n.locale !== 'ar' }">
+          <p v-for="error in errors" :key="error">{{ error }}</p>
         </div>
 
         <button
           @click="handleVerification"
           :disabled="authStore.loading"
           class="w-full mt-6 py-3 bg-blue-700 text-white font-bold rounded-xl shadow-lg hover:bg-blue-800 transition-colors duration-300 disabled:bg-gray-400"
+          :aria-label="t('otpVerification.verify')"
         >
-          {{ authStore.loading ? 'جاري التحقق...' : 'تحقق' }}
+          {{ authStore.loading ? t('otpVerification.verifying') : t('otpVerification.verify') }}
         </button>
 
         <div class="text-center text-sm text-gray-500 mt-4">
-          لم تتلق الرمز؟
-          <a href="#" @click.prevent="resendCode" class="text-blue-600 font-semibold hover:underline">إعادة إرسال الرمز</a>
+          {{ t('otpVerification.noCode') }}
+          <button
+            @click="resendCode"
+            :disabled="authStore.loading"
+            class="text-blue-600 font-semibold hover:underline"
+            :aria-label="t('otpVerification.resend')"
+          >
+            {{ authStore.loading ? t('otpVerification.resending') : t('otpVerification.resend') }}
+          </button>
+        </div>
+        <div v-if="authStore.successMsg" class="text-green-500 text-sm text-center mt-2">
+          {{ authStore.successMsg }}
         </div>
       </div>
     </div>
@@ -47,12 +63,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineProps } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../../../../../stores/WebAuth';
+import { useRouter, useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
+const { t, locale } = useI18n();
+const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
-const otpDigits = ref(['', '', '', '','','']);
+const otpDigits = ref(['', '', '', '', '', '']);
 const otpInputs = ref([]);
+const errors = ref([]);
 
 const props = defineProps({
   email: String,
@@ -61,26 +83,24 @@ const props = defineProps({
 });
 
 onMounted(() => {
-  // Log props to console when component is mounted
+  if (!props.email && !props.phone) {
+    errors.value = [t('otpVerification.invalidInfo')];
+    router.push({ name: 'authlog' });
+    return;
+  }
   console.log('OTP Page Props:', {
     email: props.email,
     phone: props.phone,
     otp_type: props.otp_type,
   });
-
   if (otpInputs.value.length > 0) {
     otpInputs.value[0].focus();
   }
 });
 
 const handleInput = (index, event) => {
-  const value = event.target.value;
-  if (value.length > 1) {
-    otpDigits.value[index] = value.slice(0, 1);
-  } else {
-    otpDigits.value[index] = value;
-  }
-
+  const value = event.target.value.replace(/[^0-9]/g, '');
+  otpDigits.value[index] = value.slice(0, 1);
   if (value && index < otpDigits.value.length - 1) {
     otpInputs.value[index + 1].focus();
   }
@@ -93,51 +113,53 @@ const handleBackspace = (index) => {
 };
 
 const handleVerification = async () => {
+  errors.value = [];
   const otp = otpDigits.value.join('');
-  // Log props to console during verification
   console.log('Verifying OTP with Props:', {
     email: props.email,
     phone: props.phone,
     otp_type: props.otp_type,
     otp,
   });
-
-  if (otp) {
-    try {
-      await authStore.verifyEmail({
-        email: props.email,
-        phone: props.phone,
-        otp,
-      });
-      // Navigation is handled in the store
-    } catch (error) {
-      console.error('OTP Verification failed:', error);
-    }
-  } else {
-    authStore.authErrors = ['الرجاء إدخال رمز تحقق مكون من 6 أرقام.'];
+  if (otp.length !== 6 || !/^\d{6}$/.test(otp)) {
+    errors.value = [t('otpVerification.invalidOtp')];
+    return;
+  }
+  const result = await authStore.verifyEmail({
+    email: props.email,
+    phone: props.phone,
+    otp,
+  });
+  if (!result.is_success) {
+    errors.value = result.errors;
   }
 };
 
 const resendCode = async () => {
-  // Log props to console during resend
+  errors.value = [];
   console.log('Resending Code with Props:', {
     email: props.email,
     phone: props.phone,
     otp_type: props.otp_type,
   });
-
-  try {
-    await authStore.resendOtp({
-      email: props.email,
-      phone: props.phone,
-      otp_type: props.otp_type,
-    });
-  } catch (error) {
-    console.error('Resend OTP failed:', error);
+  const result = await authStore.resendOtp({
+    email: props.email,
+    phone: props.phone,
+    otp_type: props.otp_type,
+  });
+  if (!result.is_success) {
+    errors.value = result.errors;
   }
 };
 </script>
 
 <style scoped>
-/* Tailwind CSS is already included in the template classes */
+/* Ensure RTL/LTR text alignment for error messages */
+[dir="rtl"] .text-right {
+  text-align: right;
+}
+
+[dir="ltr"] .text-left {
+  text-align: left;
+}
 </style>

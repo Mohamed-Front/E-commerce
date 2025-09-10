@@ -18,7 +18,7 @@
     <transition name="dropdown-fancy">
       <div
         v-if="isNotificationsOpen"
-        class="absolute top-full rtl:left-0  mt-2 w-64 bg-white rounded-xl shadow-2xl z-50 overflow-hidden dropdown-fancy"
+        class="absolute top-full rtl:left-0 ltr:right-0  mt-2 w-64 bg-white rounded-xl shadow-2xl z-50 overflow-hidden dropdown-fancy"
         ref="notificationsDropdown"
       >
         <div class="px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-amber-50 to-amber-100">

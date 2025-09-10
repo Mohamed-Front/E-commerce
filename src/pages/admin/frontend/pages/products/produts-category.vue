@@ -1,8 +1,7 @@
-```vue
 <template>
   <div class="mx-auto mt-16 max-w-7xl px-4 sm:px-6 lg:px-8 pb-16">
     <!-- Loading State -->
-    <div v-if="isLoading" class="flex flex-col items-center justify-center py-16  rounded-xl animate-pulse">
+    <div v-if="isLoading" class="flex flex-col items-center justify-center py-16 rounded-xl animate-pulse">
       <img
         src="../../../../../assets/shiftlogo.png"
         alt="Loading Logo"
@@ -36,7 +35,8 @@
               v-if="authStore.authenticatedweb"
               class="absolute top-2 right-2 p-2 rounded-full bg-white text-gray-500 hover:text-red-500 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 z-10"
               @click.stop="toggleFavorite(pro)"
-              aria-label="Add to wishlist"
+              :aria-label="pro.is_wished ? t('wishlist.remove') : t('wishlist.add')"
+              :title="pro.is_wished ? t('wishlist.remove') : t('wishlist.add')"
             >
               <svg
                 class="w-5 h-5"
@@ -52,7 +52,7 @@
             </button>
           </div>
           <div class="p-4 w-full">
-            <p class="font-sans text-gray-800 font-medium text-base line-clamp-2 ">
+            <p class="font-sans text-gray-800 font-medium text-base line-clamp-2">
               {{ truncateName(pro.name, 30) }}
             </p>
             <p v-if="pro.sub_name" class="font-sans text-gray-600 text-sm line-clamp-1 mt-1">
@@ -60,16 +60,45 @@
             </p>
             <div class="flex items-center w-full justify-between mt-1">
               <span class="font-sans text-[#A6853B] font-semibold text-lg">
-                ${{ pro.price }}
+                ${{ pro.price }} {{ $t('currencyLabel') }}
               </span>
               <button
                 v-if="authStore.authenticatedweb"
-                class="p-2 rounded-full bg-gray-100 text-[#A6853B] hover:bg-[#A6853B] hover:text-white transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#A6853B] focus:ring-offset-2"
+                class="p-2 rounded-full bg-gray-100 text-[#A6853B] transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#A6853B] focus:ring-offset-2"
+                :class="{
+                  'hover:bg-[#A6853B] hover:text-white': !pro.in_cart && !pro.isOutOfStock,
+                  'bg-gray-300 text-gray-500 cursor-not-allowed': pro.isOutOfStock || pro.in_cart,
+                }"
+                :disabled="pro.isOutOfStock || pro.in_cart"
                 @click.stop="addToCart(pro)"
-                aria-label="Add to cart"
+                :aria-label="pro.in_cart ? t('cart.inCart') : pro.isOutOfStock ? t('cart.outOfStock') : t('cart.addToCart')"
+                :title="pro.in_cart ? t('cart.inCart') : pro.isOutOfStock ? t('cart.outOfStock') : t('cart.addToCart')"
               >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.182 1.708.707 1.708H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                <svg
+                  v-if="pro.in_cart"
+                  class="w-5 h-5"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M9 16.2l-3.5-3.5a.984.984 0 0 0-1.4 0 .984.984 0 0 0 0 1.4l4.2 4.2c.39.39 1.01.39 1.4 0l8.4-8.4a.984.984 0 0 0 0-1.4.984.984 0 0 0-1.4 0L9 16.2z"
+                  />
+                </svg>
+                <svg
+                  v-else
+                  class="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.182 1.708.707 1.708H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
                 </svg>
               </button>
             </div>
@@ -146,6 +175,9 @@ const fetchProducts = async (page = 1) => {
         price: parseFloat(product.base_price || 0).toFixed(2),
         img: product.media?.find(media => media.name === 'product_main_image')?.url || product.key_default_image || defaultProductImage,
         is_wished: product.is_wished || false,
+        in_cart: product.in_cart || false, // Add in_cart
+        is_stock: product.is_stock || 0,   // Add is_stock
+        isOutOfStock: product.is_stock === 0, // 0 means out of stock
         variant_id: product.variant_id || null,
       })),
     };
@@ -177,18 +209,22 @@ const addToCart = async (product) => {
     return;
   }
 
+  if (product.isOutOfStock || product.in_cart) return; // Prevent adding out-of-stock or already in-cart items
+
   try {
     const payload = {
       product_id: product.id,
-      variant_id: product.variant_id,
+      variant_id: product.variant_id || null,
       quantity: 1,
     };
     const response = await axios.post('/api/cart/add', payload);
-    console.log('Added to cart successfully:', response.data);
-    alert('Product added to cart!');
+    if (response.status === 200) {
+      product.in_cart = true; // Update local state
+      alert(t('cart.added') || 'Product added to cart!');
+    }
   } catch (error) {
     console.error('Error adding to cart:', error);
-    alert('Failed to add product to cart.');
+    alert(t('cart.error') || 'Failed to add product to cart.');
   }
 };
 
@@ -212,14 +248,14 @@ const toggleFavorite = async (product) => {
       response = await axios.delete(url, { data: payload });
     }
 
-    // Update the is_wished property
-    product.is_wished = !isCurrentlyFavorited;
-    console.log(`Product ${isCurrentlyFavorited ? 'removed from' : 'added to'} wishlist successfully:`, response.data);
+    if (response.status === 200 || response.status === 204) {
+      product.is_wished = !isCurrentlyFavorited;
+      alert(t(isCurrentlyFavorited ? 'wishlist.removed' : 'wishlist.added') || `Product ${isCurrentlyFavorited ? 'removed from' : 'added to'} wishlist!`);
+    }
   } catch (error) {
     console.error('Error toggling favorite status:', error);
-    // Revert the state if the API call fails
-    product.is_wished = isCurrentlyFavorited;
-    alert('Failed to update wishlist.');
+    product.is_wished = isCurrentlyFavorited; // Revert on failure
+    alert(t('wishlist.error') || 'Failed to update wishlist.');
   }
 };
 
@@ -366,4 +402,3 @@ onUnmounted(() => {
   }
 }
 </style>
-```
