@@ -53,6 +53,7 @@
 
         <!-- Right Icons -->
         <div class="flex items-center gap-2">
+          <Notifications />
           <span class="icon-container bg-[#F2EDDE] cursor-pointer hover:bg-gray-200 transition-colors" @click="toggleLang">
             <svg width="8" height="12" viewBox="0 0 9 13" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M0.509563 12.5V0.579999H8.18956V1.78H1.78956V5.924H7.86956V7.124H1.78956V11.3H8.18956V12.5H0.509563Z" fill="black"/>
@@ -150,6 +151,7 @@
           <span @click="router.push({ name: 'favorites' })" class="icon-container bg-[#F2EDDE] cursor-pointer hover:bg-gray-200 transition-colors">
             <i class="fa-solid fa-heart text-black"></i>
           </span>
+          <Notifications />
           <span class="icon-container bg-[#F2EDDE] cursor-pointer hover:bg-gray-200 transition-colors" @click="toggleLang">
             <svg width="9" height="13" viewBox="0 0 9 13" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M0.509563 12.5V0.579999H8.18956V1.78H1.78956V5.924H7.86956V7.124H1.78956V11.3H8.18956V12.5H0.509563Z" fill="black"/>
@@ -195,6 +197,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { ref, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '../../../../stores/WebAuth';
+import Notifications from './Notification.vue';
 
 const authStore = useAuthStore();
 const stores = ref([]);
@@ -290,14 +293,13 @@ const UserPage = () => {
 };
 
 const logout = () => {
-     authStore.handleLogout()
+  authStore.handleLogout();
 };
 
 // Click outside handler
 const handleClickOutside = (event) => {
   // Check if click is outside stores dropdown
   if (isDropdownOpen.value && storesDropdown.value && !storesDropdown.value.contains(event.target)) {
-    // Check if click is on the store icon
     const storeIcon = event.target.closest('.icon-container');
     if (!storeIcon || !storeIcon.querySelector('.fa-store')) {
       isDropdownOpen.value = false;
@@ -306,7 +308,6 @@ const handleClickOutside = (event) => {
 
   // Check if click is outside user dropdown (desktop)
   if (isUserDropdownOpen.value && userDropdownDesktop.value && !userDropdownDesktop.value.contains(event.target)) {
-    // Check if click is on the user icon
     const userIcon = event.target.closest('.icon-container');
     if (!userIcon || !userIcon.querySelector('svg')) {
       isUserDropdownOpen.value = false;

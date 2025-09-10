@@ -8,6 +8,8 @@
   import Button from 'primevue/button'
   import Card from 'primevue/card'
   import ProgressSpinner from 'primevue/progressspinner'
+  import Editor from 'primevue/editor'
+  import FileUpload from 'primevue/fileupload' // Added PrimeVue FileUpload import
 
   // Main declarations
   const { t } = useI18n()
@@ -19,10 +21,36 @@
   // Form data for updates
   const formData = ref({
     order_tax: '',
-
     address: '',
-    phone: ''
+    phone: '',
+    privacy_policy_ar: '',
+    privacy_policy_en: '',
+
   })
+
+  // Editor configuration
+  const editorOptions = {
+    toolbar: [
+      ['bold', 'italic', 'underline'],
+      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+      ['link'],
+      ['clean']
+    ]
+  }
+
+  // Handle file upload
+  const onFileSelect = (event, key) => {
+    const file = event.files[0] // Get the first file
+    if (file) {
+      formData.value[`${key}_file`] = file
+      toast.add({
+        severity: 'info',
+        summary: 'File Selected',
+        detail: `${file.name} selected for ${t(`settings.${key}`)}`,
+        life: 3000,
+      })
+    }
+  }
 
   // Fetch settings on mount
   onMounted(() => {
@@ -72,13 +100,32 @@
   const updateSettings = async () => {
     isLoading.value = true
     try {
+      // Prepare form data for file upload
+      const formDataToSend = new FormData()
       const settingsToUpdate = Object.entries(formData.value).map(([key, value]) => ({
         key,
-        value
+        value: key.includes('_file') ? value : value // Handle file separately
       }))
 
-      const response = await axios.post('api/setting', {
-        data: settingsToUpdate
+      // Append text fields
+      settingsToUpdate.forEach(item => {
+        if (!item.key.includes('_file')) {
+          formDataToSend.append(`data[${item.key}]`, item.value)
+        }
+      })
+
+      // Append files if they exist
+      if (formData.value.privacy_policy_ar_file) {
+        formDataToSend.append('privacy_policy_ar_file', formData.value.privacy_policy_ar_file)
+      }
+      if (formData.value.privacy_policy_en_file) {
+        formDataToSend.append('privacy_policy_en_file', formData.value.privacy_policy_en_file)
+      }
+
+      const response = await axios.post('api/setting', formDataToSend, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
       })
 
       if (response.data.is_success) {
@@ -88,6 +135,9 @@
           detail: t('quickBooks.updateSuccess'),
           life: 3000,
         })
+        // Clear file inputs after successful upload
+        formData.value.privacy_policy_ar_file = null
+        formData.value.privacy_policy_en_file = null
         await fetchSettings() // Refresh settings after update
       }
     } catch (error) {
@@ -104,7 +154,7 @@
 </script>
 
 <template>
-  <div class=" mx-auto p-4">
+  <div class="mx-auto p-4">
     <Card class="max-w-5xl mx-auto">
       <template #title>
         {{ t('settings.title') }}
@@ -116,11 +166,39 @@
               {{ t(`settings.${key}`) }}
             </label>
             <InputText
+              v-if="key !== 'privacy_policy_ar' && key !== 'privacy_policy_en' && !key.includes('_file')"
               :id="key"
               v-model="formData[key]"
               :placeholder="t(`settings.${key}Placeholder`)"
               class="w-full"
             />
+            <Editor
+              v-else-if="key === 'privacy_policy_ar' || key === 'privacy_policy_en'"
+              :id="key"
+              v-model="formData[key]"
+              :placeholder="t(`settings.${key}Placeholder`)"
+              editorStyle="min-height: 200px"
+              class="w-full"
+            >
+              <template #toolbar>
+                <span class="ql-formats">
+                  <button class="ql-bold"></button>
+                  <button class="ql-italic"></button>
+                  <button class="ql-underline"></button>
+                </span>
+                <span class="ql-formats">
+                  <button class="ql-list" value="ordered"></button>
+                  <button class="ql-list" value="bullet"></button>
+                </span>
+                <span class="ql-formats">
+                  <button class="ql-link"></button>
+                </span>
+                <span class="ql-formats">
+                  <button class="ql-clean"></button>
+                </span>
+              </template>
+            </Editor>
+
           </div>
           <Button
             :label="t('settings.updateButton')"
@@ -143,5 +221,11 @@
 }
 .field {
   margin-bottom: 1rem;
+}
+:deep(.p-editor-container .p-editor-content) {
+  min-height: 200px;
+}
+:deep(.p-fileupload-choose) {
+  width: 100%;
 }
 </style>
