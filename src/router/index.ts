@@ -437,7 +437,11 @@ const routes: Array<RouteRecordRaw> = [
             path: 'shipping-update/:id',
             component: () => import('../pages/admin/shipping-setting/update.vue'),
           },
-
+         {
+            name: 'media-links',
+            path: 'media-links/:id/:type',
+            component: () => import('../pages/admin/store/mediaLinks.vue'),
+          },
 
 
             {
