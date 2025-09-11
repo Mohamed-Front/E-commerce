@@ -9,7 +9,7 @@
   import Card from 'primevue/card'
   import ProgressSpinner from 'primevue/progressspinner'
   import Editor from 'primevue/editor'
-  import FileUpload from 'primevue/fileupload' // Added PrimeVue FileUpload import
+  import FileUpload from 'primevue/fileupload'
 
   // Main declarations
   const { t } = useI18n()
@@ -25,7 +25,6 @@
     phone: '',
     privacy_policy_ar: '',
     privacy_policy_en: '',
-
   })
 
   // Editor configuration
@@ -100,18 +99,16 @@
   const updateSettings = async () => {
     isLoading.value = true
     try {
-      // Prepare form data for file upload
+      // Prepare form data for submission
       const formDataToSend = new FormData()
-      const settingsToUpdate = Object.entries(formData.value).map(([key, value]) => ({
-        key,
-        value: key.includes('_file') ? value : value // Handle file separately
-      }))
+      const settingsToUpdate = Object.entries(formData.value)
+        .filter(([key]) => !key.includes('_file')) // Exclude file fields
+        .map(([key, value], index) => ({ key, value }))
 
-      // Append text fields
-      settingsToUpdate.forEach(item => {
-        if (!item.key.includes('_file')) {
-          formDataToSend.append(`data[${item.key}]`, item.value)
-        }
+      // Append text fields with key and value structure
+      settingsToUpdate.forEach((item, index) => {
+        formDataToSend.append(`data[${index}][key]`, item.key)
+        formDataToSend.append(`data[${index}][value]`, item.value)
       })
 
       // Append files if they exist
@@ -198,7 +195,6 @@
                 </span>
               </template>
             </Editor>
-
           </div>
           <Button
             :label="t('settings.updateButton')"
