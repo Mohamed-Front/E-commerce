@@ -1,4 +1,3 @@
-```vue
 <template>
   <div class="product-page max-w-7xl mx-auto p-4 lg:p-8">
     <div v-if="isLoading" class="text-center">
@@ -133,10 +132,15 @@
     <!-- Product Description Section -->
     <section v-if="!isLoading && !error" class="bg-[#E6AC312B] px-6 pt-2 pb-12 rounded-md mt-8">
       <p class="leading-relaxed text-sm text-gray-700">
-        {{ locale === 'en' ? pro.description_en : pro.description_ar || t('product.noDescription') }}
+        {{ showFullDescription ? fullDescription : truncatedDescription }}
       </p>
-      <h3 class="text-[#E39F30] text-sm font-semibold mt-2 cursor-pointer">
-        {{ t('product.readMore') }}
+
+      <h3
+        v-if="isDescriptionLong"
+        @click="toggleDescription"
+        class="text-[#E39F30] text-sm font-semibold mt-2 cursor-pointer"
+      >
+        {{ showFullDescription ? t('product.readLess') : t('product.readMore') }}
       </h3>
     </section>
 
@@ -259,6 +263,7 @@ const newReview = ref({
   rating: 0,
   comment: ''
 });
+const showFullDescription = ref(false);
 
 // Computed properties
 const displayedReviews = computed(() => {
@@ -285,6 +290,23 @@ const allreviews = computed(() => {
       ? Math.round((distribution[stars] / reviews.value.length) * 100)
       : 0
   }));
+});
+
+const fullDescription = computed(() => {
+  return locale.value === 'en' ? pro.value.description_en : pro.value.description_ar || t('product.noDescription');
+});
+
+const descriptionLength = computed(() => {
+  return fullDescription.value.length;
+});
+
+const isDescriptionLong = computed(() => {
+  return descriptionLength.value > 200;
+});
+
+const truncatedDescription = computed(() => {
+  if (!isDescriptionLong.value) return fullDescription.value;
+  return fullDescription.value.slice(0, 200) + '...';
 });
 
 // Navigation functions
@@ -395,6 +417,11 @@ const updateQuantity = async (type) => {
 // Image handling
 const changeImg = (imgUrl) => {
   currentImg.value = imgUrl;
+};
+
+// Toggle description
+const toggleDescription = () => {
+  showFullDescription.value = !showFullDescription.value;
 };
 
 // Date formatting
@@ -526,4 +553,3 @@ onMounted(() => {
   color: #E39F30;
 }
 </style>
-```

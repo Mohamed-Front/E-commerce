@@ -25,6 +25,8 @@ const categories = ref([]);
 const brands = ref([]);
 const attributes = ref([]);
 const hasVariants = ref(false);
+const categorySearchQuery = ref(''); // New: Search query for categories
+const brandSearchQuery = ref(''); // New: Search query for brands
 
 // Image handling
 const mainImage = ref(null);
@@ -53,7 +55,7 @@ const productData = ref({
   cost_price: null,
   tax: 0,
   is_displayed: true,
-  is_stock: true, // Added is_stock field
+  is_stock: true,
   variants: []
 });
 
@@ -74,7 +76,10 @@ const fetchProduct = async () => {
   try {
     const response = await axios.get(`/api/product/${route.params.id}`);
     const data = response.data.data;
-
+    brandSearchQuery.value = data.brand.name_ar;
+    categorySearchQuery.value=data.category.name_ar
+    fetchCategories()
+    fetchBrands();
     productData.value = {
       store_id: data.store_id,
       category_id: data.category_id,
@@ -90,7 +95,7 @@ const fetchProduct = async () => {
       cost_price: data.cost_price || null,
       tax: data.tax || 0,
       is_displayed: data.is_displayed === 1,
-      is_stock: data.is_stock === 1, // Added is_stock field
+      is_stock: data.is_stock === 1,
       variants: data.variants.map(variant => ({
         id: variant.attribute_values[0]?.pivot?.attribute_value_id,
         sku: variant.sku || '',
@@ -103,7 +108,6 @@ const fetchProduct = async () => {
 
     hasVariants.value = data.has_variants;
 
-    // Set image previews if available
     if (data.media && data.media.length > 0) {
       mainImagePreview.value = data.media[0].url;
       if (data.media.length > 1) {
@@ -127,7 +131,11 @@ const fetchStores = async () => {
 
 const fetchCategories = async () => {
   try {
-    const response = await axios.get('/api/category');
+    const response = await axios.get('/api/category', {
+      params: {
+        search: categorySearchQuery.value || undefined
+      }
+    });
     categories.value = response.data.data.data;
   } catch (error) {
     toast.add({ severity: 'error', summary: t('error'), detail: t('error.categoryLoad'), life: 3000 });
@@ -136,7 +144,11 @@ const fetchCategories = async () => {
 
 const fetchBrands = async () => {
   try {
-    const response = await axios.get('/api/brand');
+    const response = await axios.get('/api/brand', {
+      params: {
+        search: brandSearchQuery.value || undefined
+      }
+    });
     brands.value = response.data.data.data;
   } catch (error) {
     toast.add({ severity: 'error', summary: t('error'), detail: t('error.brandLoad'), life: 3000 });
@@ -152,10 +164,21 @@ const fetchAttributes = async () => {
   }
 };
 
+// Handle category filter input
+const onCategoryFilter = (event) => {
+  categorySearchQuery.value = event.value;
+  fetchCategories();
+};
+
+// Handle brand filter input
+const onBrandFilter = (event) => {
+  brandSearchQuery.value = event.value;
+  fetchBrands();
+};
+
 onMounted(() => {
   fetchStores();
-  fetchCategories();
-  fetchBrands();
+
   fetchAttributes();
   fetchProduct();
 });
@@ -344,7 +367,7 @@ const submitForm = async () => {
   formData.append('description_ar', productData.value.description_ar || '');
   formData.append('tax', productData.value.tax);
   formData.append('is_displayed', productData.value.is_displayed ? 1 : 0);
-  formData.append('is_stock', productData.value.is_stock ? 1 : 0); // Added is_stock field
+  formData.append('is_stock', productData.value.is_stock ? 1 : 0);
   formData.append('base_price', productData.value.base_price);
   formData.append('cost_price', productData.value.cost_price || 0);
 
@@ -433,6 +456,8 @@ const submitForm = async () => {
             optionValue="id"
             class="w-full"
             :class="{ 'p-invalid': !productData.category_id }"
+            filterPlaceholder="Search categories"
+            @filter="onCategoryFilter"
           />
         </div>
 
@@ -450,6 +475,8 @@ const submitForm = async () => {
             optionValue="id"
             class="w-full"
             :class="{ 'p-invalid': !productData.brand_id }"
+            filterPlaceholder="Search brands"
+            @filter="onBrandFilter"
           />
         </div>
 
@@ -619,7 +646,7 @@ const submitForm = async () => {
               v-model="hasVariants"
               inputId="hasVariants"
               :binary="true"
-              @click="togglevariants"
+              @click="toggleVariants"
               class="mr-2"
             />
             <label for="hasVariants" class="text-sm font-medium text-gray-700">

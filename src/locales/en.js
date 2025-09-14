@@ -775,7 +775,7 @@ export default {
   "to": "to",
   "from": "of",
   "edit": "Edit",
-  "currencyLabel": "Jor",
+  "currencyLabel": "JOD",
   show: 'Showing',
   to: 'to',
   from: 'of',

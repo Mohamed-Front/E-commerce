@@ -14,7 +14,7 @@
         <!-- Exclusive_offers -->
         <productsSwiper v-if="exclusive_offers.length >=1" :products="exclusive_offers" />
         <!-- best_seller -->
-        <productsSwiper v-if="Best_seller.length >=1" :products="Best_seller" />
+        <productsSwiper  :products="Best_seller" />
         <!-- New_arrival -->
         <productsSwiper :products="New_arrival" />
 
