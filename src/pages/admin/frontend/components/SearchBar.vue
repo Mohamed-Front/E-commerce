@@ -5,7 +5,7 @@
       v-model="searchQuery"
       class="flex-grow bg-transparent lg:w-[400px] text-sm placeholder-gray-400 focus:outline-none"
       type="text"
-      placeholder="Search..."
+      :placeholder="t('search.placeholder')"
       @input="handleSearch"
       @focus="showResults"
       @blur="hideResultsWithDelay"
@@ -23,9 +23,9 @@
           @click="goToResult('product', result)"
           class="flex items-center px-4 py-3 transition-all duration-300 cursor-pointer dropdown-item hover:bg-amber-50"
         >
-          <div v-if="result.key_default_image" class="w-8 h-8 flex items-center justify-center overflow-hidden rounded-sm bg-gray-100 mr-2">
+          <div v-if="result.key_default_image || (result.media && result.media.length)" class="w-8 h-8 flex items-center justify-center overflow-hidden rounded-sm bg-gray-100 mx-2">
             <img
-              :src="result.key_default_image"
+              :src="result.key_default_image || result.media[0].url"
               :alt="displayName(result)"
               class="max-w-full max-h-full object-contain"
             />
@@ -33,8 +33,13 @@
           <div v-else class="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-sm mr-2">
             <i class="fa-solid fa-box text-gray-400"></i>
           </div>
-          <span class="flex-grow text-sm text-gray-700 font-medium">{{ displayName(result) }}</span>
-          <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">Product</span>
+          <span class="flex-grow text-sm text-gray-700 font-medium">
+            <template v-for="(part, index) in highlightMatch(result)" :key="index">
+              <span v-if="part.isMatch" class="bg-yellow-200">{{ part.text }}</span>
+              <span v-else>{{ part.text }}</span>
+            </template>
+          </span>
+          <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">{{ t('search.product') }}</span>
         </div>
         <!-- Categories -->
         <div
@@ -43,11 +48,23 @@
           @click="goToResult('category', result)"
           class="flex items-center px-4 py-3 transition-all duration-300 cursor-pointer dropdown-item hover:bg-amber-50"
         >
-          <div class="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-sm mr-2">
+          <div v-if="result.media && result.media.length" class="w-8 h-8 flex items-center justify-center overflow-hidden rounded-sm bg-gray-100 mx-2">
+            <img
+              :src="result.media[0].url"
+              :alt="displayName(result)"
+              class="max-w-full max-h-full object-contain"
+            />
+          </div>
+          <div v-else class="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-sm mr-2">
             <i class="fa-solid fa-folder text-gray-400"></i>
           </div>
-          <span class="flex-grow text-sm text-gray-700 font-medium">{{ displayName(result) }}</span>
-          <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">Category</span>
+          <span class="flex-grow text-sm text-gray-700 font-medium">
+            <template v-for="(part, index) in highlightMatch(result)" :key="index">
+              <span v-if="part.isMatch" class="bg-yellow-200">{{ part.text }}</span>
+              <span v-else>{{ part.text }}</span>
+            </template>
+          </span>
+          <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">{{ t('search.category') }}</span>
         </div>
         <!-- Brands -->
         <div
@@ -56,11 +73,23 @@
           @click="goToResult('brand', result)"
           class="flex items-center px-4 py-3 transition-all duration-300 cursor-pointer dropdown-item hover:bg-amber-50"
         >
-          <div class="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-sm mr-2">
+          <div v-if="result.media && result.media.length" class="w-8 h-8 flex items-center justify-center overflow-hidden rounded-sm bg-gray-100 mx-2">
+            <img
+              :src="result.media[0].url"
+              :alt="displayName(result)"
+              class="max-w-full max-h-full object-contain"
+            />
+          </div>
+          <div v-else class="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-sm mr-2">
             <i class="fa-solid fa-tag text-gray-400"></i>
           </div>
-          <span class="flex-grow text-sm text-gray-700 font-medium">{{ displayName(result) }}</span>
-          <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">Brand</span>
+          <span class="flex-grow text-sm text-gray-700 font-medium">
+            <template v-for="(part, index) in highlightMatch(result)" :key="index">
+              <span v-if="part.isMatch" class="bg-yellow-200">{{ part.text }}</span>
+              <span v-else>{{ part.text }}</span>
+            </template>
+          </span>
+          <span class="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">{{ t('search.brand') }}</span>
         </div>
       </div>
     </transition>
@@ -69,10 +98,11 @@
 
 <script setup>
 import { ref, onUnmounted, computed } from 'vue';
-import { useRouter } from "vue-router";
-
+import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import axios from 'axios';
 
+const { t } = useI18n();
 const searchQuery = ref('');
 const searchResults = ref({
   products: [],
@@ -88,6 +118,29 @@ const displayName = computed(() => {
   const lang = localStorage.getItem('appLang') || 'en';
   return (result) => (lang === 'ar' ? result.name_ar : result.name_en) || 'Unnamed';
 });
+
+// Function to highlight the matched search query in the result name
+const highlightMatch = (result) => {
+  const name = displayName.value(result);
+  const query = searchQuery.value.trim();
+  if (!query) return [{ text: name, isMatch: false }];
+
+  const lowerName = name.toLowerCase();
+  const lowerQuery = query.toLowerCase();
+  const index = lowerName.indexOf(lowerQuery);
+
+  if (index === -1) return [{ text: name, isMatch: false }];
+
+  const before = name.slice(0, index);
+  const match = name.slice(index, index + query.length);
+  const after = name.slice(index + query.length);
+
+  return [
+    ...(before ? [{ text: before, isMatch: false }] : []),
+    { text: match, isMatch: true },
+    ...(after ? [{ text: after, isMatch: false }] : [])
+  ];
+};
 
 const handleSearch = async () => {
   clearTimeout(searchTimeout);
@@ -127,14 +180,12 @@ const hideResultsWithDelay = () => {
 };
 
 const goToResult = (type, result) => {
-  console.log(result)
   showSearchResults.value = false;
   searchQuery.value = '';
   searchResults.value = { products: [], categories: [], brands: [] };
 
   if (type === 'product') {
-     router.push({name:'Product-details',params:{id:result.id}})
-
+    router.push({ name: 'Product-details', params: { id: result.id } });
   } else if (type === 'category') {
     if (result.has_subcategories) {
       router.push({ name: 'subcategory', params: { id: result.id } });

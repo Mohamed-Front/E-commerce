@@ -1,7 +1,7 @@
 <template>
   <div
     class="bg-gray-900 min-h-screen flex items-center justify-center p-4 overflow-hidden"
-    :dir="$i18n.locale === 'ar' ? 'rtl' : 'ltr'"
+    dir="rtl"
   >
     <div class="bg-white rounded-3xl shadow-2xl p-6 w-full max-w-sm my-8 text-center">
       <div class="flex flex-col items-center mb-8">
@@ -14,7 +14,7 @@
           {{ t('otpVerification.otpSent') }}
         </p>
 
-        <div class="flex justify-center space-x-2" :class="{ 'space-x-reverse': $i18n.locale === 'ar' }">
+        <div class="flex justify-center space-x-2 space-x-reverse">
           <input
             v-for="(digit, index) in otpDigits"
             :key="index"
@@ -30,8 +30,8 @@
           />
         </div>
 
-        <div v-if="errors.length" class="text-red-500 text-sm" :class="{ 'text-right': $i18n.locale === 'ar', 'text-left': $i18n.locale !== 'ar' }">
-          <p v-for="error in errors" :key="error">{{ error }}</p>
+        <div v-if="errors.length" class="text-red-500 text-sm w-full text-center">
+          <p class="text-red-500 text-sm w-full text-center" v-for="error in errors" :key="error">{{ error }}</p>
         </div>
 
         <button
@@ -43,7 +43,7 @@
           {{ authStore.loading ? t('otpVerification.verifying') : t('otpVerification.verify') }}
         </button>
 
-        <div class="text-center text-sm text-gray-500 mt-4">
+        <div class="text-sm text-gray-500 mt-4">
           {{ t('otpVerification.noCode') }}
           <button
             @click="resendCode"
@@ -54,7 +54,7 @@
             {{ authStore.loading ? t('otpVerification.resending') : t('otpVerification.resend') }}
           </button>
         </div>
-        <div v-if="authStore.successMsg" class="text-green-500 text-sm text-center mt-2">
+        <div v-if="authStore.successMsg" class="text-green-500 text-sm mt-2">
           {{ authStore.successMsg }}
         </div>
       </div>
@@ -68,7 +68,7 @@ import { useAuthStore } from '../../../../../stores/WebAuth';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
@@ -154,12 +154,8 @@ const resendCode = async () => {
 </script>
 
 <style scoped>
-/* Ensure RTL/LTR text alignment for error messages */
-[dir="rtl"] .text-right {
+/* Ensure RTL text alignment for all text elements */
+.text-right {
   text-align: right;
-}
-
-[dir="ltr"] .text-left {
-  text-align: left;
 }
 </style>
