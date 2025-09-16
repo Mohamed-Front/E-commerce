@@ -76,8 +76,8 @@ const fetchProduct = async () => {
   try {
     const response = await axios.get(`/api/product/${route.params.id}`);
     const data = response.data.data;
-    brandSearchQuery.value = data.brand.name_ar;
-    categorySearchQuery.value=data.category.name_ar
+    brandSearchQuery.value = data?.brand?.name_ar;
+    categorySearchQuery.value=data?.category?.name_ar
     fetchCategories()
     fetchBrands();
     productData.value = {

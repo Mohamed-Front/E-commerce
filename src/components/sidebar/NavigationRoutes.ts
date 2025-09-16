@@ -198,7 +198,7 @@ export default {
      {
       name: 'shipping-setting',
       displayName: 'navigation.shipping',
-      show: ['list notification-templates'],
+      show: ['list shipping-settings'],
       meta: {
         icon: 'dashboard',
       },
