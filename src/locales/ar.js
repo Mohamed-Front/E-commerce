@@ -1098,6 +1098,7 @@ export default {
     "fileRequired": "يرجى تحديد ملف للاستيراد"
   },
   attribute: {
+    isColor:"لون",
     managementTitle: 'إدارة الخصائص',
     search: 'بحث في الخصائص...',
     export: 'تصدير',

@@ -100,7 +100,7 @@ const fetchProduct = async () => {
         id: variant.attribute_values[0]?.pivot?.attribute_value_id,
         sku: variant.sku || '',
         price: variant.price,
-        attribute_value_ids: variant.attribute_values.map(av => av.id),
+        attribute_value_ids: variant.attribute_values[0].id,
         variant_image: null,
         variant_image_preview: variant.media && variant.media.length > 0 ? variant.media[0].url : null
       })) || []

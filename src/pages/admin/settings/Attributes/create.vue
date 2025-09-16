@@ -18,6 +18,7 @@ const isRTL = computed(() => currentLanguage.value === 'ar');
 const attributeData = ref({
   name_en: '',
   name_ar: '',
+  is_color: false,
   values: [
     {
       value_en: '',
@@ -63,7 +64,7 @@ const submitForm = async () => {
 
   // Validate all values
   for (const value of attributeData.value.values) {
-    if (!value.value_en || !value.value_ar) {
+    if (!value.value_en || (!attributeData.value.is_color && !value.value_ar)) {
       toast.add({
         severity: 'error',
         summary: t('error'),
@@ -76,28 +77,34 @@ const submitForm = async () => {
 
   loading.value = true;
 
+  // Prepare data to send based on is_color
+  const submitData = {
+    name_en: attributeData.value.name_en,
+    name_ar: attributeData.value.name_ar,
+    is_color: attributeData.value.is_color,
+    values: attributeData.value.is_color
+      ? attributeData.value.values.map(value => ({ value_en: value.value_en ,value_ar:value.value_en }))
+      : attributeData.value.values
+  };
 
-    axios.post("/api/attribute", attributeData.value).then((res)=>{
+  axios.post("/api/attribute", submitData).then((res) => {
     router.push({ name: 'attributes' });
-      toast.add({
-        severity: 'success',
-        summary: t("success"),
-        detail: t('attribute.createSuccess'),
-        life: 3000
-    })
-    }).catch((el)=>{
-        toast.add({
-        severity: 'error',
-        summary: t('error'),
-        detail: el.response.data.message,
-        life: 3000
-      });
-      loading.value=false
-      console.log(el.response.data.message)
-    });;
-
-
-
+    toast.add({
+      severity: 'success',
+      summary: t("success"),
+      detail: t('attribute.createSuccess'),
+      life: 3000
+    });
+  }).catch((el) => {
+    toast.add({
+      severity: 'error',
+      summary: t('error'),
+      detail: el.response.data.message,
+      life: 3000
+    });
+    loading.value = false;
+    console.log(el.response.data.message);
+  });
 };
 </script>
 
@@ -131,6 +138,18 @@ const submitForm = async () => {
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           />
         </div>
+
+        <!-- Is Color Checkbox -->
+        <div class="space-y-2">
+          <label for="is_color" class="block text-sm font-medium text-gray-700">
+            {{ t('attribute.isColor') }}
+          </label>
+          <InputSwitch
+            id="is_color"
+            v-model="attributeData.is_color"
+            class="mt-2"
+          />
+        </div>
       </div>
 
       <!-- Values Section -->
@@ -138,22 +157,30 @@ const submitForm = async () => {
         <h3 class="text-lg font-semibold text-gray-700 border-b pb-2">{{ t('attribute.values') }}</h3>
 
         <div v-for="(value, index) in attributeData.values" :key="index" class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-          <!-- English Value -->
+          <!-- English Value (Color or Text) -->
           <div class="space-y-2">
             <label :for="`value_en_${index}`" class="block text-sm font-medium text-gray-700">
               {{ t('attribute.valueEn') }} <span class="text-red-500">*</span>
             </label>
             <div class="flex space-x-2">
               <InputText
+                v-if="!attributeData.is_color"
                 :id="`value_en_${index}`"
                 v-model="value.value_en"
                 class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
               />
+              <input
+                v-else
+                type="color"
+                :id="`value_en_${index}`"
+                v-model="value.value_en"
+                class="flex-1 h-10 border border-gray-300 rounded-lg"
+              />
             </div>
           </div>
 
-          <!-- Arabic Value -->
-          <div class="space-y-2">
+          <!-- Arabic Value (only when not color) -->
+          <div v-if="!attributeData.is_color" class="space-y-2">
             <label :for="`value_ar_${index}`" class="block text-sm font-medium text-gray-700">
               {{ t('attribute.valueAr') }} <span class="text-red-500">*</span>
             </label>
@@ -174,6 +201,18 @@ const submitForm = async () => {
                 :title="t('attribute.removeValue')"
               />
             </div>
+          </div>
+
+          <!-- Remove button for color values -->
+          <div v-if="attributeData.is_color && index > 0" class="space-y-2">
+            <Button
+              type="button"
+              icon="pi pi-trash"
+              severity="danger"
+              @click="removeValueField(index)"
+              class="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
+              :title="t('attribute.removeValue')"
+            />
           </div>
         </div>
 
@@ -238,5 +277,11 @@ button.bg-gradient-to-r:hover {
 [dir="rtl"] .space-x-2 > :not([hidden]) ~ :not([hidden]) {
   margin-right: 0.5rem;
   margin-left: 0;
+}
+
+/* Color picker styling */
+input[type="color"] {
+  padding: 0;
+  cursor: pointer;
 }
 </style>

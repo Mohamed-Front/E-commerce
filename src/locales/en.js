@@ -1170,6 +1170,7 @@ export default {
   "delete": "Delete",
   "actions": "Actions",
   attribute: {
+    isColor:"isColor",
     managementTitle: 'Attributes Management',
     search: 'Search attributes...',
     export: 'Export',
