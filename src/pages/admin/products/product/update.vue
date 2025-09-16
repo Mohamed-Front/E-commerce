@@ -43,7 +43,7 @@ const isRTL = computed(() => currentLanguage.value === 'ar');
 const productData = ref({
   store_id: null,
   category_id: null,
-  brand_id: null,
+  brand_id: '',
   sku: '',
   name_en: '',
   name_ar: '',
@@ -328,7 +328,7 @@ const removeVariant = (index) => {
 
 // Submit form
 const submitForm = async () => {
-  const requiredFields = ['store_id', 'category_id', 'brand_id', 'name_en', 'name_ar', 'sku', 'base_price'];
+  const requiredFields = ['store_id', 'category_id', 'name_en', 'name_ar', 'sku', 'base_price'];
 
   // Validate required fields
   if (requiredFields.some(field => !productData.value[field])) {
@@ -336,11 +336,7 @@ const submitForm = async () => {
     return;
   }
 
-  // Validate main image (either existing or new)
-  if (!mainImagePreview.value && !mainImage.value) {
-    toast.add({ severity: 'error', summary: t('error'), detail: t('validation.mainImageRequired'), life: 3000 });
-    return;
-  }
+
 
   // Validate variants if they exist
   if (hasVariants.value) {
@@ -357,6 +353,7 @@ const submitForm = async () => {
   formData.append('_method', 'post'); // For Laravel to handle as PUT request
   formData.append('store_id', productData.value.store_id);
   formData.append('category_id', productData.value.category_id);
+  if (productData.value.brand_id)
   formData.append('brand_id', productData.value.brand_id);
   formData.append('sku', productData.value.sku);
   formData.append('name_en', productData.value.name_en);
@@ -464,7 +461,7 @@ const submitForm = async () => {
         <!-- Brand Selection -->
         <div class="space-y-2">
           <label for="brand_id" class="block text-sm font-medium text-gray-700">
-            {{ t('product.brand') }} <span class="text-red-500">*</span>
+            {{ t('product.brand') }}
           </label>
           <Dropdown
             filter
@@ -474,7 +471,7 @@ const submitForm = async () => {
             :optionLabel="labelField"
             optionValue="id"
             class="w-full"
-            :class="{ 'p-invalid': !productData.brand_id }"
+
             filterPlaceholder="Search brands"
             @filter="onBrandFilter"
           />
