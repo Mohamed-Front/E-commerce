@@ -535,7 +535,7 @@ export default {
     noOrdersAvailable: 'لا توجد طلبات متاحة',
     loadError: 'فشل في تحميل الطلبات، يرجى المحاولة لاحقًا',
     retry: 'إعادة المحاولة',
-    orderNumber: 'رقم الطلب #{id}',
+    orderNumber: 'رقم الطلب # ',
     statusPending: 'تم الطلب يوم {date} وجاري التوصيل',
     statusDelivered: 'تم توصيل الطلب بنجاح',
     statusCancelled: 'تم إلغاء الطلب يوم {date}',
