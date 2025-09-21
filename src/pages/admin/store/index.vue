@@ -108,9 +108,9 @@ const initFilters = () => {
 onBeforeMount(() => {
   initFilters()
 })
-const goToMediaLinks=(id)=>{
- router.push({name:'',params:{id:id}})
-}
+const goToMediaLinks = (id) => {
+  router.push({ name: 'media-links', params: { id: id, type:1 } });
+};
 const fetchData = () => {
   loading.value = true
   axios.get("/api/store", {

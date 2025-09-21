@@ -73,7 +73,9 @@ const fetchStores = () => {
       console.error('Error fetching stores:', error)
     })
 }
-
+const goToMediaLinks = (id) => {
+  router.push({ name: 'media-links', params: { id: id, type:2 } });
+};
 // Fetch categories data
 const fetchData = () => {
   loading.value = true
@@ -379,6 +381,13 @@ onMounted(() => {
                   @click="confirmDelete(slotProps.data.id)"
                   v-tooltip.top="t('delete')"
                   aria-label="Delete category"
+                />
+                    <Button
+                  v-can="'edit inventory'"
+                  icon="pi pi-images"
+                  class="p-button-info"
+                  @click="goToMediaLinks(slotProps.data.id)"
+
                 />
               </template>
             </Column>

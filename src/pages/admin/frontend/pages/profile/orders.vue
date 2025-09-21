@@ -175,6 +175,7 @@ import { useToast } from 'primevue/usetoast';
 import Toast from 'primevue/toast';
 import ProgressSpinner from 'primevue/progressspinner';
 import { useAuthStore } from '../../../../../stores/WebAuth';
+import moment from 'moment';
 
 // Router, i18n, Toast, and Auth
 const router = useRouter();
@@ -192,15 +193,10 @@ const pagination = ref({
   links: [],
 });
 
-// Format date for display
+// Format date using Moment.js
 const formatDate = (dateString) => {
   if (!dateString) return t('orders.notAvailable');
-  const date = new Date(dateString);
-  return date.toLocaleDateString(locale.value === 'ar' ? 'ar-EG' : 'en-US', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
+  return moment(dateString).locale(locale.value).format('D MMMM YYYY');
 };
 
 // Get status message based on status code
