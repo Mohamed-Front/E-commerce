@@ -196,7 +196,7 @@ const pagination = ref({
 // Format date using Moment.js
 const formatDate = (dateString) => {
   if (!dateString) return t('orders.notAvailable');
-  return moment(dateString).locale(locale.value).format('D MMMM YYYY');
+  return moment(dateString).format('DD-MM-YYYY');
 };
 
 // Get status message based on status code
