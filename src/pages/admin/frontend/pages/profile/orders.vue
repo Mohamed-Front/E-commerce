@@ -123,7 +123,7 @@
               >
                 {{ getStatusMessage(order.status, order.created_at, order.cancelled_at) }}
               </p>
-              <p class="text-gray-500 text-sm">{{ t('orders.orderNumber', order.id ) }}</p>
+              <p class="text-gray-500 text-sm">{{ $t('orders.orderNumber') }} {{  order.id }}</p>
             </div>
           </div>
         </div>
