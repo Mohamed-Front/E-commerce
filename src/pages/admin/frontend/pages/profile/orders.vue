@@ -195,7 +195,7 @@ const pagination = ref({
 
 // Format date using Moment.js
 const formatDate = (dateString) => {
-  if (!dateString) return t('orders.notAvailable');
+
   return moment(dateString).format('DD-MM-YYYY');
 };
 
