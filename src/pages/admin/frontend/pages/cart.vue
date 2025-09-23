@@ -437,7 +437,7 @@ const updateQuantity = async (type, id, product_id, variant_id, quantity) => {
 
 const clearProduct = async (id, product_id, variant_id) => {
   try {
-    await axios.delete(`/api/cart/clear`, {
+    await axios.post(`/api/cart/remove`, {
       data: { product_id, variant_id },
     });
     products.value = products.value.filter((product) => product.id !== id);

@@ -227,7 +227,7 @@ const typeOptions = [
             <img
               :src="media.url"
               :alt="media.name || `${route.params.type === '1' ? t('store.media') : t('category.media')} ${media.id}`"
-              class="w-full max-h-[200px] object-cover rounded-lg"
+              class="w-full h-[50px] object-cover rounded-lg"
             />
             <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center transition-all duration-300 rounded-lg">
               <a
