@@ -8,7 +8,9 @@ import * as PusherPushNotifications from '@pusher/push-notifications-web'
 export const useAuthStore = defineStore('Auth', {
   state: () => ({
     authUser: useStorage('authUser', {}),
+
     authenticated: useStorage('authenticated', false),
+    defaultStoreId: useStorage('defaultStoreId', 1),
     userPermissions: useStorage('userPermissions', []),
     authErrors: [],
     role: '',

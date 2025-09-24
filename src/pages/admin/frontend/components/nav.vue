@@ -1,7 +1,9 @@
 <template>
   <div>
+
     <!-- Mobile Top Navigation -->
     <nav class="h-[56px] bg-[#fff] flex py-2 px-4 md:hidden relative shadow-sm">
+
       <div class="w-full flex justify-between items-center">
         <!-- Left: Stores Dropdown -->
         <div class="flex items-center">
@@ -12,6 +14,7 @@
           <span class="ml-2 text-sm text-gray-700" v-if="defaultStore">{{ defaultStore.name }}</span>
           <!-- Stores Dropdown Menu -->
           <transition name="dropdown-fancy">
+
             <div
               v-if="isDropdownOpen"
               class="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-2xl z-50 overflow-hidden dropdown-fancy"
@@ -24,13 +27,11 @@
                 class="flex items-center px-4 py-3 transition-all duration-300 cursor-pointer dropdown-item"
                 :class="{ 'bg-amber-50 border-r-4 border-amber-500': store.id === defaultStoreId }"
               >
-                <div v-if="getStoreImage(store)" class="w-8 h-8 flex items-center justify-center overflow-hidden rounded-sm bg-gray-100 mr-2">
-                  <img
-                    :src="getStoreImage(store)"
-                    alt="Store Logo"
-                    class="max-w-full max-h-full object-contain"
-                  />
-                </div>
+               <div
+        v-if="getStoreImage(store)"
+        class="h-8 w-8 flex items-center justify-center overflow-hidden rounded-sm bg-gray-100 mr-2 store-image-bg"
+        :style="{ backgroundImage: `url(${getStoreImage(store)})` }"
+      ></div>
                 <div v-else class="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-sm mr-2">
                   <i class="fa-solid fa-store text-gray-400"></i>
                 </div>
@@ -60,20 +61,21 @@
     <nav class="h-[60px] bg-[#fff] flex py-6 px-6 hidden md:flex shadow-sm">
       <div class="w-full flex items-center justify-between">
         <!-- Left: Stores -->
+
         <div class="flex-[0_0_25%] h-[40px] flex items-center mx-2 overflow-x-auto scrollbar-thin">
           <div
             v-for="store in stores"
             :key="store.id"
             @click="selectStore(store)"
-            class="store-card relative mx-1.5 rounded-lg cursor-pointer h-[36px] w-[100px] bg-gray-100 hover:bg-gray-200 transition-all duration-300 group"
+            class="store-card relative mx-1.5 rounded-lg cursor-pointer max-h-[36px]  w-[90px] bg-gray-100 hover:bg-gray-200 transition-all duration-300 group"
             :class="{ 'border-2 border-[#E6AC31]': store.id === defaultStoreId }"
           >
-            <div class="h-full w-full flex items-center justify-center p-1.5">
+            <div class="h-full w-full flex items-center justify-center ">
               <div v-if="getStoreImage(store)" class="h-full w-full flex items-center justify-center overflow-hidden">
                 <img
                   :src="getStoreImage(store)"
                   alt="Store Logo"
-                  class="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-105"
+                  class="max-w-full max-h-full  transition-transform duration-300 group-hover:scale-105"
                 />
               </div>
               <div v-else class="h-full w-full flex items-center justify-center">
@@ -189,6 +191,7 @@ import SearchBar from './SearchBar.vue';
 const authStore = useAuthStore();
 const stores = ref([]);
 const router = useRouter();
+const route = useRoute(); // Added to access the current route
 const isDropdownOpen = ref(false);
 const isUserDropdownOpen = ref(false);
 const defaultStoreId = ref(4);
@@ -265,6 +268,9 @@ const toggleUserDropdown = () => {
 };
 
 const toggleLang = () => {
+  console.log(route.fullPath)
+  // Store the current route path before reloading
+  localStorage.setItem('lastRoute', route.fullPath);
   const currentLang = localStorage.getItem('appLang') || 'en';
   const newLang = currentLang === 'en' ? 'ar' : 'en';
   localStorage.setItem('appLang', newLang);
@@ -306,6 +312,7 @@ onMounted(() => {
   const storedStoreId = localStorage.getItem('defaultStoreId');
   const authStatus = localStorage.getItem('authenticatedweb');
   const userData = localStorage.getItem('webUser');
+  const lastRoute = localStorage.getItem('lastRoute'); // Get the stored route
 
   if (authStatus === 'true' && userData) {
     isAuthenticated.value = true;
@@ -318,6 +325,12 @@ onMounted(() => {
     fetchStores();
   } else {
     fetchStores();
+  }
+
+  // Restore the last route if it exists
+  if (lastRoute && lastRoute !== '/') {
+    router.push(lastRoute);
+    localStorage.removeItem('lastRoute'); // Clear the stored route after navigation
   }
 
   // Add click event listener

@@ -3,8 +3,10 @@ import { ref, computed } from "vue";
 import i18n from "../plugins/i18n";
 import { useAppLangStore } from "../stores/AppLangStore";
 import Dropdown from 'primevue/dropdown';
+import { useRouter, useRoute } from 'vue-router';
 
 const appLang = useAppLangStore();
+const router = useRouter();
 
 const languages = ref([
   { name: 'English', code: 'en', dir: 'ltr' },

@@ -12,7 +12,7 @@ axios.defaults.headers.common['local'] = localStorage.getItem('appLang') || 'en'
 axios.interceptors.request.use((config) => {
   try {
     const currentRoute = router.currentRoute.value;
-    console.log(currentRoute.fullPath);
+    console.log(currentRoute);
     let token = null;
     if (currentRoute.path.startsWith('/admin')) {
       token = localStorage.getItem('token');

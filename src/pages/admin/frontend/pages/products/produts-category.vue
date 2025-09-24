@@ -26,7 +26,7 @@
         <div v-for="(pro, i) in paginatedProducts" :key="pro.id"
              class="group flex flex-col items-start cursor-pointer h-full bg-white transition-all pb-4 rounded-lg shadow-lg duration-300 hover:-translate-y-2 hover:shadow-xl"
              @click="router.push({ name: 'Product-details', params: { id: pro.id } })">
-          <div class="w-full h-60 overflow-hidden rounded-t-lg relative">
+          <div class="w-full max-h-[600px]  overflow-hidden rounded-t-lg relative">
             <img :src="pro.img" :alt="pro.name"
                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                  loading="lazy" />

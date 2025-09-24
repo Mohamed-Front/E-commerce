@@ -297,7 +297,7 @@ const fullDescription = computed(() => {
 });
 
 const descriptionLength = computed(() => {
-  return fullDescription.value.length;
+  return fullDescription.value?.length;
 });
 
 const isDescriptionLong = computed(() => {

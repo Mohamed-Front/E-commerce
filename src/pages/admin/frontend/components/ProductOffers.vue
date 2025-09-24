@@ -159,7 +159,7 @@
 
       // Fetch categories
       const categoryResponse = await axios.get(`api/home/get-categories/${stor_id.value}`)
-      categoryResponse.data.data.data.forEach((category) => {
+      categoryResponse.data?.data?.data?.forEach((category) => {
         titels.value[category.id] = {
           name: localStorage.getItem('appLang') == 'en' ? category.name_en : category.name_ar || category.name_en,
           id: category.id,
