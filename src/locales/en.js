@@ -1189,6 +1189,19 @@ export default {
   "edit": "Edit",
   "delete": "Delete",
   "actions": "Actions",
+"products": {
+    "filters": "Filters",
+    "category": "Category",
+    "searchCategory": "Search categories",
+    "brand": "Brand",
+    "searchBrand": "Search brands",
+    "rating": "Rating",
+    "price": "Price",
+    "loadMore": "Load More",
+    "retry": "Try Again",
+    "errorLoading": "Failed to load products.",
+    "missingParams": "Missing store ID."
+  },
   attribute: {
     isColor:"isColor",
     managementTitle: 'Attributes Management',

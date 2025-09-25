@@ -1024,7 +1024,21 @@ export default {
   "update": "تحديث",
   "yes": "نعم",
   "no": "لا",
+  "products": {
+    "filters": "الفلاتر",
+    "category": "الفئة",
+    "searchCategory": "البحث في الفئات",
+    "brand": "العلامة التجارية",
+    "searchBrand": "البحث في العلامات التجارية",
+    "rating": "التقييم",
+    "price": "السعر",
+    "loadMore": "تحميل المزيد",
+    "retry": "حاول مرة أخرى",
+    "errorLoading": "فشل في تحميل المنتجات.",
+    "missingParams": "معرف المتجر مفقود."
+  },
 "product": {
+
   "stockStatus":"متاح بالمخزن",
   "inCart":"موجود بالسلة",
       "marketFilter":"اختر السوق ",
