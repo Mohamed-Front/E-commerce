@@ -27,16 +27,23 @@
                 class="flex items-center px-4 py-3 transition-all duration-300 cursor-pointer dropdown-item"
                 :class="{ 'bg-amber-50 border-r-4 border-amber-500': store.id === defaultStoreId }"
               >
-               <div
-        v-if="getStoreImage(store)"
-        class="h-8 w-8 flex items-center justify-center overflow-hidden rounded-sm bg-gray-100 mr-2 store-image-bg"
-        :style="{ backgroundImage: `url(${getStoreImage(store)})` }"
-      ></div>
-                <div v-else class="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-sm mr-2">
-                  <i class="fa-solid fa-store text-gray-400"></i>
-                </div>
+               <div class="h-full w-full flex items-center justify-center ">
+              <div v-if="getStoreImage(store)" class="h-full w-full flex items-center justify-center overflow-hidden">
+                <img
+                  :src="getStoreImage(store)"
+                  alt="Store Logo"
+                  class="max-w-[90%] max-h-full  transition-transform duration-300 group-hover:scale-105"
+                />
+              </div>
+              <div v-else class="h-full w-full flex items-center justify-center">
+                <i class="fa-solid fa-store text-gray-400 text-xl"></i>
+              </div>
+              <div class="absolute inset-0 rounded-lg border border-transparent group-hover:border-[#E6AC31] transition-all duration-300"></div>
+            </div>
+
                 <span class="text-sm text-gray-700 font-medium">{{ store.name }}</span>
-                <i v-if="store.id === defaultStoreId" class="fa-solid fa-check ml-auto text-amber-600 text-xs"></i>
+                <i v-if="store.id === defaultStoreId" class="fa-solid fa-check ml-auto text-amber-600 text-xs mx-2"></i>
+                <i v-else="store.id === defaultStoreId" class="fa-solid fa-cancel ml-auto text-amber-600 text-xs mx-2"></i>
               </div>
             </div>
           </transition>
