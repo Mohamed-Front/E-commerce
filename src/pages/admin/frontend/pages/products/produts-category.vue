@@ -25,57 +25,6 @@
           <h3 class="font-bold text-lg mb-4">{{ t('products.filters') }}</h3>
           <div class="space-y-6">
             <!-- Category Filter with Search -->
-            <div class="border-b pb-4">
-              <div
-                class="flex items-center justify-between cursor-pointer"
-                @click="toggleFilter('category')"
-              >
-                <span class="font-semibold">{{ t('products.category') }}</span>
-                <svg
-                  :class="{ 'rotate-180': filtersExpanded.category }"
-                  class="w-5 h-5 transition-transform"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 9l-7 7-7-7"
-                  ></path>
-                </svg>
-              </div>
-              <div v-show="filtersExpanded.category" class="mt-4 space-y-2">
-                <input
-                  v-model="categorySearchQuery"
-                  type="text"
-                  :placeholder="t('products.searchCategory')"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  aria-label="Search categories"
-                />
-                <div v-for="category in filteredCategories" :key="category.id" class="flex items-center">
-                  <input
-                    type="checkbox"
-                    :id="`cat-${category.id}`"
-                    :value="category.id"
-                    v-model="selectedFilters.category_ids"
-                    class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
-                  />
-                  <label :for="`cat-${category.id}`" class="ml-2 text-sm text-gray-700">{{
-                    category.name
-                  }}</label>
-                </div>
-                <button
-                  v-if="hasMoreCategories"
-                  @click="fetchMoreCategories"
-                  class="text-indigo-600 hover:text-indigo-800 text-sm"
-                >
-                  {{ t('products.loadMore') }}
-                </button>
-              </div>
-            </div>
 
             <!-- Brand Filter with Search -->
             <div class="border-b pb-4">

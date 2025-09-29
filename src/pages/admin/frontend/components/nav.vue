@@ -17,7 +17,7 @@
 
             <div
               v-if="isDropdownOpen"
-              class="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-2xl z-50 overflow-hidden dropdown-fancy"
+              class="absolute top-full left-0 rtl:right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl z-50 overflow-hidden dropdown-fancy"
               ref="storesDropdown"
             >
               <div
