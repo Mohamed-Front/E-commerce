@@ -1,3 +1,4 @@
+```vue
 <template>
   <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6" :dir="$t('dir')">
     <Toast position="top-right" />
@@ -5,7 +6,7 @@
     <!-- Tab Details -->
     <div v-if="tabDetails" class="card mb-6 transform hover:scale-[1.01] transition-transform duration-300">
       <h1 class="text-3xl font-bold mb-6 text-gray-800" :class="{ 'text-right': $t('dir') === 'rtl' }">
-        {{ tabDetails.name_en }} ({{ $t(`custom_tabs.types.${tabDetails.type_description}`) }})
+        {{ tabDetails.name_ar }}
       </h1>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div>
@@ -57,21 +58,24 @@
           </small>
         </div>
         <div class="space-y-2">
-          <label v-if="tabDetails?.type==2" class="block text-sm font-medium text-gray-700" :class="{ 'text-right': $t('dir') === 'rtl' }">
-            {{ $t('اختر المنتجات') }} <span class="text-red-500">*</span>
+          <label v-if="tabDetails?.type == 2" class="block text-sm font-medium text-gray-700" :class="{ 'text-right': $t('dir') === 'rtl' }">
+            {{ $t('custom_tabs.select_products') }} <span class="text-red-500">*</span>
           </label>
           <label v-else class="block text-sm font-medium text-gray-700" :class="{ 'text-right': $t('dir') === 'rtl' }">
-            {{ $t('اختر الفئات') }} <span class="text-red-500">*</span>
+            {{ $t('custom_tabs.select_categories') }} <span class="text-red-500">*</span>
           </label>
           <MultiSelect
             v-model="newDetail.ids"
             :options="availableIds"
             :optionLabel="multiSelectLabel"
             optionValue="id"
-            :placeholder="$t('custom_tabs.select_ids')"
+            :placeholder="tabDetails?.type == 2 ? $t('custom_tabs.select_products') : $t('custom_tabs.select_categories')"
             class="w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             :class="{ 'border-red-500': !isAddFormValid && !newDetail.ids.length }"
             aria-describedby="ids_error"
+            filter
+            :filterPlaceholder="tabDetails?.type == 2 ? $t('custom_tabs.search_products') : $t('custom_tabs.search_categories')"
+            @filter="onIdFilter"
             required
           />
           <small v-if="!isAddFormValid && !newDetail.ids.length" id="ids_error" class="text-red-500">
@@ -88,7 +92,7 @@
             :maxFileSize="1000000"
             @select="onImageSelect('new', $event)"
             :chooseLabel="$t('custom_tabs.select_image')"
-            class=" p-button-rounded"
+            class="p-button-rounded"
           />
           <small v-if="!isAddFormValid && !newDetail.image" class="text-red-500">
             {{ $t('custom_tabs.image_required') }}
@@ -123,7 +127,7 @@
             <div class="flex space-x-2">
               <Button
                 icon="pi pi-pencil"
-                class=" p-detail"
+                class="p-detail p-button-rounded"
                 @click="openEditDialog(detail)"
               />
               <Button
@@ -182,17 +186,20 @@
         </div>
         <div class="space-y-2">
           <label class="block text-sm font-medium text-gray-700" :class="{ 'text-right': $t('dir') === 'rtl' }">
-            {{ $t('custom_tabs.ids') }} <span class="text-red-500">*</span>
+            {{ tabDetails?.type == 2 ? $t('custom_tabs.select_products') : $t('custom_tabs.select_categories') }} <span class="text-red-500">*</span>
           </label>
           <MultiSelect
             v-model="editDetail.ids"
             :options="availableIds"
             :optionLabel="multiSelectLabel"
             optionValue="id"
-            :placeholder="$t('custom_tabs.select_ids')"
+            :placeholder="tabDetails?.type == 2 ? $t('custom_tabs.select_products') : $t('custom_tabs.select_categories')"
             class="w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             :class="{ 'border-red-500': !isEditFormValid && !editDetail.ids.length }"
-            aria-describedby="ids_error"
+            aria-describedby="edit_ids_error"
+            filter
+            :filterPlaceholder="tabDetails?.type == 2 ? $t('custom_tabs.search_products') : $t('custom_tabs.search_categories')"
+            @filter="onIdFilter"
             required
           />
           <small v-if="!isEditFormValid && !editDetail.ids.length" id="edit_ids_error" class="text-red-500">
@@ -223,7 +230,7 @@
         <Button
           :label="$t('custom_tabs.cancel')"
           severity="secondary"
-          class=" p-button-rounded"
+          class="p-button-rounded"
           @click="showEditDialog = false"
         />
         <Button
@@ -239,7 +246,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import Button from 'primevue/button';
@@ -250,6 +257,7 @@ import MultiSelect from 'primevue/multiselect';
 import Dialog from 'primevue/dialog';
 import axios from 'axios';
 import { useI18n } from 'vue-i18n';
+import { debounce } from 'lodash';
 
 const router = useRouter();
 const route = useRoute();
@@ -258,6 +266,7 @@ const { t } = useI18n();
 
 const tabDetails = ref(null);
 const showEditDialog = ref(false);
+const idSearchQuery = ref('');
 const newDetail = ref({
   custom_tab_id: route.params.id,
   name_en: '',
@@ -274,16 +283,15 @@ const editDetail = ref({
   image: null,
   media: [],
 });
-
-// Sample available IDs (replace with actual API call if needed)
 const availableIds = ref([]);
+const appLanguage = ref(localStorage.getItem('appLang') || 'en');
 
 // Computed property to determine MultiSelect optionLabel based on language
 const multiSelectLabel = computed(() => {
-  const appLang = localStorage.getItem('appLang') || 'en'; // Default to 'en' if not set
-  return appLang === 'en' ? 'name_en' : 'name_ar';
+  return appLanguage.value === 'en' ? 'name_en' : 'name_ar';
 });
 
+// Form validation
 const isAddFormValid = computed(() => {
   return newDetail.value.name_en &&
          newDetail.value.name_ar &&
@@ -297,20 +305,13 @@ const isEditFormValid = computed(() => {
          editDetail.value.ids.length > 0;
 });
 
+// Fetch tab details
 const fetchDetails = async () => {
   try {
     const response = await axios.get(`/api/custom-tabs/${route.params.id}`);
     if (response.data.is_success) {
       tabDetails.value = response.data.data;
-      if (tabDetails.value?.type == 1) {
-        axios.get('api/category').then((res) => {
-          availableIds.value = res.data.data.data;
-        });
-      } else {
-        axios.get('api/product').then((res) => {
-          availableIds.value = res.data.data.data;
-        });
-      }
+      await fetchIds(); // Fetch products or categories based on tab type
     } else {
       throw new Error(response.data.message);
     }
@@ -324,6 +325,45 @@ const fetchDetails = async () => {
   }
 };
 
+// Fetch products or categories with search support
+const fetchIds = async () => {
+  try {
+    const endpoint = tabDetails.value?.type == 2 ? '/api/product' : '/api/category';
+    const response = await axios.get(endpoint, {
+      params: {
+        search: idSearchQuery.value || undefined,
+      },
+    });
+    availableIds.value = response.data.data.data.map(item => ({
+      ...item,
+      label: appLanguage.value === 'en' ? item.name_en : item.name_ar,
+      value: item.id,
+    }));
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: t('error'),
+      detail: tabDetails.value?.type == 2 ? t('product.loadError') : t('category.loadError'),
+      life: 3000,
+    });
+  }
+};
+
+// Debounced fetchIds for search
+const debouncedFetchIds = debounce(fetchIds, 300);
+
+// Handle ID filter input
+const onIdFilter = (event) => {
+  idSearchQuery.value = event.value;
+  debouncedFetchIds();
+};
+
+// Watch for language changes to refetch IDs
+watch(appLanguage, () => {
+  fetchIds();
+});
+
+// Add new detail
 const addDetail = async () => {
   try {
     const formData = new FormData();
@@ -365,6 +405,7 @@ const addDetail = async () => {
   }
 };
 
+// Delete detail
 const deleteDetail = async (detailId) => {
   try {
     const response = await axios.delete(`/api/custom-tab-details/${detailId}`);
@@ -387,19 +428,21 @@ const deleteDetail = async (detailId) => {
   }
 };
 
+// Open edit dialog
 const openEditDialog = (detail) => {
   editDetail.value = {
-    ids: detail.ids,
     id: detail.id,
     custom_tab_id: route.params.id,
     name_en: detail.name_en,
     name_ar: detail.name_ar,
+    ids: detail.ids,
     image: null,
     media: detail.media,
   };
   showEditDialog.value = true;
 };
 
+// Update detail
 const updateDetail = async () => {
   try {
     const formData = new FormData();
@@ -438,6 +481,7 @@ const updateDetail = async () => {
   }
 };
 
+// Handle image selection
 const onImageSelect = (type, event) => {
   if (type === 'new') {
     newDetail.value.image = event.files[0];
@@ -446,6 +490,7 @@ const onImageSelect = (type, event) => {
   }
 };
 
+// Lifecycle hook
 onMounted(() => {
   fetchDetails();
 });
@@ -468,3 +513,4 @@ onMounted(() => {
   direction: rtl;
 }
 </style>
+```

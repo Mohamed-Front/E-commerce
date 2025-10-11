@@ -14,7 +14,7 @@ export const useAuthStore = defineStore('Auth', {
     userPermissions: useStorage('userPermissions', []),
     authErrors: [],
     role: '',
-    token: useStorage('token', null),
+    token: useStorage('token', ''),
     msg: '',
     loading: ref(false),
     router: useRouter(),
