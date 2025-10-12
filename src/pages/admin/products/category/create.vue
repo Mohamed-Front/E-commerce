@@ -1,18 +1,25 @@
+```vue
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import axios from 'axios';
 import { useToast } from 'primevue/usetoast';
 import { useI18n } from 'vue-i18n';
-import { useRouter, useRoute } from "vue-router";
+import { useRouter, useRoute } from 'vue-router';
+import InputText from 'primevue/inputtext';
+import Dropdown from 'primevue/dropdown';
+import Button from 'primevue/button';
+import Toast from 'primevue/toast';
+import { debounce } from 'lodash';
 
 const router = useRouter();
 const route = useRoute();
 const toast = useToast();
 const { t } = useI18n();
 const loading = ref(false);
+const categorySearchQuery = ref('');
 
 // Computed property for language-specific label field
-const categoryLabelField = computed(() => {
+const labelField = computed(() => {
   return localStorage.getItem('appLang') == 'ar' ? 'name_ar' : 'name_en';
 });
 
@@ -44,28 +51,53 @@ const isDraggingImage = ref(false);
 const isDraggingBannerOne = ref(false);
 const isDraggingBannerTwo = ref(false);
 
-// Fetch parent categories based on linked_to_market
+// Fetch parent categories or markets based on linked_to_market with search support
 const fetchParentCategories = async () => {
   try {
     const endpoint = categoryData.value.linked_to_market ? '/api/market' : '/api/category';
-    const response = await axios.get(endpoint);
-    parentCategories.value = response.data.data.data;
+    const response = await axios.get(endpoint, {
+      params: {
+        search: categorySearchQuery.value || undefined
+      }
+    });
+    parentCategories.value = response.data.data.data.map(item => ({
+      ...item,
+      label: localStorage.getItem('appLang') == 'ar' ? item.name_ar : item.name_en,
+      value: item.id
+    }));
   } catch (error) {
     console.error("Error fetching parent categories:", error);
     toast.add({
       severity: 'error',
       summary: t("error"),
-      detail: t('category.fetchParentError'),
+      detail: categoryData.value.linked_to_market ? t('category.fetchMarketsError') : t('category.fetchParentError'),
       life: 3000
     });
   }
 };
 
+// Debounced fetchParentCategories for search
+const debouncedFetchParentCategories = debounce(fetchParentCategories, 300);
+
+// Handle category/market search input
+const onCategoryFilter = (event) => {
+  categorySearchQuery.value = event.value;
+  debouncedFetchParentCategories();
+};
+
 // Fetch markets
 const fetchMarkets = async () => {
   try {
-    const response = await axios.get('/api/market');
-    markets.value = response.data.data.data;
+    const response = await axios.get('/api/market', {
+      params: {
+        search: categorySearchQuery.value || undefined
+      }
+    });
+    markets.value = response.data.data.data.map(item => ({
+      ...item,
+      label: localStorage.getItem('appLang') == 'ar' ? item.name_ar : item.name_en,
+      value: item.id
+    }));
   } catch (error) {
     console.error("Error fetching markets:", error);
     toast.add({
@@ -81,7 +113,11 @@ const fetchMarkets = async () => {
 const fetchStores = async () => {
   try {
     const response = await axios.get('/api/store');
-    stores.value = response.data.data.data;
+    stores.value = response.data.data.data.map(item => ({
+      ...item,
+      label: localStorage.getItem('appLang') == 'ar' ? item.name_ar : item.name_en,
+      value: item.id
+    }));
   } catch (error) {
     console.error("Error fetching stores:", error);
     toast.add({
@@ -208,8 +244,13 @@ const submitForm = async () => {
     const categoryId = route.params.id;
     const method = categoryId ? 'post' : 'post';
     const url = categoryId ? `/api/category/${categoryId}` : '/api/category';
+    if (categoryId) {
+      formData.append('_method', 'PUT');
+    }
 
-    const response = await axios[method](url, formData);
+    const response = await axios[method](url, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
 
     router.push({ name: 'categories' });
     toast.add({
@@ -231,11 +272,17 @@ const submitForm = async () => {
   }
 };
 
-// Watch for changes in linked_to_market to refetch parent categories
-watch(() => categoryData.value.linked_to_market, () => {
+// Watch for changes in linked_to_market or search query to refetch parent categories
+watch([() => categoryData.value.linked_to_market, categorySearchQuery], () => {
+  categoryData.value.parent_id = null; // Reset parent_id when switching
+  debouncedFetchParentCategories();
+});
+
+// Watch for language changes to refetch data
+watch(() => localStorage.getItem('appLang'), () => {
   fetchParentCategories();
-  // Reset parent_id when switching to avoid invalid selections
-  categoryData.value.parent_id = null;
+  fetchMarkets();
+  fetchStores();
 });
 
 // Initialize form
@@ -286,19 +333,22 @@ onMounted(async () => {
             required
           />
         </div>
-        <!-- Parent Category -->
+
+        <!-- Parent Category/Market -->
         <div class="space-y-2">
           <label for="parent_id" class="block text-sm font-medium text-gray-700">
-            {{ t('category.parent') }}
+            {{ categoryData.linked_to_market ? t('category.market') : t('category.parent') }}
           </label>
           <Dropdown
-            filter
             v-model="categoryData.parent_id"
             :options="parentCategories"
-            :optionLabel="categoryLabelField"
+            :optionLabel="labelField"
             optionValue="id"
-            :placeholder="t('category.selectParent')"
+            :placeholder="categoryData.linked_to_market ? t('category.selectMarket') : t('category.selectParent')"
             class="w-full"
+            filter
+            :filterPlaceholder="categoryData.linked_to_market ? t('category.searchMarkets') : t('category.searchParent')"
+            @filter="onCategoryFilter"
           />
         </div>
         <!-- Store Selection -->
@@ -307,24 +357,15 @@ onMounted(async () => {
             {{ t('category.store') }}
           </label>
           <Dropdown
-            filter
             v-model="categoryData.store_id"
             :options="stores"
-            :optionLabel="categoryLabelField"
+            :optionLabel="labelField"
             optionValue="id"
             :placeholder="t('category.selectStore')"
             class="w-full"
+            filter
+            :filterPlaceholder="t('category.searchStores')"
           />
-        </div>
-        <!-- Linked to Market -->
-        <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">{{ t('category.linkedToMarket') }}</label>
-          <div class="flex items-center space-x-4">
-            <InputSwitch v-model="categoryData.linked_to_market" />
-            <span class="text-sm text-gray-600">
-              {{ categoryData.linked_to_market ? t('category.market') : t('category.nonMarket') }}
-            </span>
-          </div>
         </div>
         <!-- Market Dropdown (shown when linked_to_market is true) -->
         <div v-if="categoryData.linked_to_market" class="space-y-2">
@@ -332,14 +373,14 @@ onMounted(async () => {
             {{ t('category.market') }} <span class="text-red-500">*</span>
           </label>
           <Dropdown
-            filter
             v-model="categoryData.market_id"
             :options="markets"
-            :optionLabel="categoryLabelField"
+            :optionLabel="labelField"
             optionValue="id"
             :placeholder="t('category.selectMarket')"
             class="w-full"
-            required
+            filter
+            :filterPlaceholder="t('category.searchMarkets')"
           />
         </div>
         <!-- Category Image -->
@@ -490,7 +531,7 @@ onMounted(async () => {
       </div>
     </form>
   </div>
-  <Toast/>
+  <Toast />
 </template>
 
 <style scoped>
@@ -519,3 +560,4 @@ button.bg-gradient-to-r:hover {
   background-size: 150% 100%;
 }
 </style>
+```
