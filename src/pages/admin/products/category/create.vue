@@ -252,7 +252,7 @@ const submitForm = async () => {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
 
-    router.push({ name: 'categories' });
+
     toast.add({
       severity: 'success',
       summary: t("success"),
