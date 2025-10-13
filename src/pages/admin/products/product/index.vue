@@ -447,13 +447,13 @@ onMounted(() => {
                                 {{ slotProps.data.id }}
                             </template>
                         </Column>
-                        <Column field="name_ar" :header="t('product.nameAr')" :sortable="true" header-style="width:14%; min-width:10rem;">
+                        <Column field="name_ar" :header="t('product.nameAr')" :sortable="true" header-style="width:14%; min-width:13rem;">
                             <template #body="slotProps">
                                 {{ slotProps.data.name_ar }}
                             </template>
                         </Column>
 
-                        <Column field="name_en" :header="t('product.nameEn')" :sortable="true" header-style="width:14%; min-width:10rem;">
+                        <Column field="name_en" :header="t('product.nameEn')" :sortable="true" header-style="width:14%; min-width:13rem;">
                             <template #body="slotProps">
                                 {{ slotProps.data.name_en }}
                             </template>
