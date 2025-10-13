@@ -442,7 +442,11 @@ onMounted(() => {
                         v-can="'list products'"
                     >
                         <Column selection-mode="multiple" header-style="width: 3rem"></Column>
-
+ `                    ` <Column field="id" :header="t('id')" :sortable="true" header-style="width:14%; min-width:10rem;">
+                            <template #body="slotProps">
+                                {{ slotProps.data.id }}
+                            </template>
+                        </Column>
                         <Column field="name_ar" :header="t('product.nameAr')" :sortable="true" header-style="width:14%; min-width:10rem;">
                             <template #body="slotProps">
                                 {{ slotProps.data.name_ar }}
