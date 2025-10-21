@@ -734,7 +734,28 @@ export default {
     loadError: 'Failed to load custom tabs',
     deleteSuccess: 'Custom tab deleted successfully',
     deleteError: 'Failed to delete custom tab',
+    updateTitle: 'Update Custom Tab',
+      belongsTo: 'Belongs To',
+      type: 'Type',
+      modelId: 'Model',
+      rowType: 'Row Type',
+      nameEn: 'Name (English)',
+      nameAr: 'Name (Arabic)',
+      updateButton: 'Update',
+      cancelButton: 'Cancel',
+      updateSuccess: 'Custom tab updated successfully'
   },
+  error: {
+      storeLoad: 'Failed to load stores',
+      categoryLoad: 'Failed to load categories',
+      marketLoad: 'Failed to load markets',
+      modelLoad: 'Failed to load model options',
+      fetchCustomTab: 'Failed to fetch custom tab',
+      updateError: 'Failed to update custom tab',
+      validation: {
+        requiredFields: 'All fields are required'
+      }
+    },
 
   "favorites": {
     "title": "My Favorites",

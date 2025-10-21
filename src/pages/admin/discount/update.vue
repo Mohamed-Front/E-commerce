@@ -11,15 +11,15 @@ import Calendar from 'primevue/calendar';
 import Button from 'primevue/button';
 import Toast from 'primevue/toast';
 import moment from 'moment';
+import { debounce } from 'lodash';
 
 // Validation Class
 class Validation {
   constructor(errorsRef, t) {
-    this.errors = errorsRef; // Use reactive ref for errors
-    this.t = t; // Translation function
+    this.errors = errorsRef;
+    this.t = t;
   }
 
-  // Validate required fields
   required(value, fieldName) {
     if (!value || (Array.isArray(value) && value.length === 0)) {
       this.errors.value[fieldName] = this.t('validation.requiredFields', { field: this.t(`discount.${fieldName}`) });
@@ -28,7 +28,6 @@ class Validation {
     return true;
   }
 
-  // Validate numeric range
   numericRange(value, fieldName, min, max) {
     if (value === null || value === undefined || isNaN(value)) {
       this.errors.value[fieldName] = this.t('validation.requiredFields', { field: this.t(`discount.${fieldName}`) });
@@ -45,7 +44,14 @@ class Validation {
     return true;
   }
 
-  // Check if valid
+  validDate(value, fieldName) {
+    if (!value || !(value instanceof Date) || isNaN(value.getTime())) {
+      this.errors.value[fieldName] = this.t('validation.invalidDate', { field: this.t(`discount.${fieldName}`) });
+      return false;
+    }
+    return true;
+  }
+
   isValid() {
     return Object.keys(this.errors.value).length === 0;
   }
@@ -66,85 +72,107 @@ const products = ref([]);
 const categorySearchQuery = ref('');
 const productSearchQuery = ref('');
 const discountId = ref(route.params.id);
-const errors = ref({}); // Reactive errors for field-specific display
+const errors = ref({});
 
 // Form Data
 const discountData = ref({
   type: '',
-  ids: [], // Array for multiple category IDs
-  products: [], // Array for product IDs
+  ids: [],
+  products: [],
   discount_type: null,
   discount_value: null,
   expires_at: null
 });
 
-// Fetch discount data
+// Debounced fetch functions for search
+const debouncedFetchCategories = debounce(fetchCategories, 300);
+const debouncedFetchProducts = debounce(fetchProducts, 300);
+
+/**
+ * Fetches the specific discount details and initializes the form.
+ */
 const fetchDiscount = async () => {
+  loading.value = true;
   try {
     const response = await axios.get(`/api/discount/${discountId.value}`);
-    const data = response.data.data;
+    const data = response.data?.data;
+    if (!data) throw new Error('Invalid discount data');
 
+    // Initialize form fields
     discountData.value = {
       type: data.type || '',
-      ids: Array.isArray(data.ids) ? data.ids : [],
-      products: data.type === 'product' ? (Array.isArray(data.ids) ? data.ids : []) : [],
       discount_type: data.discount_type || null,
       discount_value: parseFloat(data.discount_value) || null,
-      expires_at: data.expires_at ? new Date(data.expires_at) : null
+      expires_at: data.expires_at ? new Date(data.expires_at) : null,
+      ids: [],
+      products: []
     };
 
-    if (data.type === 'product' && data.ids.length > 0) {
-      await fetchCategories();
+    await fetchCategories();
+
+    // Handle data specific to discount type
+    if (data.type === 'product' && Array.isArray(data.ids) && data.ids.length > 0) {
+      discountData.value.products = data.ids;
       await fetchProductCategories(data.ids);
-    } else if (data.type === 'category') {
-      await fetchCategories();
+    } else if (data.type === 'category' && Array.isArray(data.ids) && data.ids.length > 0) {
       discountData.value.ids = data.ids.filter(id => categories.value.some(category => category.id === id));
     }
   } catch (error) {
     console.error('Error fetching discount:', error);
     toast.add({ severity: 'error', summary: t('error'), detail: t('error.discountLoad'), life: 3000 });
     router.push({ name: 'discount' });
+  } finally {
+    loading.value = false;
   }
 };
 
-// Fetch categories for product IDs (reverse lookup)
+/**
+ * Fetches parent categories for the given product IDs.
+ */
 const fetchProductCategories = async (productIds) => {
   try {
     const categoryIds = new Set();
-    for (const productId of productIds) {
-      const response = await axios.get(`/api/product/${productId}`);
-      const product = response.data.data;
-      if (product.category_id) {
-        categoryIds.add(product.category_id);
-      }
-    }
-    discountData.value.ids = Array.from(categoryIds);
+    const categoryPromises = productIds.map(productId =>
+      axios.get(`/api/product/${productId}`).then(response => {
+        const product = response.data?.data;
+        if (product?.category_id) {
+          categoryIds.add(product.category_id);
+        }
+      }).catch(() => {
+        // Silent fail for individual product fetch errors
+      })
+    );
+    await Promise.all(categoryPromises);
+
+    discountData.value.ids = Array.from(categoryIds).filter(id => categories.value.some(category => category.id === id));
+
     if (discountData.value.ids.length > 0) {
       await fetchProducts();
     }
   } catch (error) {
     console.error('Error fetching product categories:', error);
-    toast.add({ severity: 'error', summary: t('error'), detail: t('error.productLoad'), life: 3000 });
   }
 };
 
-// Fetch categories with search
-const fetchCategories = async () => {
+/**
+ * Fetches categories with search.
+ */
+async function fetchCategories() {
   try {
     const response = await axios.get('/api/category', {
-      params: {
-        search: categorySearchQuery.value || undefined
-      }
+      params: { search: categorySearchQuery.value || undefined }
     });
-    categories.value = response.data.data.data || [];
+    categories.value = response.data?.data?.data || [];
   } catch (error) {
     console.error('Error fetching categories:', error);
     toast.add({ severity: 'error', summary: t('error'), detail: t('error.categoryLoad'), life: 3000 });
   }
-};
+}
 
-// Fetch products with search and category filter
-const fetchProducts = async () => {
+/**
+ * Fetches products with search and category filter.
+ */
+async function fetchProducts() {
   try {
     const response = await axios.get('/api/product', {
       params: {
@@ -152,26 +180,25 @@ const fetchProducts = async () => {
         category_ids: discountData.value.ids.length > 0 ? discountData.value.ids.join(',') : undefined
       }
     });
-    products.value = response.data.data.data || [];
+    products.value = response.data?.data?.data || [];
   } catch (error) {
     console.error('Error fetching products:', error);
     toast.add({ severity: 'error', summary: t('error'), detail: t('error.productLoad'), life: 3000 });
   }
-};
+}
 
-// Handle category filter input
+// Handle filter inputs
 const onCategoryFilter = (event) => {
   categorySearchQuery.value = event.value;
-  fetchCategories();
+  debouncedFetchCategories();
 };
 
-// Handle product filter input
 const onProductFilter = (event) => {
   productSearchQuery.value = event.value;
-  fetchProducts();
+  debouncedFetchProducts();
 };
 
-// Watch for changes in type
+// Watch for type changes
 watch(() => discountData.value.type, (newType) => {
   discountData.value.ids = [];
   discountData.value.products = [];
@@ -182,31 +209,21 @@ watch(() => discountData.value.type, (newType) => {
   }
 });
 
-// Watch for changes in ids when type is 'product'
+// Watch for category changes
 watch(() => discountData.value.ids, (newCategoryIds) => {
   if (discountData.value.type === 'product' && newCategoryIds.length > 0) {
     fetchProducts();
-  } else {
+  } else if (discountData.value.type === 'product' && newCategoryIds.length === 0) {
     products.value = [];
     discountData.value.products = [];
   }
 }, { deep: true });
 
-// Watch for changes in categories
-watch(categories, () => {
-  if (discountData.value.type === 'category' && discountData.value.ids.length > 0) {
-    discountData.value.ids = discountData.value.ids.filter(id =>
-      categories.value.some(category => category.id === id)
-    );
-  }
-}, { deep: true });
-
 // Submit form
 const submitForm = async () => {
-  errors.value = {}; // Clear previous errors
+  errors.value = {};
   const validator = new Validation(errors, t);
 
-  // Validate fields
   validator.required(discountData.value.type, 'type');
   validator.required(discountData.value.ids, 'select_category');
   if (discountData.value.type === 'product') {
@@ -214,14 +231,14 @@ const submitForm = async () => {
   }
   validator.required(discountData.value.discount_type, 'discount_type');
   validator.numericRange(discountData.value.discount_value, 'discount_value', 0, discountData.value.discount_type === 2 ? 100 : null);
-  validator.required(discountData.value.expires_at, 'expiration_date');
+  validator.validDate(discountData.value.expires_at, 'expiration_date');
 
   if (!validator.isValid()) {
-    const errorMessage = Object.values(errors.value).join(', ');
+    const firstErrorKey = Object.keys(errors.value)[0];
     toast.add({
       severity: 'error',
       summary: t('error'),
-      detail: errorMessage,
+      detail: errors.value[firstErrorKey],
       life: 3000
     });
     return;
@@ -242,7 +259,7 @@ const submitForm = async () => {
     router.push({ name: 'discount' });
     toast.add({ severity: 'success', summary: t('success'), detail: t('discount.updated_successfully'), life: 3000 });
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error updating discount:', error);
     toast.add({
       severity: 'error',
       summary: t('error'),
@@ -263,9 +280,8 @@ onMounted(() => {
   <div v-can="'update discounts'" class="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow-lg" :dir="isRTL ? 'rtl' : 'ltr'">
     <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">{{ t('discount.update_discount') }}</h1>
 
-    <form @submit.prevent="submitForm" class="space-y-6">
+    <form @submit.prevent="submitForm" class="space-y-6" role="form" aria-label="Update Discount Form">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Discount Type -->
         <div class="space-y-2">
           <label for="type" class="block text-sm font-medium text-gray-700">
             {{ t('discount.type') }} <span class="text-red-500">*</span>
@@ -279,11 +295,12 @@ onMounted(() => {
             class="w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
             :class="{ 'p-invalid': errors.type }"
             :disabled="loading"
+            aria-required="true"
+            aria-describedby="type-error"
           />
-          <small v-if="errors.type" class="text-red-500 text-xs">{{ errors.type }}</small>
+          <small v-if="errors.type" id="type-error" class="text-red-500 text-xs">{{ errors.type }}</small>
         </div>
 
-        <!-- Category Selection -->
         <div class="space-y-2">
           <label for="ids" class="block text-sm font-medium text-gray-700">
             {{ t('discount.select_category') }} <span class="text-red-500">*</span>
@@ -301,11 +318,12 @@ onMounted(() => {
             :disabled="loading || !discountData.type"
             @filter="onCategoryFilter"
             display="chip"
+            aria-required="true"
+            aria-describedby="ids-error"
           />
-          <small v-if="errors.select_category" class="text-red-500 text-xs">{{ errors.select_category }}</small>
+          <small v-if="errors.select_category" id="ids-error" class="text-red-500 text-xs">{{ errors.select_category }}</small>
         </div>
 
-        <!-- Product Selection (only shown if type is 'product') -->
         <div v-if="discountData.type === 'product'" class="space-y-2">
           <label for="product_id" class="block text-sm font-medium text-gray-700">
             {{ t('discount.select_product') }} <span class="text-red-500">*</span>
@@ -323,11 +341,12 @@ onMounted(() => {
             :disabled="loading || discountData.ids.length === 0"
             @filter="onProductFilter"
             display="chip"
+            aria-required="true"
+            aria-describedby="product_id-error"
           />
-          <small v-if="errors.select_product" class="text-red-500 text-xs">{{ errors.select_product }}</small>
+          <small v-if="errors.select_product" id="product_id-error" class="text-red-500 text-xs">{{ errors.select_product }}</small>
         </div>
 
-        <!-- Discount Type -->
         <div class="space-y-2">
           <label for="discount_type" class="block text-sm font-medium text-gray-700">
             {{ t('discount.discount_type') }} <span class="text-red-500">*</span>
@@ -346,11 +365,12 @@ onMounted(() => {
             class="w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
             :class="{ 'p-invalid': errors.discount_type }"
             :disabled="loading"
+            aria-required="true"
+            aria-describedby="discount_type-error"
           />
-          <small v-if="errors.discount_type" class="text-red-500 text-xs">{{ errors.discount_type }}</small>
+          <small v-if="errors.discount_type" id="discount_type-error" class="text-red-500 text-xs">{{ errors.discount_type }}</small>
         </div>
 
-        <!-- Discount Value -->
         <div class="space-y-2">
           <label for="discount_value" class="block text-sm font-medium text-gray-700">
             {{ t('discount.discount_value') }} <span class="text-red-500">*</span>
@@ -364,14 +384,15 @@ onMounted(() => {
             class="w-full rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
             :class="{ 'p-invalid': errors.discount_value }"
             :disabled="loading"
+            aria-required="true"
+            aria-describedby="discount_value-error"
           />
           <small class="text-gray-500 text-xs" v-if="discountData.discount_type === 2">
             {{ t('discount.percentage_note') }}
           </small>
-          <small v-if="errors.discount_value" class="text-red-500 text-xs">{{ errors.discount_value }}</small>
+          <small v-if="errors.discount_value" id="discount_value-error" class="text-red-500 text-xs">{{ errors.discount_value }}</small>
         </div>
 
-        <!-- Expires At -->
         <div class="space-y-2">
           <label for="expires_at" class="block text-sm font-medium text-gray-700">
             {{ t('discount.expiration_date') }} <span class="text-red-500">*</span>
@@ -386,12 +407,13 @@ onMounted(() => {
             :class="{ 'p-invalid': errors.expiration_date }"
             :disabled="loading"
             :showIcon="true"
+            aria-required="true"
+            aria-describedby="expires_at-error"
           />
-          <small v-if="errors.expiration_date" class="text-red-500 text-xs">{{ errors.expiration_date }}</small>
+          <small v-if="errors.expiration_date" id="expires_at-error" class="text-red-500 text-xs">{{ errors.expiration_date }}</small>
         </div>
       </div>
 
-      <!-- Submit Button -->
       <div class="pt-4 flex justify-center space-x-4">
         <Button
           type="button"
@@ -400,6 +422,7 @@ onMounted(() => {
           @click="router.go(-1)"
           class="px-6 mx-2 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
           :disabled="loading"
+          aria-label="Cancel"
         />
         <Button
           type="submit"
@@ -408,6 +431,7 @@ onMounted(() => {
           :loading="loading"
           class="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
           :disabled="loading"
+          aria-label="Update Discount"
         >
           <span v-if="!loading">{{ t('discount.update_discount') }}</span>
           <i v-else class="pi pi-spinner pi-spin"></i>
@@ -419,7 +443,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* Smooth transitions */
 .transition-all {
   transition-property: all;
 }
@@ -430,23 +453,19 @@ onMounted(() => {
   transition-duration: 300ms;
 }
 
-/* Button gradient animation */
 button.bg-gradient-to-r:hover {
   background-size: 150% 100%;
 }
 
-/* RTL support */
 [dir="rtl"] .space-x-2 > :not([hidden]) ~ :not([hidden]) {
   margin-right: 0.5rem;
   margin-left: 0;
 }
 
-/* Invalid input styling */
 .p-invalid {
   border-color: #f44336 !important;
 }
 
-/* Custom scrollbar for dropdowns */
 :deep(.p-dropdown-panel .p-dropdown-items-wrapper),
 :deep(.p-multiselect-panel .p-multiselect-items-wrapper) {
   scrollbar-width: thin;
@@ -467,7 +486,6 @@ button.bg-gradient-to-r:hover {
   border-radius: 3px;
 }
 
-/* Calendar styling */
 :deep(.p-calendar) {
   width: 100%;
 }

@@ -6,11 +6,11 @@
     <!-- Tab Details -->
     <div v-if="tabDetails" class="card mb-6 transform hover:scale-[1.01] transition-transform duration-300">
       <h1 class="text-3xl font-bold mb-6 text-gray-800" :class="{ 'text-right': $t('dir') === 'rtl' }">
-        {{ tabDetails.name_ar }}
+        {{ tabDetails[labelField] }}
       </h1>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div>
-          <p class="text-lg"><strong>{{ $t('custom_tabs.store') }}:</strong> {{ tabDetails.store.name_en }}</p>
+          <p class="text-lg"><strong>{{ belongsToLabel }}:</strong> {{ belongsToName }}</p>
           <p class="text-lg"><strong>{{ $t('custom_tabs.name_en') }}:</strong> {{ tabDetails.name_en }}</p>
         </div>
         <div>
@@ -33,11 +33,11 @@
             v-model="newDetail.name_en"
             :placeholder="$t('custom_tabs.enter_name_en')"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-            :class="{ 'border-red-500': !isAddFormValid && !newDetail.name_en }"
+            :class="{ 'border-red-500': showAddValidationErrors && !newDetail.name_en }"
             aria-describedby="name_en_error"
             required
           />
-          <small v-if="!isAddFormValid && !newDetail.name_en" id="name_en_error" class="text-red-500">
+          <small v-if="showAddValidationErrors && !newDetail.name_en" id="name_en_error" class="text-red-500">
             {{ $t('custom_tabs.name_en_required') }}
           </small>
         </div>
@@ -49,36 +49,33 @@
             v-model="newDetail.name_ar"
             :placeholder="$t('custom_tabs.enter_name_ar')"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-            :class="{ 'border-red-500': !isAddFormValid && !newDetail.name_ar }"
+            :class="{ 'border-red-500': showAddValidationErrors && !newDetail.name_ar }"
             aria-describedby="name_ar_error"
             required
           />
-          <small v-if="!isAddFormValid && !newDetail.name_ar" id="name_ar_error" class="text-red-500">
+          <small v-if="showAddValidationErrors && !newDetail.name_ar" id="name_ar_error" class="text-red-500">
             {{ $t('custom_tabs.name_ar_required') }}
           </small>
         </div>
         <div class="space-y-2">
-          <label v-if="tabDetails?.type == 2" class="block text-sm font-medium text-gray-700" :class="{ 'text-right': $t('dir') === 'rtl' }">
-            {{ $t('custom_tabs.select_products') }} <span class="text-red-500">*</span>
-          </label>
-          <label v-else class="block text-sm font-medium text-gray-700" :class="{ 'text-right': $t('dir') === 'rtl' }">
-            {{ $t('custom_tabs.select_categories') }} <span class="text-red-500">*</span>
+          <label class="block text-sm font-medium text-gray-700" :class="{ 'text-right': $t('dir') === 'rtl' }">
+            {{ selectLabel }} <span class="text-red-500">*</span>
           </label>
           <MultiSelect
             v-model="newDetail.ids"
             :options="availableIds"
             :optionLabel="multiSelectLabel"
             optionValue="id"
-            :placeholder="tabDetails?.type == 2 ? $t('custom_tabs.select_products') : $t('custom_tabs.select_categories')"
+            :placeholder="selectPlaceholder"
             class="w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            :class="{ 'border-red-500': !isAddFormValid && !newDetail.ids.length }"
+            :class="{ 'border-red-500': showAddValidationErrors && !newDetail.ids.length }"
             aria-describedby="ids_error"
             filter
-            :filterPlaceholder="tabDetails?.type == 2 ? $t('custom_tabs.search_products') : $t('custom_tabs.search_categories')"
+            :filterPlaceholder="searchPlaceholder"
             @filter="onIdFilter"
             required
           />
-          <small v-if="!isAddFormValid && !newDetail.ids.length" id="ids_error" class="text-red-500">
+          <small v-if="showAddValidationErrors && !newDetail.ids.length" id="ids_error" class="text-red-500">
             {{ $t('custom_tabs.ids_required') }}
           </small>
         </div>
@@ -94,7 +91,7 @@
             :chooseLabel="$t('custom_tabs.select_image')"
             class="p-button-rounded"
           />
-          <small v-if="!isAddFormValid && !newDetail.image" class="text-red-500">
+          <small v-if="showAddValidationErrors && !newDetail.image" class="text-red-500">
             {{ $t('custom_tabs.image_required') }}
           </small>
         </div>
@@ -104,7 +101,6 @@
         icon="pi pi-plus"
         class="mt-6 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
         @click="addDetail"
-        :disabled="!isAddFormValid"
       />
     </div>
 
@@ -186,19 +182,19 @@
         </div>
         <div class="space-y-2">
           <label class="block text-sm font-medium text-gray-700" :class="{ 'text-right': $t('dir') === 'rtl' }">
-            {{ tabDetails?.type == 2 ? $t('custom_tabs.select_products') : $t('custom_tabs.select_categories') }} <span class="text-red-500">*</span>
+            {{ selectLabel }} <span class="text-red-500">*</span>
           </label>
           <MultiSelect
             v-model="editDetail.ids"
             :options="availableIds"
             :optionLabel="multiSelectLabel"
             optionValue="id"
-            :placeholder="tabDetails?.type == 2 ? $t('custom_tabs.select_products') : $t('custom_tabs.select_categories')"
+            :placeholder="selectPlaceholder"
             class="w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             :class="{ 'border-red-500': !isEditFormValid && !editDetail.ids.length }"
             aria-describedby="edit_ids_error"
             filter
-            :filterPlaceholder="tabDetails?.type == 2 ? $t('custom_tabs.search_products') : $t('custom_tabs.search_categories')"
+            :filterPlaceholder="searchPlaceholder"
             @filter="onIdFilter"
             required
           />
@@ -266,6 +262,7 @@ const { t } = useI18n();
 
 const tabDetails = ref(null);
 const showEditDialog = ref(false);
+const showAddValidationErrors = ref(false);
 const idSearchQuery = ref('');
 const newDetail = ref({
   custom_tab_id: route.params.id,
@@ -286,9 +283,51 @@ const editDetail = ref({
 const availableIds = ref([]);
 const appLanguage = ref(localStorage.getItem('appLang') || 'en');
 
-// Computed property to determine MultiSelect optionLabel based on language
-const multiSelectLabel = computed(() => {
-  return appLanguage.value === 'en' ? 'name_en' : 'name_ar';
+// Computed properties
+const labelField = computed(() => appLanguage.value === 'en' ? 'name_en' : 'name_ar');
+
+const multiSelectLabel = computed(() => labelField.value);
+
+const belongsToLabel = computed(() => {
+  switch (tabDetails.value?.belongs_to) {
+    case 'store':
+      return t('custom_tabs.store');
+    case 'category':
+      return t('custom_tabs.category');
+    case 'market':
+      return t('custom_tabs.market');
+    default:
+      return t('custom_tabs.unknown');
+  }
+});
+
+const belongsToName = computed(() => {
+  const entity = tabDetails.value?.[tabDetails.value.belongs_to];
+  return entity ? entity[labelField.value] : '';
+});
+
+const selectLabel = computed(() => {
+  const type = tabDetails.value?.type;
+  if (type === 1) return t('custom_tabs.select_categories');
+  if (type === 2) return t('custom_tabs.select_products');
+  if (type === 3) return t('custom_tabs.select_brands');
+  return t('custom_tabs.select_items');
+});
+
+const selectPlaceholder = computed(() => {
+  const type = tabDetails.value?.type;
+  if (type === 1) return t('custom_tabs.select_categories');
+  if (type === 2) return t('custom_tabs.select_products');
+  if (type === 3) return t('custom_tabs.select_brands');
+  return t('custom_tabs.select_items');
+});
+
+const searchPlaceholder = computed(() => {
+  const type = tabDetails.value?.type;
+  if (type === 1) return t('custom_tabs.search_categories');
+  if (type === 2) return t('custom_tabs.search_products');
+  if (type === 3) return t('custom_tabs.search_brands');
+  return t('custom_tabs.search_items');
 });
 
 // Form validation
@@ -305,13 +344,28 @@ const isEditFormValid = computed(() => {
          editDetail.value.ids.length > 0;
 });
 
+// Validate add form and show errors
+const validateAddForm = () => {
+  showAddValidationErrors.value = true;
+  if (!isAddFormValid.value) {
+    toast.add({
+      severity: 'error',
+      summary: t('error'),
+      detail: t('custom_tabs.validation_required'),
+      life: 3000,
+    });
+    return false;
+  }
+  return true;
+};
+
 // Fetch tab details
 const fetchDetails = async () => {
   try {
     const response = await axios.get(`/api/custom-tabs/${route.params.id}`);
     if (response.data.is_success) {
       tabDetails.value = response.data.data;
-      await fetchIds(); // Fetch products or categories based on tab type
+      await fetchIds(); // Fetch products, categories, or brands based on tab type
     } else {
       throw new Error(response.data.message);
     }
@@ -325,25 +379,33 @@ const fetchDetails = async () => {
   }
 };
 
-// Fetch products or categories with search support
+// Fetch products, categories, or brands with search support
 const fetchIds = async () => {
   try {
-    const endpoint = tabDetails.value?.type == 2 ? '/api/product' : '/api/category';
+    let endpoint;
+    const type = tabDetails.value?.type;
+    if (type === 1) endpoint = '/api/category';
+    else if (type === 2) endpoint = '/api/product';
+    else if (type === 3) endpoint = '/api/brand';
+    else return; // Unknown type, skip
+
     const response = await axios.get(endpoint, {
       params: {
         search: idSearchQuery.value || undefined,
       },
     });
-    availableIds.value = response.data.data.data.map(item => ({
-      ...item,
-      label: appLanguage.value === 'en' ? item.name_en : item.name_ar,
-      value: item.id,
-    }));
+    availableIds.value = response.data.data.data;
   } catch (error) {
+    let errorKey = 'items.loadError';
+    const type = tabDetails.value?.type;
+    if (type === 1) errorKey = 'category.loadError';
+    else if (type === 2) errorKey = 'product.loadError';
+    else if (type === 3) errorKey = 'brand.loadError';
+
     toast.add({
       severity: 'error',
       summary: t('error'),
-      detail: tabDetails.value?.type == 2 ? t('product.loadError') : t('category.loadError'),
+      detail: t(errorKey),
       life: 3000,
     });
   }
@@ -365,6 +427,8 @@ watch(appLanguage, () => {
 
 // Add new detail
 const addDetail = async () => {
+  if (!validateAddForm()) return;
+
   try {
     const formData = new FormData();
     formData.append('custom_tab_id', newDetail.value.custom_tab_id);
@@ -393,6 +457,7 @@ const addDetail = async () => {
         ids: [],
         image: null,
       };
+      showAddValidationErrors.value = false;
       await fetchDetails();
     }
   } catch (error) {

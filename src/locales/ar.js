@@ -848,6 +848,81 @@ export default {
     loadError: 'فشل في تحميل علامات التبويب المخصصة',
     deleteSuccess: 'تم حذف علامة التبويب المخصصة بنجاح',
     deleteError: 'فشل في حذف علامة التبويب المخصصة',
+    updateTitle: 'تحديث علامة التبويب المخصصة',
+      belongsTo: 'ينتمي إلى',
+      type: 'النوع',
+      modelId: 'النموذج',
+      rowType: 'نوع الصف',
+      nameEn: 'الاسم (إنجليزي)',
+      nameAr: 'الاسم (عربي)',
+      updateButton: 'تحديث',
+      cancelButton: 'إلغاء',
+      updateSuccess: 'تم تحديث علامة التبويب المخصصة بنجاح'
+  },
+  error: {
+      storeLoad: 'فشل في تحميل المتاجر',
+      categoryLoad: 'فشل في تحميل الفئات',
+      marketLoad: 'فشل في تحميل الأسواق',
+      modelLoad: 'فشل في تحميل خيارات النموذج',
+      fetchCustomTab: 'فشل في جلب علامة التبويب المخصصة',
+      updateError: 'فشل في تحديث علامة التبويب المخصصة',
+      validation: {
+        requiredFields: 'جميع الحقول مطلوبة'
+      }
+    },
+    "custom_tabs": {
+    "store": "متجر",
+    "category": "فئة",
+    "market": "سوق",
+    "unknown": "غير معروف",
+    "name_en": "الاسم (بالإنجليزية)",
+    "name_ar": "الاسم (بالعربية)",
+    "add_new_detail": "إضافة تفاصيل جديدة",
+    "enter_name_en": "أدخل الاسم بالإنجليزية",
+    "enter_name_ar": "أدخل الاسم بالعربية",
+    "select_categories": "اختر الفئات",
+    "select_products": "اختر المنتجات",
+    "select_brands": "اختر العلامات التجارية",
+    "select_items": "اختر العناصر",
+    "search_categories": "البحث في الفئات",
+    "search_products": "البحث في المنتجات",
+    "search_brands": "البحث في العلامات التجارية",
+    "search_items": "البحث في العناصر",
+    "image": "الصورة",
+    "select_image": "اختر صورة",
+    "add_detail": "إضافة تفاصيل",
+    "details": "التفاصيل",
+    "no_details": "لا توجد تفاصيل متاحة",
+    "detail_image": "صورة التفاصيل",
+    "current_image": "الصورة الحالية",
+    "edit_detail": "تعديل التفاصيل",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "name_en_required": "الاسم بالإنجليزية مطلوب",
+    "name_ar_required": "الاسم بالعربية مطلوب",
+    "ids_required": "يجب اختيار عنصر واحد على الأقل",
+    "image_required": "الصورة مطلوبة",
+    "validation_required": "يرجى ملء جميع الحقول المطلوبة",
+    "fetch_failed": "فشل في جلب تفاصيل التبويب",
+    "detail_added": "تمت إضافة التفاصيل بنجاح",
+    "detail_updated": "تم تحديث التفاصيل بنجاح",
+    "detail_deleted": "تم حذف التفاصيل بنجاح",
+    "add_failed": "فشل في إضافة التفاصيل",
+    "update_failed": "فشل في تحديث التفاصيل",
+    "delete_failed": "فشل في حذف التفاصيل",
+    "media": "الوسائط"
+  },
+  "category": {
+    "loadError": "فشل في تحميل الفئات"
+  },
+  "product": {
+    "loadError": "فشل في تحميل المنتجات"
+  },
+  "brand": {
+    "loadError": "فشل في تحميل العلامات التجارية"
+  },
+  "items": {
+    "loadError": "فشل في تحميل العناصر"
   },
     "favorites": {
     "title": "المفضلة",

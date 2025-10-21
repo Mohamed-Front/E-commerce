@@ -1,359 +1,398 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import axios from 'axios';
 import { useToast } from 'primevue/usetoast';
 import { useI18n } from 'vue-i18n';
-import axios from 'axios';
-import InputText from 'primevue/inputtext';
 import Dropdown from 'primevue/dropdown';
+import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import Toast from 'primevue/toast';
 
-const router = useRouter();
 const route = useRoute();
+const router = useRouter();
 const toast = useToast();
 const { t } = useI18n();
-const loading = ref(false);
-const tabsLoading = ref(false);
-const storesLoading = ref(false);
-const customTabs = ref([]);
-const stores = ref([]);
-const errors = ref({});
 
-// Form Data
+// Form state
 const formData = ref({
-  store_id: null,
-  type: null,
-  name_ar: '',
+  id: null,
+  belongs_to: null,
+  model_id: null,
   name_en: '',
-  row_type: null,
+  name_ar: '',
+  type: null,
+  row_type: null
 });
 
-// Type options for dropdown
-const typeOptions = [
-  { label: t('custom_tabs.categories'), value: 1 },
-  { label: t('custom_tabs.products'), value: 2 },
-];
+// Dropdown options
+const belongsToOptions = ref([
+  { label: 'Store', value: 'store' },
+  { label: 'Category', value: 'category' },
+  { label: 'Market', value: 'market' }
+]);
 
-// Row type options for dropdown
-const rowTypeOptions = [
-  { label: t('custom_tabs.single_row'), value: 1 },
-  { label: t('custom_tabs.double_rows'), value: 2 },
-];
+const typeOptions = ref([
+  { label: 'Categories', value: 1 },
+  { label: 'Products', value: 2 },
+  { label: 'Brand', value: 3 }
+]);
 
-// Fetch stores
+const rowTypeOptions = ref([
+  { label: 'Single Row', value: 1 },
+  { label: 'Double Rows', value: 2 }
+]);
+
+const stores = ref([]);
+const categories = ref([]);
+const markets = ref([]);
+
+// Search queries for server-side filtering
+const storeSearchQuery = ref('');
+const categorySearchQuery = ref('');
+const marketSearchQuery = ref('');
+
+// Selected model data
+const selectedModel = ref(null);
+
+// Language handling
+const currentLanguage = computed(() => localStorage.getItem('appLang') || 'en');
+const labelField = computed(() => currentLanguage.value === 'en' ? 'name_en' : 'name_ar');
+const isRTL = computed(() => currentLanguage.value === 'ar');
+
+// Loading states
+const loading = ref(false);
+const loadingData = ref(true);
+
+// Debounce function
+const debounce = (func, wait) => {
+  let timeout;
+  return function(...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  };
+};
+
+// Fetch dropdown data
 const fetchStores = async () => {
-  storesLoading.value = true;
   try {
-    const res = await axios.get('/api/store');
-    stores.value = res.data?.data.data || [];
-    if (!stores.value.length) {
-      toast.add({
-        severity: 'warn',
-        summary: t('warning'),
-        detail: t('custom_tabs.no_stores_found'),
-        life: 3000,
-      });
+    const response = await axios.get('/api/store', {
+      params: {
+        search: storeSearchQuery.value || undefined
+      }
+    });
+    stores.value = response.data.data.data || response.data.data || [];
+    if (selectedModel.value && formData.value.belongs_to === 'store' && !stores.value.some(item => item.id === selectedModel.value.id)) {
+      stores.value.push(selectedModel.value);
     }
   } catch (error) {
-    stores.value = [];
-    toast.add({
-      severity: 'error',
-      summary: t('error'),
-      detail: t('custom_tabs.fetch_stores_failed'),
-      life: 3000,
-    });
-  } finally {
-    storesLoading.value = false;
+    toast.add({ severity: 'error', summary: t('error'), detail: t('error.storeLoad'), life: 3000 });
   }
 };
 
-// Fetch existing custom tabs
-const fetchCustomTabs = async () => {
-  tabsLoading.value = true;
+const fetchCategories = async () => {
   try {
-    const res = await axios.get('/api/custom-tabs');
-    customTabs.value = res.data?.data.data || [];
-    if (!customTabs.value.length) {
-      toast.add({
-        severity: 'warn',
-        summary: t('warning'),
-        detail: t('custom_tabs.no_tabs_found'),
-        life: 3000,
-      });
+    const response = await axios.get('/api/category', {
+      params: {
+        search: categorySearchQuery.value || undefined
+      }
+    });
+    categories.value = response.data.data.data || response.data.data || [];
+    if (selectedModel.value && formData.value.belongs_to === 'category' && !categories.value.some(item => item.id === selectedModel.value.id)) {
+      categories.value.push(selectedModel.value);
     }
   } catch (error) {
-    customTabs.value = [];
-    toast.add({
-      severity: 'error',
-      summary: t('error'),
-      detail: t('custom_tabs.fetch_failed'),
-      life: 3000,
-    });
-  } finally {
-    tabsLoading.value = false;
+    toast.add({ severity: 'error', summary: t('error'), detail: t('error.categoryLoad'), life: 3000 });
   }
 };
 
-// Fetch single custom tab by ID
-const fetchCustomTabById = async (id) => {
-  loading.value = true;
+const fetchMarkets = async () => {
   try {
-    const res = await axios.get(`/api/custom-tabs/${id}`);
-    const tab = res.data?.data;
-    if (tab) {
-      formData.value = {
-        store_id: tab.store_id,
-        type: tab.type,
-        name_ar: tab.name_ar,
-        name_en: tab.name_en,
-        row_type: tab.row_type,
+    const response = await axios.get('/api/market', {
+      params: {
+        search: marketSearchQuery.value || undefined
+      }
+    });
+    markets.value = response.data.data.data || response.data.data || [];
+    if (selectedModel.value && formData.value.belongs_to === 'market' && !markets.value.some(item => item.id === selectedModel.value.id)) {
+      markets.value.push(selectedModel.value);
+    }
+  } catch (error) {
+    toast.add({ severity: 'error', summary: t('error'), detail: t('error.marketLoad'), life: 3000 });
+  }
+};
+
+// Debounced fetch functions
+const debouncedFetchStores = debounce(fetchStores, 300);
+const debouncedFetchCategories = debounce(fetchCategories, 300);
+const debouncedFetchMarkets = debounce(fetchMarkets, 300);
+
+// Handle model filter input for server-side search
+const onModelFilter = (event) => {
+  const searchValue = event.value;
+  if (formData.value.belongs_to === 'store') {
+    storeSearchQuery.value = searchValue;
+    debouncedFetchStores();
+  } else if (formData.value.belongs_to === 'category') {
+    categorySearchQuery.value = searchValue;
+    debouncedFetchCategories();
+  } else if (formData.value.belongs_to === 'market') {
+    marketSearchQuery.value = searchValue;
+    debouncedFetchMarkets();
+  }
+};
+
+// Fetch custom tab data by ID
+const fetchCustomTab = async (id) => {
+  try {
+    const response = await axios.get(`/api/custom-tabs/${id}`);
+    const customTab = response.data.data;
+    formData.value = {
+      id: customTab.id,
+      belongs_to: customTab.belongs_to,
+      model_id: customTab.model?.id || null,
+      name_en: customTab.name_en || '',
+      name_ar: customTab.name_ar || '',
+      type: customTab.type,
+      row_type: customTab.row_type
+    };
+
+    if (customTab.model && customTab.belongs_to) {
+      selectedModel.value = {
+        id: customTab.model.id,
+        name_en: customTab.model.name_en,
+        name_ar: customTab.model.name_ar
       };
-    } else {
-      toast.add({
-        severity: 'error',
-        summary: t('error'),
-        detail: t('custom_tabs.tab_not_found'),
-        life: 3000,
-      });
-      router.push({ name: 'custom-tabs' });
     }
+
+    // Fetch the lists after setting the form data and selected model
+    await Promise.all([fetchStores(), fetchCategories(), fetchMarkets()]);
   } catch (error) {
     toast.add({
       severity: 'error',
       summary: t('error'),
-      detail: t('custom_tabs.fetch_failed'),
-      life: 3000,
+      detail: error.response?.data?.message || t('error.fetchCustomTab'),
+      life: 3000
     });
     router.push({ name: 'custom-tabs' });
   } finally {
-    loading.value = false;
+    loadingData.value = false;
   }
 };
 
-// Validate form
-const validateForm = () => {
-  errors.value = {};
-  if (!formData.value.store_id) errors.value.store_id = t('custom_tabs.store_id_required');
-  if (![1, 2].includes(formData.value.type)) errors.value.type = t('custom_tabs.type_required');
-  if (!formData.value.name_ar) errors.value.name_ar = t('custom_tabs.name_ar_required');
-  if (!formData.value.name_en) errors.value.name_en = t('custom_tabs.name_en_required');
-  if (![1, 2].includes(formData.value.row_type)) errors.value.row_type = t('custom_tabs.row_type_required');
-  return Object.keys(errors.value).length === 0;
+// Reset form fields when belongs_to changes
+const resetFormFields = () => {
+  formData.value.model_id = null;
+  formData.value.type = null;
+  storeSearchQuery.value = '';
+  categorySearchQuery.value = '';
+  marketSearchQuery.value = '';
 };
 
-// Submit form (update)
+// Computed property for model dropdown options
+const modelDropdownOptions = computed(() => {
+  switch (formData.value.belongs_to) {
+    case 'store':
+      return stores.value;
+    case 'category':
+      return categories.value;
+    case 'market':
+      return markets.value;
+    default:
+      return [];
+  }
+});
+
+// Form submission for update
 const submitForm = async () => {
-  if (!validateForm()) {
-    toast.add({
-      severity: 'error',
-      summary: t('error'),
-      detail: t('custom_tabs.update_failed'),
-      life: 3000,
-    });
+  const requiredFields = ['belongs_to', 'model_id', 'name_en', 'name_ar', 'type', 'row_type'];
+
+  // Validate required fields
+  if (requiredFields.some(field => !formData.value[field] && formData.value[field] !== 0)) {
+    toast.add({ severity: 'error', summary: t('error'), detail: t('validation.requiredFields'), life: 3000 });
     return;
   }
+
   loading.value = true;
   try {
-    await axios.put(`/api/custom-tabs/${route.params.id}`, formData.value);
-    router.push({ name: 'custom-tabs' });
+    await axios.put(`/api/custom-tabs/${formData.value.id}`, formData.value);
     toast.add({
       severity: 'success',
       summary: t('success'),
-      detail: t('custom_tabs.updated_successfully'),
-      life: 3000,
+      detail: t('customTabs.updateSuccess'),
+      life: 3000
     });
   } catch (error) {
     toast.add({
       severity: 'error',
       summary: t('error'),
-      detail: error.response?.data?.message || t('custom_tabs.update_failed'),
-      life: 3000,
+      detail: error.response?.data?.message || t('error.updateError'),
+      life: 3000
     });
   } finally {
     loading.value = false;
   }
 };
 
-onMounted(() => {
-  fetchStores();
-  fetchCustomTabs();
-  if (route.params.id) {
-    fetchCustomTabById(route.params.id);
-  } else {
-    toast.add({
-      severity: 'error',
-      summary: t('error'),
-      detail: t('custom_tabs.invalid_id'),
-      life: 3000,
-    });
-    router.push({ name: 'custom-tabs' });
+// Watch for route ID changes
+watch(() => route.params.id, (newId) => {
+  if (newId) {
+    loadingData.value = true;
+    fetchCustomTab(newId);
   }
-});
+}, { immediate: true });
+
 </script>
 
 <template>
-  <div class="max-w-3xl mx-auto p-6 bg-white rounded-xl shadow-lg">
-    <h1 id="form-title" class="text-3xl font-bold text-center mb-8 text-gray-800" role="heading" aria-level="1">
-      {{ $t('custom_tabs.edit_tab') }}
-    </h1>
+  <div v-can="'update custom tabs'" class="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow-lg" :dir="isRTL ? 'rtl' : 'ltr'">
+    <div v-if="loadingData" class="flex justify-center items-center h-64">
+      <i class="pi pi-spin pi-spinner text-4xl text-gray-500"></i>
+    </div>
 
-    <form @submit.prevent="submitForm" class="space-y-6" role="form" aria-labelledby="form-title">
-      <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <!-- Store ID -->
-        <div class="space-y-2">
-          <label for="store_id" class="block text-sm font-medium text-gray-700">
-            {{ $t('custom_tabs.store_id') }} <span class="text-red-500">*</span>
-          </label>
-          <Dropdown
-            filter
-            id="store_id"
-            v-model="formData.store_id"
-            :options="stores"
-            optionLabel="name_en"
-            optionValue="id"
-            :placeholder="storesLoading ? $t('loading') : $t('custom_tabs.select_store')"
-            :disabled="storesLoading || loading"
-            class="w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            :class="{ 'border-red-500': errors.store_id }"
-            aria-describedby="store_id_error"
-            required
-          />
-          <small v-if="errors.store_id" id="store_id_error" class="text-red-500">
-            {{ errors.store_id }}
-          </small>
+    <div v-else>
+      <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">{{ t('customTabs.updateTitle') }}</h1>
+
+      <form @submit.prevent="submitForm" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Belongs To Selection -->
+          <div class="space-y-2">
+            <label for="belongs_to" class="block text-sm font-medium text-gray-700">
+              {{ t('customTabs.belongsTo') }} <span class="text-red-500">*</span>
+            </label>
+            <Dropdown
+              id="belongs_to"
+              v-model="formData.belongs_to"
+              :options="belongsToOptions"
+              optionLabel="label"
+              optionValue="value"
+              class="w-full"
+              :class="{ 'p-invalid': !formData.belongs_to }"
+              @change="resetFormFields"
+              :disabled="loading"
+            />
+          </div>
+
+          <!-- Type Selection -->
+          <div class="space-y-2">
+            <label for="type" class="block text-sm font-medium text-gray-700">
+              {{ t('customTabs.type') }} <span class="text-red-500">*</span>
+            </label>
+            <Dropdown
+              id="type"
+              v-model="formData.type"
+              :options="typeOptions"
+              optionLabel="label"
+              optionValue="value"
+              class="w-full"
+              :class="{ 'p-invalid': !formData.type && formData.type !== 0 }"
+              :disabled="loading"
+            />
+          </div>
+
+          <!-- Model ID Selection -->
+          <div class="space-y-2">
+            <label for="model_id" class="block text-sm font-medium text-gray-700">
+              {{ t('customTabs.modelId') }} <span class="text-red-500">*</span>
+            </label>
+            <Dropdown
+              id="model_id"
+              v-model="formData.model_id"
+              :options="modelDropdownOptions"
+              :optionLabel="labelField"
+              optionValue="id"
+              class="w-full"
+              :class="{ 'p-invalid': !formData.model_id && formData.model_id !== 0 }"
+              :disabled="!formData.belongs_to || loading"
+              filter
+              filterPlaceholder="Search"
+              @filter="onModelFilter"
+            />
+          </div>
+
+          <!-- Row Type Selection -->
+          <div class="space-y-2">
+            <label for="row_type" class="block text-sm font-medium text-gray-700">
+              {{ t('customTabs.rowType') }} <span class="text-red-500">*</span>
+            </label>
+            <Dropdown
+              id="row_type"
+              v-model="formData.row_type"
+              :options="rowTypeOptions"
+              optionLabel="label"
+              optionValue="value"
+              class="w-full"
+              :class="{ 'p-invalid': !formData.row_type && formData.row_type !== 0 }"
+              :disabled="loading"
+            />
+          </div>
+
+          <!-- English Name -->
+          <div class="space-y-2">
+            <label for="name_en" class="block text-sm font-medium text-gray-700">
+              {{ t('customTabs.nameEn') }} <span class="text-red-500">*</span>
+            </label>
+            <InputText
+              id="name_en"
+              v-model="formData.name_en"
+              class="w-full"
+              :class="{ 'p-invalid': !formData.name_en }"
+              :disabled="loading"
+            />
+          </div>
+
+          <!-- Arabic Name -->
+          <div class="space-y-2">
+            <label for="name_ar" class="block text-sm font-medium text-gray-700">
+              {{ t('customTabs.nameAr') }} <span class="text-red-500">*</span>
+            </label>
+            <InputText
+              id="name_ar"
+              v-model="formData.name_ar"
+              dir="rtl"
+              class="w-full"
+              :class="{ 'p-invalid': !formData.name_ar }"
+              :disabled="loading"
+            />
+          </div>
         </div>
 
-        <!-- Type -->
-        <div class="space-y-2">
-          <label for="type" class="block text-sm font-medium text-gray-700">
-            {{ $t('custom_tabs.type') }} <span class="text-red-500">*</span>
-          </label>
-          <Dropdown
-            filter
-            id="type"
-            v-model="formData.type"
-            :options="typeOptions"
-            optionLabel="label"
-            optionValue="value"
-            :placeholder="tabsLoading ? $t('loading') : $t('custom_tabs.select_type')"
-            :disabled="tabsLoading || loading"
-            class="w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            :class="{ 'border-red-500': errors.type }"
-            aria-describedby="type_error"
-            required
+        <!-- Submit Buttons -->
+        <div class="pt-4 flex justify-center space-x-4">
+          <Button
+            type="button"
+            :label="t('customTabs.cancelButton')"
+            icon="pi pi-times"
+            @click="router.push({ name: 'custom-tabs' })"
+            class="p-button-outlined p-button-secondary text-sm mx-2"
+            :disabled="loading || loadingData"
           />
-          <small v-if="errors.type" id="type_error" class="text-red-500">
-            {{ errors.type }}
-          </small>
-        </div>
-
-        <!-- Name (Arabic) -->
-        <div class="space-y-2">
-          <label for="name_ar" class="block text-sm font-medium text-gray-700">
-            {{ $t('custom_tabs.name_ar') }} <span class="text-red-500">*</span>
-          </label>
-          <InputText
-            id="name_ar"
-            v-model="formData.name_ar"
-            :placeholder="$t('custom_tabs.enter_name_ar')"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-            :class="{ 'border-red-500': errors.name_ar }"
-            :disabled="loading"
-            aria-describedby="name_ar_error"
-            required
+          <Button
+            type="submit"
+            :label="t('customTabs.updateButton')"
+            icon="pi pi-check"
+            :loading="loading"
+            class="p-button-success text-sm mx-2"
+            :disabled="loadingData"
           />
-          <small v-if="errors.name_ar" id="name_ar_error" class="text-red-500">
-            {{ errors.name_ar }}
-          </small>
         </div>
+      </form>
+    </div>
 
-        <!-- Name (English) -->
-        <div class="space-y-2">
-          <label for="name_en" class="block text-sm font-medium text-gray-700">
-            {{ $t('custom_tabs.name_en') }} <span class="text-red-500">*</span>
-          </label>
-          <InputText
-            id="name_en"
-            v-model="formData.name_en"
-            :placeholder="$t('custom_tabs.enter_name_en')"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-            :class="{ 'border-red-500': errors.name_en }"
-            :disabled="loading"
-            aria-describedby="name_en_error"
-            required
-          />
-          <small v-if="errors.name_en" id="name_en_error" class="text-red-500">
-            {{ errors.name_en }}
-          </small>
-        </div>
-
-        <!-- Row Type -->
-        <div class="space-y-2">
-          <label for="row_type" class="block text-sm font-medium text-gray-700">
-            {{ $t('custom_tabs.row_type') }} <span class="text-red-500">*</span>
-          </label>
-          <Dropdown
-            id="row_type"
-            v-model="formData.row_type"
-            :options="rowTypeOptions"
-            optionLabel="label"
-            optionValue="value"
-            :placeholder="tabsLoading ? $t('loading') : $t('custom_tabs.select_row_type')"
-            :disabled="tabsLoading || loading"
-            class="w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            :class="{ 'border-red-500': errors.row_type }"
-            aria-describedby="row_type_error"
-            required
-          />
-          <small v-if="errors.row_type" id="row_type_error" class="text-red-500">
-            {{ errors.row_type }}
-          </small>
-        </div>
-      </div>
-
-      <!-- Submit and Cancel Buttons -->
-      <div class="pt-4 flex justify-center space-x-4">
-        <Button
-          type="submit"
-          :label="$t('custom_tabs.update_tab')"
-          icon="pi pi-check"
-          :loading="loading"
-          class="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
-          :disabled="loading"
-        >
-          <span v-if="!loading">{{ $t('custom_tabs.update_tab') }}</span>
-          <i v-else class="pi pi-spinner pi-spin"></i>
-        </Button>
-        <Button
-          type="button"
-          :label="$t('cancel')"
-          icon="pi pi-times"
-          class="px-8 py-3 mx-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
-          @click="router.push({ name: 'custom-tabs' })"
-          :disabled="loading"
-        />
-      </div>
-    </form>
+    <Toast />
   </div>
-
-  <Toast />
 </template>
 
 <style scoped>
-/* Smooth transitions */
-.transition-all {
-  transition-property: all;
-}
-.transition-colors {
-  transition-property: background-color, border-color, color;
-}
-.duration-300 {
-  transition-duration: 300ms;
+.p-dropdown, .p-inputtext {
+  width: 100%;
 }
 
-/* Input styling */
-:deep(.p-inputtext), :deep(.p-dropdown) {
-  width: 100%;
+.p-card {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.p-invalid {
+  border-color: #bab0af !important;
 }
 </style>
