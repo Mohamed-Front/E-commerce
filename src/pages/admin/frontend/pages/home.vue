@@ -165,8 +165,9 @@ const goCatgory = (data) => {
     }
   }
 
-  onBeforeMount(async () => {
-    await Promise.all([loaddata(),])
+  onBeforeMount( () => {
+    loaddata()
+
   });
 </script>
 

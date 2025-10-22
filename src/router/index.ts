@@ -47,6 +47,29 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../pages/admin/frontend/pages/products/brand-products.vue'),
       },
       {
+        name: 'customtap-products',
+        path: '/customtap-products/:id',
+        component: () => import('../pages/admin/frontend/pages/customtap/customtap-products.vue'),
+        props: route => ({
+          title: route.query.title
+        })
+      },
+       {
+        name: 'customtap-category',
+        path: '/customtap-category/:id',
+        component: () => import('../pages/admin/frontend/pages/customtap/customtap-category.vue'),
+         props: route => ({
+          title: route.query.title
+        })
+      }, {
+        name: 'customtap-brand',
+        path: '/customtap-brand/:id',
+        component: () => import('../pages/admin/frontend/pages/customtap/customtap-brand.vue'),
+         props: route => ({
+          title: route.query.title
+        })
+      },
+      {
         name: 'Product-details',
         path: '/product-details/:id',
         component: () => import('../pages/admin/frontend/pages/products/product-details.vue'),

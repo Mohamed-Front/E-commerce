@@ -1,6 +1,5 @@
-<!-- src/views/Home.vue -->
 <template>
-  <div class="mx-auto px-4 max-w-[1500px] ">
+  <div class="mx-auto px-4 max-w-[1500px]">
     <!-- Custom Tabs -->
     <div v-for="tab in customTabs" :key="tab.id">
       <div class="flex items-center justify-between">
@@ -42,7 +41,7 @@
           v-for="(detail, i) in tab.details"
           :key="i"
           class="group flex flex-col items-start cursor-pointer transition-all pb-[1%] rounded-lg shadow-lg duration-300 hover:-translate-y-2"
-          @click="router.push({ name: 'Product-details', params: { id: detail.ids[0] } })"
+          @click="navigateToDetail(tab.type, detail.id, locale === 'ar' ? detail.name_ar : detail.name_en)"
         >
           <!-- تغيير نسبة العرض إلى الارتفاع إلى 4/3 (مستطيل) -->
           <div class="w-full aspect-[3.3/4] overflow-hidden rounded-xl shadow-sm relative">
@@ -60,7 +59,6 @@
           >
             {{ locale === 'ar' ? detail.name_ar : detail.name_en }}
           </p>
-
         </SwiperSlide>
       </swiper>
     </div>
@@ -72,28 +70,16 @@ import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Autoplay, Grid } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/grid'
-import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, computed, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
-
 
 const locale = ref(localStorage.getItem('appLang') || 'ar')
 const stores = ref([])
 const customTabs = ref([])
-const isDropdownOpen = ref(false)
 const storeId = ref(localStorage.getItem('defaultStoreId') || null)
 const router = useRouter()
-
-// Computed property to get the selected store
-const selectedStore = computed(() => {
-  return stores.value.find(store => store.id === parseInt(storeId.value)) || null
-})
-
-// Helper function to get the store image URL
-const getStoreImage = (store) => {
-  const storeImage = store.media?.find(mediaItem => mediaItem.name === 'store_image')
-  return storeImage ? storeImage.url : null
-}
+const route = useRoute()
 
 // Fetch stores
 const fetchStores = async () => {
@@ -110,37 +96,41 @@ const fetchStores = async () => {
   }
 }
 
-// Fetch custom tabs
+// Fetch custom tabs based on route
 const fetchCustomTabs = async () => {
   try {
-    const response = await axios.get(`/api/home/get-custom-tab/${storeId.value}`)
+    const type = ['home', 'stores-hasmarket'].includes(route.name) ? 'store' : 'category'
+    const id = route.params.id || storeId.value
+    if (!id) {
+      console.error('No store ID available')
+      return
+    }
+    const response = await axios.get(`/api/home/get-custom-tab/${type}/${id}`)
     customTabs.value = response.data.data.data
   } catch (error) {
     console.error('Error fetching custom tabs:', error)
   }
 }
 
-// Toggle dropdown
-const toggleDropdown = () => {
-  isDropdownOpen.value = !isDropdownOpen.value
-}
-
-// Select store and fetch custom tabs
-const selectStore = (id) => {
-  storeId.value = id
-  localStorage.setItem('defaultStoreId', id)
-  isDropdownOpen.value = false
-  fetchCustomTabs()
-  router.push({ name: 'stores-hasmarket', params: { id } })
-}
-
-// Toggle language
-const toggleLang = () => {
-  const currentLang = localStorage.getItem('appLang') || 'en'
-  const newLang = currentLang === 'en' ? 'ar' : 'en'
-  localStorage.setItem('appLang', newLang)
-  locale.value = newLang
-  window.location.reload()
+// Navigation logic based on tab type, passing name as title
+const navigateToDetail = (type, id, name) => {
+  console.log(name)
+  let routeName
+  switch (type) {
+    case 1:
+      routeName = 'customtap-category'
+      break
+    case 2:
+      routeName = 'customtap-products'
+      break
+    case 3:
+      routeName = 'customtap-brand'
+      break
+    default:
+      console.error('Unknown tab type:', type)
+      return
+  }
+  router.push({ name: routeName, params: { id }, query: { title: name } })
 }
 
 // Add to cart placeholder
@@ -148,10 +138,21 @@ const addToCart = (detail) => {
   console.log('Added to cart:', detail)
 }
 
+// Watch route changes
+watch(
+  () => route.name,
+  () => {
+    if (storeId.value || route.params.id) {
+      fetchCustomTabs()
+    }
+  },
+  { immediate: true }
+)
+
 // Initialize data on mount
 onMounted(() => {
   fetchStores()
-  if (storeId.value) {
+  if (storeId.value || route.params.id) {
     fetchCustomTabs()
   }
 })

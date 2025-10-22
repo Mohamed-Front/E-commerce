@@ -227,15 +227,13 @@ const fetchSubCategoryProducts = async () => {
 
 
 // Fetch all data
-const fetchAllData = async () => {
+const fetchAllData =  () => {
   isLoading.value = true;
   error.value = null;
-  await Promise.allSettled([
-    fetchCategoryData(),
+  fetchCategoryData()
 
-  ]);
   if (subCategories.value.length) {
-    await fetchSubCategoryProducts();
+     fetchSubCategoryProducts();
   }
   isLoading.value = false;
 };

@@ -12,7 +12,7 @@
 
         <!-- more products -->
         <!-- Exclusive_offers -->
-        <productsSwiper v-if="exclusive_offers.length >=1" :products="exclusive_offers" />
+        <productsSwiper  :products="exclusive_offers" />
         <!-- best_seller -->
         <productsSwiper  :products="Best_seller" />
         <!-- New_arrival -->
@@ -128,8 +128,8 @@
     isLoading.value = true
     error.value = null
     try {
-      const response = await axios.get(`api/home/exclusive-offers/${stor_id.value}`)
-      const data = response.data.data || []
+      const response = await axios.get(`api/home/discounts/${stor_id.value}`)
+      const data = response.data.data.data || []
       exclusive_offers.value = {
         title: t('category.exclusive') || 'New Arrivals',
         products: data.map((product) => ({

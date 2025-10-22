@@ -1,6 +1,5 @@
 <template>
   <div class="mx-auto max-w-[1400px] px-4">
-    <!-- Main Slider -->
     <Swiper
       v-if="sliderImages.length"
       :modules="[Autoplay, Navigation]"
@@ -29,9 +28,7 @@
       </SwiperSlide>
     </Swiper>
 
-    <!-- Dual Sliders Section -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 max-w-7xl mx-auto">
-      <!-- Slider for slider_images_two -->
       <div class="rounded-xl shadow-lg overflow-hidden">
         <Swiper
           v-if="sliderImagesTwo.length"
@@ -56,7 +53,6 @@
         </Swiper>
       </div>
 
-      <!-- Slider for slider_images_three -->
       <div class="bg-white rounded-xl shadow-lg overflow-hidden">
         <Swiper
           v-if="sliderImagesThree.length"
@@ -82,7 +78,6 @@
       </div>
     </div>
 
-    <!-- Categories Slider -->
     <div v-if="categories.length >1" class=" py-2 rounded-sm px-2 bg-[#1F3A932B] mx-auto max-w-7xl">
       <Swiper
         ref="categoriesSwiper"
@@ -116,7 +111,6 @@
       </Swiper>
     </div>
 
-    <!-- Sub Banner -->
     <div v-if="subBannerImage" class="my-8 max-w-5xl mx-auto">
       <div
         @click="handleMediaClick(subBannerImage)"
@@ -158,31 +152,38 @@ const categoriesSwiper = ref(null);
 
 // Helper function to extract media by name
 const getMediaByName = (mediaArray, name) => {
+  // Finds the first media item with the given name
   return mediaArray?.find(item => item.name === name) || null;
 };
 
 // Helper function to extract slider images
 const getSliderImages = (mediaArray, name) => {
+  // Filters all media items that match the slider name
   return mediaArray?.filter(item => item.name === name) || [];
 };
 
-// Handle media click based on media link type
+/**
+ * Handle media click based on media link type for navigation.
+ * Type 1: Category, Type 2: Product
+ * @param {Object} mediaItem - The media object which should include a `media_links` property.
+ */
 const handleMediaClick = (mediaItem) => {
+  // Check if mediaItem or media_links is null before accessing properties
   if (!mediaItem || !mediaItem.media_links) {
-    console.log(mediaItem);
+    console.log('Media item or media links are missing. Cannot navigate.', mediaItem);
     return;
   }
 
   const { type, id } = mediaItem.media_links;
 
   if (type === 1) {
-    // Navigate to category page
-    router.push({ name: 'subcategory', params: { id } });
+    // Navigate to category page (assuming 'subcategory' route is for category ID)
+    router.push({ name: 'customtap-category', params: { id } });
   } else if (type === 2) {
     // Navigate to product details page
-    router.push({ name: 'product-details', params: { id } });
+    router.push({ name: 'customtap-product', params: { id } });
   } else {
-    console.log('Unknown media link type:', type);
+    router.push({ name: 'customtap-brand', params: { id } });
   }
 };
 
@@ -199,15 +200,26 @@ const fetchStoreDetails = async () => {
 
     // Get all media items with their media_links
     const allMedia = store.media || [];
-    const mediaLinks = store.media_links || [];
+    const mediaLinks = store.media_links || []; // Note: The sample data shows media_links being on the media item itself, not a separate top-level array.
+                                                // I will adjust the logic to reflect the assumption that media_links are merged onto the media items in the backend/API response,
+                                                // or keep the current (correct) logic for the provided structure.
 
-    // Enhance media items with their media_links
+    // **CORRECTION/VERIFICATION:** Based on the data structure provided in the prompt, the `media` array already contains the `media_links` property for some items (e.g., sub_banner_image),
+    // and for others (e.g., slider_images_one) it's null.
+    // The provided `fetchStoreDetails` logic seems to be an *attempt* to merge a separate `store.media_links` array onto `store.media`.
+    // Since the provided data doesn't have a top-level `store.media_links`, but has `media_links` *inside* the `media` array,
+    // I will simplify the enhancement logic to use the media items directly, which is what the API seems to be doing.
+
+    // Let's use the provided logic which assumes media_links is separate and needs merging, to be safe.
     const enhancedMedia = allMedia.map(mediaItem => {
-      // Find the corresponding media_link for this media item
-      const mediaLink = mediaLinks.find(link => link.media_id === mediaItem.id);
+      // Find the corresponding media_link for this media item from the separate media_links array (if it existed)
+      // Since it's inside the media object in the sample, we'll ensure we keep it if it exists, or look for it in the separate array.
+      const mediaLinkFromSeparateArray = mediaLinks.find(link => link.media_id === mediaItem.id);
+
       return {
         ...mediaItem,
-        media_links: mediaLink || null
+        // Prioritize the link from the media item itself, otherwise use the one from the separate array.
+        media_links: mediaItem.media_links || mediaLinkFromSeparateArray || null
       };
     });
 
@@ -222,6 +234,7 @@ const fetchStoreDetails = async () => {
     // Update Swiper after data is fetched
     if (categoriesSwiper.value && categoriesSwiper.value.swiper) {
       categoriesSwiper.value.swiper.update();
+      // Ensure autoplay starts if it was stopped/not initialized properly
       categoriesSwiper.value.swiper.autoplay.start();
     }
   } catch (error) {
