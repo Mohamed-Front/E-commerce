@@ -14,9 +14,7 @@
     </div>
 
     <div v-else v-for="tab in customTabs" :key="tab.id" class="m-auto max-w-7xl">
-      <h2 class="font-bold font-sans text-gray-600 lg:mt-4 xs:mt-2 xs:text-lg text-center sm:text-xl md:text-2xl lg:text-3xl">
-        {{ title || (locale === 'ar' ? tab.name_ar : tab.name_en) || 'Category' }}
-      </h2>
+
       <div
         class="mt-6 grid gap-x-4 gap-y-8"
         :class="
@@ -137,7 +135,7 @@ const fetchCustomTabs = async (id, page = 1) => {
   isLoading.value = true
   error.value = null
 
-  const url = `/api/home/get-custom-tab-details/${id}?limit=${perPageLimit.value}&page=${page}`
+  const url = `/api/home/get-media-link/details/${route.params.id}?limit=${perPageLimit.value}&page=${page}`
 
   try {
     const response = await axios.get(url)
@@ -173,14 +171,19 @@ const fetchCustomTabs = async (id, page = 1) => {
     error.value = t('error.fetchFailed') || 'Failed to load custom content.'
   } finally {
     isLoading.value = false
-    router.push({ query: { ...route.query } }).catch(() => {})
+    router.push({ query: { ...route.query} }).catch(() => {})
   }
 }
 
 // --- Navigation ---
-const navigateToDetail = ( id) => {
-
-  router.push({ name: 'products-brand', params: { id:id } })
+const navigateToDetail = (hasSubcategories, id, name) => {
+  let routeName
+  if (hasSubcategories) {
+    routeName = 'customtap-category'
+  } else {
+    routeName = 'customtap-products'
+  }
+  router.push({ name: routeName, params: { id }, query: { title: name } })
 }
 
 // --- Pagination ---

@@ -34,11 +34,7 @@
     </div>
 
     <div v-else class="m-auto max-w-7xl">
-      <h2
-        class="font-bold font-sans text-gray-600 lg:mt-4 xs:mt-2 xs:text-lg text-center sm:text-xl md:text-2xl lg:text-3xl"
-      >
-        {{ title || t('products.allProducts') || 'Products' }}
-      </h2>
+
 
       <div
         class="mt-6 grid gap-x-4 gap-y-8 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5"
@@ -241,7 +237,7 @@ const fetchProducts = async (id, page = 1) => {
   // IMPORTANT: Replaced custom tab API with a generic products API
   // You might need to adjust the API path and parameters based on how your backend expects filtering.
   // For this example, I'm assuming /api/home/products returns a paginated list of products.
-  const url = `/api/home/get-custom-tab-details/${route.params.id}?limit=${perPageLimit.value}&page=${page}`;
+  const url = `/api/home/get-media-link/details/${route.params.id}?limit=${perPageLimit.value}&page=${page}`;
 
   try {
     const response = await axios.get(url);

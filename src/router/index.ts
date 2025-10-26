@@ -46,6 +46,19 @@ const routes: Array<RouteRecordRaw> = [
         path: '/products-brand/:id',
         component: () => import('../pages/admin/frontend/pages/products/brand-products.vue'),
       },
+
+      {
+        name: 'media-products',
+        path: '/media-products/:id',
+        component: () => import('../pages/admin/frontend/pages/media-links/media-products.vue'),
+
+      },
+       {
+        name: 'media-category',
+        path: '/media-category/:id',
+        component: () => import('../pages/admin/frontend/pages/media-links/media-category.vue'),
+
+      },
       {
         name: 'customtap-products',
         path: '/customtap-products/:id',

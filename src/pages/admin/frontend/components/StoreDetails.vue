@@ -23,6 +23,7 @@
             :src="image.url"
             :alt="`Slider Image ${index + 1}`"
             class="w-full h-full object-cover rounded-xl transform hover:scale-105 transition-transform duration-500"
+            loading="lazy"
           />
         </div>
       </SwiperSlide>
@@ -38,7 +39,7 @@
           :autoplay="{ delay: 2500, disableOnInteraction: false }"
           class="w-full h-full"
         >
-          <SwiperSlide v-for="(image, index) in sliderImagesTwo" :key="'two-'+index">
+          <SwiperSlide v-for="(image, index) in sliderImagesTwo" :key="'two-' + index">
             <div
               @click="handleMediaClick(image)"
               class="flex w-full max-h-64 items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl overflow-hidden cursor-pointer"
@@ -47,6 +48,7 @@
                 :src="image.url"
                 :alt="`Slider Two Image ${index + 1}`"
                 class="w-full h-64 object-cover rounded-xl transform hover:scale-105 transition-transform duration-500"
+                loading="lazy"
               />
             </div>
           </SwiperSlide>
@@ -62,7 +64,7 @@
           :autoplay="{ delay: 2500, disableOnInteraction: false }"
           class="w-full h-full"
         >
-          <SwiperSlide v-for="(image, index) in sliderImagesThree" :key="'three-'+index">
+          <SwiperSlide v-for="(image, index) in sliderImagesThree" :key="'three-' + index">
             <div
               @click="handleMediaClick(image)"
               class="flex w-full h-64 items-center justify-center bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl overflow-hidden cursor-pointer"
@@ -71,6 +73,7 @@
                 :src="image.url"
                 :alt="`Slider Three Image ${index + 1}`"
                 class="w-full h-full object-cover rounded-xl transform hover:scale-105 transition-transform duration-500"
+                loading="lazy"
               />
             </div>
           </SwiperSlide>
@@ -78,10 +81,10 @@
       </div>
     </div>
 
-    <div v-if="categories.length >1" class=" py-2 rounded-sm px-2 bg-[#1F3A932B] mx-auto max-w-7xl">
+    <div v-if="categories.length > 1" class="py-2 rounded-sm px-2 bg-[#1F3A932B] mx-auto max-w-7xl">
       <Swiper
         ref="categoriesSwiper"
-        :modules="[Autoplay]"
+        :modules="[Autoplay, Pagination]"
         :slides-per-view="8"
         :space-between="10"
         :navigation="false"
@@ -102,6 +105,7 @@
               :src="category?.media[0]?.url"
               :alt="category.name_en || 'Category Image'"
               class="w-full h-full object-cover rounded-xl"
+              loading="lazy"
             />
             <div class="p-3 w-full text-center rounded-xl">
               <span class="font-bold text-sm text-black">{{ category?.name_ar ? category.name_ar.slice(0, 20) : 'Category' }}</span>
@@ -121,8 +125,7 @@
           class="w-full h-64 sm:h-40 md:h-46 object-cover transition-transform duration-700 hover:scale-105"
           loading="lazy"
         />
-        <div class="absolute inset-0 bg-gradient-to-b from-transparent flex items-center justify-center p-6">
-        </div>
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent flex items-center justify-center p-6"></div>
       </div>
     </div>
   </div>
@@ -152,23 +155,22 @@ const categoriesSwiper = ref(null);
 
 // Helper function to extract media by name
 const getMediaByName = (mediaArray, name) => {
-  // Finds the first media item with the given name
   return mediaArray?.find(item => item.name === name) || null;
 };
 
 // Helper function to extract slider images
 const getSliderImages = (mediaArray, name) => {
-  // Filters all media items that match the slider name
   return mediaArray?.filter(item => item.name === name) || [];
 };
 
 /**
  * Handle media click based on media link type for navigation.
- * Type 1: Category, Type 2: Product
- * @param {Object} mediaItem - The media object which should include a `media_links` property.
+ * Type 1: Navigate to category page
+ * Type 2: Navigate to brand page
+ * @param {Object} mediaItem - The media object with a `media_links` property.
  */
 const handleMediaClick = (mediaItem) => {
-  // Check if mediaItem or media_links is null before accessing properties
+  // Check if mediaItem or media_links is null/undefined
   if (!mediaItem || !mediaItem.media_links) {
     console.log('Media item or media links are missing. Cannot navigate.', mediaItem);
     return;
@@ -177,13 +179,14 @@ const handleMediaClick = (mediaItem) => {
   const { type, id } = mediaItem.media_links;
 
   if (type === 1) {
-    // Navigate to category page (assuming 'subcategory' route is for category ID)
-    router.push({ name: 'customtap-category', params: { id } });
+       router.push({ name: 'media-products', params: { id } });
+    // Navigate to category page
   } else if (type === 2) {
-    // Navigate to product details page
-    router.push({ name: 'customtap-product', params: { id } });
+    // Navigate to brand page
+     router.push({ name: 'media-category', params: { id } });
+
   } else {
-    router.push({ name: 'customtap-brand', params: { id } });
+    console.log('Unsupported media link type:', type);
   }
 };
 
@@ -198,43 +201,21 @@ const fetchStoreDetails = async () => {
     const response = await axios.get(`/api/home/store-details/${storeId.value}`);
     const { store } = response.data.data;
 
-    // Get all media items with their media_links
+    // Get all media items
     const allMedia = store.media || [];
-    const mediaLinks = store.media_links || []; // Note: The sample data shows media_links being on the media item itself, not a separate top-level array.
-                                                // I will adjust the logic to reflect the assumption that media_links are merged onto the media items in the backend/API response,
-                                                // or keep the current (correct) logic for the provided structure.
 
-    // **CORRECTION/VERIFICATION:** Based on the data structure provided in the prompt, the `media` array already contains the `media_links` property for some items (e.g., sub_banner_image),
-    // and for others (e.g., slider_images_one) it's null.
-    // The provided `fetchStoreDetails` logic seems to be an *attempt* to merge a separate `store.media_links` array onto `store.media`.
-    // Since the provided data doesn't have a top-level `store.media_links`, but has `media_links` *inside* the `media` array,
-    // I will simplify the enhancement logic to use the media items directly, which is what the API seems to be doing.
-
-    // Let's use the provided logic which assumes media_links is separate and needs merging, to be safe.
-    const enhancedMedia = allMedia.map(mediaItem => {
-      // Find the corresponding media_link for this media item from the separate media_links array (if it existed)
-      // Since it's inside the media object in the sample, we'll ensure we keep it if it exists, or look for it in the separate array.
-      const mediaLinkFromSeparateArray = mediaLinks.find(link => link.media_id === mediaItem.id);
-
-      return {
-        ...mediaItem,
-        // Prioritize the link from the media item itself, otherwise use the one from the separate array.
-        media_links: mediaItem.media_links || mediaLinkFromSeparateArray || null
-      };
-    });
-
-    sliderImages.value = getSliderImages(enhancedMedia, 'slider_images_one');
-    sliderImagesTwo.value = getSliderImages(enhancedMedia, 'slider_images_two');
-    sliderImagesThree.value = getSliderImages(enhancedMedia, 'slider_images_three');
-    mainBannerImage.value = getMediaByName(enhancedMedia, 'main_banner_image');
-    subBannerImage.value = getMediaByName(enhancedMedia, 'sub_banner_image');
-    sponsorImage.value = getMediaByName(enhancedMedia, 'store_image');
+    // Use media as provided, assuming media_links is embedded in media items
+    sliderImages.value = getSliderImages(allMedia, 'slider_images_one');
+    sliderImagesTwo.value = getSliderImages(allMedia, 'slider_images_two');
+    sliderImagesThree.value = getSliderImages(allMedia, 'slider_images_three');
+    mainBannerImage.value = getMediaByName(allMedia, 'main_banner_image');
+    subBannerImage.value = getMediaByName(allMedia, 'sub_banner_image');
+    sponsorImage.value = getMediaByName(allMedia, 'store_image');
     categories.value = store.categories || [];
 
     // Update Swiper after data is fetched
     if (categoriesSwiper.value && categoriesSwiper.value.swiper) {
       categoriesSwiper.value.swiper.update();
-      // Ensure autoplay starts if it was stopped/not initialized properly
       categoriesSwiper.value.swiper.autoplay.start();
     }
   } catch (error) {

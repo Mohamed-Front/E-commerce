@@ -173,7 +173,7 @@ const fetchCustomTabs = async (id, page = 1) => {
     error.value = t('error.fetchFailed') || 'Failed to load custom content.'
   } finally {
     isLoading.value = false
-    router.push({ query: { ...route.query, page: currentPage.value } }).catch(() => {})
+    router.push({ query: { ...route.query} }).catch(() => {})
   }
 }
 
