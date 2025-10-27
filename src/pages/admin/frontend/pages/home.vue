@@ -1,6 +1,6 @@
-<<template>
+<template>
   <!-- main body -->
-  <main class=" min-h-[100vh]">
+  <main class="min-h-[100vh]">
     <header>
       <!-- products titles slider -->
       <swiper
@@ -12,21 +12,21 @@
         :speed="3000"
         :navigation="false"
         grab-cursor
-        class=" h-[58px] mt-2"
+        class="h-[58px] mt-2"
         :breakpoints="{
-          0: { slidesPerView: 4 ,spaceBetween: 5 },
-          480: { slidesPerView: 3,spaceBetween: 5  },
-          768: { slidesPerView: 4 ,spaceBetween: 5},
-           1024: { slidesPerView: 8, spaceBetween:5 }
+          0: { slidesPerView: 4, spaceBetween: 5 },
+          480: { slidesPerView: 3, spaceBetween: 5 },
+          768: { slidesPerView: 4, spaceBetween: 5 },
+          1024: { slidesPerView: 8, spaceBetween: 5 },
         }"
       >
         <swiper-slide v-for="title in computedTitles" :key="title.id" class="flex items-center justify-center">
-          <div
-            class="titels font-sans bg-[#1F3A93] h-[40px] min-w-[80px] sm:h-[44px] sm:min-w-[100px] md:h-[48px] md:min-w-[140px] text-[.5rem] sm:text-[.8rem] md:text-[.8rem] text-center place-content-center font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer text-white"
-            @click="goCatgory(title)"
+          <router-link
+            :to="linkTo(title)"
+            class="titels font-sans bg-[#1F3A93] h-[40px] min-w-[80px] sm:h-[44px] sm:min-w-[100px] md:h-[48px] md:min-w-[140px] text-[.5rem] sm:text-[.8rem] md:text-[.8rem] text-center place-content-center font-bold rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer text-white inline-flex items-center justify-center"
           >
             {{ title.name }}
-          </div>
+          </router-link>
         </swiper-slide>
       </swiper>
       <!-- main banner -->
@@ -46,26 +46,24 @@
         </swiper-slide>
       </swiper>
     </header>
-      <StoreDetails></StoreDetails>
+    <StoreDetails></StoreDetails>
 
     <!-- main content -->
     <div class="contaner">
       <!-- section 1 -->
       <section class="mx-auto mt-16 w-[100%] max-w-7xl">
-
-
-
         <ProductOffers></ProductOffers>
-
       </section>
-       <CustomTaps></CustomTaps>
+      <section class="mx-auto mt-16 w-[100%] max-w-7xl">
+        <CustomTaps></CustomTaps>
+      </section>
     </div>
   </main>
 </template>
 
 <script setup>
   import { onBeforeMount, ref, computed } from 'vue'
-   import ProductOffers from '../components/ProductOffers.vue'
+  import ProductOffers from '../components/ProductOffers.vue'
   import axios from 'axios'
   import { Swiper, SwiperSlide } from 'swiper/vue'
   import { Autoplay, Navigation } from 'swiper/modules'
@@ -84,7 +82,7 @@
   const router = useRouter()
   const route = useRoute()
 
-   const exclusive_offers = ref({ title: '', products: [] })
+  const exclusive_offers = ref({ title: '', products: [] })
   // constructor
   class Data {
     constructor(name = 'No name', img = '', price = '$$', id) {
@@ -105,31 +103,21 @@
   const error = ref(null)
   const locale = ref(localStorage.getItem('appLang') || 'ar')
 
-
-    const stor_id= ref(localStorage.getItem('defaultStoreId'))
-
-
+  const stor_id = ref(localStorage.getItem('defaultStoreId'))
 
   // Computed property for titles
   const computedTitles = computed(() => {
     return Object.values(titels.value)
   })
 
+  const linkTo = (d) =>
+    d.has_subcategories
+      ? { name: 'subcategory', params: { id: d.id } }
+      : { name: 'produts_category', params: { id: d.id } }
 
 
-const goCatgory = (data) => {
-  console.log(data)
-  if(data.has_subcategories ){
-   router.push({ name: 'subcategory', params: { id: data.id } });
-
-  }
-  else
-  router.push({ name: 'produts_category', params: { id: data.id } });
-
-};
   const loaddata = async () => {
     try {
-
       // Fetch categories
       const categoryResponse = await axios.get(`api/home/get-categories/${stor_id.value}`)
       categoryResponse.data.data.forEach((category) => {
@@ -137,16 +125,14 @@ const goCatgory = (data) => {
           name: localStorage.getItem('appLang') == 'en' ? category.name_en : category.name_ar || category.name_en,
           id: category.id,
           has_subcategories: category.has_subcategories,
-
-
         }
       })
 
       // Fetch banner slider images
       const bannerResponse = await axios.get('api/home/get-media-link')
-      banners_slider.value = bannerResponse.data.data.map(item => ({
+      banners_slider.value = bannerResponse.data.data.map((item) => ({
         url: item.url,
-        id: item.id
+        id: item.id,
       }))
 
       // Fetch store images
@@ -165,10 +151,9 @@ const goCatgory = (data) => {
     }
   }
 
-  onBeforeMount( () => {
+  onBeforeMount(() => {
     loaddata()
-
-  });
+  })
 </script>
 
 <style scoped>
@@ -239,7 +224,7 @@ const goCatgory = (data) => {
   }
 
   .titels:hover {
-    background: linear-gradient(45deg, #6B7280, var(--main-text-color));
+    background: linear-gradient(45deg, #6b7280, var(--main-text-color));
   }
 </style>
 >

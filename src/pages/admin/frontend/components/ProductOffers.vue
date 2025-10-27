@@ -1,4 +1,4 @@
-<<template>
+<template>
   <!-- main body -->
   <main class="bg-[#FAF7F0] ">
 
