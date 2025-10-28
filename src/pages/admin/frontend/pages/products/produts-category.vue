@@ -400,7 +400,7 @@ const fetchMoreCategories = () => {
 // Fetch brands from API
 const fetchBrands = async (page = 1, append = false) => {
   try {
-    const response = await axios.get('/api/home/brands', {
+    const response = await axios.get(`/api/home/brands-by-category/${route.params.id}`, {
       params: { page, search: brandSearchQuery.value || undefined },
     });
     const data = response.data.data;
