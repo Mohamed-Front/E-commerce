@@ -457,7 +457,7 @@ const submitReview = async () => {
       message: newReview.value.comment.trim()
     };
     const response = await axios.post('/api/review', payload);
-    if (response.data.success) {
+    if (response.data.is_success) {
       reviews.value.unshift({
         id: response.data.data.id,
         rate: newReview.value.rating,

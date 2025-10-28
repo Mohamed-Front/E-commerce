@@ -365,7 +365,7 @@ const filteredBrands = computed(() => {
 // Fetch categories from API
 const fetchCategories = async (page = 1, append = false) => {
   try {
-    const response = await axios.get('/api/home/categories', {
+    const response = await axios.get(`/api/home/categories-by-brand/${route.params.id}`, {
       params: { page, search: categorySearchQuery.value || undefined },
     });
     const data = response.data.data;
