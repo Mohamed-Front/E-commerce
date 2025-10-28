@@ -48,9 +48,9 @@
             v-for="subCategory in subCategories"
             :key="subCategory.id"
             class="group flex flex-col items-center cursor-pointer transition-all duration-300 hover:-translate-y-2"
-            @click="goCatgory(subCategory)"
+
           >
-            <div class="w-full h-48 overflow-hidden rounded-xl shadow-md relative">
+            <router-link  :to="linkTo(subCategory)" class="w-full h-48 overflow-hidden rounded-xl shadow-md relative">
               <img
                 :src="subCategory.media[0]?.url"
                 :alt="`${categoryName(subCategory)} image`"
@@ -60,7 +60,7 @@
               <div
                 class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300"
               ></div>
-            </div>
+            </router-link>
             <h3 class="font-sans mt-4 mb-1 text-gray-800 font-semibold text-sm sm:text-base md:text-lg">
               {{ categoryName(subCategory) }}
             </h3>
@@ -154,14 +154,10 @@ const productcategoryName = (item) => {
   return locale.value === 'ar' ? 'منتجات ' + (item.name_ar || item.name_en) : 'Products ' + (item.name_en || item.name_ar);
 };
 
-const goCatgory = (data) => {
-  console.log(data)
-  if(data.has_subcategories  ){
-   router.push({ name: 'subcategory', params: { id: data.id } });
-  }
-  else
-  router.push({ name: 'produts_category', params: { id: data.id } });
-};
+  const linkTo = (d) =>
+    d.has_subcategories
+      ? { name: 'subcategory', params: { id: d.id } }
+      : { name: 'produts_category', params: { id: d.id } }
 
 // Fetch category and products data
 const fetchCategoryData = async () => {

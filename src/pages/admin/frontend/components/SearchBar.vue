@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center bg-gray-100 rounded-lg h-9 mx-3 md:h-10 md:mx-2">
+  <div class="flex items-center bg-gray-100 rounded-lg h-9 mx-3 md:h-10 md:mx-2 relative">
     <i class="fa-solid fa-magnifying-glass text-gray-500 px-2.5 text-sm md:px-3 md:text-base"></i>
     <input
       v-model="searchQuery"
@@ -10,17 +10,19 @@
       @focus="showResults"
       @blur="hideResultsWithDelay"
     />
+
     <transition name="dropdown-fancy">
       <div
         v-if="showSearchResults && (searchResults.products.length || searchResults.categories.length || searchResults.brands.length)"
-        class="absolute top-12 mt-2 lg:w-[500px] max-w-md bg-white rounded-xl shadow-2xl z-50 overflow-y-auto dropdown-fancy"
+        class="absolute top-12 mt-2 left-0 right-0 lg:w-[500px] max-w-md bg-white rounded-xl shadow-2xl z-50 overflow-y-auto dropdown-fancy"
         style="max-height: 70vh;"
+        @mousedown.prevent
       >
-        <!-- Products -->
-        <div
+        <router-link
           v-for="result in searchResults.products"
           :key="'product-' + result.id"
-          @click="goToResult('product', result)"
+          :to="{ name: 'Product-details', params: { id: result.id } }"
+          @click="cleanUpState"
           class="flex items-center px-4 py-3 transition-all duration-300 cursor-pointer dropdown-item hover:bg-amber-50"
         >
           <div v-if="result.key_default_image || (result.media && result.media.length)" class="w-8 h-8 flex items-center justify-center overflow-hidden rounded-sm bg-gray-100 mx-2">
@@ -40,12 +42,13 @@
             </template>
           </span>
           <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">{{ t('search.product') }}</span>
-        </div>
-        <!-- Categories -->
-        <div
+        </router-link>
+
+        <router-link
           v-for="result in searchResults.categories"
           :key="'category-' + result.id"
-          @click="goToResult('category', result)"
+          :to="getCategoryLink(result)"
+          @click="cleanUpState"
           class="flex items-center px-4 py-3 transition-all duration-300 cursor-pointer dropdown-item hover:bg-amber-50"
         >
           <div v-if="result.media && result.media.length" class="w-8 h-8 flex items-center justify-center overflow-hidden rounded-sm bg-gray-100 mx-2">
@@ -65,12 +68,13 @@
             </template>
           </span>
           <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">{{ t('search.category') }}</span>
-        </div>
-        <!-- Brands -->
-        <div
+        </router-link>
+
+        <router-link
           v-for="result in searchResults.brands"
           :key="'brand-' + result.id"
-          @click="goToResult('brand', result)"
+          :to="{ name: 'products-brand', params: { id: result.id } }"
+          @click="cleanUpState"
           class="flex items-center px-4 py-3 transition-all duration-300 cursor-pointer dropdown-item hover:bg-amber-50"
         >
           <div v-if="result.media && result.media.length" class="w-8 h-8 flex items-center justify-center overflow-hidden rounded-sm bg-gray-100 mx-2">
@@ -90,7 +94,7 @@
             </template>
           </span>
           <span class="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">{{ t('search.brand') }}</span>
-        </div>
+        </router-link>
       </div>
     </transition>
   </div>
@@ -98,7 +102,7 @@
 
 <script setup>
 import { ref, onUnmounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter } from 'vue-router'; // useRouter is no longer strictly needed for navigation, but kept for context
 import { useI18n } from 'vue-i18n';
 import axios from 'axios';
 
@@ -110,7 +114,6 @@ const searchResults = ref({
   brands: []
 });
 const showSearchResults = ref(false);
-const router = useRouter();
 let searchTimeout = null;
 
 // Computed property to determine which name to display based on appLang
@@ -152,6 +155,7 @@ const handleSearch = async () => {
     }
 
     try {
+      // NOTE: Make sure the URL structure is correct for your backend.
       const response = await axios.get(`api/home/search?query=${encodeURIComponent(searchQuery.value)}`);
       searchResults.value = {
         products: response.data.data?.products || [],
@@ -174,27 +178,25 @@ const showResults = () => {
 };
 
 const hideResultsWithDelay = () => {
+  // Delay allows click events on the results to register before the dropdown disappears
+  // NOTE: This delay is less critical now, but kept as a fallback good practice.
   setTimeout(() => {
     showSearchResults.value = false;
   }, 200);
 };
 
-const goToResult = (type, result) => {
+// Helper function to construct the category link dynamically
+const getCategoryLink = (result) => {
+    return result.has_subcategories
+      ? { name: 'subcategory', params: { id: result.id } }
+      : { name: 'produts_category', params: { id: result.id } };
+};
+
+// Cleanup function to reset the state after a click on a result
+const cleanUpState = () => {
   showSearchResults.value = false;
   searchQuery.value = '';
   searchResults.value = { products: [], categories: [], brands: [] };
-
-  if (type === 'product') {
-    router.push({ name: 'Product-details', params: { id: result.id } });
-  } else if (type === 'category') {
-    if (result.has_subcategories) {
-      router.push({ name: 'subcategory', params: { id: result.id } });
-    } else {
-      router.push({ name: 'produts_category', params: { id: result.id } });
-    }
-  } else if (type === 'brand') {
-    router.push({ name: 'products-brand', params: { id: result.id } });
-  }
 };
 
 onUnmounted(() => {
@@ -246,6 +248,10 @@ onUnmounted(() => {
 }
 
 input:focus + i {
-  @apply text-[#E6AC31];
+  /* This targets the magnifying glass icon next to the focused input */
+  /* This needs to be checked for correctness in the actual component structure if it's not working */
+  /* @apply text-[#E6AC31]; is Tailwind, which can't be used directly in a standard <style> block. */
+  /* Assuming a CSS/Tailwind-compatible setup: */
+  color: #E6AC31;
 }
 </style>

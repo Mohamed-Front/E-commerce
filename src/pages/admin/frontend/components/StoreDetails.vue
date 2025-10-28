@@ -89,7 +89,7 @@
         :space-between="10"
         :navigation="false"
         :autoplay="{ delay: 600, disableOnInteraction: false }"
-        :pagination="{ clickable: true }"
+
         class="w-full"
         :breakpoints="{
           320: { slidesPerView: 2 },
