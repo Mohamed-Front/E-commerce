@@ -37,29 +37,30 @@
               }
         "
       >
-        <SwiperSlide
-          v-for="(detail, i) in tab.details"
-          :key="i"
-          class="group flex flex-col items-start cursor-pointer transition-all pb-[1%] rounded-lg shadow-lg duration-300 hover:-translate-y-2"
-          @click="navigateToDetail(tab.type, detail.id, locale === 'ar' ? detail.name_ar : detail.name_en)"
-        >
-          <!-- تغيير نسبة العرض إلى الارتفاع إلى 4/3 (مستطيل) -->
-          <div class="w-full aspect-[3.3/4] overflow-hidden rounded-xl shadow-sm relative">
-            <img
-              :src="detail.media[0]?.url || '/placeholder.jpg'"
-              :alt="locale === 'ar' ? detail.name_ar : detail.name_en"
-              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-            />
-            <div
-              class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300"
-            ></div>
-          </div>
-          <p
-            class="font-sans mt-4 mb-1 text-center mx-3 text-gray-800 font-medium xs:text-sm sm:text-base md:text-lg"
-          >
-            {{ locale === 'ar' ? detail.name_ar : detail.name_en }}
-          </p>
-        </SwiperSlide>
+
+  <SwiperSlide
+    v-for="(detail, i) in tab.details"
+    :key="i"
+    class="group flex flex-col items-start pb-[1%] rounded-lg shadow-lg transition-all duration-300 hover:-translate-y-2"
+  >
+    <router-link
+      :to="linkToDetail(tab.type, detail.id, locale === 'ar' ? detail.name_ar : detail.name_en)"
+      class="block w-full"
+    >
+      <div class="w-full aspect-[3.3/4] overflow-hidden rounded-xl shadow-sm relative">
+        <img
+          :src="detail.media[0]?.url || '/placeholder.jpg'"
+          :alt="locale === 'ar' ? detail.name_ar : detail.name_en"
+          class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+        />
+        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
+      </div>
+
+      <p class="font-sans mt-4 mb-1 text-center mx-3 text-gray-800 font-medium xs:text-sm sm:text-base md:text-lg">
+        {{ locale === 'ar' ? detail.name_ar : detail.name_en }}
+      </p>
+    </router-link>
+  </SwiperSlide>
       </swiper>
     </div>
   </div>
@@ -112,27 +113,15 @@ const fetchCustomTabs = async () => {
   }
 }
 
-// Navigation logic based on tab type, passing name as title
-const navigateToDetail = (type, id, name) => {
-  console.log(name)
-  let routeName
-  switch (type) {
-    case 1:
-      routeName = 'customtap-category'
-      break
-    case 2:
-      routeName = 'customtap-products'
-      break
-    case 3:
-      routeName = 'customtap-brand'
-      break
-    default:
-      console.error('Unknown tab type:', type)
-      return
-  }
-  router.push({ name: routeName, params: { id }, query: { title: name } })
+const linkToDetail = (type, id, name) => {
+  const routeName =
+    type === 1 ? 'customtap-category' :
+    type === 2 ? 'customtap-products' :
+    type === 3 ? 'customtap-brand' :
+    null
+  if (!routeName) return null
+  return { name: routeName, params: { id }, query: { title: name } }
 }
-
 // Add to cart placeholder
 const addToCart = (detail) => {
   console.log('Added to cart:', detail)
