@@ -67,13 +67,13 @@ const unreadCount = ref(0);
 
 // Fetch notifications from API
 const fetchNotifications = async () => {
-  try {
-    const response = await axios.get('api/user-notification');
-    notifications.value = response.data.data.data || [];
-    unreadCount.value = notifications.value.filter(n => !n.is_seen).length;
-  } catch (error) {
-    console.error('Error fetching notifications:', error);
-  }
+  // try {
+  //   const response = await axios.get('api/user-notification');
+  //   notifications.value = response.data.data.data || [];
+  //   unreadCount.value = notifications.value.filter(n => !n.is_seen).length;
+  // } catch (error) {
+  //   console.error('Error fetching notifications:', error);
+  // }
 };
 
 // Mark notification as read
