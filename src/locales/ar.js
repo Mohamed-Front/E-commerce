@@ -345,7 +345,7 @@ export default {
     generate_random_code: 'إنشاء كود عشوائي',
     discount_type: 'نوع الخصم',
     select_discount_type: 'اختر نوع الخصم',
-    fixed_amount: 'قيمة ثابتة',
+    fixed_amount: ' قيمه المنتج بعد الخصم لا تتعدي القيمه الاصليه',
     percentage: 'نسبة مئوية',
     discount_value: 'قيمة الخصم',
     enter_discount_value: 'أدخل قيمة الخصم',
@@ -1331,6 +1331,7 @@ export default {
     "hidePassword": "إخفاء كلمة المرور"
   },
   discount: {
+    edit_discount:"تعديل الخصم",
     select_category:"اختر الكاتكورجي",
     select_product:"اختر المنتجات",
     managementTitle: 'إدارة الخصومات',
@@ -1368,7 +1369,7 @@ export default {
     select_model_type: 'اختر نوع الموديل',
     discount_type: 'نوع الخصم',
     select_discount_type: 'اختر نوع الخصم',
-    fixed_amount: 'قيمة ثابتة',
+    fixed_amount: ' قيمه المنتج بعد الخصم لا تتعدي القيمه الاصليه',
     percentage: 'نسبة مئوية',
     discount_value: 'قيمة الخصم',
     enter_discount_value: 'أدخل قيمة الخصم',

@@ -25,8 +25,8 @@ const categories = ref([]);
 const brands = ref([]);
 const attributes = ref([]);
 const hasVariants = ref(false);
-const categorySearchQuery = ref(''); // New: Search query for categories
-const brandSearchQuery = ref(''); // New: Search query for brands
+const categorySearchQuery = ref('');
+const brandSearchQuery = ref('');
 
 // Image handling
 const mainImage = ref(null);
@@ -59,6 +59,15 @@ const productData = ref({
   variants: []
 });
 
+// Dynamic required fields: SKU required only if no variants
+const requiredFields = computed(() => {
+  const base = ['store_id', 'category_id', 'name_en', 'name_ar', 'base_price'];
+  if (!hasVariants.value) {
+    base.push('sku');
+  }
+  return base;
+});
+
 // Computed property for formatted attributes
 const formattedAttributes = computed(() => {
   return attributes.value.map(attr => ({
@@ -76,10 +85,15 @@ const fetchProduct = async () => {
   try {
     const response = await axios.get(`/api/product/${route.params.id}`);
     const data = response.data.data;
-    brandSearchQuery.value = data?.brand?.name_ar;
-    categorySearchQuery.value=data?.category?.name_ar
-    fetchCategories()
-    fetchBrands();
+
+    // Set search queries for dropdowns
+    brandSearchQuery.value = data?.brand?.name_ar || '';
+    categorySearchQuery.value = data?.category?.name_ar || '';
+
+    // Fetch dropdowns after setting search
+    await fetchCategories();
+    await fetchBrands();
+
     productData.value = {
       store_id: data.store_id,
       category_id: data.category_id,
@@ -96,22 +110,23 @@ const fetchProduct = async () => {
       tax: data.tax || 0,
       is_displayed: data.is_displayed === 1,
       is_stock: data.is_stock === 1,
-      variants: data.variants.map(variant => ({
-        id: variant.attribute_values[0]?.pivot?.attribute_value_id,
+      variants: data.variants?.map(variant => ({
+        id: variant.id,
         sku: variant.sku || '',
         price: variant.price,
-        attribute_value_ids: variant.attribute_values[0].id,
+        attribute_value_ids: variant.attribute_values.map(av => av.id), // Array of IDs
         variant_image: null,
-        variant_image_preview: variant.media && variant.media.length > 0 ? variant.media[0].url : null
+        variant_image_preview: variant.media?.[0]?.url || null
       })) || []
     };
 
-    hasVariants.value = data.has_variants;
+    hasVariants.value = data.has_variants === 1;
 
+    // Main image
     if (data.media && data.media.length > 0) {
       mainImagePreview.value = data.media[0].url;
       if (data.media.length > 1) {
-        additionalImagePreviews.value = data.media.slice(1).map(media => media.url);
+        additionalImagePreviews.value = data.media.slice(1).map(m => m.url);
       }
     }
   } catch (error) {
@@ -132,9 +147,7 @@ const fetchStores = async () => {
 const fetchCategories = async () => {
   try {
     const response = await axios.get('/api/category', {
-      params: {
-        search: categorySearchQuery.value || undefined
-      }
+      params: { search: categorySearchQuery.value || undefined }
     });
     categories.value = response.data.data.data;
   } catch (error) {
@@ -145,9 +158,7 @@ const fetchCategories = async () => {
 const fetchBrands = async () => {
   try {
     const response = await axios.get('/api/brand', {
-      params: {
-        search: brandSearchQuery.value || undefined
-      }
+      params: { search: brandSearchQuery.value || undefined }
     });
     brands.value = response.data.data.data;
   } catch (error) {
@@ -178,7 +189,6 @@ const onBrandFilter = (event) => {
 
 onMounted(() => {
   fetchStores();
-
   fetchAttributes();
   fetchProduct();
 });
@@ -328,19 +338,21 @@ const removeVariant = (index) => {
 
 // Submit form
 const submitForm = async () => {
-  const requiredFields = ['store_id', 'category_id', 'name_en', 'name_ar', 'sku', 'base_price'];
-
-  // Validate required fields
-  if (requiredFields.some(field => !productData.value[field])) {
+  // Validate required fields (SKU only if no variants)
+  if (requiredFields.value.some(field => !productData.value[field])) {
     toast.add({ severity: 'error', summary: t('error'), detail: t('validation.requiredFields'), life: 3000 });
     return;
   }
 
+  // Validate main image (required if no existing image)
+  if (!mainImage.value && !mainImagePreview.value) {
+    toast.add({ severity: 'error', summary: t('error'), detail: t('validation.mainImageRequired'), life: 3000 });
+    return;
+  }
 
-
-  // Validate variants if they exist
+  // Validate variants: price & attributes required, SKU optional
   if (hasVariants.value) {
-    if (productData.value.variants.some(v => !v.sku || !v.price || v.attribute_value_ids.length === 0)) {
+    if (productData.value.variants.some(v => !v.price || v.attribute_value_ids.length === 0)) {
       toast.add({ severity: 'error', summary: t('error'), detail: t('validation.variantRequiredFields'), life: 3000 });
       return;
     }
@@ -349,13 +361,14 @@ const submitForm = async () => {
   loading.value = true;
   const formData = new FormData();
 
-  // Append basic product data
-  formData.append('_method', 'post'); // For Laravel to handle as PUT request
+  // Laravel spoof PUT
+  formData.append('_method', 'PUT');
+
+  // Basic product data
   formData.append('store_id', productData.value.store_id);
   formData.append('category_id', productData.value.category_id);
-  if (productData.value.brand_id)
-  formData.append('brand_id', productData.value.brand_id);
-  formData.append('sku', productData.value.sku);
+  if (productData.value.brand_id) formData.append('brand_id', productData.value.brand_id);
+  formData.append('sku', productData.value.sku || '');
   formData.append('name_en', productData.value.name_en);
   formData.append('name_ar', productData.value.name_ar);
   formData.append('sub_name_en', productData.value.sub_name_en || '');
@@ -368,27 +381,25 @@ const submitForm = async () => {
   formData.append('base_price', productData.value.base_price);
   formData.append('cost_price', productData.value.cost_price || 0);
 
-  // Append main image if new one was uploaded
+  // Main image (only if changed)
   if (mainImage.value) {
     formData.append('main_image', mainImage.value);
   }
 
-  // Append additional images
+  // Additional images
   additionalImages.value.forEach((image, index) => {
     formData.append(`images[${index}]`, image);
   });
 
-  // Append variants if they exist
+  // Variants (SKU optional)
   if (hasVariants.value) {
     productData.value.variants.forEach((variant, index) => {
-      formData.append(`variants[${index}][attribute_value_id]`, variant.attribute_value_ids);
-      formData.append(`variants[${index}][sku]`, variant.sku);
+      if (variant.id) formData.append(`variants[${index}][id]`, variant.id);
+      if (variant.sku) formData.append(`variants[${index}][sku]`, variant.sku);
       formData.append(`variants[${index}][price]`, variant.price);
-      if (Array.isArray(variant.attribute_value_ids)) {
-        variant.attribute_value_ids.forEach((attrId, attrIndex) => {
-          formData.append(`variants[${index}][attribute_value_ids][${attrIndex}]`, attrId);
-        });
-      }
+      variant.attribute_value_ids.forEach((id, i) => {
+        formData.append(`variants[${index}][attribute_value_ids][${i}]`, id);
+      });
       if (variant.variant_image) {
         formData.append(`variants[${index}][variant_image]`, variant.variant_image);
       }
@@ -397,9 +408,7 @@ const submitForm = async () => {
 
   try {
     await axios.post(`/api/product/${route.params.id}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+      headers: { 'Content-Type': 'multipart/form-data' }
     });
     router.push({ name: 'product' });
     toast.add({ severity: 'success', summary: t('success'), detail: t('product.updateSuccess'), life: 3000 });
@@ -471,22 +480,22 @@ const submitForm = async () => {
             :optionLabel="labelField"
             optionValue="id"
             class="w-full"
-
             filterPlaceholder="Search brands"
             @filter="onBrandFilter"
           />
         </div>
 
-        <!-- SKU -->
+        <!-- SKU - Required only if no variants -->
         <div class="space-y-2">
           <label for="sku" class="block text-sm font-medium text-gray-700">
-            {{ t('product.sku') }} <span class="text-red-500">*</span>
+            {{ t('product.sku') }}
+            <span v-if="!hasVariants" class="text-red-500">*</span>
           </label>
           <InputText
             id="sku"
             v-model="productData.sku"
             class="w-full"
-            :class="{ 'p-invalid': !productData.sku }"
+            :class="{ 'p-invalid': !hasVariants && !productData.sku }"
           />
         </div>
 
@@ -681,20 +690,19 @@ const submitForm = async () => {
                 />
               </div>
 
-              <!-- SKU -->
+              <!-- SKU - NOT REQUIRED -->
               <div class="space-y-2">
                 <label :for="'sku_' + index" class="block text-sm font-medium text-gray-700">
-                  {{ t('product.sku') }} <span class="text-red-500">*</span>
+                  {{ t('product.sku') }}
                 </label>
                 <InputText
                   :id="'sku_' + index"
                   v-model="variant.sku"
                   class="w-full"
-                  :class="{ 'p-invalid': !variant.sku }"
                 />
               </div>
 
-              <!-- Price -->
+              <!-- Price - REQUIRED -->
               <div class="space-y-2">
                 <label :for="'price_' + index" class="block text-sm font-medium text-gray-700">
                   {{ t('product.price') }} <span class="text-red-500">*</span>

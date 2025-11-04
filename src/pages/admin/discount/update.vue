@@ -3,7 +3,7 @@ import { ref, onMounted, computed, watch } from 'vue';
 import axios from 'axios';
 import { useToast } from 'primevue/usetoast';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import Dropdown from 'primevue/dropdown';
 import MultiSelect from 'primevue/multiselect';
 import InputNumber from 'primevue/inputnumber';
@@ -13,7 +13,47 @@ import Toast from 'primevue/toast';
 import moment from 'moment';
 import { debounce } from 'lodash';
 
+// ──────────────────────────────────────────────────────────────
+// i18n & Helpers
+// ──────────────────────────────────────────────────────────────
+const currentLanguage = computed(() => localStorage.getItem('appLang') || 'en');
+const labelField = computed(() => currentLanguage.value === 'en' ? 'name_en' : 'name_ar');
+const isRTL = computed(() => currentLanguage.value === 'ar');
+
+const router = useRouter();
+const route = useRoute();
+const toast = useToast();
+const { t } = useI18n();
+
+// ──────────────────────────────────────────────────────────────
+// Form State
+// ──────────────────────────────────────────────────────────────
+const loading = ref(false);
+const errors = ref({});
+const isEdit = computed(() => !!route.params.id);
+
+const discountData = ref({
+  type: 'category',           // 'category' | 'product'
+  ids: [],                    // category ids (when type=category)
+  products: [],               // product ids (when type=product)
+  discount_type: 1,           // 1 = fixed, 2 = percentage
+  discount_value: null,
+  expires_at: null
+});
+
+// ──────────────────────────────────────────────────────────────
+// Data Sources
+// ──────────────────────────────────────────────────────────────
+const categories = ref([]);
+const products = ref([]);
+const categorySearchQuery = ref('');
+const productSearchQuery = ref('');
+const categoryLoading = ref(false);
+const productLoading = ref(false);
+
+// ──────────────────────────────────────────────────────────────
 // Validation Class
+// ──────────────────────────────────────────────────────────────
 class Validation {
   constructor(errorsRef, t) {
     this.errors = errorsRef;
@@ -57,213 +97,180 @@ class Validation {
   }
 }
 
-// Language handling
-const currentLanguage = computed(() => localStorage.getItem('appLang') || 'en');
-const labelField = computed(() => currentLanguage.value === 'en' ? 'name_en' : 'name_ar');
-const isRTL = computed(() => currentLanguage.value === 'ar');
-
-const route = useRoute();
-const router = useRouter();
-const toast = useToast();
-const { t } = useI18n();
-const loading = ref(false);
-const categories = ref([]);
-const products = ref([]);
-const categorySearchQuery = ref('');
-const productSearchQuery = ref('');
-const discountId = ref(route.params.id);
-const errors = ref({});
-
-// Form Data
-const discountData = ref({
-  type: '',
-  ids: [],
-  products: [],
-  discount_type: null,
-  discount_value: null,
-  expires_at: null
-});
-
-// Debounced fetch functions for search
-const debouncedFetchCategories = debounce(fetchCategories, 300);
-const debouncedFetchProducts = debounce(fetchProducts, 300);
-
-/**
- * Fetches the specific discount details and initializes the form.
- */
-const fetchDiscount = async () => {
-  loading.value = true;
+// ──────────────────────────────────────────────────────────────
+// Fetch Categories
+// ──────────────────────────────────────────────────────────────
+const fetchCategories = async () => {
+  categoryLoading.value = true;
   try {
-    const response = await axios.get(`/api/discount/${discountId.value}`);
-    const data = response.data?.data;
-    if (!data) throw new Error('Invalid discount data');
-
-    // Initialize form fields
-    discountData.value = {
-      type: data.type || '',
-      discount_type: data.discount_type || null,
-      discount_value: parseFloat(data.discount_value) || null,
-      expires_at: data.expires_at ? new Date(data.expires_at) : null,
-      ids: [],
-      products: []
-    };
-
-    await fetchCategories();
-
-    // Handle data specific to discount type
-    if (data.type === 'product' && Array.isArray(data.ids) && data.ids.length > 0) {
-      discountData.value.products = data.ids;
-      await fetchProductCategories(data.ids);
-    } else if (data.type === 'category' && Array.isArray(data.ids) && data.ids.length > 0) {
-      discountData.value.ids = data.ids.filter(id => categories.value.some(category => category.id === id));
-    }
-  } catch (error) {
-    console.error('Error fetching discount:', error);
-    toast.add({ severity: 'error', summary: t('error'), detail: t('error.discountLoad'), life: 3000 });
-    router.push({ name: 'discount' });
-  } finally {
-    loading.value = false;
-  }
-};
-
-/**
- * Fetches parent categories for the given product IDs.
- */
-const fetchProductCategories = async (productIds) => {
-  try {
-    const categoryIds = new Set();
-    const categoryPromises = productIds.map(productId =>
-      axios.get(`/api/product/${productId}`).then(response => {
-        const product = response.data?.data;
-        if (product?.category_id) {
-          categoryIds.add(product.category_id);
-        }
-      }).catch(() => {
-        // Silent fail for individual product fetch errors
-      })
-    );
-    await Promise.all(categoryPromises);
-
-    discountData.value.ids = Array.from(categoryIds).filter(id => categories.value.some(category => category.id === id));
-
-    if (discountData.value.ids.length > 0) {
-      await fetchProducts();
-    }
-  } catch (error) {
-    console.error('Error fetching product categories:', error);
-  }
-};
-
-/**
- * Fetches categories with search.
- */
-async function fetchCategories() {
-  try {
-    const response = await axios.get('/api/category', {
+    const { data } = await axios.get('/api/category', {
       params: { search: categorySearchQuery.value || undefined }
     });
-    categories.value = response.data?.data?.data || [];
+    categories.value = data.data?.data || [];
   } catch (error) {
     console.error('Error fetching categories:', error);
     toast.add({ severity: 'error', summary: t('error'), detail: t('error.categoryLoad'), life: 3000 });
+  } finally {
+    categoryLoading.value = false;
   }
-}
+};
 
-/**
- * Fetches products with search and category filter.
- */
-async function fetchProducts() {
-  try {
-    const response = await axios.get('/api/product', {
-      params: {
-        search: productSearchQuery.value || undefined,
-        category_ids: discountData.value.ids.length > 0 ? discountData.value.ids.join(',') : undefined
-      }
-    });
-    products.value = response.data?.data?.data || [];
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    toast.add({ severity: 'error', summary: t('error'), detail: t('error.productLoad'), life: 3000 });
-  }
-}
-
-// Handle filter inputs
+const debouncedFetchCategories = debounce(fetchCategories, 300);
 const onCategoryFilter = (event) => {
   categorySearchQuery.value = event.value;
   debouncedFetchCategories();
 };
 
+// ──────────────────────────────────────────────────────────────
+// Fetch Products (only when type=product and categories selected)
+// ──────────────────────────────────────────────────────────────
+const fetchProducts = async () => {
+  if (discountData.value.type !== 'product' || discountData.value.ids.length === 0) {
+    products.value = [];
+    return;
+  }
+
+  productLoading.value = true;
+  try {
+    const { data } = await axios.get('/api/product', {
+      params: {
+        search: productSearchQuery.value || undefined,
+        category_ids: discountData.value.ids.join(',')
+      }
+    });
+    products.value = data.data?.data || [];
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    toast.add({ severity: 'error', summary: t('error'), detail: t('error.productLoad'), life: 3000 });
+  } finally {
+    productLoading.value = false;
+  }
+};
+
+const debouncedFetchProducts = debounce(fetchProducts, 300);
 const onProductFilter = (event) => {
   productSearchQuery.value = event.value;
   debouncedFetchProducts();
 };
 
-// Watch for type changes
+// ──────────────────────────────────────────────────────────────
+// Load Existing Discount (Edit Mode)
+// ──────────────────────────────────────────────────────────────
+const loadDiscount = async () => {
+  loading.value = true;
+  try {
+    const { data } = await axios.get(`/api/discount/${route.params.id}`);
+    const d = data.data;
+
+    discountData.value = {
+      type: d.type,
+      ids: d.type === 'category' ? d.ids : [],
+      products: d.type === 'product' ? d.ids : [],
+      discount_type: d.discount_type,
+      discount_value: parseFloat(d.discount_value),
+      expires_at: d.expires_at ? new Date(d.expires_at) : null
+    };
+
+    // Preload categories
+    await fetchCategories();
+
+    // If product type, preload products after categories
+    if (d.type === 'product' && d.ids.length > 0) {
+      discountData.value.ids = d.products.map(p => p.category_id);
+      setTimeout(() => {
+        discountData.value.products = d.ids;
+        fetchProducts();
+      }, 100);
+    }
+  } catch (error) {
+    console.error('Error loading discount:', error);
+    toast.add({
+      severity: 'error',
+      summary: t('error'),
+      detail: error.response?.data?.message || t('error.loadError'),
+      life: 3000
+    });
+    router.push({ name: 'discount' });
+  } finally {
+    loading.value = false;
+  }
+};
+
+// ──────────────────────────────────────────────────────────────
+// Watchers
+// ──────────────────────────────────────────────────────────────
 watch(() => discountData.value.type, (newType) => {
   discountData.value.ids = [];
   discountData.value.products = [];
   products.value = [];
   errors.value = {};
-  if (newType === 'category' || newType === 'product') {
-    fetchCategories();
-  }
 });
 
-// Watch for category changes
-watch(() => discountData.value.ids, (newCategoryIds) => {
-  if (discountData.value.type === 'product' && newCategoryIds.length > 0) {
-    fetchProducts();
-  } else if (discountData.value.type === 'product' && newCategoryIds.length === 0) {
-    products.value = [];
+watch(() => discountData.value.ids, (newIds) => {
+  if (discountData.value.type === 'product') {
     discountData.value.products = [];
+    if (newIds.length > 0) {
+      fetchProducts();
+    } else {
+      products.value = [];
+    }
   }
 }, { deep: true });
 
-// Submit form
+// ──────────────────────────────────────────────────────────────
+// Submit Form (Create / Update)
+// ──────────────────────────────────────────────────────────────
 const submitForm = async () => {
   errors.value = {};
   const validator = new Validation(errors, t);
 
   validator.required(discountData.value.type, 'type');
-  validator.required(discountData.value.ids, 'select_category');
-  if (discountData.value.type === 'product') {
+
+  if (discountData.value.type === 'category') {
+    validator.required(discountData.value.ids, 'select_category');
+  } else if (discountData.value.type === 'product') {
+    validator.required(discountData.value.ids, 'select_category');
     validator.required(discountData.value.products, 'select_product');
   }
+
   validator.required(discountData.value.discount_type, 'discount_type');
-  validator.numericRange(discountData.value.discount_value, 'discount_value', 0, discountData.value.discount_type === 2 ? 100 : null);
+  validator.numericRange(
+    discountData.value.discount_value,
+    'discount_value',
+    0,
+    discountData.value.discount_type === 2 ? 100 : null
+  );
   validator.validDate(discountData.value.expires_at, 'expiration_date');
 
   if (!validator.isValid()) {
-    const firstErrorKey = Object.keys(errors.value)[0];
-    toast.add({
-      severity: 'error',
-      summary: t('error'),
-      detail: errors.value[firstErrorKey],
-      life: 3000
-    });
+    const firstError = Object.values(errors.value)[0];
+    toast.add({ severity: 'error', summary: t('error'), detail: firstError, life: 3000 });
     return;
   }
 
   loading.value = true;
-  const data = {
+  const payload = {
     type: discountData.value.type,
     ids: discountData.value.type === 'product' ? discountData.value.products : discountData.value.ids,
     discount_type: discountData.value.discount_type,
     discount_value: discountData.value.discount_value,
-    expires_at: moment(discountData.value.expires_at).format('YYYY-MM-DD'),
-    _method: 'PUT'
+    expires_at: moment(discountData.value.expires_at).format('YYYY-MM-DD')
   };
 
   try {
-    await axios.post(`/api/discount/${discountId.value}`, data);
+    if (isEdit.value) {
+      await axios.put(`/api/discount/${route.params.id}`, payload);
+      toast.add({ severity: 'success', summary: t('success'), detail: t('discount.updated_successfully'), life: 3000 });
+    } else {
+      await axios.post('/api/discount', payload);
+      toast.add({ severity: 'success', summary: t('success'), detail: t('discount.created_successfully'), life: 3000 });
+    }
     router.push({ name: 'discount' });
-    toast.add({ severity: 'success', summary: t('success'), detail: t('discount.updated_successfully'), life: 3000 });
   } catch (error) {
-    console.error('Error updating discount:', error);
     toast.add({
       severity: 'error',
       summary: t('error'),
-      detail: error.response?.data?.message || t('error.updateError'),
+      detail: error.response?.data?.message || t('error.saveError'),
       life: 3000
     });
   } finally {
@@ -271,89 +278,55 @@ const submitForm = async () => {
   }
 };
 
+// ──────────────────────────────────────────────────────────────
+// Lifecycle
+// ──────────────────────────────────────────────────────────────
 onMounted(() => {
-  fetchDiscount();
+  fetchCategories();
+  if (isEdit.value) {
+    loadDiscount();
+  }
 });
 </script>
 
 <template>
-  <div v-can="'update discounts'" class="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow-lg" :dir="isRTL ? 'rtl' : 'ltr'">
-    <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">{{ t('discount.update_discount') }}</h1>
+  <div
+    v-can="'create discounts'"
+    class="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow-lg"
+    :dir="isRTL ? 'rtl' : 'ltr'"
+  >
+    <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">
+      {{ isEdit ? t('discount.edit_discount') : t('discount.create_new_discount') }}
+    </h1>
 
-    <form @submit.prevent="submitForm" class="space-y-6" role="form" aria-label="Update Discount Form">
+    <form @submit.prevent="submitForm" class="space-y-6">
+      <!-- Type Selector -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="space-y-2">
-          <label for="type" class="block text-sm font-medium text-gray-700">
-            {{ t('discount.type') }} <span class="text-red-500">*</span>
-          </label>
-          <Dropdown
-            filter
-            id="type"
-            v-model="discountData.type"
-            :options="['product', 'category']"
-            :placeholder="t('discount.select_type')"
-            class="w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-            :class="{ 'p-invalid': errors.type }"
-            :disabled="loading"
-            aria-required="true"
-            aria-describedby="type-error"
-          />
-          <small v-if="errors.type" id="type-error" class="text-red-500 text-xs">{{ errors.type }}</small>
-        </div>
-
-        <div class="space-y-2">
-          <label for="ids" class="block text-sm font-medium text-gray-700">
-            {{ t('discount.select_category') }} <span class="text-red-500">*</span>
-          </label>
-          <MultiSelect
-            filter
-            id="ids"
-            v-model="discountData.ids"
-            :options="categories"
-            :optionLabel="labelField"
-            optionValue="id"
-            :placeholder="t('discount.searchCategories')"
-            class="w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-            :class="{ 'p-invalid': errors.select_category }"
-            :disabled="loading || !discountData.type"
-            @filter="onCategoryFilter"
-            display="chip"
-            aria-required="true"
-            aria-describedby="ids-error"
-          />
-          <small v-if="errors.select_category" id="ids-error" class="text-red-500 text-xs">{{ errors.select_category }}</small>
-        </div>
-
-        <div v-if="discountData.type === 'product'" class="space-y-2">
-          <label for="product_id" class="block text-sm font-medium text-gray-700">
-            {{ t('discount.select_product') }} <span class="text-red-500">*</span>
-          </label>
-          <MultiSelect
-            filter
-            id="product_id"
-            v-model="discountData.products"
-            :options="products"
-            :optionLabel="labelField"
-            optionValue="id"
-            :placeholder="t('discount.searchProducts')"
-            class="w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-            :class="{ 'p-invalid': errors.select_product }"
-            :disabled="loading || discountData.ids.length === 0"
-            @filter="onProductFilter"
-            display="chip"
-            aria-required="true"
-            aria-describedby="product_id-error"
-          />
-          <small v-if="errors.select_product" id="product_id-error" class="text-red-500 text-xs">{{ errors.select_product }}</small>
-        </div>
-
-        <div class="space-y-2">
-          <label for="discount_type" class="block text-sm font-medium text-gray-700">
+        <div class="space-y-2 hidden">
+          <label class="block text-sm font-medium text-gray-700">
             {{ t('discount.discount_type') }} <span class="text-red-500">*</span>
           </label>
           <Dropdown
-            filter
-            id="discount_type"
+            v-model="discountData.type"
+            :options="[
+              { label: t('discount.category'), value: 'category' },
+              { label: t('discount.product'), value: 'product' }
+            ]"
+            optionLabel="label"
+            optionValue="value"
+            :placeholder="t('discount.select_type')"
+            class="w-full"
+            :class="{ 'p-invalid': errors.type }"
+          />
+          <small v-if="errors.type" class="p-error">{{ errors.type }}</small>
+        </div>
+
+        <!-- Discount Type (Fixed / Percentage) -->
+        <div class="space-y-2 hidden">
+          <label class="block text-sm font-medium text-gray-700">
+            {{ t('discount.discount_method') }} <span class="text-red-500">*</span>
+          </label>
+          <Dropdown
             v-model="discountData.discount_type"
             :options="[
               { label: t('discount.fixed_amount'), value: 1 },
@@ -361,136 +334,131 @@ onMounted(() => {
             ]"
             optionLabel="label"
             optionValue="value"
-            :placeholder="t('discount.select_discount_type')"
-            class="w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            :placeholder="t('discount.select_method')"
+            class="w-full"
             :class="{ 'p-invalid': errors.discount_type }"
-            :disabled="loading"
-            aria-required="true"
-            aria-describedby="discount_type-error"
           />
-          <small v-if="errors.discount_type" id="discount_type-error" class="text-red-500 text-xs">{{ errors.discount_type }}</small>
+          <small v-if="errors.discount_type" class="p-error">{{ errors.discount_type }}</small>
         </div>
+      </div>
 
+
+      <!-- Products (Only when type = product) -->
+      <div v-if="discountData.type === 'product'" class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700">
+          {{ t('discount.select_product') }} <span class="text-red-500">*</span>
+        </label>
+        <Dropdown
+          v-model="discountData.products[0]"
+          :options="products"
+          :optionLabel="labelField"
+          optionValue="id"
+          filter
+          :filterPlaceholder="t('discount.searchProducts')"
+          :placeholder="t('discount.select_products')"
+          :loading="productLoading"
+          class="w-full"
+          :class="{ 'p-invalid': errors.select_product }"
+          @filter="onProductFilter"
+        />
+        <small v-if="errors.select_product" class="p-error">{{ errors.select_product }}</small>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Discount Value -->
         <div class="space-y-2">
-          <label for="discount_value" class="block text-sm font-medium text-gray-700">
-            {{ t('discount.discount_value') }} <span class="text-red-500">*</span>
+          <label class="block text-sm font-medium text-gray-700">
+            {{ t('discount.discount_value') }}
+            <span v-if="discountData.discount_type === 1">({{ t('discount.fixed_amount') }})</span>
+            <span v-else>(%)</span>
+            <span class="text-red-500">*</span>
           </label>
           <InputNumber
-            id="discount_value"
             v-model="discountData.discount_value"
             :min="0"
             :max="discountData.discount_type === 2 ? 100 : null"
+            mode="decimal"
             :placeholder="t('discount.enter_discount_value')"
-            class="w-full rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            class="w-full"
             :class="{ 'p-invalid': errors.discount_value }"
-            :disabled="loading"
-            aria-required="true"
-            aria-describedby="discount_value-error"
           />
-          <small class="text-gray-500 text-xs" v-if="discountData.discount_type === 2">
-            {{ t('discount.percentage_note') }}
-          </small>
-          <small v-if="errors.discount_value" id="discount_value-error" class="text-red-500 text-xs">{{ errors.discount_value }}</small>
+          <small v-if="errors.discount_value" class="p-error">{{ errors.discount_value }}</small>
         </div>
 
+        <!-- Expiration Date -->
         <div class="space-y-2">
-          <label for="expires_at" class="block text-sm font-medium text-gray-700">
+          <label class="block text-sm font-medium text-gray-700">
             {{ t('discount.expiration_date') }} <span class="text-red-500">*</span>
           </label>
           <Calendar
-            id="expires_at"
             v-model="discountData.expires_at"
             :minDate="new Date()"
             dateFormat="yy-mm-dd"
             :placeholder="t('discount.select_expiration_date')"
-            class="w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            class="w-full"
             :class="{ 'p-invalid': errors.expiration_date }"
-            :disabled="loading"
-            :showIcon="true"
-            aria-required="true"
-            aria-describedby="expires_at-error"
+            showIcon
           />
-          <small v-if="errors.expiration_date" id="expires_at-error" class="text-red-500 text-xs">{{ errors.expiration_date }}</small>
+          <small v-if="errors.expiration_date" class="p-error">{{ errors.expiration_date }}</small>
         </div>
       </div>
 
+      <!-- Buttons -->
       <div class="pt-4 flex justify-center space-x-4">
         <Button
           type="button"
           :label="t('discount.cancel')"
           icon="pi pi-times"
           @click="router.go(-1)"
-          class="px-6 mx-2 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
+          class="px-6 py-3 bg-gray-200 hover:bg-gray-300 mx-2 text-gray-700 rounded-lg shadow-md"
           :disabled="loading"
-          aria-label="Cancel"
         />
         <Button
           type="submit"
-          :label="t('discount.update_discount')"
+          :label="isEdit ? t('discount.update_discount') : t('discount.create_discount')"
           icon="pi pi-check"
           :loading="loading"
-          class="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
-          :disabled="loading"
-          aria-label="Update Discount"
-        >
-          <span v-if="!loading">{{ t('discount.update_discount') }}</span>
-          <i v-else class="pi pi-spinner pi-spin"></i>
-        </Button>
+          class="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg shadow-md"
+        />
       </div>
     </form>
+
     <Toast />
   </div>
 </template>
 
 <style scoped>
-.transition-all {
-  transition-property: all;
-}
-.transition-colors {
-  transition-property: background-color, border-color, color;
-}
-.duration-300 {
-  transition-duration: 300ms;
-}
-
-button.bg-gradient-to-r:hover {
-  background-size: 150% 100%;
-}
-
-[dir="rtl"] .space-x-2 > :not([hidden]) ~ :not([hidden]) {
-  margin-right: 0.5rem;
-  margin-left: 0;
-}
-
 .p-invalid {
-  border-color: #f44336 !important;
+  @apply border-red-500 ring-red-500;
 }
 
-:deep(.p-dropdown-panel .p-dropdown-items-wrapper),
-:deep(.p-multiselect-panel .p-multiselect-items-wrapper) {
+.p-error {
+  @apply text-red-600 text-xs;
+}
+
+:deep(.p-multiselect-panel .p-multiselect-items-wrapper),
+:deep(.p-dropdown-panel .p-dropdown-items-wrapper) {
   scrollbar-width: thin;
   scrollbar-color: #3b82f6 #f1f1f1;
 }
-:deep(.p-dropdown-panel .p-dropdown-items-wrapper::-webkit-scrollbar),
-:deep(.p-multiselect-panel .p-multiselect-items-wrapper::-webkit-scrollbar) {
-  width: 6px;
-}
-:deep(.p-dropdown-panel .p-dropdown-items-wrapper::-webkit-scrollbar-track),
-:deep(.p-multiselect-panel .p-multiselect-items-wrapper::-webkit-scrollbar-track) {
-  background: #f1f1f1;
-  border-radius: 3px;
-}
-:deep(.p-dropdown-panel .p-multiselect-items-wrapper::-webkit-scrollbar-thumb),
-:deep(.p-multiselect-panel .p-multiselect-items-wrapper::-webkit-scrollbar-thumb) {
-  background-color: #3b82f6;
-  border-radius: 3px;
+
+:deep(.p-multiselect-panel .p-multiselect-items-wrapper::-webkit-scrollbar),
+:deep(.p-dropdown-panel .p-dropdown-items-wrapper::-webkit-scrollbar) {
+  @apply w-1.5;
 }
 
-:deep(.p-calendar) {
-  width: 100%;
+:deep(.p-multiselect-panel .p-multiselect-items-wrapper::-webkit-scrollbar-track),
+:deep(.p-dropdown-panel .p-dropdown-items-wrapper::-webkit-scrollbar-track) {
+  @apply bg-gray-100 rounded;
 }
-:deep(.p-datepicker) {
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+:deep(.p-multiselect-panel .p-multiselect-items-wrapper::-webkit-scrollbar-thumb),
+:deep(.p-dropdown-panel .p-dropdown-items-wrapper::-webkit-scrollbar-thumb) {
+  @apply bg-blue-500 rounded;
+}
+
+[dir="rtl"] .space-x-4 > :not([hidden]) ~ :not([hidden]) {
+  margin-left: 1rem;
+  margin-right: 0;
 }
 </style>

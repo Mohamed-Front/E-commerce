@@ -1,4 +1,3 @@
-```vue
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
@@ -47,6 +46,15 @@ const productData = ref({
   tax: 0,
   is_displayed: true,
   variants: []
+});
+
+// Dynamic required fields: SKU required only if no variants
+const requiredFields = computed(() => {
+  const base = ['store_id', 'category_id', 'brand_id', 'name_en', 'name_ar', 'base_price'];
+  if (!hasVariants.value) {
+    base.push('sku');
+  }
+  return base;
 });
 
 // Computed property for formatted attributes
@@ -241,7 +249,7 @@ const addVariant = () => {
 };
 
 const removeVariant = (index) => {
-  if (productData.variants.length > 1) {
+  if (productData.value.variants.length > 1) {
     productData.value.variants.splice(index, 1);
   } else {
     toast.add({ severity: 'warn', summary: t('error'), detail: t('validation.atLeastOneVariant'), life: 3000 });
@@ -250,10 +258,8 @@ const removeVariant = (index) => {
 
 // Submit form
 const submitForm = async () => {
-  const requiredFields = ['store_id', 'category_id', 'brand_id', 'name_en', 'name_ar', 'sku', 'base_price'];
-
-  // Validate required fields
-  if (requiredFields.some(field => !productData.value[field])) {
+  // Validate required fields (SKU required only if no variants)
+  if (requiredFields.value.some(field => !productData.value[field])) {
     toast.add({ severity: 'error', summary: t('error'), detail: t('validation.requiredFields'), life: 3000 });
     return;
   }
@@ -264,9 +270,9 @@ const submitForm = async () => {
     return;
   }
 
-  // Validate variants if they exist
+  // Validate variants: price and attributes required, SKU is optional
   if (hasVariants.value) {
-    if (productData.value.variants.some(v => !v.sku || !v.price || v.attribute_value_ids.length === 0)) {
+    if (productData.value.variants.some(v => !v.price || v.attribute_value_ids.length === 0)) {
       toast.add({ severity: 'error', summary: t('error'), detail: t('validation.variantRequiredFields'), life: 3000 });
       return;
     }
@@ -279,7 +285,7 @@ const submitForm = async () => {
   formData.append('store_id', productData.value.store_id);
   formData.append('category_id', productData.value.category_id);
   formData.append('brand_id', productData.value.brand_id);
-  formData.append('sku', productData.value.sku);
+  formData.append('sku', productData.value.sku || ''); // Optional if variants
   formData.append('name_en', productData.value.name_en);
   formData.append('name_ar', productData.value.name_ar);
   formData.append('sub_name_en', productData.value.sub_name_en || '');
@@ -299,17 +305,15 @@ const submitForm = async () => {
     formData.append(`images[${index}]`, image);
   });
 
-  // Append variants if they exist
+  // Append variants (SKU is optional)
   if (hasVariants.value) {
     productData.value.variants.forEach((variant, index) => {
-      formData.append(`variants[${index}][sku]`, variant.sku);
+      if (variant.sku) formData.append(`variants[${index}][sku]`, variant.sku);
       formData.append(`variants[${index}][price]`, variant.price);
       formData.append(`variants[${index}][cost_price]`, variant.cost_price || 0);
-      if (Array.isArray(variant.attribute_value_ids)) {
-        variant.attribute_value_ids.forEach((attrId, attrIndex) => {
-          formData.append(`variants[${index}][attribute_value_ids][${attrIndex}]`, attrId);
-        });
-      }
+      variant.attribute_value_ids.forEach((attrId, attrIndex) => {
+        formData.append(`variants[${index}][attribute_value_ids][${attrIndex}]`, attrId);
+      });
       if (variant.variant_image) {
         formData.append(`variants[${index}][variant_image]`, variant.variant_image);
       }
@@ -394,16 +398,17 @@ const submitForm = async () => {
           />
         </div>
 
-        <!-- SKU -->
+        <!-- SKU - Required only if no variants -->
         <div class="space-y-2">
           <label for="sku" class="block text-sm font-medium text-gray-700">
-            {{ t('product.sku') }} <span class="text-red-500">*</span>
+            {{ t('product.sku') }}
+            <span v-if="!hasVariants" class="text-red-500">*</span>
           </label>
           <InputText
             id="sku"
             v-model="productData.sku"
             class="w-full"
-            :class="{ 'p-invalid': !productData.sku }"
+            :class="{ 'p-invalid': !hasVariants && !productData.sku }"
           />
         </div>
 
@@ -587,20 +592,19 @@ const submitForm = async () => {
                 />
               </div>
 
-              <!-- SKU -->
+              <!-- SKU - NOT REQUIRED -->
               <div class="space-y-2">
                 <label :for="'sku_' + index" class="block text-xs font-medium text-gray-700">
-                  {{ t('product.sku') }} <span class="text-red-500">*</span>
+                  {{ t('product.sku') }}
                 </label>
                 <InputText
                   :id="'sku_' + index"
                   v-model="variant.sku"
                   class="w-full"
-                  :class="{ 'p-invalid': !variant.sku }"
                 />
               </div>
 
-              <!-- Price -->
+              <!-- Price - REQUIRED -->
               <div class="space-y-2">
                 <label :for="'price_' + index" class="block text-xs font-medium text-gray-700">
                   {{ t('product.price') }} <span class="text-red-500">*</span>
@@ -858,4 +862,3 @@ const submitForm = async () => {
   transition-duration: 200ms;
 }
 </style>
-```
