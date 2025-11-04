@@ -362,7 +362,7 @@ const submitForm = async () => {
   const formData = new FormData();
 
   // Laravel spoof PUT
-  formData.append('_method', 'PUT');
+  formData.append('_method', 'post');
 
   // Basic product data
   formData.append('store_id', productData.value.store_id);
