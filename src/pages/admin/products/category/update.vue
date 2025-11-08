@@ -258,7 +258,7 @@ const submitForm = async () => {
   if (categoryData.value.banner_two_image) {
     formData.append('banner_two_image', categoryData.value.banner_two_image);
   }
-  formData.append('_method', 'PUT');
+  formData.append('_method', 'post');
 
   try {
     const categoryId = route.params.id;
