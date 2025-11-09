@@ -939,6 +939,13 @@ export default {
   to: 'to',
   from: 'of',
    "product": {
+    "updatePrice": "Update Prices",
+    "updatePriceTitle": "Bulk Price Update",
+    "priceUpdateInfo": "Upload a CSV file containing the product 'id', 'base_price', and 'cost_price' to update prices in bulk.",
+    "downloadPriceExample": "Download Price Update Example",
+    "updatePriceButton": "Upload & Update Prices",
+    "priceUpdateSuccess": "Prices updated successfully!",
+    "priceUpdateError": "Error updating prices. Please check the file format and contents.",
       categoryFilter:" category Filter",
       storeFilter:"store Filter",
      "marketFilter":" market",

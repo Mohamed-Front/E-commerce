@@ -1100,6 +1100,7 @@ export default {
   "yes": "نعم",
   "no": "لا",
   "products": {
+
     "filters": "الفلاتر",
     "category": "الفئة",
     "searchCategory": "البحث في الفئات",
@@ -1113,7 +1114,13 @@ export default {
     "missingParams": "معرف المتجر مفقود."
   },
 "product": {
-
+"updatePrice": "تحديث ",
+    "updatePriceTitle": "تحديث الأسعار بالجملة",
+    "priceUpdateInfo": "قم بتحميل ملف CSV يحتوي على 'معرّف المنتج' و 'السعر الأساسي' و 'سعر التكلفة' لتحديث الأسعار بالجملة.",
+    "downloadPriceExample": "تحميل مثال تحديث الأسعار",
+    "updatePriceButton": "رفع وتحديث الأسعار",
+    "priceUpdateSuccess": "تم تحديث الأسعار بنجاح!",
+    "priceUpdateError": "حدث خطأ أثناء تحديث الأسعار. يرجى التحقق من تنسيق الملف ومحتوياته.",
   "stockStatus":"متاح بالمخزن",
   "inCart":"موجود بالسلة",
       "marketFilter":"اختر السوق ",

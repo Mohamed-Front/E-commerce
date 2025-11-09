@@ -30,13 +30,19 @@ const selectedFile = ref(null)
 const importLoading = ref(false)
 const categories = ref([])
 const stores = ref([])
-const markets = ref([]) // New market state
+const markets = ref([])
 const selectedCategory = ref(null)
 const selectedStore = ref(null)
-const selectedMarket = ref(null) // New selected market
+const selectedMarket = ref(null)
 const categorySearchQuery = ref('')
-const marketSearchQuery = ref('') // New market search state
+const marketSearchQuery = ref('')
 const appLanguage = ref(localStorage.getItem('appLang') || 'en')
+
+// --- NEW PRICE UPDATE STATE ---
+const priceUpdateDialog = ref(false)
+const selectedPriceFile = ref(null)
+const priceUpdateLoading = ref(false)
+// ------------------------------
 
 // Pagination variables
 const currentPage = ref(1)
@@ -135,7 +141,7 @@ const fetchData = () => {
             search: searchQuery.value || undefined,
             category_id: selectedCategory.value || undefined,
             store_id: selectedStore.value || undefined,
-            market_id: selectedMarket.value || undefined // Add market filter
+            market_id: selectedMarket.value || undefined
         }
     })
     .then((response) => {
@@ -238,7 +244,7 @@ const exportCSV = () => {
         search: searchQuery.value || '',
         category_id: selectedCategory.value || '',
         store_id: selectedStore.value || '',
-        market_id: selectedMarket.value || '' // Add market filter to export
+        market_id: selectedMarket.value || ''
     })
 
     const url = `/api/export/products?${params.toString()}`
@@ -270,7 +276,7 @@ const exportCSV = () => {
         })
 }
 
-// Download example CSV
+// Download example CSV for full product import
 const downloadExample = () => {
     const csvContent = 'store_id,category_id,market_id,name_en,name_ar,sku,brand_id,sub_name_en,sub_name_ar,description_en,description_ar,base_price,cost_price,tax\n' +
         '1,1,1,Demo Product 1,منتج تجريبي 1,SKU001,1,Sub Demo 1,تجريبي فرعي 1,Description of Demo Product 1,وصف المنتج التجريبي 1,15.50,10.00,0.05\n' +
@@ -289,12 +295,38 @@ const downloadExample = () => {
     }
 }
 
-// Handle file selection
+// --- NEW FUNCTION: Download example CSV for price update ---
+const downloadPriceExample = () => {
+    const csvContent = 'id,price,cost_price\n' +
+        '1,16.00,10.50\n' +
+        '2,23.50,15.00';
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob)
+        link.setAttribute('href', url)
+        link.setAttribute('download', 'product_price_update_example.csv')
+        link.style.visibility = 'hidden'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+    }
+}
+// -----------------------------------------------------------
+
+// Handle file selection for full product import
 const onFileSelect = (event) => {
     selectedFile.value = event.files[0]
 }
 
-// Import products
+// --- NEW FUNCTION: Handle file selection for price update ---
+const onPriceFileSelect = (event) => {
+    selectedPriceFile.value = event.files[0]
+}
+// -----------------------------------------------------------
+
+// Import products (full)
 const importProducts = () => {
     if (!selectedFile.value) {
         toast.add({
@@ -335,6 +367,50 @@ const importProducts = () => {
         importLoading.value = false
     })
 }
+
+// --- NEW FUNCTION: Update Prices ---
+const updatePrices = () => {
+    if (!selectedPriceFile.value) {
+        toast.add({
+            severity: 'error',
+            summary: t('error'),
+            detail: t('validation.fileRequired'),
+            life: 3000
+        })
+        return
+    }
+
+    priceUpdateLoading.value = true
+    const formData = new FormData()
+    formData.append('file', selectedPriceFile.value)
+
+    // Assuming a new endpoint for price update exists: /api/import/prices
+    axios.post('/api/product/update/prices', formData)
+    .then(() => {
+        toast.add({
+            severity: 'success',
+            summary: t('success'),
+            detail: t('product.priceUpdateSuccess'), // You need to define this in your i18n
+            life: 3000
+        })
+        fetchData()
+        priceUpdateDialog.value = false
+        selectedPriceFile.value = null
+    })
+    .catch((error) => {
+        toast.add({
+            severity: 'error',
+            summary: t('error'),
+            detail: t('product.priceUpdateError'), // You need to define this in your i18n
+            life: 3000
+        })
+        console.error('Error updating prices:', error)
+    })
+    .finally(() => {
+        priceUpdateLoading.value = false
+    })
+}
+// ------------------------------------
 
 // Navigation functions
 const createNewProduct = () => {
@@ -398,6 +474,13 @@ onMounted(() => {
                                 filter
                                 filterPlaceholder="Search markets"
                                 @filter="onMarketFilter"
+                            />
+
+                            <Button
+                                :label="t('product.updatePrice')"
+                                icon="pi pi-dollar"
+                                class="p-button-warning p-button-outlined"
+                                @click="priceUpdateDialog = true"
                             />
                             <Button
                                 :label="t('product.import')"
@@ -631,7 +714,47 @@ onMounted(() => {
                         />
                     </template>
                 </Dialog>
-            </div>
+
+                <Dialog
+                    v-model:visible="priceUpdateDialog"
+                    :style="{ width: '450px' }"
+                    :header="t('product.updatePriceTitle')"
+                    :modal="true"
+                >
+                    <div class="flex flex-column gap-3">
+
+                        <Button
+                            :label="t('product.downloadPriceExample')"
+                            icon="pi pi-download"
+                            class="p-button-outlined p-button-warning"
+                            @click="downloadPriceExample"
+                        />
+                        <FileUpload
+                            mode="basic"
+                            :custom-upload="true"
+                            @select="onPriceFileSelect"
+                            :maxFileSize="10000000"
+                            chooseLabel="Select Price File"
+                        />
+
+                    </div>
+                    <template #footer>
+                        <Button
+                            :label="t('cancel')"
+                            icon="pi pi-times"
+                            class="p-button-text"
+                            @click="priceUpdateDialog = false"
+                        />
+                        <Button
+                            :label="t('product.updatePriceButton')"
+                            icon="pi pi-check"
+                            :loading="priceUpdateLoading"
+                            :disabled="!selectedPriceFile"
+                            @click="updatePrices"
+                        />
+                    </template>
+                </Dialog>
+                </div>
         </div>
     </div>
 </template>
