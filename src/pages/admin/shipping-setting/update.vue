@@ -22,7 +22,6 @@ const loading = ref(false);
 
 // Form Data
 const shippingData = ref({
-  store_id: null,
   is_enabled: false,
   min_amount: 0,
   free_amount: 0,
@@ -87,10 +86,9 @@ const fetchStores = async () => {
 const fetchShippingSetting = async () => {
   loading.value = true;
   try {
-    const response = await axios.get(`/api/shipping-setting/${route.params.id}`);
+    const response = await axios.get(`/api/shipping/setting/show`);
     const data = response.data.data;
     shippingData.value = {
-      store_id: data.store_id,
       is_enabled: data.is_enabled,
       min_amount: parseFloat(data.min_amount),
       free_amount: parseFloat(data.free_amount),
@@ -158,7 +156,7 @@ const submitForm = async () => {
 
 
 
-    await axios.post(`/api/shipping-setting/${route.params.id}`, shippingData.value, {
+    await axios.post(`/api/shipping/setting/update`, shippingData.value, {
 
     });
 
@@ -199,30 +197,10 @@ onMounted(() => {
 
     <form @submit.prevent="submitForm" class="space-y-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Store Selection -->
-        <div class="space-y-2">
-          <label for="store_id" class="block text-sm font-medium text-gray-700">
-            {{ t('shippingSetting.store') }} <span class="text-red-500">*</span>
-          </label>
-          <Dropdown
-            id="store_id"
-            v-model="shippingData.store_id"
-            :options="stores"
-            optionLabel="label"
-            optionValue="value"
-            :placeholder="t('shippingSetting.selectStore')"
-            class="w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-            required
-          />
-        </div>
 
-        <!-- Is Enabled -->
-        <div class="space-y-4">
-          <div class="flex items-center space-x-4">
-            <label class="block text-sm font-medium text-gray-700 mx-2">{{ t('shippingSetting.isEnabled') }}</label>
-            <InputSwitch v-model="shippingData.is_enabled" />
-          </div>
-        </div>
+
+
+
 
         <!-- Min Amount -->
         <div class="space-y-2">
@@ -258,13 +236,6 @@ onMounted(() => {
           />
         </div>
 
-        <!-- Express Enabled -->
-        <div class="space-y-4">
-          <div class="flex items-center space-x-4">
-            <label class="block text-sm font-medium text-gray-700 mx-2">{{ t('shippingSetting.expressEnabled') }}</label>
-            <InputSwitch v-model="shippingData.express_enabled" />
-          </div>
-        </div>
 
         <!-- Days -->
         <div class="space-y-2">
@@ -313,7 +284,21 @@ onMounted(() => {
           />
         </div>
 
-
+    <div class="flex ">
+            <div class="space-y-4 my-auto">
+              <div class="flex items-center space-x-4">
+                <label class="block text-sm font-medium text-gray-700 mx-2">{{ t('shippingSetting.isEnabled') }}</label>
+                <InputSwitch v-model="shippingData.is_enabled" />
+              </div>
+            </div>
+            <!-- Express Enabled -->
+            <div class="space-y-4 my-auto">
+              <div class="flex items-center space-x-4">
+                <label class="block text-sm font-medium text-gray-700 mx-2">{{ t('shippingSetting.expressEnabled') }}</label>
+                <InputSwitch v-model="shippingData.express_enabled" />
+              </div>
+            </div>
+          </div>
 
 
         <!-- Google Map -->

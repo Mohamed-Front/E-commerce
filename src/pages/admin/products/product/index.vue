@@ -104,7 +104,9 @@ const fetchStores = async () => {
         console.error('Error fetching stores:', error)
     }
 }
-
+    const goToShippingSettings = (storeId) => {
+      router.push({ name: 'product-shipping-settings', params: { id: storeId } })
+    }
 // Fetch markets with search support
 const fetchMarkets = async () => {
     try {
@@ -524,7 +526,6 @@ onMounted(() => {
                         class="p-datatable-sm"
                         v-can="'list products'"
                     >
-                        <Column selection-mode="multiple" header-style="width: 3rem"></Column>
  `                    ` <Column field="id" :header="t('id')" :sortable="true" header-style="width:14%; min-width:10rem;">
                             <template #body="slotProps">
                                 {{ slotProps.data.id }}
@@ -547,8 +548,13 @@ onMounted(() => {
                                 {{ slotProps.data.base_price }}
                             </template>
                         </Column>
+                        <Column field="total_discounts_value" :header="t('product.Price after discount')" :sortable="true" header-style="width:14%; min-width:10rem;">
+                            <template #body="slotProps">
+                                {{ slotProps.data.base_price -slotProps.data.total_discounts_value }}
+                            </template>
+                        </Column>
 
-                        <Column field="is_displayed" :header="t('product.isDisplayed')" :sortable="true" header-style="width:14%; min-width:10rem;">
+                        <Column field="is_displayed" :header="t('product.isDisplayed')" :sortable="true" header-style="width:7%; min-width:7rem;">
                             <template #body="slotProps">
                                 <Tag
                                     :value="slotProps.data.is_displayed ? t('yes') : t('no')"
@@ -557,7 +563,7 @@ onMounted(() => {
                             </template>
                         </Column>
 
-                        <Column :header="t('actions')" header-style="width: 12rem">
+                        <Column :header="t('actions')" header-style="width:16rem">
                             <template #body="slotProps">
                                 <Button
                                     v-can="'edit products'"
@@ -573,6 +579,12 @@ onMounted(() => {
                                     @click="confirmDelete(slotProps.data.id)"
                                     v-tooltip.top="t('delete')"
                                 />
+                                 <Button
+                                    icon="pi pi-truck"
+                                    class="p-button-warning mx-1"
+                                    @click="goToShippingSettings(slotProps.data.id)"
+                                    v-tooltip.top="t('store.shippingSettings')"
+                                  />
                             </template>
                         </Column>
 
@@ -758,3 +770,32 @@ onMounted(() => {
         </div>
     </div>
 </template>
+<style scoped lang="scss">
+/* Custom styles for better table display */
+:deep(.p-datatable) {
+  font-size: 0.9rem;
+}
+
+:deep(.p-datatable .p-datatable-thead > tr > th) {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr) {
+  transition: background-color 0.2s;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr:hover) {
+  background-color: var(--hoverColor);
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 960px) {
+  :deep(.p-datatable) {
+    overflow-x: auto;
+    display: block;
+  }
+}
+</style>

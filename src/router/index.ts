@@ -102,6 +102,8 @@ const routes: Array<RouteRecordRaw> = [
         path: '/stores-nothasmarket/:id',
         component: () => import('../pages/admin/frontend/pages/stores/nothasmarket.vue'),
       },
+
+
       {
         name: 'stores-page',
         path: '/stores',
@@ -417,6 +419,26 @@ const routes: Array<RouteRecordRaw> = [
             component: () => import('../pages/admin/store/index.vue'),
           },
            {
+            name: 'store-shipping-settings',
+            path: 'store-shipping-settings/:id',
+            component: () => import('../pages/admin/store/shipping-setting.vue'),
+          },
+          {
+            name: 'product-shipping-settings',
+            path: 'product-shipping-settings/:id',
+            component: () => import('../pages/admin/products/product/shipping-setting.vue'),
+          },
+          {
+            name: 'market-shipping-settings',
+            path: 'market-shipping-settings/:id',
+            component: () => import('../pages/admin/products/markets/shipping-setting.vue'),
+          },
+           {
+            name: 'category-shipping-settings',
+            path: 'category-shipping-settings/:id',
+            component: () => import('../pages/admin/products/category/shipping-setting.vue'),
+          },
+           {
             name: 'inventory',
             path: 'inventory',
             component: () => import('../pages/admin/inventory/index.vue'),
@@ -458,19 +480,10 @@ const routes: Array<RouteRecordRaw> = [
             path: 'setting',
             component: () => import('../pages/admin/settings/setting/update.vue'),
           },
-           {
-            name: 'shipping-setting',
-            path: 'shipping-setting',
-            component: () => import('../pages/admin/shipping-setting/index.vue'),
-          },
-          {
-            name: 'shipping-create',
-            path: 'shipping-create',
-            component: () => import('../pages/admin/shipping-setting/create.vue'),
-          },
+
           {
             name: 'shipping-update',
-            path: 'shipping-update/:id',
+            path: 'shipping-update',
             component: () => import('../pages/admin/shipping-setting/update.vue'),
           },
          {

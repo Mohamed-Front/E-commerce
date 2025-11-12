@@ -54,7 +54,9 @@ const exampleData = ref([
     Top_Parent: 'shift7',
   },
 ])
-
+    const goToShippingSettings = (storeId) => {
+      router.push({ name: 'market-shipping-settings', params: { id: storeId } })
+    }
 // Fetch markets data
 const fetchData = () => {
   loading.value = true
@@ -339,7 +341,7 @@ onMounted(() => {
                 {{ slotProps.data.store?.name_en || t('market.noStore') }}
               </template>
             </Column>
-            <Column :header="t('actions')" header-style="width:12rem;">
+            <Column :header="t('actions')" header-style="width:14rem;">
               <template #body="slotProps">
                 <Button
                   icon="pi pi-pencil"
@@ -355,6 +357,12 @@ onMounted(() => {
                   v-tooltip.top="t('delete')"
                   aria-label="Delete market"
                 />
+                 <Button
+                    icon="pi pi-truck"
+                    class="p-button-warning mx-1"
+                    @click="goToShippingSettings(slotProps.data.id)"
+                    v-tooltip.top="t('store.shippingSettings')"
+                  />
               </template>
             </Column>
             <template #empty>

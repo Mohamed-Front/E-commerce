@@ -221,6 +221,9 @@ const onFileSelect = (event) => {
   selectedFile.value = event.files[0]
 }
 
+    const goToShippingSettings = (storeId) => {
+      router.push({ name: 'category-shipping-settings', params: { id: storeId } })
+    }
 const importCategories = () => {
   if (!selectedFile.value) {
     toast.add({
@@ -382,13 +385,19 @@ onMounted(() => {
                   v-tooltip.top="t('delete')"
                   aria-label="Delete category"
                 />
-                    <Button
+                  <Button
                   v-can="'edit inventory'"
                   icon="pi pi-images"
-                  class="p-button-info"
+                  class="p-detail"
                   @click="goToMediaLinks(slotProps.data.id)"
 
                 />
+                 <Button
+                    icon="pi pi-truck"
+                    class="p-button-warning mx-1"
+                    @click="goToShippingSettings(slotProps.data.id)"
+                    v-tooltip.top="t('store.shippingSettings')"
+                  />
               </template>
             </Column>
             <template #empty>

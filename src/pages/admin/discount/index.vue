@@ -188,9 +188,19 @@ const editDiscount = (id) => {
           >
             <Column selection-mode="multiple" header-style="width: 3rem"></Column>
 
+          <Column field="en_name" :header="t('product.nameEn')" :sortable="true">
+              <template #body="slotProps">
+                {{ slotProps.data.products[0]?.name_en }}
+              </template>
+            </Column>
+              <Column field="name_ar" :header="t('product.nameAr')" :sortable="true">
+              <template #body="slotProps">
+                {{ slotProps.data.products[0]?.name_ar }}
+              </template>
+            </Column>
 
 
-            <Column field="discount_value" :header="t('discount.discount_value')" :sortable="true">
+            <Column field="discount_value" :header="t('product.basePrice')" :sortable="true">
               <template #body="slotProps">
                 {{ slotProps.data.discount_value }}
               </template>

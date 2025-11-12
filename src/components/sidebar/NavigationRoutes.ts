@@ -196,7 +196,7 @@ export default {
       },
     },
      {
-      name: 'shipping-setting',
+      name: 'shipping-update',
       displayName: 'navigation.shipping',
       show: ['list shipping-settings'],
       meta: {

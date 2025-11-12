@@ -82,11 +82,13 @@ const exportStores = () => {
     })
 }
 
-const delet = (id) => {
-  delete_id.value = id
-  deleteStoresDialog.value = true
-}
-
+    const delet = (id) => {
+      delete_id.value = id
+      deleteStoresDialog.value = true
+    }
+    const goToShippingSettings = (storeId) => {
+      router.push({ name: 'store-shipping-settings', params: { id: storeId } })
+    }
 const deleteSelectedStore = () => {
   axios.delete(`/api/store/${delete_id.value}`)
     .then(() => {
@@ -263,7 +265,7 @@ const formatDate = (dateString) => {
               </template>
             </Column>
 
-            <Column :header="t('actions')" headerStyle="width: 12rem">
+            <Column :header="t('actions')" headerStyle="width: 15rem">
               <template #body="slotProps">
                 <Button
                   v-can="'edit stores'"
@@ -282,9 +284,16 @@ const formatDate = (dateString) => {
                   <Button
                   v-can="'edit inventory'"
                   icon="pi pi-images"
-                  class="p-button-info"
+                  class="p-detail"
                   @click="goToMediaLinks(slotProps.data.id)"
 
+                />
+                <Button
+
+                  icon="pi pi-truck"
+                  class="p-button-warning mx-1"
+                  @click="goToShippingSettings(slotProps.data.id)"
+                  v-tooltip.top="t('store.shippingSettings')"
                 />
               </template>
             </Column>

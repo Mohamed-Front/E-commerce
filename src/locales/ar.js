@@ -1114,6 +1114,7 @@ export default {
     "missingParams": "معرف المتجر مفقود."
   },
 "product": {
+  "Price after discount":"السعر بعد الخصم",
 "updatePrice": "تحديث ",
     "updatePriceTitle": "تحديث الأسعار بالجملة",
     "priceUpdateInfo": "قم بتحميل ملف CSV يحتوي على 'معرّف المنتج' و 'السعر الأساسي' و 'سعر التكلفة' لتحديث الأسعار بالجملة.",
