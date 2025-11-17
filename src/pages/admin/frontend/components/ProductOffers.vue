@@ -74,7 +74,7 @@
       const response = await axios.get(`api/home/best-sellers/${stor_id.value}`)
       const data = response.data.data.data || []
     Best_seller.value = {
-        title: t('category.bestsellers') || 'New Arrivals',
+        title: t('category.bestsellers'),
         products: data.map((product) => ({
           variant_id: product?.variant_id,
           data:product,

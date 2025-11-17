@@ -11,6 +11,11 @@ import FileUpload from 'primevue/fileupload'
 import Tag from 'primevue/tag'
 import Dropdown from 'primevue/dropdown'
 import InputText from 'primevue/inputtext'
+import ProgressSpinner from 'primevue/progressspinner'
+import Dialog from 'primevue/dialog'
+import Button from 'primevue/button'
+import DataTable from 'primevue/datatable'
+import InputSwitch from 'primevue/inputswitch'  // <-- NEW: Import InputSwitch
 
 const router = useRouter()
 const toast = useToast()
@@ -43,6 +48,10 @@ const priceUpdateDialog = ref(false)
 const selectedPriceFile = ref(null)
 const priceUpdateLoading = ref(false)
 // ------------------------------
+
+// --- NEW TOGGLE LOADING MAP ---
+const toggleLoading = ref({}) // { productId: true/false }
+// --------------------------------
 
 // Pagination variables
 const currentPage = ref(1)
@@ -104,9 +113,7 @@ const fetchStores = async () => {
         console.error('Error fetching stores:', error)
     }
 }
-    const goToShippingSettings = (storeId) => {
-      router.push({ name: 'product-shipping-settings', params: { id: storeId } })
-    }
+
 // Fetch markets with search support
 const fetchMarkets = async () => {
     try {
@@ -297,7 +304,7 @@ const downloadExample = () => {
     }
 }
 
-// --- NEW FUNCTION: Download example CSV for price update ---
+// Download example CSV for price update
 const downloadPriceExample = () => {
     const csvContent = 'id,price,cost_price\n' +
         '1,16.00,10.50\n' +
@@ -315,18 +322,16 @@ const downloadPriceExample = () => {
         document.body.removeChild(link)
     }
 }
-// -----------------------------------------------------------
 
 // Handle file selection for full product import
 const onFileSelect = (event) => {
     selectedFile.value = event.files[0]
 }
 
-// --- NEW FUNCTION: Handle file selection for price update ---
+// Handle file selection for price update
 const onPriceFileSelect = (event) => {
     selectedPriceFile.value = event.files[0]
 }
-// -----------------------------------------------------------
 
 // Import products (full)
 const importProducts = () => {
@@ -340,7 +345,7 @@ const importProducts = () => {
         return
     }
 
-    importLoading.value = true
+    importLoading = true
     const formData = new FormData()
     formData.append('file', selectedFile.value)
 
@@ -370,7 +375,7 @@ const importProducts = () => {
     })
 }
 
-// --- NEW FUNCTION: Update Prices ---
+// Update Prices
 const updatePrices = () => {
     if (!selectedPriceFile.value) {
         toast.add({
@@ -386,13 +391,12 @@ const updatePrices = () => {
     const formData = new FormData()
     formData.append('file', selectedPriceFile.value)
 
-    // Assuming a new endpoint for price update exists: /api/import/prices
     axios.post('/api/product/update/prices', formData)
     .then(() => {
         toast.add({
             severity: 'success',
             summary: t('success'),
-            detail: t('product.priceUpdateSuccess'), // You need to define this in your i18n
+            detail: t('product.priceUpdateSuccess'),
             life: 3000
         })
         fetchData()
@@ -403,7 +407,7 @@ const updatePrices = () => {
         toast.add({
             severity: 'error',
             summary: t('error'),
-            detail: t('product.priceUpdateError'), // You need to define this in your i18n
+            detail: t('product.priceUpdateError'),
             life: 3000
         })
         console.error('Error updating prices:', error)
@@ -411,6 +415,45 @@ const updatePrices = () => {
     .finally(() => {
         priceUpdateLoading.value = false
     })
+}
+
+// --- NEW: Toggle Free Shipping ---
+const toggleFreeShipping = async (product) => {
+  console.log(product.is_free_shipping)
+    const productId = product.id
+    const newValue = product.is_free_shipping ? 1 : 0
+
+    // Set loading state for this product
+    toggleLoading.value[productId] = true
+
+    try {
+        await axios.post(`/api/product/is/free/shipping/${productId}`, {
+            is_free_shipping: newValue
+        })
+
+        // Update local product state
+        product.is_free_shipping = newValue
+
+        toast.add({
+            severity: 'success',
+            summary: t('success'),
+            detail: newValue ? t('product.freeShippingEnabled') : t('product.freeShippingDisabled'),
+            life: 3000
+        })
+    } catch (error) {
+        // Revert on error
+        product.is_free_shipping = !newValue
+
+        toast.add({
+            severity: 'error',
+            summary: t('error'),
+            detail: t('product.freeShippingUpdateError'),
+            life: 3000
+        })
+        console.error('Error updating free shipping:', error)
+    } finally {
+        toggleLoading.value[productId] = false
+    }
 }
 // ------------------------------------
 
@@ -526,11 +569,12 @@ onMounted(() => {
                         class="p-datatable-sm"
                         v-can="'list products'"
                     >
- `                    ` <Column field="id" :header="t('id')" :sortable="true" header-style="width:14%; min-width:10rem;">
+                        <Column field="id" :header="t('id')" :sortable="true" header-style="width:6%; min-width:4rem;">
                             <template #body="slotProps">
                                 {{ slotProps.data.id }}
                             </template>
                         </Column>
+
                         <Column field="name_ar" :header="t('product.nameAr')" :sortable="true" header-style="width:14%; min-width:13rem;">
                             <template #body="slotProps">
                                 {{ slotProps.data.name_ar }}
@@ -543,14 +587,15 @@ onMounted(() => {
                             </template>
                         </Column>
 
-                        <Column field="base_price" :header="t('product.basePrice')" :sortable="true" header-style="width:14%; min-width:10rem;">
+                        <Column field="base_price" :header="t('product.basePrice')" :sortable="true" header-style="width:8%; min-width:8rem;">
                             <template #body="slotProps">
                                 {{ slotProps.data.base_price }}
                             </template>
                         </Column>
-                        <Column field="total_discounts_value" :header="t('product.Price after discount')" :sortable="true" header-style="width:14%; min-width:10rem;">
+
+                        <Column field="total_discounts_value" :header="t('product.Price after discount')" :sortable="true" header-style="width:10%; min-width:10rem;">
                             <template #body="slotProps">
-                                {{ slotProps.data.base_price -slotProps.data.total_discounts_value }}
+                                {{ slotProps.data.base_price - slotProps.data.total_discounts_value }}
                             </template>
                         </Column>
 
@@ -563,7 +608,28 @@ onMounted(() => {
                             </template>
                         </Column>
 
-                        <Column :header="t('actions')" header-style="width:16rem">
+                        <!-- NEW: Free Shipping Toggle Column -->
+                        <Column :header="t('product.freeShipping')" header-style="width:10%; min-width:8rem;">
+                            <template #body="slotProps">
+                                <div class="flex justify-content-center">
+                                  <InputSwitch
+                                    :model-value="slotProps.data.is_free_shipping === 1"
+                                    :disabled="toggleLoading[slotProps.data.id]"
+                                    @update:model-value="slotProps.data.is_free_shipping = $event ? 1 : 0; toggleFreeShipping(slotProps.data)"
+                                    v-tooltip.top="slotProps.data.is_free_shipping === 1 ? t('product.freeShipping') : t('product.notFreeShipping')"
+                                />
+                                    <ProgressSpinner
+                                        v-if="toggleLoading[slotProps.data.id]"
+                                        style="width: 20px; height: 20px"
+                                        class="ml-2"
+                                        strokeWidth="5"
+                                    />
+                                </div>
+                            </template>
+                        </Column>
+                        <!-- END -->
+
+                        <Column :header="t('actions')" header-style="width:14rem">
                             <template #body="slotProps">
                                 <Button
                                     v-can="'edit products'"
@@ -579,12 +645,6 @@ onMounted(() => {
                                     @click="confirmDelete(slotProps.data.id)"
                                     v-tooltip.top="t('delete')"
                                 />
-                                 <Button
-                                    icon="pi pi-truck"
-                                    class="p-button-warning mx-1"
-                                    @click="goToShippingSettings(slotProps.data.id)"
-                                    v-tooltip.top="t('store.shippingSettings')"
-                                  />
                             </template>
                         </Column>
 
@@ -602,6 +662,7 @@ onMounted(() => {
                         </template>
                     </DataTable>
 
+                    <!-- Pagination -->
                     <div class="p-paginator p-component p-unselectable-text p-paginator-bottom">
                         <div class="p-paginator-left-content">
                             <span class="p-paginator-current">{{ t('show') }} {{ from }} {{ t('to') }} {{ to }} {{ t('from') }} {{ totalRecords }}</span>
@@ -660,6 +721,7 @@ onMounted(() => {
                     </div>
                 </div>
 
+                <!-- Delete Dialog -->
                 <Dialog
                     v-model:visible="deleteDialog"
                     :style="{ width: '450px' }"
@@ -686,6 +748,7 @@ onMounted(() => {
                     </template>
                 </Dialog>
 
+                <!-- Import Dialog -->
                 <Dialog
                     v-model:visible="importDialog"
                     :style="{ width: '450px' }"
@@ -727,6 +790,7 @@ onMounted(() => {
                     </template>
                 </Dialog>
 
+                <!-- Price Update Dialog -->
                 <Dialog
                     v-model:visible="priceUpdateDialog"
                     :style="{ width: '450px' }"
@@ -734,7 +798,6 @@ onMounted(() => {
                     :modal="true"
                 >
                     <div class="flex flex-column gap-3">
-
                         <Button
                             :label="t('product.downloadPriceExample')"
                             icon="pi pi-download"
@@ -748,7 +811,6 @@ onMounted(() => {
                             :maxFileSize="10000000"
                             chooseLabel="Select Price File"
                         />
-
                     </div>
                     <template #footer>
                         <Button
@@ -766,12 +828,12 @@ onMounted(() => {
                         />
                     </template>
                 </Dialog>
-                </div>
+            </div>
         </div>
     </div>
 </template>
+
 <style scoped lang="scss">
-/* Custom styles for better table display */
 :deep(.p-datatable) {
   font-size: 0.9rem;
 }
@@ -791,7 +853,6 @@ onMounted(() => {
   background-color: var(--hoverColor);
 }
 
-/* Responsive adjustments */
 @media screen and (max-width: 960px) {
   :deep(.p-datatable) {
     overflow-x: auto;

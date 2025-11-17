@@ -63,7 +63,7 @@
                     v-model="selectedFilters.category_ids"
                     class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
                   />
-                  <label :for="`cat-${category.id}`" class="ml-2 text-sm text-gray-700">{{
+                  <label :for="`cat-${category.id}`" class="mx-2 text-sm text-gray-700">{{
                     category.name
                   }}</label>
                 </div>
@@ -147,18 +147,18 @@
                 </svg>
               </div>
               <div v-show="filtersExpanded.price" class="mt-4 space-y-2">
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center ">
                   <input
                     type="number"
-                    placeholder="Min"
+                  :placeholder='$t("min_price")'
                     v-model.number="selectedFilters.min_price"
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     aria-label="Minimum price"
                   />
-                  <span>-</span>
+                  <span class="mx-1"> - </span>
                   <input
                     type="number"
-                    placeholder="Max"
+                   :placeholder='$t("max_price")'
                     v-model.number="selectedFilters.max_price"
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     aria-label="Maximum price"

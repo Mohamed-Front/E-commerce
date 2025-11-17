@@ -12,7 +12,7 @@
       :space-between="8"
       :loop="true"
       :autoplay="{ delay: 3000, disableOnInteraction: false }"
-      :speed="5000"
+      :speed="4000"
       :grab-cursor="true"
       :touch-ratio="1.5"
       class="mt-6 pb-1"
@@ -29,26 +29,27 @@
         :key="i"
         class="group"
       >
-        <!-- Clickable Card - Opens in New Tab -->
+        <!-- Clickable Card – opens product details in NEW TAB (except buttons) -->
         <a
           :href="`/product-details/${pro.id}`"
           target="_blank"
           rel="noopener noreferrer"
           class="block h-full bg-white rounded-lg shadow-lg transition-all duration-300 hover:-translate-y-2 cursor-pointer"
+          @click.prevent.stop="handleCardClick($event, pro)"
         >
           <!-- Image Container -->
           <div class="w-full h-full aspect-square overflow-hidden rounded-xl shadow-sm relative">
             <img
               :src="pro.img"
               :alt="pro.name"
-              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-100"
             />
             <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300"></div>
 
             <!-- Wishlist Button -->
             <button
               v-if="authStore.authenticatedweb"
-              @click.stop="toggleFavorite(pro)"
+              @click.stop.prevent="toggleFavorite(pro)"
               class="absolute top-2 right-2 p-2 rounded-full bg-white text-gray-500 hover:text-red-500 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 z-10"
               aria-label="Add to wishlist"
             >
@@ -67,7 +68,7 @@
           </div>
 
           <!-- Product Info -->
-          <div class="p-3 flex flex-col h-[140px]"> <!-- Fixed height for consistent layout -->
+          <div class="p-3 flex flex-col h-[140px]">
             <p class="font-sans mt-2 text-gray-800 font-medium xs:text-sm sm:text-base md:text-lg line-clamp-2">
               {{ truncateName(pro.name, 30) }}
             </p>
@@ -84,7 +85,7 @@
               <!-- Add to Cart Button -->
               <button
                 v-if="authStore.authenticatedweb"
-                @click.stop="addToCart(pro)"
+                @click.stop.prevent="addToCart(pro)"
                 class="p-2 rounded-full bg-gray-100 text-[#A6853B] transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#A6853B] focus:ring-offset-2"
                 :class="{
                   'hover:bg-[#A6853B] hover:text-white': !pro.in_cart && pro.is_stock !== 1,
@@ -164,7 +165,17 @@ const props = defineProps({
   },
 });
 
-// Add to Cart
+/* ----------  إدارة نقرة البطاقة (فتح في تبويب جديد فقط إذا لم يكن زر) ---------- */
+const handleCardClick = (event, product) => {
+  // إذا كان النقر على زر داخل البطاقة → لا تفعل شيئًا (الأزرار تُدار بواسطة @click.stop.prevent)
+  // إذا كان النقر على أي مكان آخر → افتح الرابط في تبويب جديد
+  if (event.target.closest('button')) return;
+
+  const url = `/product-details/${product.id}`;
+  window.open(url, '_blank', 'noopener,noreferrer');
+};
+
+/* ----------  إضافة للسلة ---------- */
 const addToCart = async (product) => {
   if (!authStore.authenticatedweb) {
     alert(t('auth.required') || 'Please log in to add to cart.');
@@ -185,7 +196,7 @@ const addToCart = async (product) => {
   }
 };
 
-// Toggle Wishlist
+/* ----------  تبديل المفضلة ---------- */
 const toggleFavorite = async (product) => {
   if (!authStore.authenticatedweb) {
     alert(t('auth.required') || 'Please log in to manage wishlist.');
@@ -205,16 +216,15 @@ const toggleFavorite = async (product) => {
     }
 
     product.is_wished = !isCurrentlyFavorited;
-    alert(t(isCurrentlyFavorited ? 'wishlist.removed' : 'wishlist.added') ||
-          `Product ${isCurrentlyFavorited ? 'removed from' : 'added to'} wishlist!`);
+
   } catch (error) {
     console.error('Error toggling wishlist:', error);
-    product.is_wished = isCurrentlyFavorited; // Revert
+    product.is_wished = isCurrentlyFavorited; // إعادة القيمة الأصلية
     alert(t('wishlist.error') || 'Failed to update wishlist.');
   }
 };
 
-// Truncate Name
+/* ----------  تقطيع اسم المنتج ---------- */
 const truncateName = (name, maxLength) => {
   if (name.length <= maxLength) return name;
   return name.slice(0, maxLength) + '...';

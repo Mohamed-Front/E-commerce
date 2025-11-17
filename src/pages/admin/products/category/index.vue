@@ -392,12 +392,7 @@ onMounted(() => {
                   @click="goToMediaLinks(slotProps.data.id)"
 
                 />
-                 <Button
-                    icon="pi pi-truck"
-                    class="p-button-warning mx-1"
-                    @click="goToShippingSettings(slotProps.data.id)"
-                    v-tooltip.top="t('store.shippingSettings')"
-                  />
+
               </template>
             </Column>
             <template #empty>

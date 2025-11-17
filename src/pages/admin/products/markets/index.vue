@@ -14,6 +14,7 @@ import Dialog from 'primevue/dialog'
 import ProgressSpinner from 'primevue/progressspinner'
 import Dropdown from 'primevue/dropdown'
 import FileUpload from 'primevue/fileupload'
+import InputNumber from 'primevue/inputnumber'
 
 const router = useRouter()
 const toast = useToast()
@@ -31,6 +32,9 @@ const selectedMarkets = ref(null)
 const importDialog = ref(false)
 const selectedFile = ref(null)
 const importLoading = ref(false)
+const service_feeDialog = ref(false)
+const selectedMarketId = ref(null)
+const service_fee = ref(0)
 
 // Pagination variables
 const currentPage = ref(1)
@@ -244,6 +248,38 @@ const importMarkets = () => {
     })
 }
 
+// Service fee functions
+const openservice_feeDialog = (data) => {
+  selectedMarketId.value = data.id
+  service_fee.value = data.service_fee // Reset or fetch current if needed
+  service_feeDialog.value = true
+}
+
+const addservice_fee = () => {
+  axios.post(`/api/market/service/fee/${selectedMarketId.value}`, {
+    service_fee: service_fee.value
+  })
+    .then(() => {
+      toast.add({
+        severity: 'success',
+        summary: t('success'),
+        detail: t('market.serviceFeeSuccess'),
+        life: 3000
+      })
+      service_feeDialog.value = false
+      fetchData() // Optional refresh
+    })
+    .catch((error) => {
+      toast.add({
+        severity: 'error',
+        summary: t('error'),
+        detail: t('market.service_feeError'),
+        life: 3000
+      })
+      console.error('Error adding service fee:', error)
+    })
+}
+
 // Navigation functions
 const createNewMarket = () => {
   router.push({ name: 'market-create' })
@@ -341,6 +377,11 @@ onMounted(() => {
                 {{ slotProps.data.store?.name_en || t('market.noStore') }}
               </template>
             </Column>
+             <Column field="store.service_fee" :header="t('market.serviceFee')" :sortable="true" header-style="width:14%; min-width:10rem;">
+              <template #body="slotProps">
+                {{ slotProps.data?.service_fee || 0   }} {{ $t("currencyLabel") }}
+              </template>
+            </Column>
             <Column :header="t('actions')" header-style="width:14rem;">
               <template #body="slotProps">
                 <Button
@@ -357,12 +398,13 @@ onMounted(() => {
                   v-tooltip.top="t('delete')"
                   aria-label="Delete market"
                 />
-                 <Button
-                    icon="pi pi-truck"
-                    class="p-button-warning mx-1"
-                    @click="goToShippingSettings(slotProps.data.id)"
-                    v-tooltip.top="t('store.shippingSettings')"
-                  />
+                <Button
+                  icon="pi pi-money-bill"
+                  class="p-button-info ml-2"
+                  @click="openservice_feeDialog(slotProps.data)"
+                  v-tooltip.top="t('market.addServiceFee')"
+                  aria-label="Add service fee"
+                />
               </template>
             </Column>
             <template #empty>
@@ -518,6 +560,35 @@ onMounted(() => {
               :disabled="!selectedFile"
               :loading="importLoading"
               aria-label="Import markets"
+            />
+          </template>
+        </Dialog>
+
+        <!-- Service Fee Dialog -->
+        <Dialog
+          v-model:visible="service_feeDialog"
+          :style="{ width: '450px' }"
+          :header="t('market.addServiceFee')"
+          :modal="true"
+        >
+          <div class=" gap-3">
+            <p for="service_fee" class="my-1">{{ t('market.serviceFee') }}</p>
+            <InputNumber class="w-full" id="service_fee" v-model="service_fee" :min="0" :step="0.01"  />
+          </div>
+          <template #footer>
+            <Button
+              :label="t('cancel')"
+              icon="pi pi-times"
+              class="p-button-text"
+              @click="service_feeDialog = false"
+              aria-label="Cancel"
+            />
+            <Button
+              :label="t('save')"
+              icon="pi pi-check"
+              class="p-button-success"
+              @click="addservice_fee"
+              aria-label="Save service fee"
             />
           </template>
         </Dialog>
