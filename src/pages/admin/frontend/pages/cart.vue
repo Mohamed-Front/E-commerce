@@ -46,7 +46,7 @@
             >
               <option :value="null" disabled>{{ t('cart.selectAddressPlaceholder') }}</option>
               <option v-for="address in addresses" :key="address.id" :value="address.id">
-                {{ address.name }} - {{ address.street }}, {{ address.city }}
+                {{ address.address_line_1 }}, {{ address.city }}
               </option>
             </select>
           </div>
@@ -109,7 +109,7 @@
               class="bg-gray-100 p-6 mt-6 rounded-lg shadow-inner"
             >
               <h3 class="text-lg font-semibold text-gray-800 mb-4">
-                {{ t('cart.orderFrom', { store: getStoreName(storeOrder.store_id) }) }}
+                {{ t('cart.orderFrom') }} {{ getStoreName(storeOrder.store_id)  }}
               </h3>
               <div v-if="storeOrder.delivery_message" class="mb-4 p-3 bg-yellow-100 text-yellow-800 rounded-md">
                 {{ storeOrder.delivery_message }}
@@ -117,7 +117,7 @@
               <div class="flex flex-col gap-4">
                 <span class="flex justify-between items-center">
                   <h4 class="text-yellow-600 font-semibold">{{ t('cart.shippingTime') }}</h4>
-                  <p class="text-gray-700">{{ storeOrder.time ? `${storeOrder.time} ${t('cart.hours')}` : t('cart.notAvailable') }}</p>
+                  <p class="text-gray-700">{{ storeOrder.delivery_time ? `${storeOrder.delivery_time} ` : t('cart.notAvailable') }}</p>
                 </span>
                 <span class="flex justify-between items-center">
                   <h4 class="text-yellow-600 font-semibold">{{ t('cart.subtotal') }}</h4>
