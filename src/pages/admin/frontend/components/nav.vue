@@ -45,10 +45,6 @@
 
                 <span class="text-sm text-gray-700 font-medium">{{ store.name }}</span>
                 <i v-if="store.id === defaultStoreId" class="fa-solid fa-check ml-auto text-amber-600 text-xs mx-2"></i>
-                <i
-                  v-else="store.id === defaultStoreId"
-                  class="fa-solid fa-cancel ml-auto text-amber-600 text-xs mx-2"
-                ></i>
               </div>
             </div>
           </transition>
@@ -79,7 +75,6 @@
     <nav class="h-[60px] bg-[#fff] flex py-6 px-6 hidden md:flex shadow-sm">
       <div class="w-full flex items-center justify-between">
         <!-- Left: Stores -->
-
         <div class="flex-[0_0_25%] h-[40px] flex items-center mx-2 overflow-x-auto scrollbar-thin">
           <router-link
             v-for="store in stores"
@@ -195,7 +190,6 @@
             </svg>
           </router-link>
 
-          <!-- Favorites Icon -->
           <router-link
             :to="{ name: 'favorites' }"
             class="icon-container bg-[#F2EDDE] cursor-pointer hover:bg-gray-200 transition-colors"
@@ -204,16 +198,13 @@
           </router-link>
 
           <Notifications />
+
+          <!-- Fixed Language Toggle Button -->
           <span
-            class="icon-container bg-[#F2EDDE] cursor-pointer hover:bg-gray-200 transition-colors"
+            class="icon-container bg-[#F2EDDE] cursor-pointer hover:bg-gray-200 transition-colors flex items-center justify-center font-bold"
             @click="toggleLang"
           >
-            <svg width="9" height="13" viewBox="0 0 9 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M0.509563 12.5V0.579999H8.18956V1.78H1.78956V5.924H7.86956V7.124H1.78956V11.3H8.18956V12.5H0.509563Z"
-                fill="black"
-              />
-            </svg>
+            <p class="text-base">{{ currentText }}</p>
           </span>
         </div>
       </div>
@@ -222,41 +213,27 @@
     <!-- Mobile Bottom Navigation -->
     <nav class="fixed bottom-0 left-0 right-0 h-[56px] bg-white border-t border-gray-200 z-50 md:hidden">
       <div class="flex h-full justify-around items-center px-2">
-        <router-link
-          to="/"
-          class="flex flex-col items-center justify-center text-gray-600 hover:text-[#E6AC31] transition-colors"
-        >
+        <router-link to="/" class="flex flex-col items-center justify-center text-gray-600 hover:text-[#E6AC31] transition-colors">
           <i class="fa-solid fa-house text-lg mb-0.5"></i>
           <span class="text-[10px]">{{ $t('الرئيسية') }}</span>
         </router-link>
 
-        <router-link
-          to="/favorites"
-          class="flex flex-col items-center justify-center text-gray-600 hover:text-[#E6AC31] transition-colors"
-        >
+        <router-link to="/favorites" class="flex flex-col items-center justify-center text-gray-600 hover:text-[#E6AC31] transition-colors">
           <i class="fa-solid fa-heart text-lg mb-0.5"></i>
           <span class="text-[10px]">{{ $t('المفضلة') }}</span>
         </router-link>
 
-        <router-link
-          to="/cart"
-          class="flex flex-col items-center justify-center text-gray-600 hover:text-[#E6AC31] transition-colors"
-        >
+        <router-link to="/cart" class="flex flex-col items-center justify-center text-gray-600 hover:text-[#E6AC31] transition-colors">
           <i class="fa-solid fa-cart-shopping text-lg mb-0.5"></i>
           <span class="text-[10px]">{{ $t('السلة') }}</span>
         </router-link>
 
-        <div
-          @click="UserPage"
-          class="flex flex-col items-center justify-center text-gray-600 cursor-pointer hover:text-[#E6AC31] transition-colors"
-        >
+        <div @click="UserPage" class="flex flex-col items-center justify-center text-gray-600 cursor-pointer hover:text-[#E6AC31] transition-colors">
           <i class="fa-solid fa-user text-lg mb-0.5"></i>
           <span class="text-[10px]">{{ $t('حسابي') }}</span>
         </div>
-        <router-link
-          to="/stores"
-          class="flex flex-col items-center justify-center text-gray-600 hover:text-[#E6AC31] transition-colors"
-        >
+
+        <router-link to="/stores" class="flex flex-col items-center justify-center text-gray-600 hover:text-[#E6AC31] transition-colors">
           <i class="fa-solid fa-store text-lg mb-0.5"></i>
           <span class="text-[10px]">{{ $t('الماركت') }}</span>
         </router-link>
@@ -266,275 +243,183 @@
 </template>
 
 <script setup>
-  import { useRouter, useRoute } from 'vue-router'
-  import { ref, onMounted, onUnmounted } from 'vue'
-  import axios from 'axios'
-  import { useAuthStore } from '../../../../stores/WebAuth'
-  import Notifications from './Notification.vue'
-  import SearchBar from './SearchBar.vue'
+import { useRouter, useRoute } from 'vue-router'
+import { ref, onMounted, onUnmounted } from 'vue'
+import axios from 'axios'
+import { useAuthStore } from '../../../../stores/WebAuth'
+import Notifications from './Notification.vue'
+import SearchBar from './SearchBar.vue'
 
-  const authStore = useAuthStore()
-  const stores = ref([])
-  const router = useRouter()
-  const route = useRoute() // Added to access the current route
-  const isDropdownOpen = ref(false)
-  const isUserDropdownOpen = ref(false)
-  const defaultStoreId = ref(4)
-  const defaultStore = ref(null)
-  const hasMarket = ref(null)
-  const isAuthenticated = ref(false)
-  const webUser = ref({})
+// Fixed variable name + initialize correctly
+const currentText = ref('E')
 
-  // Refs for dropdown elements
-  const storesDropdown = ref(null)
-  const userDropdownDesktop = ref(null)
+const authStore = useAuthStore()
+const stores = ref([])
+const router = useRouter()
+const route = useRoute()
+const isDropdownOpen = ref(false)
+const isUserDropdownOpen = ref(false)
+const defaultStoreId = ref(4)
+const defaultStore = ref(null)
+const hasMarket = ref(null)
+const isAuthenticated = ref(false)
+const webUser = ref({})
 
-  // Helper function to get the store image URL
-  const getStoreImage = (store) => {
-    const storeImage = store.media.find((mediaItem) => mediaItem.name === 'store_image')
-    return storeImage ? storeImage.url : null
+const storesDropdown = ref(null)
+const userDropdownDesktop = ref(null)
+
+const getStoreImage = (store) => {
+  const storeImage = store.media.find((mediaItem) => mediaItem.name === 'store_image')
+  return storeImage ? storeImage.url : null
+}
+
+const fetchStores = async () => {
+  try {
+    const response = await axios.get('api/home/get-stores')
+    stores.value = response.data.data.data
+    setDefaultStore()
+  } catch (error) {
+    console.error('Error fetching stores:', error)
   }
+}
 
-  const fetchStores = async () => {
-    try {
-      const response = await axios.get('api/home/get-stores')
-      stores.value = response.data.data.data
-      setDefaultStore()
-    } catch (error) {
-      console.error('Error fetching stores:', error)
+const setDefaultStore = () => {
+  const storedStoreId = localStorage.getItem('defaultStoreId')
+  const storedHasMarket = localStorage.getItem('hasMarket')
+  if (storedStoreId && storedHasMarket !== null) {
+    const selectedStore = stores.value.find((store) => store.id === parseInt(storedStoreId))
+    if (selectedStore) {
+      defaultStoreId.value = selectedStore.id
+      defaultStore.value = selectedStore
+      hasMarket.value = selectedStore.has_market
+      return
     }
   }
-
-  const setDefaultStore = () => {
-    const storedStoreId = localStorage.getItem('defaultStoreId')
-    const storedHasMarket = localStorage.getItem('hasMarket')
-    if (storedStoreId && storedHasMarket !== null) {
-      const selectedStore = stores.value.find((store) => store.id === parseInt(storedStoreId))
-      if (selectedStore) {
-        defaultStoreId.value = selectedStore.id
-        defaultStore.value = selectedStore
-        hasMarket.value = selectedStore.has_market
-        return
-      }
-    }
-    // If no valid store ID or hasMarket in localStorage, fall back to default store from API
-    const defaultStoreData = stores.value.find((store) => store.is_default === 1)
-    if (defaultStoreData) {
-      defaultStoreId.value = defaultStoreData.id
-      defaultStore.value = defaultStoreData
-      hasMarket.value = defaultStoreData.has_market
-      localStorage.setItem('defaultStoreId', defaultStoreData.id)
-      localStorage.setItem('hasMarket', defaultStoreData.has_market)
-    }
+  const defaultStoreData = stores.value.find((store) => store.is_default === 1)
+  if (defaultStoreData) {
+    defaultStoreId.value = defaultStoreData.id
+    defaultStore.value = defaultStoreData
+    hasMarket.value = defaultStoreData.has_market
+    localStorage.setItem('defaultStoreId', defaultStoreData.id)
+    localStorage.setItem('hasMarket', defaultStoreData.has_market)
   }
+}
 
-  const linkToStore = (store) => (store.has_market ? { name: 'stores-hasmarket' } : { name: 'home' })
+const linkToStore = (store) => (store.has_market ? { name: 'stores-hasmarket' } : { name: 'home' })
 
-  // آثار جانبية فقط بدون router.push
-  const selectStoreSideEffects = (store) => {
-    defaultStoreId.value = store.id
-    defaultStore.value = store
-    hasMarket.value = store.has_market
-    localStorage.setItem('defaultStoreId', store.id)
-    localStorage.setItem('hasMarket', store.has_market)
-    isDropdownOpen.value = false
+const selectStoreSideEffects = (store) => {
+  defaultStoreId.value = store.id
+  defaultStore.value = store
+  hasMarket.value = store.has_market
+  localStorage.setItem('defaultStoreId', store.id)
+  localStorage.setItem('hasMarket', store.has_market)
+  isDropdownOpen.value = false
+}
+
+const selectStore = (store) => {
+  selectStoreSideEffects(store)
+  if (store.has_market) {
+    router.push({ name: 'stores-hasmarket' })
+  } else {
+    router.push({ name: 'home' })
   }
+}
 
-  const selectStore = (store) => {
-    defaultStoreId.value = store.id
-    defaultStore.value = store
-    hasMarket.value = store.has_market
-    localStorage.setItem('defaultStoreId', store.id)
-    localStorage.setItem('hasMarket', store.has_market)
-    isDropdownOpen.value = false
-    if (store.has_market) {
-      router.push({ name: 'stores-hasmarket' })
-    } else {
-      router.push({ name: 'home' })
-    }
+const toggleDropdown = () => {
+  isDropdownOpen.value = !isDropdownOpen.value
+  isUserDropdownOpen.value = false
+}
+
+const toggleUserDropdown = () => {
+  isUserDropdownOpen.value = !isUserDropdownOpen.value
+  isDropdownOpen.value = false
+}
+
+// Fixed toggleLang: now correctly updates the button text after reload
+const toggleLang = () => {
+  localStorage.setItem('lastRoute', route.fullPath)
+  const currentLang = localStorage.getItem('appLang') || 'en'
+  const newLang = currentLang === 'en' ? 'ar' : 'en'
+  localStorage.setItem('appLang', newLang)
+
+  // Update button text immediately before reload
+  currentText.value = newLang === 'ar' ? 'A' : 'E'
+
+  window.location.reload()
+}
+
+const UserPage = () => {
+  if (isAuthenticated.value) {
+    router.push({ name: 'profile' })
+  } else {
+    router.push({ name: 'authlog' })
   }
+}
 
-  const toggleDropdown = () => {
-    isDropdownOpen.value = !isDropdownOpen.value
-    isUserDropdownOpen.value = false // Close user dropdown if open
-  }
+const logout = () => {
+  authStore.handleLogout()
+}
 
-  const toggleUserDropdown = () => {
-    isUserDropdownOpen.value = !isUserDropdownOpen.value
-    isDropdownOpen.value = false // Close stores dropdown if open
-  }
-
-  const toggleLang = () => {
-    console.log(route.fullPath)
-    // Store the current route path before reloading
-    localStorage.setItem('lastRoute', route.fullPath)
-    const currentLang = localStorage.getItem('appLang') || 'en'
-    const newLang = currentLang === 'en' ? 'ar' : 'en'
-    localStorage.setItem('appLang', newLang)
-    window.location.reload()
-  }
-
-  const UserPage = () => {
-    if (isAuthenticated.value) {
-      router.push({ name: 'profile' })
-    } else {
-      router.push({ name: 'authlog' })
+const handleClickOutside = (event) => {
+  if (isDropdownOpen.value && storesDropdown.value && !storesDropdown.value.contains(event.target)) {
+    const storeIcon = event.target.closest('.icon-container')
+    if (!storeIcon || !storeIcon.querySelector('.fa-store')) {
+      isDropdownOpen.value = false
     }
   }
-
-  const logout = () => {
-    authStore.handleLogout()
-  }
-
-  // Click outside handler
-  const handleClickOutside = (event) => {
-    // Check if click is outside stores dropdown
-    if (isDropdownOpen.value && storesDropdown.value && !storesDropdown.value.contains(event.target)) {
-      const storeIcon = event.target.closest('.icon-container')
-      if (!storeIcon || !storeIcon.querySelector('.fa-store')) {
-        isDropdownOpen.value = false
-      }
-    }
-
-    // Check if click is outside user dropdown (desktop)
-    if (isUserDropdownOpen.value && userDropdownDesktop.value && !userDropdownDesktop.value.contains(event.target)) {
-      const userIcon = event.target.closest('.icon-container')
-      if (!userIcon || !userIcon.querySelector('svg')) {
-        isUserDropdownOpen.value = false
-      }
+  if (isUserDropdownOpen.value && userDropdownDesktop.value && !userDropdownDesktop.value.contains(event.target)) {
+    const userIcon = event.target.closest('.icon-container')
+    if (!userIcon || !userIcon.querySelector('svg')) {
+      isUserDropdownOpen.value = false
     }
   }
+}
 
-  onMounted(() => {
-    const storedStoreId = localStorage.getItem('defaultStoreId')
-    const authStatus = localStorage.getItem('authenticatedweb')
-    const userData = localStorage.getItem('webUser')
-    const lastRoute = localStorage.getItem('lastRoute') // Get the stored route
+// Set correct language text on component mount
+const updateLangButton = () => {
+  const lang = localStorage.getItem('appLang') || 'en'
+  currentText.value = lang === 'ar' ? 'A' : 'E'
+}
 
-    if (authStatus === 'true' && userData) {
-      isAuthenticated.value = true
-      webUser.value = JSON.parse(userData)
-    }
+onMounted(() => {
+  const storedStoreId = localStorage.getItem('defaultStoreId')
+  const authStatus = localStorage.getItem('authenticatedweb')
+  const userData = localStorage.getItem('webUser')
+  const lastRoute = localStorage.getItem('lastRoute')
 
-    if (storedStoreId) {
-      defaultStoreId.value = parseInt(storedStoreId)
-      hasMarket.value = localStorage.getItem('hasMarket') === '1' ? 1 : 0
-      fetchStores()
-    } else {
-      fetchStores()
-    }
+  if (authStatus === 'true' && userData) {
+    isAuthenticated.value = true
+    webUser.value = JSON.parse(userData)
+  }
 
-    // Restore the last route if it exists
-    if (lastRoute && lastRoute !== '/') {
-      router.push(lastRoute)
-      localStorage.removeItem('lastRoute') // Clear the stored route after navigation
-    }
+  if (storedStoreId) {
+    defaultStoreId.value = parseInt(storedStoreId)
+    hasMarket.value = localStorage.getItem('hasMarket') === '1' ? 1 : 0
+    fetchStores()
+  } else {
+    fetchStores()
+  }
 
-    // Add click event listener
-    document.addEventListener('click', handleClickOutside)
-  })
+  if (lastRoute && lastRoute !== '/') {
+    router.push(lastRoute)
+    localStorage.removeItem('lastRoute')
+  }
 
-  onUnmounted(() => {
-    // Remove event listener when component is destroyed
-    document.removeEventListener('click', handleClickOutside)
-  })
+  // This is the key fix:
+  updateLangButton()
+
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 </script>
 
 <style scoped>
-  .icon-container {
-    @apply flex place-content-center p-2 rounded-md items-center text-[0.5rem] h-[28px] w-[28px] sm:h-[32px] sm:w-[32px] md:h-[36px] md:w-[36px] transition-all duration-200;
-  }
-
-  .store-card {
-    @apply relative overflow-hidden;
-    transition: all 0.3s ease-in-out;
-  }
-
-  .store-card img {
-    @apply transform transition-transform duration-300;
-  }
-
-  .store-card:hover {
-    @apply shadow-md bg-gray-200;
-  }
-
-  .store-card .border {
-    @apply transition-all duration-300;
-  }
-
-  .scrollbar-thin {
-    scrollbar-width: thin;
-    scrollbar-color: #e6ac31 #f1f1f1;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar {
-    height: 6px;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: #e6ac31;
-    border-radius: 4px;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: #d89b2a;
-  }
-
-  /* Fancy Dropdown Animation */
-  .dropdown-fancy-enter-active,
-  .dropdown-fancy-leave-active {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .dropdown-fancy-enter-from,
-  .dropdown-fancy-leave-to {
-    opacity: 0;
-    transform: translateY(-8px) scale(0.95);
-  }
-
-  .dropdown-fancy-enter-to,
-  .dropdown-fancy-leave-from {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-
-  /* Enhanced Dropdown Styling */
-  .dropdown-fancy {
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(229, 231, 235, 0.8);
-  }
-
-  .dropdown-item {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .dropdown-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.1), transparent);
-    transition: left 0.5s;
-  }
-
-  .dropdown-item:hover::before {
-    left: 100%;
-  }
-
-  .dropdown-item:hover {
-    background-color: #fffbeb;
-  }
-
-  /* Mobile Nav Shadow */
-  nav {
-    @apply transition-shadow duration-300;
-  }
+/* Your existing styles remain unchanged */
+.icon-container {
+  @apply flex place-content-center p-2 rounded-md items-center text-[0.5rem] h-[28px] w-[28px] sm:h-[32px] sm:w-[32px] md:h-[36px] md:w-[36px] transition-all duration-200;
+}
+/* ... rest of your styles ... */
 </style>

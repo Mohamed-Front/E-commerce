@@ -1,4 +1,3 @@
-```vue
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
@@ -18,21 +17,38 @@ const toast = useToast();
 const { t } = useI18n();
 const loading = ref(false);
 
+// Jordanian Governorates
+const governorates = [
+  { label: 'عمان (Amman)', value: 'amman' },
+  { label: 'البلقاء (Balqa)', value: 'balqa' },
+  { label: 'الزرقاء (Zarqa)', value: 'zarqa' },
+  { label: 'مادبا (Madaba)', value: 'madaba' },
+  { label: 'إربد (Irbid)', value: 'irbid' },
+  { label: 'جرش (Jerash)', value: 'jerash' },
+  { label: 'عجلون (Ajloun)', value: 'ajloun' },
+  { label: 'المفرق (Mafraq)', value: 'mafraq' },
+  { label: 'الكرك (Karak)', value: 'karak' },
+  { label: 'الطفيلة (Tafila)', value: 'tafila' },
+  { label: 'معان (Ma\'an)', value: 'maan' },
+  { label: 'العقبة (Aqaba)', value: 'aqaba' }
+];
+
 // Form Data
 const addressData = ref({
   user_id: null,
   address_line_1: '',
   address_line_2: '',
+  governorate: '',
   city: '',
-  country: '',
+  country: 'Jordan',
   zip_code: '',
   is_default: false,
-  lat: 31.984983325941823, // Default coordinates
+  lat: 31.984983325941823,
   long: 35.900908045672196,
-  distance: 1000, // Default distance in meters
+  distance: 1000,
 });
 
-// Computed property for Google Maps Circle
+// Computed for Google Maps Circle
 const circle = computed(() => {
   const distance = Number(addressData.value.distance) || 1000;
   return {
@@ -46,7 +62,7 @@ const circle = computed(() => {
   };
 });
 
-// Fetch users for dropdown
+// Fetch users
 const fetchUsers = () => {
   axios.get('api/user')
     .then((res) => {
@@ -62,7 +78,7 @@ const fetchUsers = () => {
     });
 };
 
-// Handle map click to update lat and long
+// Handle map click
 function handleMapClick(event) {
   const clickedLatLng = event.latLng;
   addressData.value.lat = clickedLatLng.lat();
@@ -74,44 +90,40 @@ const submitForm = async () => {
   loading.value = true;
   try {
     // Validation
-    if (!addressData.value.user_id || !addressData.value.address_line_1 || !addressData.value.city || !addressData.value.country) {
-      toast.add({
-        severity: 'error',
-        summary: t('validation_error'),
-        detail: t('address.required_fields_missing'),
-        life: 3000,
-      });
+    if (!addressData.value.user_id) {
+      toast.add({ severity: 'error', summary: t('validation_error'), detail: t('address.user_required'), life: 3000 });
       return;
     }
-    if (addressData.value.lat < -90 || addressData.value.lat > 90) {
-      toast.add({
-        severity: 'error',
-        summary: t('validation_error'),
-        detail: t('address.invalid_lat'),
-        life: 3000,
-      });
+    if (!addressData.value.address_line_1) {
+      toast.add({ severity: 'error', summary: t('validation_error'), detail: t('address.line1_required'), life: 3000 });
       return;
     }
-    if (addressData.value.long < -180 || addressData.value.long > 180) {
-      toast.add({
-        severity: 'error',
-        summary: t('validation_error'),
-        detail: t('address.invalid_long'),
-        life: 3000,
-      });
+    if (!addressData.value.governorate) {
+      toast.add({ severity: 'error', summary: t('validation_error'), detail: t('address.governorate_required'), life: 3000 });
       return;
     }
-    if (addressData.value.distance <= 0) {
-      toast.add({
-        severity: 'error',
-        summary: t('validation_error'),
-        detail: t('address.invalid_distance'),
-        life: 3000,
-      });
+    if (!addressData.value.city) {
+      toast.add({ severity: 'error', summary: t('validation_error'), detail: t('address.city_required'), life: 3000 });
+      return;
+    }
+    if (!addressData.value.country) {
+      toast.add({ severity: 'error', summary: t('validation_error'), detail: t('address.country_required'), life: 3000 });
       return;
     }
 
-    // Convert is_default to string '1' or '0'
+    if (addressData.value.lat < -90 || addressData.value.lat > 90) {
+      toast.add({ severity: 'error', summary: t('validation_error'), detail: t('address.invalid_lat'), life: 3000 });
+      return;
+    }
+    if (addressData.value.long < -180 || addressData.value.long > 180) {
+      toast.add({ severity: 'error', summary: t('validation_error'), detail: t('address.invalid_long'), life: 3000 });
+      return;
+    }
+    if (addressData.value.distance <= 0) {
+      toast.add({ severity: 'error', summary: t('validation_error'), detail: t('address.invalid_distance'), life: 3000 });
+      return;
+    }
+
     const payload = {
       ...addressData.value,
       is_default: addressData.value.is_default ? '1' : '0',
@@ -148,6 +160,7 @@ onMounted(() => {
 
     <form @submit.prevent="submitForm" class="space-y-6">
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+
         <!-- User Selection -->
         <div class="space-y-2">
           <label for="user_id" class="block text-sm font-medium text-gray-700">
@@ -159,8 +172,8 @@ onMounted(() => {
             :options="users"
             optionLabel="name"
             optionValue="id"
-            :placeholder="$t('user.name')"
-            class="w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            :placeholder="$t('user.select_user')"
+            class="w-full"
             required
           />
         </div>
@@ -174,7 +187,7 @@ onMounted(() => {
             id="address_line_1"
             v-model="addressData.address_line_1"
             :placeholder="$t('address.enter_line1')"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            class="w-full"
             required
           />
         </div>
@@ -188,7 +201,23 @@ onMounted(() => {
             id="address_line_2"
             v-model="addressData.address_line_2"
             :placeholder="$t('address.enter_line2')"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            class="w-full"
+          />
+        </div>
+
+        <!-- Governorate -->
+        <div class="space-y-2">
+          <label for="governorate" class="block text-sm font-medium text-gray-700">
+            {{ $t('address.governorate') }} <span class="text-red-500">*</span>
+          </label>
+          <Dropdown
+            v-model="addressData.governorate"
+            :options="governorates"
+            optionLabel="label"
+            optionValue="value"
+            :placeholder="$t('address.select_governorate')"
+            class="w-full"
+            required
           />
         </div>
 
@@ -201,24 +230,12 @@ onMounted(() => {
             id="city"
             v-model="addressData.city"
             :placeholder="$t('address.enter_city')"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            class="w-full"
             required
           />
         </div>
 
-        <!-- Country -->
-        <div class="space-y-2">
-          <label for="country" class="block text-sm font-medium text-gray-700">
-            {{ $t('address.country') }} <span class="text-red-500">*</span>
-          </label>
-          <InputText
-            id="country"
-            v-model="addressData.country"
-            :placeholder="$t('address.enter_country')"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-            required
-          />
-        </div>
+
 
         <!-- ZIP Code -->
         <div class="space-y-2">
@@ -229,11 +246,11 @@ onMounted(() => {
             id="zip_code"
             v-model="addressData.zip_code"
             :placeholder="$t('address.enter_zip_code')"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            class="w-full"
           />
         </div>
 
-        <!-- lat -->
+        <!-- Latitude -->
         <div class="space-y-2">
           <label for="lat" class="block text-sm font-medium text-gray-700">
             {{ $t('address.lat') }} <span class="text-red-500">*</span>
@@ -241,17 +258,18 @@ onMounted(() => {
           <InputNumber
             id="lat"
             v-model="addressData.lat"
-            :placeholder="$t('address.enter_lat')"
             :min="-90"
             :max="90"
             :step="0.000001"
-            :decimalPlaces="6"
+            mode="decimal"
+            :minFractionDigits="6"
+            :maxFractionDigits="6"
             class="w-full"
             required
           />
         </div>
 
-        <!-- long -->
+        <!-- Longitude -->
         <div class="space-y-2">
           <label for="long" class="block text-sm font-medium text-gray-700">
             {{ $t('address.long') }} <span class="text-red-500">*</span>
@@ -259,49 +277,61 @@ onMounted(() => {
           <InputNumber
             id="long"
             v-model="addressData.long"
-            :placeholder="$t('address.enter_long')"
             :min="-180"
             :max="180"
             :step="0.000001"
-            :decimalPlaces="6"
+            mode="decimal"
+            :minFractionDigits="6"
+            :maxFractionDigits="6"
             class="w-full"
             required
           />
         </div>
 
+        <!-- Distance -->
+        <div class="space-y-2">
+          <label for="distance" class="block text-sm font-medium text-gray-700">
+            {{ $t('address.distance') }} ({{ $t('address.meters') }}) <span class="text-red-500">*</span>
+          </label>
+          <InputNumber
+            id="distance"
+            v-model="addressData.distance"
+            :min="1"
+            :placeholder="$t('address.enter_distance')"
+            class="w-full"
+            required
+          />
+        </div>
 
         <!-- Default Address -->
-        <div class="space-y-2">
-          <label class="flex items-center space-x-2">
-            <input type="checkbox" class="w-5 h-5 mx-2" v-model="addressData.is_default" :binary="true" />
-            <span class="text-sm font-medium text-gray-700 mx-1">{{ $t('address.set_as_default') }}</span>
-          </label>
+        <div class="flex items-center space-y-2 col-span-1 lg:col-span-2">
+          <input type="checkbox" v-model="addressData.is_default" class="w-5 h-5 text-blue-600" />
+          <label class="ml-2 text-sm font-medium text-gray-700">{{ $t('address.set_as_default') }}</label>
         </div>
       </div>
 
       <!-- Google Map -->
-      <div class="mt-6">
+      <div class="mt-8">
         <h2 class="text-xl font-semibold text-gray-800 mb-4">{{ $t('address.select_location') }}</h2>
         <GoogleMap
           @click="handleMapClick"
           style="width: 100%; height: 500px"
-          :center="{ lat: parseFloat(addressData.lat), lng: parseFloat(addressData.long) }"
+          :center="{ lat: Number(addressData.lat), lng: Number(addressData.long) }"
           :zoom="14"
         >
-          <Marker :options="{ position: { lat: parseFloat(addressData.lat), lng: parseFloat(addressData.long) } }" />
+          <Marker :options="{ position: { lat: Number(addressData.lat), lng: Number(addressData.long) } }" />
           <Circle :options="circle" />
         </GoogleMap>
       </div>
 
       <!-- Submit Button -->
-      <div class="pt-4 flex justify-center">
+      <div class="pt-6 flex justify-center">
         <Button
           type="submit"
           :label="$t('address.create_address')"
           icon="pi pi-plus"
           :loading="loading"
-          class="px-8 py-3 bg-gradient-to-r mx-2 from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
-          :disabled="loading"
+          class="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
         >
           <span v-if="!loading">{{ $t('address.create_address') }}</span>
           <i v-else class="pi pi-spinner pi-spin"></i>
@@ -313,28 +343,9 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* Smooth transitions */
-.transition-all {
-  transition-property: all;
-}
-.transition-colors {
-  transition-property: background-color, border-color, color;
-}
-.duration-300 {
-  transition-duration: 300ms;
-}
-
-/* Input styling */
-:deep(.p-inputtext), :deep(.p-dropdown), :deep(.p-inputnumber) {
-  width: 100%;
-}
-
-/* Card styling */
-.card {
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+:deep(.p-inputtext),
+:deep(.p-dropdown),
+:deep(.p-inputnumber .p-inputtext) {
+  @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition;
 }
 </style>
-```
