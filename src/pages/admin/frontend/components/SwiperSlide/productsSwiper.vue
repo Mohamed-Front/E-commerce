@@ -30,6 +30,7 @@
         class="group"
       >
         <!-- Clickable Card – opens product details in NEW TAB (except buttons) -->
+
         <a
           :href="`/product-details/${pro.id}`"
           target="_blank"

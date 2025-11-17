@@ -51,21 +51,7 @@
             </select>
           </div>
 
-          <!-- Express Delivery Toggle -->
-          <div class="flex items-center gap-4 mb-6">
-            <label class="text-gray-800 font-medium">{{ t('cart.expressDelivery') }}</label>
-            <button
-              @click="toggleExpressDelivery"
-              class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors duration-200"
-              :class="isExpressed ? 'bg-yellow-600' : 'bg-gray-300'"
-              :aria-label="t('cart.toggleExpressDeliveryAria', { state: isExpressed ? t('cart.enabled') : t('cart.disabled') })"
-            >
-              <span
-                class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform duration-200"
-                :class="isExpressed ? 'translate-x-6' : 'translate-x-1'"
-              ></span>
-            </button>
-          </div>
+
 
           <div v-if="filteredProducts.length === 0" class="text-center text-gray-600 py-4">
             {{ t('cart.emptyCart') }}
@@ -438,7 +424,8 @@ const updateQuantity = async (type, id, product_id, variant_id, quantity) => {
 const clearProduct = async (id, product_id, variant_id) => {
   try {
     await axios.post(`/api/cart/remove`, {
-      data: { product_id, variant_id },
+      product_id:product_id,
+      variant_id:variant_id,
     });
     products.value = products.value.filter((product) => product.id !== id);
     await fetchOrderTotals();
@@ -533,10 +520,7 @@ const selectAllStores = () => {
   fetchOrderTotals();
 };
 
-const toggleExpressDelivery = () => {
-  isExpressed.value = !isExpressed.value;
-  fetchOrderTotals();
-};
+
 
 watch([selectedAddress, isExpressed], () => {
   fetchOrderTotals();
