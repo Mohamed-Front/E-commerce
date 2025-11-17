@@ -135,52 +135,9 @@
               />
             </div>
 
-            <!-- Latitude & Longitude (hidden but updated by map/geocode) -->
-            <div class="space-y-2">
-              <label for="lat" class="block text-sm font-medium text-gray-700">
-                {{ $t('address.lat') }} <span class="text-red-500">*</span>
-              </label>
-              <InputNumber
-                id="lat"
-                v-model="addressData.lat"
-                mode="decimal"
-                :minFractionDigits="6"
-                :maxFractionDigits="8"
-                class="w-full"
-                required
-              />
-            </div>
 
-            <div class="space-y-2">
-              <label for="long" class="block text-sm font-medium text-gray-700">
-                {{ $t('address.long') }} <span class="text-red-500">*</span>
-              </label>
-              <InputNumber
-                id="long"
-                v-model="addressData.long"
-                mode="decimal"
-                :minFractionDigits="6"
-                :maxFractionDigits="8"
-                class="w-full"
-                required
-              />
-            </div>
 
-            <!-- Distance (Delivery Radius) -->
-            <div class="space-y-2">
-              <label for="distance" class="block text-sm font-medium text-gray-700">
-                {{ $t('address.distance') }} (متر) <span class="text-red-500">*</span>
-              </label>
-              <InputNumber
-                id="distance"
-                v-model="addressData.distance"
-                :min="100"
-                :max="10000"
-                :step="100"
-                class="w-full"
-                required
-              />
-            </div>
+
 
             <!-- Default Address -->
             <div class="flex items-center">
@@ -207,15 +164,7 @@
             </GoogleMap>
           </div>
 
-          <!-- Geocode Button -->
-          <div class="mt-4 text-center">
-            <Button
-              :label="$t('address.find_location')"
-              icon="pi pi-search"
-              @click="geocodeAddress"
-              class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white"
-            />
-          </div>
+
 
           <!-- Submit Button -->
           <div class="pt-6 flex justify-center gap-4">

@@ -281,7 +281,7 @@ onMounted(() => {
           </div>
         </div>
 
-        <div class="p-6 border border-teal-200 rounded-xl shadow-lg bg-teal-50/50">
+        <div v-if="shippingData.has_zones" class="p-6 border border-teal-200 rounded-xl shadow-lg bg-teal-50/50">
           <h2 class="text-2xl font-semibold text-teal-700 mb-6 border-b pb-2 flex items-center">
             <i class="pi pi-map-marker mr-2"></i>{{ t('shippingSetting.select_location') }}
           </h2>
