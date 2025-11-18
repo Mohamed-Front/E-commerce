@@ -924,6 +924,7 @@ export default {
   to: 'to',
   from: 'of',
    "product": {
+    "Free_Delivery":" Free Delivery",
     "freeShipping": "Free Shipping",
     "freeShippingEnabled": "Free shipping enabled",
     "freeShippingDisabled": "Free shipping disabled",

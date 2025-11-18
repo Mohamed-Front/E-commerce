@@ -182,8 +182,14 @@ const fetchCategoryData = async () => {
       title: productcategoryName(category.value),
       products: (data.products.data || []).map(product => ({
         id: product.id,
+          sub_name: locale.value === 'ar'
+    ? (product.sub_name_ar || product.sub_name_en || '')
+    : (product.sub_name_en || product.sub_name_ar || ''),
         name: locale.value === 'ar' ? product.name_ar || product.name_en : product.name_en || product.name_ar,
         tax: product.tax || 0,
+          total_discounts_value:product.total_discounts_value,
+          is_free_shipping: product.is_free_shipping,
+          total_rating: product.total_rating,
         price: parseFloat(product.base_price || 0).toFixed(2),
         img: product.media?.find(media => media.name === 'product_main_image')?.url || product.key_default_image || defaultProductImage,
       })),

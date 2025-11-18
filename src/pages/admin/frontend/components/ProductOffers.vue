@@ -57,8 +57,10 @@ const mapProduct = (product) => ({
   final_price: formatPrice(
     Number(product.base_price) - Number(product.total_discounts_value || 0)
   ),
-  discount_value: Number(product.total_discounts_value || 0).toFixed(2),
-  is_free: product.is_free,
+
+  total_discounts_value:formatPrice(product.total_discounts_value),
+  is_free_shipping: product.is_free_shipping,
+  total_rating: product.total_rating,
   has_discount: Number(product.total_discounts_value || 0) > 0,
   img: getMainImage(product),
   is_wished: product.is_wished || false,

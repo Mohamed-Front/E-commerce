@@ -1087,7 +1087,7 @@ export default {
   "yes": "نعم",
   "no": "لا",
   "products": {
-
+    "Free_Delivery":"توصيل مجاني",
     "filters": "الفلاتر",
     "category": "الفئة",
     "searchCategory": "البحث في الفئات",

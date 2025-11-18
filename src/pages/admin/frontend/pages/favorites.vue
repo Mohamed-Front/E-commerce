@@ -1,9 +1,8 @@
-```vue
 <template>
-  <main class="bg-[#FAF7F0] min-h-[100vh] py-8">
-    <section class="mx-auto w-full max-w-7xl px-4">
+  <main class="bg-[#FAF7F0] min-h-screen py-12">
+    <section class="mx-auto max-w-7xl px-4">
       <h1
-        class="text-3xl font-bold text-center mb-8"
+        class="text-4xl font-bold text-center mb-12"
         :class="{
           'font-noto-kufi text-right': locale === 'ar',
           'font-plus-jakarta': locale === 'en'
@@ -12,253 +11,261 @@
         {{ t('favorites.title') }}
       </h1>
 
-      <div v-if="isLoading" class="text-center">
-        <p class="text-lg font-sans">{{ t('favorites.loading') }}</p>
+      <!-- Loading -->
+      <div v-if="isLoading" class="flex justify-center items-center py-20">
+        <svg class="animate-spin h-10 w-10 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
       </div>
 
-      <div v-else-if="error" class="text-center text-red-500">
-        <p class="text-lg font-sans">{{ error }}</p>
+      <!-- Error -->
+      <div v-else-if="error" class="text-center py-20">
+        <p class="text-xl font-semibold text-red-600 mb-4">{{ error }}</p>
+        <button @click="fetchFavorites()" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition">
+          {{ t('common.retry') }}
+        </button>
       </div>
 
-      <div v-else-if="favorites.products.length === 0" class="text-center">
-        <p class="text-lg font-sans">{{ t('favorites.empty') }}</p>
+      <!-- Empty State -->
+      <div v-else-if="favorites.length === 0" class="text-center py-20">
+        <p class="text-2xl text-gray-600 mb-6">{{ t('favorites.empty') }}</p>
+        <button @click="router.push({ name: 'Home' })" class="bg-[#A6853B] text-white px-8 py-3 rounded-lg hover:bg-[#8f702c] transition">
+          {{ t('favorites.continueShopping') }}
+        </button>
       </div>
 
-      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <!-- Favorites Grid -->
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         <div
-          v-for="product in favorites.products"
-          :key="`${product.id}-${product.variant_id}`"
-          class="group flex flex-col items-start bg-white rounded-lg shadow-lg transition-all duration-300 hover:-translate-y-2 cursor-pointer"
-          @click="router.push({ name: 'Product-details', params: { id: product.id } })"
+          v-for="pro in favorites"
+          :key="pro.id + '-' + (pro.variant_id || '')"
+          class="group bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl hover:-translate-y-3 transition-all duration-300 cursor-pointer"
+          @click="router.push({ name: 'Product-details', params: { id: pro.id } })"
         >
-          <div class="w-full aspect-square overflow-hidden rounded-t-lg relative">
+          <!-- Image -->
+          <div class="aspect-square bg-gray-100 relative overflow-hidden">
             <img
-              :src="product.img"
-              :alt="product.name"
-              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              :src="pro.img"
+              :alt="pro.name"
+              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               loading="lazy"
             />
-            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300"></div>
+            <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity"></div>
+
+            <!-- Remove from Wishlist Button -->
             <button
-              v-if="authStore.authenticatedweb"
-              class="absolute top-2 right-2 p-2 rounded-full bg-white text-gray-500 hover:text-red-500 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 z-10"
-              @click.stop="toggleWishlist(product)"
-              :aria-label="product.is_wished ? t('favorites.removeFromWishlist') : t('favorites.addToWishlist')"
+              @click.stop="removeFromWishlist(pro)"
+              class="absolute top-3 right-3 p-2.5 bg-white rounded-full shadow-lg z-10 text-red-500 hover:bg-red-50 transition-all"
+              :aria-label="t('favorites.remove')"
             >
-              <svg
-                class="w-5 h-5"
-                :class="{ 'text-red-500': product.is_wished }"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                />
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
               </svg>
             </button>
+
+            <!-- Out of Stock Overlay -->
+            <div v-if="pro.isOutOfStock" class="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+              <span class="text-white font-bold text-lg">{{ t('products.outOfStock') }}</span>
+            </div>
           </div>
-          <div class="p-4 flex flex-col flex-grow w-full">
-            <p
-              class="font-sans text-gray-800 font-medium xs:text-sm sm:text-base md:text-lg truncate"
-              :class="{ 'text-right': locale === 'ar' }"
-            >
-              {{ truncateName(product.name, 30) }}
+
+          <!-- Content -->
+          <div class="p-5 flex flex-col flex-grow">
+            <h3 class="font-semibold text-gray-900 text-lg line-clamp-2 mb-2">
+              {{ truncateName(pro.name, 50) }}
+            </h3>
+
+            <p v-if="pro.sub_name" class="text-gray-600 text-sm line-clamp-2 mb-3">
+              {{ pro.sub_name }}
             </p>
-            <p
-              v-if="product.sub_name"
-              class="font-sans text-gray-600 text-sm truncate"
-              :class="{ 'text-right': locale === 'ar' }"
-            >
-              {{ product.sub_name.slice(0, 37) }}
-            </p>
-            <div class="flex items-center justify-between mt-auto">
-              <span class="font-sans text-[#A6853B] font-semibold xs:text-base sm:text-lg">
-                {{ product.price }} {{ t('currencyLabel') }}
-              </span>
+
+            <!-- Rating -->
+            <div class="flex items-center gap-1 mb-3">
+              <span class="text-yellow-500 font-bold text-sm">{{ pro.total_rating || '0.0' }}</span>
+              <svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 24 24">
+                <path d="M12 17.27l6.18 3.73-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73-1.64 7.03z"/>
+              </svg>
+              <span class="text-gray-500 text-xs">({{ pro.total_reviews || 0 }})</span>
+            </div>
+
+            <!-- Price & Cart -->
+            <div class="mt-auto flex items-center justify-between">
+              <div class="flex items-baseline gap-2">
+                <span class="text-2xl font-bold text-gray-900">
+                  {{ $t('currencyLabel') }} {{ formatPrice(pro.final_price) }}
+                </span>
+                <span v-if="pro.total_discounts_value > 0" class="text-base line-through text-blue-600 opacity-80">
+                  {{ $t('currencyLabel') }} {{ formatPrice(pro.base_price) }}
+                </span>
+              </div>
+
               <button
-                v-if="authStore.authenticatedweb"
-                class="p-2 rounded-full bg-gray-100 text-[#A6853B] hover:bg-[#A6853B] hover:text-white transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#A6853B] focus:ring-offset-2"
-                @click.stop="addToCart(product)"
-                :aria-label="t('favorites.addToCart')"
+                @click.stop="addToCart(pro)"
+                :disabled="pro.isOutOfStock"
+                class="p-3 rounded-full transition-all duration-300 shadow-md"
+                :class="[
+                  pro.in_cart
+                    ? 'bg-[#0b3baa] text-white'
+                    : pro.isOutOfStock
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'bg-[#A6853B] text-white hover:bg-[#8f702c]'
+                ]"
               >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.182 1.708.707 1.708H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                  ></path>
+                <svg v-if="pro.in_cart" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M9 16.2l-3.5-3.5a.984.984 0 0 0-1.4 0 .984.984 0 0 0 0 1.4l4.2 4.2c.39.39 1.01.39 1.4 0l8.4-8.4a.984.984 0 0 0 0-1.4.984.984 0 0 0-1.4 0L9 16.2z"/>
+                </svg>
+                <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.182 1.708.707 1.708H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                 </svg>
               </button>
+            </div>
+
+            <!-- Free Shipping -->
+            <div v-if="pro.is_free_shipping" class="flex items-center mt-3 text-[#0b3baa] text-xs font-medium">
+              <i class="pi pi-truck mr-1"></i>
+              {{ $t("products.Free_Delivery") }}
             </div>
           </div>
         </div>
       </div>
 
-      <div v-if="pagination.last_page > 1" class="mt-8 flex justify-center items-center gap-2">
-        <button
-          @click="fetchFavorites(pagination.current_page - 1)"
-          :disabled="pagination.current_page === 1"
-          class="px-4 py-2 rounded-lg text-gray-700 bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300"
-          aria-label="الصفحة السابقة"
-        >
-          {{ t('pagination.previous') || 'السابق' }}
-        </button>
-        <div class="flex gap-1">
+      <!-- Pagination -->
+      <div v-if="pagination.last_page > 1" class="mt-16 flex justify-center">
+        <nav class="inline-flex gap-2" aria-label="Pagination">
           <button
-            v-for="page in pagination.links"
-            :key="page.label"
-            @click="fetchFavorites(getPageNumber(page.url))"
-            :class="{ 'bg-yellow-500 text-white': page.active, 'bg-gray-200 text-gray-700': !page.active }"
-            class="px-4 py-2 rounded-lg"
-            :disabled="!page.url"
-            :aria-label="`الصفحة ${page.label}`"
-          >
-            {{ page.label }}
-          </button>
-        </div>
-        <button
-          @click="fetchFavorites(pagination.current_page + 1)"
-          :disabled="pagination.current_page === pagination.last_page"
-          class="px-4 py-2 rounded-lg text-gray-700 bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300"
-          aria-label="الصفحة التالية"
-        >
-          {{ t('pagination.next') || 'التالي' }}
-        </button>
+            v-for="link in pagination.links"
+            :key="link.label"
+            @click="link.url && fetchFavorites(extractPage(link.url))"
+            :disabled="!link.url"
+            :class="[
+              'px-4 py-2 rounded-full text-sm font-medium transition-colors',
+              link.active
+                ? 'bg-indigo-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-indigo-100 hover:text-indigo-700 disabled:opacity-50'
+            ]"
+            v-html="link.label"
+          />
+        </nav>
       </div>
     </section>
   </main>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRouter, useRoute } from 'vue-router';
-import axios from 'axios';
-import { useAuthStore } from '../../../../stores/WebAuth';
+import { ref, onMounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import axios from 'axios'
+import { useAuthStore } from '../../../../stores/WebAuth'
 
-const { t, locale } = useI18n();
-const router = useRouter();
-const route = useRoute();
-const authStore = useAuthStore();
+const { t, locale } = useI18n()
+const router = useRouter()
+const authStore = useAuthStore()
 
-const localeRef = ref(localStorage.getItem('appLang') || 'ar');
-const favorites = ref({ title: t('favorites.title') || 'Favorites', products: [] });
-const isLoading = ref(false);
-const error = ref(null);
+// State
+const favorites = ref([])
+const isLoading = ref(true)
+const error = ref(null)
 const pagination = ref({
-  current_page: parseInt(route.query.page) || 1,
+  current_page: 1,
   last_page: 1,
-  links: [],
-});
+  links: []
+})
 
+// Helpers
+const formatPrice = (price) => Number(price || 0).toFixed(2)
+const truncateName = (name, len) => name?.length > len ? name.slice(0, len) + '...' : name
+const extractPage = (url) => {
+  if (!url) return 1
+  const match = url.match(/page=(\d+)/)
+  return match ? parseInt(match[1]) : 1
+}
+
+// Fetch Wishlist
 const fetchFavorites = async (page = 1) => {
-  isLoading.value = true;
-  error.value = null;
-  try {
-    const response = await axios.get('/api/wishlists', {
-      params: {
-        page,
-        limit: 12, // Fixed limit to match orders page
-      },
-    });
-    const data = response.data.data.data || [];
-    const paginationData = response.data.data;
+  if (!authStore.authenticatedweb) {
+    router.push({ name: 'AuthLogin' })
+    return
+  }
 
-    favorites.value = {
-      title: t('favorites.title') || 'Favorites',
-      products: data.map((product) => ({
-        id: product.id,
-        variant_id: product.variant_id,
-        data: product,
-        is_wished: product.is_wished ?? true,
-        sub_name: localeRef.value === 'ar' ? product.sub_name_ar || product.sub_name_en : product.sub_name_en || product.sub_name_ar,
-        name: localeRef.value === 'ar' ? product.name_ar : product.name_en,
-        price: parseFloat(product.base_price).toFixed(2),
-        img: product.media?.find((media) => media.name === 'product_main_image')?.url || product.key_default_image,
-      })),
-    };
+  isLoading.value = true
+  error.value = null
+
+  try {
+    const res = await axios.get('/api/wishlists', { params: { page, limit: 12 } })
+    const data = res.data.data
+
+    favorites.value = (data.data || []).map(p => ({
+      id: p.id,
+      variant_id: p.variant_id || null,
+      name: locale.value === 'ar' ? (p.name_ar || p.name_en) : (p.name_en || p.name_ar),
+      sub_name: locale.value === 'ar' ? (p.sub_name_ar || p.sub_name_en) : (p.sub_name_en || p.sub_name_ar),
+      base_price: parseFloat(p.base_price),
+      total_discounts_value: parseFloat(p.total_discounts_value || 0),
+      final_price: Math.max(0, parseFloat(p.base_price) - parseFloat(p.total_discounts_value || 0)),
+      img: p.media?.find(m => m.name === 'product_main_image')?.url || p.key_default_image || '/placeholder.jpg',
+      total_rating: p.total_rating || '0.0',
+      total_reviews: p.total_reviews || 0,
+      in_cart: p.in_cart || false,
+      is_stock: p.is_stock,
+      isOutOfStock: p.is_stock === 0,
+      is_free_shipping: p.is_free_shipping || false,
+      is_wished: true
+    }))
 
     pagination.value = {
-      current_page: paginationData.current_page || 1,
-      last_page: paginationData.last_page || 1,
-      links: paginationData.links || [],
-    };
-  } catch (err) {
-    console.error('Error fetching favorites:', err);
-    error.value = t('favorites.errorLoading') || 'Failed to load favorites.';
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-const getPageNumber = (url) => {
-  if (!url) return null;
-  try {
-    const pageParam = new URL(url).searchParams.get('page');
-    return pageParam ? parseInt(pageParam) : null;
-  } catch (e) {
-    return null;
-  }
-};
-
-const addToCart = async (product) => {
-  if (!authStore.authenticatedweb) {
-    router.push({ name: 'AuthLogin' });
-    return;
-  }
-  try {
-    await axios.post('/api/cart/add', {
-      product_id: product.id,
-      variant_id: product.variant_id,
-      quantity: 1,
-    });
-    alert(t('favorites.addedToCart') || 'Added to cart successfully!');
-  } catch (err) {
-    console.error('Error adding to cart:', err);
-    alert(t('favorites.errorCart') || 'Failed to add to cart.');
-  }
-};
-
-const toggleWishlist = async (product) => {
-  if (!authStore.authenticatedweb) {
-    router.push({ name: 'AuthLogin' });
-    return;
-  }
-  try {
-    const endpoint = product.is_wished ? '/api/wishlists/remove' : '/api/wishlists/add';
-    await axios.post(endpoint, {
-      product_id: product.id,
-      variant_id: product.variant_id,
-    });
-    product.is_wished = !product.is_wished;
-    if (!product.is_wished) {
-      favorites.value.products = favorites.value.products.filter(
-        (p) => p.id !== product.id || p.variant_id !== product.variant_id
-      );
+      current_page: data.current_page,
+      last_page: data.last_page,
+      links: data.links || []
     }
-    alert(t(product.is_wished ? 'favorites.addedToWishlist' : 'favorites.removedFromWishlist') || 'Wishlist updated!');
   } catch (err) {
-    console.error('Error toggling wishlist:', err);
-    alert(t('favorites.errorWishlist') || 'Failed to update wishlist.');
+    error.value = t('favorites.errorLoading')
+    console.error(err)
+  } finally {
+    isLoading.value = false
   }
-};
+}
 
-const truncateName = (name, maxLength) => {
-  if (!name) return '';
-  if (name.length <= maxLength) return name;
-  return name.slice(0, maxLength) + '...';
-};
+// Actions
+const addToCart = async (product) => {
+  if (!authStore.authenticatedweb) return router.push({ name: 'AuthLogin' })
+  if (product.isOutOfStock || product.in_cart) return
 
+  try {
+    await axios.post('/api/cart/add', { product_id: product.id, variant_id: product.variant_id, quantity: 1 })
+    product.in_cart = true
+  } catch (err) {
+    alert(t('cart.error'))
+  }
+}
+
+const removeFromWishlist = async (product) => {
+  try {
+    await axios.delete(`/api/wishlists/${product.id}`, {
+      data: { variant_id: product.variant_id }
+    })
+    favorites.value = favorites.value.filter(p =>
+      p.id !== product.id || p.variant_id !== product.variant_id
+    )
+  } catch (err) {
+    alert(t('favorites.errorWishlist'))
+  }
+}
+
+// Lifecycle
 onMounted(() => {
-  fetchFavorites(pagination.value.current_page);
-});
+  locale.value = localStorage.getItem('appLang') || 'ar'
+  fetchFavorites()
+})
 </script>
-```
+
+<style scoped>
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+</style>

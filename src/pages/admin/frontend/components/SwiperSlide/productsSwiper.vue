@@ -1,66 +1,63 @@
 <template>
-  <div class="mx-auto max-w-7xl">
-    <div class="flex items-center justify-between">
-      <h2 class="font-bold font-sans text-gray-800 lg:mt-4 xs:mt-2 xs:text-lg sm:text-xl md:text-2xl lg:text-3xl">
-        {{ products.title }}
-      </h2>
-    </div>
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <h2 class="font-bold font-sans text-gray-800 text-2xl md:text-3xl lg:text-4xl mb-6">
+      {{ products.title }}
+    </h2>
 
     <swiper
       :modules="[Autoplay]"
       :slides-per-view="4"
-      :space-between="8"
-      :loop="true"
+      :space-between="20"
       :autoplay="{ delay: 3000, disableOnInteraction: false }"
       :speed="4000"
       :grab-cursor="true"
       :touch-ratio="1.5"
-      class="mt-6 pb-1"
+      class="product-swiper"
       :breakpoints="{
-        320: { slidesPerView: 1, spaceBetween: 8 },
-        480: { slidesPerView: 1.5, spaceBetween: 10 },
-        640: { slidesPerView: 2, spaceBetween: 12 },
-        768: { slidesPerView: 3, spaceBetween: 16 },
-        1024: { slidesPerView: 4, spaceBetween: 20 }
+        320: { slidesPerView: 1.2, spaceBetween: 10, centeredSlides: true },
+        480: { slidesPerView: 1.5, spaceBetween: 12 },
+        640: { slidesPerView: 2, spaceBetween: 16 },
+        768: { slidesPerView: 3, spaceBetween: 20 },
+        1024: { slidesPerView: 4, spaceBetween: 24 },
+        1280: { slidesPerView: 4, spaceBetween: 24 }
       }"
     >
-      <SwiperSlide
-        v-for="(pro, i) in products.products"
-        :key="i"
-        class="group"
-      >
-        <!-- Clickable Card – opens product details in NEW TAB (except buttons) -->
-
+      <SwiperSlide v-for="(pro, i) in products.products" :key="i" class="py-4">
         <a
           :href="`/product-details/${pro.id}`"
           target="_blank"
           rel="noopener noreferrer"
-          class="block h-full bg-white rounded-lg shadow-lg transition-all duration-300 hover:-translate-y-2 cursor-pointer"
+          class="block h-full bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300  cursor-pointer overflow-hidden group"
           @click.prevent.stop="handleCardClick($event, pro)"
         >
           <!-- Image Container -->
-          <div class="w-full h-full aspect-square overflow-hidden rounded-xl shadow-sm relative">
+          <div class="relative aspect-square overflow-hidden bg-gray-50">
+            <!-- Best Seller Badge -->
+            <div
+              v-if="pro.is_best_seller"
+              class="absolute top-3 left-3 z-10 bg-black text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider"
+            >
+              Best Seller
+            </div>
+
+            <!-- Product Image -->
             <img
-              :src="pro.img"
+              :src="pro.img || '/placeholder-image.jpg'"
               :alt="pro.name"
-              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-100"
+              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             />
-            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300"></div>
+
+            <!-- Overlay on Hover -->
+            <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
 
             <!-- Wishlist Button -->
             <button
               v-if="authStore.authenticatedweb"
               @click.stop.prevent="toggleFavorite(pro)"
-              class="absolute top-2 right-2 p-2 rounded-full bg-white text-gray-500 hover:text-red-500 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 z-10"
-              aria-label="Add to wishlist"
+              class="absolute top-3 right-3 z-20 p-2.5 bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+              :class="{ 'text-red-500': pro.is_wished }"
             >
-              <svg
-                class="w-5 h-5"
-                :class="{ 'text-red-500': pro.is_wished }"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                 <path
                   d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
                 />
@@ -68,60 +65,71 @@
             </button>
           </div>
 
-          <!-- Product Info -->
-          <div class="p-3 flex flex-col h-[140px]">
-            <p class="font-sans mt-2 text-gray-800 font-medium xs:text-sm sm:text-base md:text-lg line-clamp-2">
-              {{ truncateName(pro.name, 30) }}
+          <!-- Card Content -->
+          <div class="p-5 flex flex-col h-[220px]">
+            <!-- Product Name -->
+            <h3 class="font-semibold text-gray-900 text-lg line-clamp-2 leading-tight mb-2">
+              {{ truncateName(pro.name, 50) }}
+            </h3>
+
+            <!-- Description / Sub Name - NOW VISIBLE -->
+            <p v-if="pro.sub_name" class="text-gray-600 text-sm line-clamp-2 mb-3 leading-snug">
+              {{ pro.sub_name }}
             </p>
 
-            <p v-if="pro.sub_name" class="font-sans text-gray-600 text-sm line-clamp-1 mt-1">
-              {{ pro.sub_name.slice(0, 37) }}
-            </p>
+            <!-- Rating -->
+            <div class="flex items-center gap-1 ">
+              <span class="text-yellow-500 font-bold text-sm">{{ pro.total_rating || '0' }}</span>
+              <svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 24 24">
+                <path d="M12 17.27l6.18 3.73-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73-1.64 7.03z"/>
+              </svg>
+              <span class="text-gray-500 text-xs">({{ pro.total_rating || 0 }})</span>
+            </div>
 
-            <div class="flex items-center justify-between mt-auto">
-              <span class="font-sans text-[#A6853B] font-semibold xs:text-base sm:text-lg">
-                {{ pro.price }} {{ $t('currencyLabel') }}
-              </span>
+            <!-- Price & Discount -->
+            <div class="mt-auto">
+              <div class="flex  justify-between">
+                <div class="flex items-baseline gap-2">
+                  <span class="text-2xl font-bold text-gray-900">
+                    {{ $t('currencyLabel') }} {{parseFloat( pro.price-pro.total_discounts_value ).toFixed(2)}}
+                  </span>
 
-              <!-- Add to Cart Button -->
-              <button
-                v-if="authStore.authenticatedweb"
-                @click.stop.prevent="addToCart(pro)"
-                class="p-2 rounded-full bg-gray-100 text-[#A6853B] transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#A6853B] focus:ring-offset-2"
-                :class="{
-                  'hover:bg-[#A6853B] hover:text-white': !pro.in_cart && pro.is_stock !== 1,
-                  'bg-gray-300 text-gray-500 cursor-not-allowed': pro.is_stock === 1,
-                }"
-                :disabled="pro.is_stock === 1"
-                :aria-label="pro.in_cart ? 'In cart' : pro.is_stock === 1 ? 'Out of stock' : 'Add to cart'"
-              >
-                <svg
-                  v-if="pro.in_cart"
-                  class="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
+                  <span
+                    v-if="pro.total_discounts_value !=0"
+                    class=" font-bold text-base line-through text-[#0b3baa] px-2 py-0.5 rounded"
+                  >
+                    {{ pro.price }}
+                  </span>
+                </div>
+
+                <!-- Add to Cart Button -->
+                <button
+                  @click.stop.prevent="addToCart(pro)"
+                  :disabled="pro.is_stock === 1"
+                  :class="[
+                    'p-3 rounded-full my-auto transition-all duration-300 shadow-md',
+                    pro.in_cart
+                      ? 'bg-[#0b3baa] text-white'
+                      : pro.is_stock === 1
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-[#A6853B] text-white hover:bg-[#8f702c]'
+                  ]"
                 >
-                  <path
-                    d="M9 16.2l-3.5-3.5a.984.984 0 0 0-1.4 0 .984.984 0 0 0 0 1.4l4.2 4.2c.39.39 1.01.39 1.4 0l8.4-8.4a.984.984 0 0 0 0-1.4.984.984 0 0 0-1.4 0L9 16.2z"
-                  />
-                </svg>
-                <svg
-                  v-else
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.182 1.708.707 1.708H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                  />
-                </svg>
-              </button>
+                  <svg v-if="pro.in_cart" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 16.2l-3.5-3.5a.984.984 0 0 0-1.4 0 .984.984 0 0 0 0 1.4l4.2 4.2c.39.39 1.01.39 1.4 0l8.4-8.4a.984.984 0 0 0 0-1.4.984.984 0 0 0-1.4 0L9 16.2z"/>
+                  </svg>
+                  <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.182 1.708.707 1.708H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Free Shipping -->
+              <div v-if="pro.is_free_shipping == 1" class="flex items-center text-[#0b3baa] text-xs font-medium">
+                <a  class="pi pi-truck"></a>
+                {{ $t("products.Free_Delivery") }}
+              </div>
             </div>
           </div>
         </a>
@@ -138,143 +146,79 @@ import axios from 'axios';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../../../../../stores/WebAuth';
 
-const authStore = useAuthStore();
 const { t } = useI18n();
+const authStore = useAuthStore();
 
 const props = defineProps({
   products: {
     type: Object,
     required: true,
-    validator: (products) => {
-      return (
-        products &&
-        typeof products.title === 'string' &&
-        Array.isArray(products.products) &&
-        products.products.every(
-          (pro) =>
-            pro.id &&
-            pro.name &&
-            typeof pro.sub_name === 'string' &&
-            pro.price &&
-            pro.img &&
-            typeof pro.is_wished === 'boolean' &&
-            typeof pro.in_cart === 'boolean' &&
-            typeof pro.is_stock === 'number'
-        )
-      );
-    },
   },
 });
 
-/* ----------  إدارة نقرة البطاقة (فتح في تبويب جديد فقط إذا لم يكن زر) ---------- */
 const handleCardClick = (event, product) => {
-  // إذا كان النقر على زر داخل البطاقة → لا تفعل شيئًا (الأزرار تُدار بواسطة @click.stop.prevent)
-  // إذا كان النقر على أي مكان آخر → افتح الرابط في تبويب جديد
   if (event.target.closest('button')) return;
-
-  const url = `/product-details/${product.id}`;
-  window.open(url, '_blank', 'noopener,noreferrer');
+  window.open(`/product-details/${product.id}`, '_blank', 'noopener,noreferrer');
 };
 
-/* ----------  إضافة للسلة ---------- */
 const addToCart = async (product) => {
+  if (product.is_stock === 1 || product.in_cart) return;
   if (!authStore.authenticatedweb) {
-    alert(t('auth.required') || 'Please log in to add to cart.');
+    alert(t('auth.required') || 'Please log in to add items to cart.');
     return;
   }
 
   try {
-    const payload = {
+    await axios.post('/api/cart/add', {
       product_id: product.id,
       variant_id: product.variant_id || null,
       quantity: 1,
-    };
-    await axios.post('/api/cart/add', payload);
+    });
     product.in_cart = true;
   } catch (error) {
-    console.error('Failed to add to cart:', error);
     alert(t('cart.error') || 'Failed to add to cart.');
   }
 };
 
-/* ----------  تبديل المفضلة ---------- */
 const toggleFavorite = async (product) => {
   if (!authStore.authenticatedweb) {
     alert(t('auth.required') || 'Please log in to manage wishlist.');
     return;
   }
 
-  const isCurrentlyFavorited = product.is_wished;
-  const method = isCurrentlyFavorited ? 'delete' : 'post';
-  const url = isCurrentlyFavorited ? `/api/wishlists/${product.id}` : '/api/wishlists';
-  const payload = { product_id: product.id };
-
+  const wasWished = product.is_wished;
   try {
-    if (method === 'post') {
-      await axios.post(url, payload);
+    if (wasWished) {
+      await axios.delete(`/api/wishlists/${product.id}`, { data: { product_id: product.id } });
     } else {
-      await axios.delete(url, { data: payload });
+      await axios.post('/api/wishlists', { product_id: product.id });
     }
-
-    product.is_wished = !isCurrentlyFavorited;
-
+    product.is_wished = !wasWished;
   } catch (error) {
-    console.error('Error toggling wishlist:', error);
-    product.is_wished = isCurrentlyFavorited; // إعادة القيمة الأصلية
+    product.is_wished = wasWished;
     alert(t('wishlist.error') || 'Failed to update wishlist.');
   }
 };
 
-/* ----------  تقطيع اسم المنتج ---------- */
-const truncateName = (name, maxLength) => {
-  if (name.length <= maxLength) return name;
-  return name.slice(0, maxLength) + '...';
+const truncateName = (name, length) => {
+  return name.length > length ? name.slice(0, length) + '...' : name;
 };
 </script>
 
 <style scoped>
-.swiper {
-  @apply w-full pb-8;
+.product-swiper {
+  padding-bottom: 2rem;
 }
 
 .swiper-slide {
-  @apply h-auto;
+  height: auto;
 }
 
-/* Consistent card height */
-a {
-  @apply flex flex-col h-full;
-}
-
-/* Line clamp for text overflow */
-.line-clamp-1 {
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-}
-
+/* Line Clamp Polyfill for all browsers */
 .line-clamp-2 {
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  @apply bg-gray-100;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 rounded-full;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400;
 }
 </style>
