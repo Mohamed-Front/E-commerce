@@ -313,7 +313,7 @@ const fetchProducts = async (page = 1) => {
     const params = {
       page,
       limit: limit.value,
-      category_id: route.params.id ? route.params.id : undefined,
+      category_ids: route.params.id ? route.params.id : undefined,
       brand_ids: selectedFilters.value.brand_ids.length ? selectedFilters.value.brand_ids.join(',') : undefined,
       rate: selectedFilters.value.rate > 0 ? selectedFilters.value.rate : undefined,
       min_price: selectedFilters.value.min_price,
