@@ -3,7 +3,6 @@
     <div class="">
       <section class="mx-auto max-w-7xl">
         <!-- Exclusive Offers -->
-        {{ exclusive_offers }}
         <productsSwiper v-if="exclusive_offers.products.length >= 1" :products="exclusive_offers" />
         <!-- Best Sellers -->
         <productsSwiper v-if="Best_seller.products.length >= 1"  :products="Best_seller" />
