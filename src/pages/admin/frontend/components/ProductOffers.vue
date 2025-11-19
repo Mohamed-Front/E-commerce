@@ -3,7 +3,6 @@
     <div class="">
       <section class="mx-auto max-w-7xl">
         <!-- Exclusive Offers -->
-
         <productsSwiper v-if="exclusive_offers.products.length >= 1" :products="exclusive_offers" />
         <!-- Best Sellers -->
         <productsSwiper v-if="Best_seller.products.length >= 1"  :products="Best_seller" />
@@ -81,7 +80,7 @@ const buildEndpoint = (base) => {
 const fetchExclusiveOffers = async () => {
   try {
     const response = await axios.get(buildEndpoint('exclusive-offers'))
-    const data = response.data.data.data || []
+    const data = response.data.data || []
 
     exclusive_offers.value = {
       title: t('category.exclusive') || 'Exclusive Offers',

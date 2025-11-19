@@ -125,12 +125,7 @@ const onCategoryFilter = (event) => {
 // Fetch Products (only when type=product and categories selected)
 // ──────────────────────────────────────────────────────────────
 const fetchProducts = async () => {
-  if (discountData.value.type !== 'product' || discountData.value.ids.length === 0) {
-    products.value = [];
-    return;
-  }
 
-  productLoading.value = true;
   try {
     const { data } = await axios.get('/api/product', {
       params: {
@@ -165,23 +160,15 @@ const loadDiscount = async () => {
     discountData.value = {
       type: d.type,
       ids: d.type === 'category' ? d.ids : [],
-      products: d.type === 'product' ? d.ids : [],
+      products:  d.products ,
       discount_type: d.discount_type,
-      discount_value: parseFloat(d.discount_value),
+      discount_value: d.discount_value ,
       expires_at: d.expires_at ? new Date(d.expires_at) : null
     };
-
+    fetchProducts()
     // Preload categories
-    await fetchCategories();
 
-    // If product type, preload products after categories
-    if (d.type === 'product' && d.ids.length > 0) {
-      discountData.value.ids = d.products.map(p => p.category_id);
-      setTimeout(() => {
-        discountData.value.products = d.ids;
-        fetchProducts();
-      }, 100);
-    }
+
   } catch (error) {
     console.error('Error loading discount:', error);
     toast.add({
@@ -373,11 +360,9 @@ onMounted(() => {
             <span v-else>(%)</span>
             <span class="text-red-500">*</span>
           </label>
-          <InputNumber
-            v-model="discountData.discount_value"
-            :min="0"
-            :max="discountData.discount_type === 2 ? 100 : null"
-            mode="decimal"
+          <InputText
+          type="number"
+                    v-model="discountData.discount_value"
             :placeholder="t('discount.enter_discount_value')"
             class="w-full"
             :class="{ 'p-invalid': errors.discount_value }"

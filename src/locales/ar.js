@@ -455,6 +455,12 @@ export default {
     "fileTypes": "SVG، PNG، JPG أو GIF (الحد الأقصى 2 ميجابايت)"
   },
   cart: {
+    "checkoutThisStoreOnly": "اطلب من هذا المتجر فقط",
+    "checkoutAll": "إتمام الطلب (جميع المتاجر)",
+    "orderSuccessStore": "تم تقديم الطلب بنجاح من {store}",
+    "selectAddressFirst": "يرجى اختيار عنوان التوصيل أولاً",
+    "noItemsInStore": "لا توجد منتجات في هذا المتجر لإتمام الطلب",
+    "checkoutThisStoreOnly_disabled": "اختر عنوان التوصيل لتتمكن من الطلب من هذا المتجر",
     selectStore: 'اختر المتجر',
     selectStoreAria: 'اختر المتجر {name}',
     selectAllStores: 'اختر جميع المتاجر',

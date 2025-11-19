@@ -234,11 +234,11 @@ const submitForm = async () => {
             <span class="text-red-500">*</span>
           </label>
 
-          <InputNumber
+          <InputText
+          type="number"
             id="discount_value"
             v-model="discountData.discount_value"
-            :min="0"
-            mode="decimal"
+
             :placeholder="t('discount.enter_discount_value')"
             class="w-full"
             :class="{ 'p-invalid': errors.discount_value }"
