@@ -150,7 +150,7 @@ const mainBannerImage = ref(null);
 const subBannerImage = ref(null);
 const sponsorImage = ref(null);
 const categories = ref([]);
-const storeId = ref(localStorage.getItem('defaultStoreId') || '4');
+const storeId = ref(localStorage.getItem('defaultStoreId'));
 const categoriesSwiper = ref(null);
 
 // Helper function to extract media by name

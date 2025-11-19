@@ -10,7 +10,7 @@ export const useAuthStore = defineStore('Auth', {
     authUser: useStorage('authUser', {}),
 
     authenticated: useStorage('authenticated', false),
-    defaultStoreId: useStorage('defaultStoreId', 1),
+
     userPermissions: useStorage('userPermissions', []),
     authErrors: [],
     role: '',

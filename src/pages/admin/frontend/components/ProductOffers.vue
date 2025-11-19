@@ -24,7 +24,7 @@ const { t } = useI18n()
 const route = useRoute()
 
 const locale = ref(localStorage.getItem('appLang') || 'ar')
-const stor_id = ref(localStorage.getItem('defaultStoreId') || 4)
+const stor_id = ref(localStorage.getItem('defaultStoreId'))
 const categoryId = ref(route.params.id || null)
 
 const exclusive_offers = ref({ title: '', products: [] })

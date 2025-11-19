@@ -87,11 +87,8 @@ const fetchStores = async () => {
   try {
     const response = await axios.get(`api/home/get-stores`)
     stores.value = response.data.data.data
-    const defaultStore = stores.value.find(store => store.is_default === 1)
-    if (defaultStore) {
-      localStorage.setItem('defaultStoreId', defaultStore.id)
-      storeId.value = defaultStore.id
-    }
+    const defaultStore = stores.value.find(store => store.is_default === 4)
+
   } catch (error) {
     console.error('Error fetching stores:', error)
   }

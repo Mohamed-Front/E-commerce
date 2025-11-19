@@ -242,6 +242,7 @@ const fetchAllData =  () => {
 
 // Initialize on mount
 onBeforeMount(() => {
+  console.log(storeId.value)
   if (route.params.id && storeId.value) {
     fetchAllData();
   } else {

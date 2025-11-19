@@ -259,7 +259,7 @@ const router = useRouter()
 const route = useRoute()
 const isDropdownOpen = ref(false)
 const isUserDropdownOpen = ref(false)
-const defaultStoreId = ref(4)
+const defaultStoreId = ref('')
 const defaultStore = ref(null)
 const hasMarket = ref(null)
 const isAuthenticated = ref(false)
@@ -295,14 +295,7 @@ const setDefaultStore = () => {
       return
     }
   }
-  const defaultStoreData = stores.value.find((store) => store.is_default === 1)
-  if (defaultStoreData) {
-    defaultStoreId.value = defaultStoreData.id
-    defaultStore.value = defaultStoreData
-    hasMarket.value = defaultStoreData.has_market
-    localStorage.setItem('defaultStoreId', defaultStoreData.id)
-    localStorage.setItem('hasMarket', defaultStoreData.has_market)
-  }
+
 }
 
 const linkToStore = (store) => (store.has_market ? { name: 'stores-hasmarket' } : { name: 'home' })

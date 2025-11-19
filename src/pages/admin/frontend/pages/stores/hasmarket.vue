@@ -218,7 +218,7 @@ const isLoading = ref(false);
 const error = ref(null);
 
 // Get store ID from localStorage
-const storeId = ref(localStorage.getItem('defaultStoreId') || '');
+const storeId = ref(localStorage.getItem('defaultStoreId') );
 
 // Helper function to get category name based on locale
 const categoryName = (category) => {
