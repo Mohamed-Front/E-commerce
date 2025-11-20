@@ -321,7 +321,7 @@ const fetchProducts = async (page = 1) => {
     const params = {
       page,
       limit: limit.value,
-      brand_id: route.params.id,
+      brand_ids: route.params.id,
       category_ids: selectedFilters.value.category_ids.length ? selectedFilters.value.category_ids.join(',') : undefined,
       rate: selectedFilters.value.rate > 0 ? selectedFilters.value.rate : undefined,
       min_price: selectedFilters.value.min_price,

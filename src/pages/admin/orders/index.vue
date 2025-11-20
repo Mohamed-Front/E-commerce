@@ -24,6 +24,9 @@ const toast = useToast()
 const loading = ref(true)
 const delete_id = ref('')
 const deleteDialog = ref(false)
+const rejectDialog = ref(false)
+const rejectOrderId = ref(null)
+
 const orders = ref(null)
 const selectedOrders = ref(null)
 const dt = ref(null)
@@ -35,10 +38,6 @@ const currentPage = ref(1)
 const totalRecords = ref(0)
 const rowsPerPage = ref(10)
 const totalPages = ref(0)
-const firstPageUrl = ref('')
-const lastPageUrl = ref('')
-const nextPageUrl = ref('')
-const prevPageUrl = ref('')
 const from = ref(0)
 const to = ref(0)
 const links = ref([])
@@ -64,10 +63,6 @@ const fetchData = () => {
       orders.value = res.data.data.data
       totalRecords.value = res.data.data.total
       totalPages.value = res.data.data.last_page
-      firstPageUrl.value = res.data.data.first_page_url
-      lastPageUrl.value = res.data.data.last_page_url
-      nextPageUrl.value = res.data.data.next_page_url
-      prevPageUrl.value = res.data.data.prev_page_url
       from.value = res.data.data.from
       to.value = res.data.data.to
       links.value = res.data.data.links
@@ -101,9 +96,60 @@ const goToPage = (page) => {
 
 // Handle rows per page change
 const changeRowsPerPage = (event) => {
-  rowsPerPage.value = event.value
+  rowsPerPage.value = event.value || event.target.value
   currentPage.value = 1
   fetchData()
+}
+
+// Change order status (Accept or Reject)
+const changeOrderStatus = (orderId, status, isReject = false) => {
+  if (isReject) {
+    rejectOrderId.value = orderId
+    rejectDialog.value = true
+    return
+  }
+
+  // Direct accept
+  performStatusChange(orderId, status)
+}
+
+const performStatusChange = (orderId, status) => {
+  loading.value = true
+  axios.post(`/api/order/change-status/${orderId}`, null, {
+    params: { status }
+  })
+    .then(() => {
+      toast.add({
+        severity: 'success',
+        summary: t('success'),
+        detail: status === 1
+          ? t('order.statusAccepted')
+          : t('order.statusRejected'),
+        life: 3000
+      })
+      fetchData() // Refresh list
+    })
+    .catch((error) => {
+      toast.add({
+        severity: 'error',
+        summary: t('error'),
+        detail: t('order.statusChangeError'),
+        life: 5000
+      })
+      console.error('Status change failed:', error)
+    })
+    .finally(() => {
+      loading.value = false
+      rejectDialog.value = false
+    })
+}
+
+// Confirm Reject
+const confirmReject = () => {
+  if (rejectOrderId.value) {
+    performStatusChange(rejectOrderId.value, 2)
+    rejectOrderId.value = null
+  }
 }
 
 // Delete order
@@ -124,7 +170,7 @@ const deleteOrder = () => {
       fetchData()
       deleteDialog.value = false
     })
-    .catch((error) => {
+    .catch(() => {
       toast.add({
         severity: 'error',
         summary: t('error'),
@@ -200,37 +246,61 @@ onMounted(() => {
           >
             <Column selection-mode="multiple" header-style="width: 3rem"></Column>
 
-            <Column field="id" :header="t('order.id')" :sortable="true" header-style="width:14%; min-width:8rem;">
+            <Column field="id" :header="t('order.id')" :sortable="true" header-style="width:10%; min-width:6rem;">
               <template #body="slotProps">
-                {{ slotProps.data.id }}
+                #{{ slotProps.data.id }}
               </template>
             </Column>
 
-            <Column field="total_price" :header="t('order.totalPrice')" :sortable="true" header-style="width:14%; min-width:10rem;">
+            <Column field="total_price" :header="t('order.totalPrice')" :sortable="true">
               <template #body="slotProps">
-                {{ slotProps.data.total_price }} {{' ' + $t("currencyLabel") }}
+                {{ slotProps.data.total_price }} {{ $t("currencyLabel") }}
               </template>
             </Column>
 
-            <Column field="status" :header="t('order.status')" :sortable="true" header-style="width:14%; min-width:10rem;">
+            <Column field="status" :header="t('order.status')" :sortable="true">
               <template #body="slotProps">
                 <Tag
-                  :value="slotProps.data.status === 0 ? t('order.pending') : t('order.completed')"
-                  :severity="slotProps.data.status === 0 ? 'warning' : 'success'"
+                  :value="slotProps.data.status === 0 ? t('order.pending') :
+                         slotProps.data.status === 1 ? t('order.completed') : t('order.rejected')"
+                  :severity="slotProps.data.status === 0 ? 'warning' :
+                             slotProps.data.status === 1 ? 'success' : 'danger'"
                 />
               </template>
             </Column>
 
-            <Column :header="t('actions')" header-style="min-width:10rem;">
+            <Column :header="t('actions')" header-style="min-width:14rem;">
               <template #body="slotProps">
-                <Button
-                  v-can="'show orders'"
-                  icon="pi pi-eye"
-                  class="p-detail"
-                  @click="viewOrder(slotProps.data.id)"
-                  v-tooltip.top="t('view')"
-                />
+                <div class="flex gap-2">
+                  <!-- View Button -->
+                  <Button
+                    v-can="'show orders'"
+                    icon="pi pi-eye"
+                    class="p-button-rounded p-detail p-button-sm"
+                    @click="viewOrder(slotProps.data.id)"
+                    v-tooltip.top="t('view')"
+                  />
 
+                  <!-- Accept Button (only if pending) -->
+                  <Button
+                    v-if="slotProps.data.status === 0"
+                    v-can="'update orders'"
+                    icon="pi pi-check"
+                    class="p-button-rounded p-detail p-button-sm"
+                    @click="changeOrderStatus(slotProps.data.id, 1)"
+                    v-tooltip.top="t('order.accept')"
+                  />
+
+                  <!-- Reject Button (only if pending) -->
+                  <Button
+                    v-if="slotProps.data.status === 0"
+                    v-can="'update orders'"
+                    icon="pi pi-times"
+                    class="p-button-rounded p-delete"
+                    @click="changeOrderStatus(slotProps.data.id, 2, true)"
+                    v-tooltip.top="t('order.reject')"
+                  />
+                </div>
               </template>
             </Column>
 
@@ -251,9 +321,11 @@ onMounted(() => {
           <!-- Custom Pagination -->
           <div class="p-paginator p-component p-unselectable-text p-paginator-bottom">
             <div class="p-paginator-left-content">
-              <span class="p-paginator-current">{{ t('show') }} {{ from }} {{ t('to') }} {{ to }} {{ t('from') }} {{ totalRecords }}</span>
+              <span class="p-paginator-current">
+                {{ t('show') }} {{ from }} {{ t('to') }} {{ to }} {{ t('from') }} {{ totalRecords }}
+              </span>
             </div>
-            <div class="p-paginator-right-content">
+            <div class="p-paginator-right-content flex align-items-center gap-3">
               <button
                 class="p-paginator-first p-paginator-element p-link"
                 :disabled="currentPage === 1"
@@ -263,7 +335,7 @@ onMounted(() => {
               </button>
               <button
                 class="p-paginator-prev p-paginator-element p-link"
-                :disabled="!prevPageUrl"
+                :disabled="currentPage === 1"
                 @click="goToPage(currentPage - 1)"
               >
                 <span class="p-paginator-icon pi pi-angle-left"></span>
@@ -283,7 +355,7 @@ onMounted(() => {
 
               <button
                 class="p-paginator-next p-paginator-element p-link"
-                :disabled="!nextPageUrl"
+                :disabled="currentPage === totalPages"
                 @click="goToPage(currentPage + 1)"
               >
                 <span class="p-paginator-icon pi pi-angle-right"></span>
@@ -298,14 +370,42 @@ onMounted(() => {
 
               <Dropdown
                 v-model="rowsPerPage"
-                :options="[5, 10, 20, 30]"
+                :options="[5, 10, 20, 30, 50]"
                 @change="changeRowsPerPage"
-                class="ml-2"
+                class="ml-3"
                 style="width: 80px"
               />
             </div>
           </div>
         </div>
+
+        <!-- Reject Confirmation Dialog -->
+        <Dialog
+          v-model:visible="rejectDialog"
+          :style="{ width: '450px' }"
+          :header="t('order.rejectConfirmTitle')"
+          :modal="true"
+          :closable="false"
+        >
+          <div class="flex align-items-center justify-content-center gap-3">
+            <i class="pi pi-exclamation-triangle" style="font-size: 2.5rem; color: var(--red-500)" />
+            <span>{{ t('order.rejectConfirmMessage') }}</span>
+          </div>
+          <template #footer>
+            <Button
+              :label="t('no')"
+              icon="pi pi-times"
+              class="p-button-text"
+              @click="rejectDialog = false"
+            />
+            <Button
+              :label="t('yesReject')"
+              icon="pi pi-check"
+              class="p-button-danger"
+              @click="confirmReject"
+            />
+          </template>
+        </Dialog>
 
         <!-- Delete Confirmation Dialog -->
         <Dialog
@@ -338,5 +438,3 @@ onMounted(() => {
   </div>
 </template>
 
-<style>
-</style>
