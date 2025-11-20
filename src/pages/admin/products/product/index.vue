@@ -15,7 +15,7 @@ import ProgressSpinner from 'primevue/progressspinner'
 import Dialog from 'primevue/dialog'
 import Button from 'primevue/button'
 import DataTable from 'primevue/datatable'
-import InputSwitch from 'primevue/inputswitch'  // <-- NEW: Import InputSwitch
+import InputSwitch from 'primevue/inputswitch'
 
 const router = useRouter()
 const toast = useToast()
@@ -49,7 +49,7 @@ const selectedPriceFile = ref(null)
 const priceUpdateLoading = ref(false)
 // ------------------------------
 
-// --- NEW TOGGLE LOADING MAP ---
+// --- TOGGLE LOADING MAP ---
 const toggleLoading = ref({}) // { productId: true/false }
 // --------------------------------
 
@@ -345,7 +345,7 @@ const importProducts = () => {
         return
     }
 
-    importLoading = true
+    importLoading.value = true
     const formData = new FormData()
     formData.append('file', selectedFile.value)
 
@@ -417,13 +417,13 @@ const updatePrices = () => {
     })
 }
 
-// --- NEW: Toggle Free Shipping ---
+// FIXED: Toggle Free Shipping (Safe & Reactive)
 const toggleFreeShipping = async (product) => {
-  console.log(product.is_free_shipping)
     const productId = product.id
-    const newValue = product.is_free_shipping ? 1 : 0
+    const currentValue = product.is_free_shipping
+    const newValue = currentValue === 1 ? 0 : 1
 
-    // Set loading state for this product
+    // Show loading
     toggleLoading.value[productId] = true
 
     try {
@@ -431,18 +431,18 @@ const toggleFreeShipping = async (product) => {
             is_free_shipping: newValue
         })
 
-        // Update local product state
+        // Success: update locally
         product.is_free_shipping = newValue
 
         toast.add({
             severity: 'success',
             summary: t('success'),
-            detail: newValue ? t('product.freeShippingEnabled') : t('product.freeShippingDisabled'),
+            detail: newValue === 1 ? t('product.freeShippingEnabled') : t('product.freeShippingDisabled'),
             life: 3000
         })
     } catch (error) {
         // Revert on error
-        product.is_free_shipping = !newValue
+        product.is_free_shipping = currentValue
 
         toast.add({
             severity: 'error',
@@ -455,7 +455,6 @@ const toggleFreeShipping = async (product) => {
         toggleLoading.value[productId] = false
     }
 }
-// ------------------------------------
 
 // Navigation functions
 const createNewProduct = () => {
@@ -608,16 +607,16 @@ onMounted(() => {
                             </template>
                         </Column>
 
-                        <!-- NEW: Free Shipping Toggle Column -->
+                        <!-- FIXED: Free Shipping Toggle Column -->
                         <Column :header="t('product.freeShipping')" header-style="width:10%; min-width:8rem;">
                             <template #body="slotProps">
-                                <div class="flex justify-content-center">
-                                  <InputSwitch
-                                    :model-value="slotProps.data.is_free_shipping === 1"
-                                    :disabled="toggleLoading[slotProps.data.id]"
-                                    @update:model-value="slotProps.data.is_free_shipping = $event ? 1 : 0; toggleFreeShipping(slotProps.data)"
-                                    v-tooltip.top="slotProps.data.is_free_shipping === 1 ? t('product.freeShipping') : t('product.notFreeShipping')"
-                                />
+                                <div class="flex justify-content-center align-items-center">
+                                    <InputSwitch
+                                        :model-value="slotProps.data.is_free_shipping === 1"
+                                        :disabled="toggleLoading[slotProps.data.id]"
+                                        @update:model-value="toggleFreeShipping(slotProps.data)"
+                                        v-tooltip.top="slotProps.data.is_free_shipping === 1 ? t('product.freeShipping') : t('product.notFreeShipping')"
+                                    />
                                     <ProgressSpinner
                                         v-if="toggleLoading[slotProps.data.id]"
                                         style="width: 20px; height: 20px"
@@ -627,7 +626,6 @@ onMounted(() => {
                                 </div>
                             </template>
                         </Column>
-                        <!-- END -->
 
                         <Column :header="t('actions')" header-style="width:14rem">
                             <template #body="slotProps">
