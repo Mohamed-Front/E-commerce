@@ -504,6 +504,19 @@ export default {
     noAddressSelected: 'يرجى اختيار عنوان للتوصيل',
     orderSuccess: 'تم إرسال الطلب بنجاح',
     orderError: 'فشل إرسال الطلب',
+    "selectAddressWarning": "الرجاء إضافة واختيار عنوان للمتابعة وإتمام الطلب.",
+    "addAddressButton": "إضافة عنوان جديد",
+    "selectAddressWarning": "الرجاء إضافة واختيار عنوان للمتابعة وإتمام الطلب.",
+    "addAddressButton": "إضافة عنوان جديد",
+    "deliveryFee": "رسوم التوصيل",
+    "couponDiscount": "خصم القسيمة",
+    "serviceFees": "رسوم الخدمة",
+    "deliveryStatus": "حالة التوصيل",
+    "statusAvailable": "متاح",
+    "statusFree": "مجاني",
+    "statusNotAvailable": "غير متاح",
+    "cannotCheckoutDueToDelivery": "لا يمكن إتمام الطلب. متجر واحد أو أكثر لا يوفر خدمة التوصيل لهذا العنوان."
+
   },
   orders: {
     title: 'طلباتي',
@@ -758,8 +771,16 @@ export default {
     primary: 'العنوان الرئيسي',
     shipping: 'عنوان الشحن',
     add: 'إضافة عنوان جديد',
-    edit: 'تعديل العنوان {name}',
+    edit: 'تعديل العنوان ',
     apiError: 'فشل استجابة الـ API',
+    "deleteTitle": "تأكيد",
+    "deleteConfirmation": "هل أنت متأكد من حذف العنوان:",
+    "deleteConfirm": "حذف",
+    "cancel": "إلغاء",
+    "deleteSuccess": "تم حذف العنوان بنجاح.",
+    "deleteApiError": "فشل في حذف العنوان عبر النظام.",
+    "deleteError": "حدث خطأ غير متوقع أثناء حذف العنوان.",
+    "delete": "حذف "
   },
 "address": {
     "select_governorate":"اختر المحافظة",

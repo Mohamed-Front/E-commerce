@@ -208,7 +208,7 @@ onMounted(() => {
 
             <Column field="total_price" :header="t('order.totalPrice')" :sortable="true" header-style="width:14%; min-width:10rem;">
               <template #body="slotProps">
-                ${{ slotProps.data.total_price }}
+                {{ slotProps.data.total_price }} {{' ' + $t("currencyLabel") }}
               </template>
             </Column>
 
