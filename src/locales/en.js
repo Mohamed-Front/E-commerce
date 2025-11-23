@@ -1158,6 +1158,7 @@ export default {
   reviews: {
     title: 'Leave A Review',
     singular: 'review',
+     writeReview:" write Review",
     plural: 'reviews',
     placeholder: 'Write your review here...',
     submitting: 'Submitting...',

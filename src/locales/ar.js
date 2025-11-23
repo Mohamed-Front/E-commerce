@@ -1087,6 +1087,7 @@ export default {
     title: 'اترك تقييمًا',
     singular: 'تقييم',
     plural: 'تقييمات',
+    writeReview:"اكتب تعليقك",
     placeholder: 'اكتب تقييمك هنا...',
     submitting: 'جارٍ الإرسال...',
     submit: 'إرسال',
