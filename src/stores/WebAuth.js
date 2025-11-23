@@ -10,6 +10,7 @@ export const useAuthStore = defineStore('Auth', {
     webUser: useStorage('webUser', {}),
     webToken: useStorage('webToken', null),
     authenticatedweb: useStorage('authenticatedweb', false),
+       defaultStoreId: useStorage('defaultStoreId', 4),
     verify: false,
     role: '',
     router: useRouter(),

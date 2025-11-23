@@ -116,10 +116,16 @@ export default {
   "to": "إلى",
   "from": "من",
   "order": {
+    "total":"الاجمالي ",
     "detailTitle": "تفاصيل الطلب",
     "financialSummary": "الملخص المالي",
     "generalInfo": "معلومات عامة",
-
+"invoiceConfirmationTitle": "تأكيد إنشاء الفاتورة",
+    "invoiceConfirmationMessage": "هل أنت متأكد من المتابعة في إنشاء الفاتورة الرسمية لهذا الطلب؟ قد يكون هذا الإجراء غير قابل للإلغاء.",
+    "orderSummaryBrief": "ملخص الطلب",
+    "itemsCount": "إجمالي المنتجات",
+    "invoiceGenerationWarning": "تحذير: قد يؤدي إنشاء الفاتورة إلى إنهاء تفاصيل هذا الطلب.",
+    "confirmGenerate": "تأكيد وإنشاء",
     "subTotalPrice": "المجموع الفرعي",
     "taxFee": "الضريبة",
     "serviceFee": "رسوم الخدمة",

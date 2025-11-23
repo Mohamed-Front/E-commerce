@@ -498,11 +498,20 @@ const routes: Array<RouteRecordRaw> = [
             path: 'template-notification',
             component: () => import('../pages/admin/template-notification/index.vue'),
           },
-
-          {
+         {
             name: 'attributes',
             path: 'attributes',
             component: () => import('../pages/admin/settings/Attributes/index.vue'),
+          },
+          {
+            name: 'invoices',
+            path: 'invoices',
+            component: () => import('../pages/admin/Invoice/index.vue'),
+          },
+           {
+            name: 'invoice-show',
+            path: 'invoices-show/:id',
+            component: () => import('../pages/admin/Invoice/show.vue'),
           },
           {
             name: 'attribute-create',

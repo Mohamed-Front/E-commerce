@@ -187,6 +187,14 @@ export default {
         icon: 'dashboard',
       },
     },
+    {
+      name: 'invoices',
+      displayName: 'navigation.invoices',
+      show: ['list invoices'],
+      meta: {
+        icon: 'invoice',
+      },
+    },
       {
       name: 'template-notification',
       displayName: 'navigation.notification',

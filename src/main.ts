@@ -274,6 +274,8 @@ if( localStorage.appLang == 'ar')
 document.body.dir ="rtl"
 else
 document.body.dir ="ltr"
+
+
 app.directive('can', (el, binding, vnode) =>{
   // console.log(JSON.parse(localStorage.getItem('permissions')))
 

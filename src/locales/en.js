@@ -130,7 +130,12 @@ export default {
     "detailTitle": "Order Details",
     "financialSummary": "Financial Summary",
     "generalInfo": "General Information",
-
+"invoiceConfirmationTitle": "Confirm Invoice Generation",
+    "invoiceConfirmationMessage": "Are you sure you want to proceed with generating the official invoice for this order? This action may be irreversible.",
+    "orderSummaryBrief": "Order Summary",
+    "itemsCount": "Total Items",
+    "invoiceGenerationWarning": "Warning: Generating the invoice may finalize this order's details.",
+    "confirmGenerate": "Confirm & Generate",
     "subTotalPrice": "Subtotal",
     "taxFee": "Tax",
     "serviceFee": "Service Fee",
