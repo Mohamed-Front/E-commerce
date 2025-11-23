@@ -108,7 +108,7 @@
               loading="lazy"
             />
             <div class="p-3 w-full text-center rounded-xl">
-              <span class="font-bold text-sm text-black">{{ category?.name_ar ? category.name_ar.slice(0, 20) : 'Category' }}</span>
+              <span class="font-bold text-sm text-black">{{lang =='en' ? category?.name_en : category.name_ar.slice(0, 20)  }}</span>
             </div>
           </div>
         </SwiperSlide>
@@ -151,6 +151,7 @@ const subBannerImage = ref(null);
 const sponsorImage = ref(null);
 const categories = ref([]);
 const storeId = ref(localStorage.getItem('defaultStoreId'));
+const lang = ref(localStorage.getItem('appLang'));
 const categoriesSwiper = ref(null);
 
 // Helper function to extract media by name
