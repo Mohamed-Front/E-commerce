@@ -291,12 +291,12 @@ const downloadExample = () => {
         '1,1,1,Demo Product 1,منتج تجريبي 1,SKU001,1,Sub Demo 1,تجريبي فرعي 1,Description of Demo Product 1,وصف المنتج التجريبي 1,15.50,10.00,0.05\n' +
         '2,2,2,Demo Product 2,منتج تجريبي 2,SKU002,2,Sub Demo 2,تجريبي فرعي 2,Description of Demo Product 2,وصف المنتج التجريبي 2,22.00,15.00,0.05';
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const blob = new Blob([csvContent], { type: 'text/xlsx;charset=utf-8;' })
     const link = document.createElement('a')
     if (link.download !== undefined) {
         const url = URL.createObjectURL(blob)
         link.setAttribute('href', url)
-        link.setAttribute('download', 'product_import_example.csv')
+        link.setAttribute('download', 'product_import_example.xlsx')
         link.style.visibility = 'hidden'
         document.body.appendChild(link)
         link.click()

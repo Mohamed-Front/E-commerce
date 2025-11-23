@@ -202,7 +202,7 @@ const downloadExample = () => {
   if (link.download !== undefined) {
     const url = URL.createObjectURL(blob)
     link.setAttribute('href', url)
-    link.setAttribute('download', 'category_import_example.csv')
+    link.setAttribute('download', 'category_import_example.xlsx')
     link.style.visibility = 'hidden'
     document.body.appendChild(link)
     link.click()
