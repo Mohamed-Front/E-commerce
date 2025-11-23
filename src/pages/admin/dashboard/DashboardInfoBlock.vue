@@ -61,7 +61,7 @@
         <div class="flex justify-between items-start">
           <div>
             <p class="text-sm font-medium text-gray-500">{{ t('dashboard.totalSales') }}</p>
-            <h3 class="text-3xl font-bold text-gray-800 mt-2">{{ formatCurrency(data.total_sales) }}</h3>
+            <h3 class="text-3xl font-bold text-gray-800 mt-2">{{ formatCurrency(data.total_sales) }}{{ $t("currencyLabel") }}</h3>
             <p class="text-sm mt-3 flex items-center">
               <span class="text-green-500 font-medium flex items-center">
                 <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -268,7 +268,7 @@ const typeColors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 
 // Utility to format currency
 const formatCurrency = (value: string) => {
-  return `$${parseFloat(value).toFixed(2)}`;
+  return `${parseFloat(value).toFixed(2)}`;
 };
 
 // Fetch data from API

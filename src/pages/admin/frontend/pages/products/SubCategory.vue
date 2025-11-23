@@ -25,7 +25,7 @@
       </div>
       <!-- Sub-Categories Section with Swiper -->
       <div v-if="subCategories.length >= 1">
-        <h2 class="font-bold font-sans text-gray-800 text-2xl sm:text-3xl lg:text-4xl mb-8 animate-slide-up">
+        <h2 class="font-bold font-sans text-gray-800 text-2xl sm:text-3xl lg:text-4xl mb-4 animate-slide-up">
         </h2>
         <swiper
           :modules="[Autoplay, Navigation]"
@@ -69,12 +69,12 @@
       </div>
 
       <!-- First Banner Section -->
-      <div v-if="category.media?.find(media => media.name === 'banner_one_image')" class="my-8">
+      <div v-if="category.media?.find(media => media.name === 'banner_one_image')" class="mb-3 md:my-8">
         <div class="relative overflow-hidden rounded-2xl shadow-lg animate-banner-slide">
           <img
             :src="category.media.find(media => media.name === 'banner_one_image').url"
             :alt="`${categoryName(category)} banner one`"
-            class="w-full h-64 sm:h-70 md:h-76 object-cover transition-transform duration-700 hover:scale-105"
+            class="w-full  sm:h-70 md:h-76 object-cover transition-transform duration-700 hover:scale-105"
             loading="lazy"
           />
           <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end justify-center p-6">
@@ -101,7 +101,7 @@
           <img
             :src="category.media.find(media => media.name === 'banner_two_image').url"
             :alt="`${categoryName(category)} banner two`"
-            class="w-full h-64 sm:h-70 md:h-76 object-cover transition-transform duration-700 hover:scale-105"
+            class="w-full  sm:h-70 md:h-76 object-cover transition-transform duration-700 hover:scale-105"
             loading="lazy"
           />
           <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/50 flex items-center justify-center p-6">
