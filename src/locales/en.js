@@ -51,6 +51,8 @@ export default {
     "loadStoresError": "Failed to load stores"
   },
   navigation: {
+        "invoices":"invoices",
+
     "inventory":"inventory",
     "shipping":" Prepare delivery",
     "markets":"markets",
@@ -126,6 +128,32 @@ export default {
     "statusCancelled": "Cancelled on ",
     "statusUnknown": "Unknown Status"
   },
+  "invoice": {
+    "details": "Invoice Details",
+    "invoice": "Invoice",
+    "number": "Invoice Number",
+    "date": "Issue Date",
+    "customer": "Customer",
+    "items": "Order Items",
+    "subTotal": "Subtotal",
+    "tax": "Tax",
+    "deliveryFee": "Delivery Fee",
+    "serviceFee": "Service Fee",
+    "coupon": "Coupon Discount",
+    "total": "Total Amount",
+    "thankYou": "Thank you for your business!",
+    "notFound": "Invoice not found",
+    "loadError": "Failed to load invoice details"
+  },
+  "product": "Product",
+  "quantity": "Qty",
+  "price": "Unit Price",
+  "total": "Line Total",
+  "name": "Name",
+  "print": "Print Invoice",
+  "back": "Back to Invoices",
+  "error": "Error",
+  "success": "Success",
   "order": {
     "detailTitle": "Order Details",
     "financialSummary": "Financial Summary",

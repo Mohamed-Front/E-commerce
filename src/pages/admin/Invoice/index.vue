@@ -117,7 +117,7 @@ onMounted(() => {
               </span>
 
               <Button
-                :label="t('export')"
+                :label="t('role.export')"
                 icon="pi pi-upload"
                 class="p-button-outlined"
                 @click="exportCSV"
@@ -146,11 +146,7 @@ onMounted(() => {
         >
           <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
 
-          <Column field="id" :header="t('invoice.id')" sortable headerStyle="width: 8rem">
-            <template #body="slotProps">
-              #{{ slotProps.data.id }}
-            </template>
-          </Column>
+
 
           <Column field="number" :header="t('invoice.number')" sortable>
             <template #body="slotProps">
@@ -158,20 +154,9 @@ onMounted(() => {
             </template>
           </Column>
 
-          <Column field="order_id" :header="t('invoice.orderId')" sortable headerStyle="width: 10rem">
-            <template #body="slotProps">
-              <router-link
-                :to="{ name: 'order-show', params: { id: slotProps.data.order_id } }"
-                class="text-primary hover:underline"
-                v-if="slotProps.data.order_id"
-              >
-                #{{ slotProps.data.order_id }}
-              </router-link>
-              <span v-else>-</span>
-            </template>
-          </Column>
 
-          <Column field="total_price" :header="t('invoice.totalPrice')" sortable>
+
+          <Column field="total_price" :header="t('invoice.total')" sortable>
             <template #body="slotProps">
               <strong>{{ slotProps.data.total_price }} {{ $t("currencyLabel") }}</strong>
             </template>
@@ -193,7 +178,7 @@ onMounted(() => {
             <template #body="slotProps">
               <Button
                 icon="pi pi-eye"
-                class="p-button-rounded p-button-info p-button-sm"
+                class="p-button-rounded p-detail"
                 @click="viewInvoice(slotProps.data.id)"
                 v-tooltip.top="t('view')"
                 v-can="'show invoices'"
