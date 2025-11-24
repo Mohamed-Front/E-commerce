@@ -66,7 +66,7 @@
           </div>
 
           <!-- Card Content -->
-          <div class="p-5 flex flex-col h-[220px]">
+          <div class="p-5 flex flex-col ">
             <!-- Product Name -->
             <h3 class="font-semibold text-gray-900 text-lg line-clamp-2 leading-tight mb-2">
               {{ truncateName(pro.name, 50) }}

@@ -3,12 +3,8 @@
     <Swiper
       v-if="sliderImages.length"
       :modules="[Autoplay, Navigation]"
-      :breakpoints="{
-        320: { slidesPerView: 1 },
-        640: { slidesPerView: 1 },
-        768: { slidesPerView: 1 },
-        1024: { slidesPerView: 1 }
-      }"
+      :centered-slides="true"
+      :slides-per-view="1.1"
       :space-between="10"
       :autoplay="{ delay: 3000, disableOnInteraction: false }"
       :navigation="false"
@@ -17,7 +13,7 @@
       <SwiperSlide v-for="(image, index) in sliderImages" :key="index">
         <div
           @click="handleMediaClick(image)"
-          class="flex w-full max-h-[50vh] items-center justify-center bg-gradient-to-br from-gray-50 to-gray-300 rounded-xl shadow-lg overflow-hidden cursor-pointer"
+          class="flex w-full  items-center justify-center  rounded-xl shadow-lg overflow-hidden cursor-pointer"
         >
           <img
             :src="image.url"
@@ -29,11 +25,17 @@
       </SwiperSlide>
     </Swiper>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 max-w-7xl mx-auto">
-      <div class="rounded-xl shadow-lg overflow-hidden">
+    <div class="gap-6  max-w-7xl mx-auto">
+      <div class="rounded-xl my-4  overflow-hidden">
         <Swiper
           v-if="sliderImagesTwo.length"
           :modules="[Autoplay]"
+           :breakpoints="{
+            320: { slidesPerView: 2 },
+            640: { slidesPerView: 2 },
+            768: { slidesPerView: 2 },
+            1024: { slidesPerView: 2 }
+          }"
           :slides-per-view="1"
           :space-between="10"
           :autoplay="{ delay: 2500, disableOnInteraction: false }"
@@ -42,12 +44,12 @@
           <SwiperSlide v-for="(image, index) in sliderImagesTwo" :key="'two-' + index">
             <div
               @click="handleMediaClick(image)"
-              class="flex w-full max-h-64 items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl overflow-hidden cursor-pointer"
+              class="flex w-full  items-center justify-center  rounded-xl overflow-hidden cursor-pointer"
             >
               <img
                 :src="image.url"
                 :alt="`Slider Two Image ${index + 1}`"
-                class="w-full h-64 object-cover rounded-xl transform hover:scale-105 transition-transform duration-500"
+                class="w-full  object-cover rounded-xl transform hover:scale-105 transition-transform duration-500"
                 loading="lazy"
               />
             </div>
@@ -55,10 +57,11 @@
         </Swiper>
       </div>
 
-      <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+      <div class=" rounded-xl mb-4 shadow-lg overflow-hidden">
         <Swiper
           v-if="sliderImagesThree.length"
           :modules="[Autoplay]"
+
           :slides-per-view="1"
           :space-between="10"
           :autoplay="{ delay: 2500, disableOnInteraction: false }"
@@ -67,7 +70,7 @@
           <SwiperSlide v-for="(image, index) in sliderImagesThree" :key="'three-' + index">
             <div
               @click="handleMediaClick(image)"
-              class="flex w-full h-64 items-center justify-center bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl overflow-hidden cursor-pointer"
+              class="flex w-full  items-center justify-center rounded-xl overflow-hidden cursor-pointer"
             >
               <img
                 :src="image.url"

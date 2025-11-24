@@ -42,7 +42,7 @@
         class="my-swiper mt-2"
       >
         <swiper-slide v-for="(pro, index) in banners_slider" :key="index" class="flex justify-center">
-          <img :src="pro.url" class="w-full h-auto max-w-[1200px] max-h-[600px] object-contain mb-2 rounded-lg" />
+          <img :src="pro.url" class="w-full h-auto max-w-[1200px]  object-contain mb-2 rounded-lg" />
         </swiper-slide>
       </swiper>
     </header>
