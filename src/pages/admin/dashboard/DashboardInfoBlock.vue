@@ -221,46 +221,12 @@ const data = ref({
 
 // Sample data for recent activities
 const recentActivities = ref([
-  {
-    title: 'dashboard.activities.newUser',
-    description: 'dashboard.activities.newUserDesc',
-    time: 'قبل 10 دقائق',
-    status: 'dashboard.activities.active',
-    statusClass: 'bg-green-100 text-green-800',
-    iconBg: 'bg-blue-100',
-    iconText: 'text-blue-600',
-    iconPath: 'M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z',
-    iconWidth: '2',
-  },
-  {
-    title: 'dashboard.activities.orderPlaced',
-    description: 'dashboard.activities.orderPlacedDesc',
-    time: 'قبل 25 دقيقة',
-    status: 'dashboard.activities.pending',
-    statusClass: 'bg-blue-100 text-blue-800',
-    iconBg: 'bg-green-100',
-    iconText: 'text-green-600',
-    iconPath: 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z',
-    iconWidth: '2',
-  },
-  {
-    title: 'dashboard.activities.productAdded',
-    description: 'dashboard.activities.productAddedDesc',
-    time: 'قبل ساعة',
-    status: 'dashboard.activities.completed',
-    statusClass: 'bg-purple-100 text-purple-800',
-    iconBg: 'bg-purple-100',
-    iconText: 'text-purple-600',
-    iconPath: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
-    iconWidth: '2',
-  },
+
 ]);
 
 // Monthly stats
 const monthlyStats = ref([
-  { name: 'dashboard.monthlyStats.newUsers', value: '124', trend: 8 },
-  { name: 'dashboard.monthlyStats.orders', value: '342', trend: 12 },
-  { name: 'dashboard.monthlyStats.sales', value: '$24,560', trend: 5 },
+
 ]);
 
 // Colors for charts

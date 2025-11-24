@@ -263,7 +263,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed ,watch} from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import axios from 'axios'
@@ -471,7 +471,16 @@ const fetchProductData = async () => {
     isLoading.value = false
   }
 }
-
+watch(
+  () => route.params.id,
+  (newId) => {
+    if (newId) {
+      fetchProductData()
+      window.scrollTo(0, 0) // Optional: scroll to top on product change
+    }
+  },
+  { immediate: false } // We already call it in onMounted, so no need to run immediately again
+)
 onMounted(() => {
   window.scrollTo(0, 0)
   fetchProductData()

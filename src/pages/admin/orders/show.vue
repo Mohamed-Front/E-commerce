@@ -228,13 +228,13 @@ const formatCurrency = (value) => {
 
                 <Column :header="t('order.price')" style="width: 12%">
                   <template #body="{ data }">
-                    {{ formatCurrency(data.price) }}
+                    {{ formatCurrency((parseFloat(data.price) / data.quantity).toFixed(2)) }}
                   </template>
                 </Column>
 
                 <Column :header="t('order.total')" style="width: 12%">
                   <template #body="{ data }">
-                    <strong>{{ formatCurrency((parseFloat(data.price) * data.quantity).toFixed(2)) }}</strong>
+                    <strong>{{ formatCurrency(parseFloat(data.price)) }}</strong>
                   </template>
                 </Column>
 
