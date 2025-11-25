@@ -14,7 +14,7 @@
     <transition name="dropdown-fancy">
       <div
         v-if="showSearchResults && (searchResults.products.length || searchResults.categories.length || searchResults.brands.length)"
-        class="absolute top-12 mt-2 left-0 right-0 lg:w-[500px] max-w-md bg-white rounded-xl shadow-2xl z-50 overflow-y-auto dropdown-fancy"
+        class="absolute top-12 mt-2 left-0 right-0 lg:w-[500px] w-[220px] bg-white rounded-xl shadow-2xl z-50 overflow-y-auto dropdown-fancy"
         style="max-height: 70vh;"
         @mousedown.prevent
       >

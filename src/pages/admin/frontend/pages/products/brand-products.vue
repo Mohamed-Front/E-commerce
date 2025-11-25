@@ -315,7 +315,6 @@ watch(locale, () => {
 
 // Fetch Products
 const fetchProducts = async (page = 1) => {
-  isLoading.value = true;
   error.value = null;
   try {
     const params = {
