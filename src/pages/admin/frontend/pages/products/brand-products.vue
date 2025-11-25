@@ -36,7 +36,7 @@
                 <div v-for="cat in filteredCategories" :key="cat.id" class="flex items-center">
                   <input type="checkbox" :id="`cat-${cat.id}`" :value="cat.id" v-model="selectedFilters.category_ids"
                     class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500" />
-                  <label :for="`cat-${cat.id}`" class="ml-3 text-sm text-gray-700">{{ cat.name }}</label>
+                  <label :for="`cat-${cat.id}`" class="mx-3 text-sm text-gray-700">{{ cat.name }}</label>
                 </div>
                 <button v-if="hasMoreCategories" @click="fetchMoreCategories"
                   class="text-indigo-600 text-sm hover:underline">{{ t('products.loadMore') }}</button>

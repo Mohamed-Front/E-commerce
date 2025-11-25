@@ -52,7 +52,7 @@
                     v-model="selectedFilters.brand_ids"
                     class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
                   />
-                  <label :for="`brand-${brand.id}`" class="ml-3 text-sm text-gray-700">{{ brand.name }}</label>
+                  <label :for="`brand-${brand.id}`" class="mx-3 text-sm text-gray-700">{{ brand.name }}</label>
                 </div>
                 <button v-if="hasMoreBrands" @click="fetchMoreBrands" class="text-indigo-600 text-sm hover:underline">
                   {{ t('products.loadMore') }}

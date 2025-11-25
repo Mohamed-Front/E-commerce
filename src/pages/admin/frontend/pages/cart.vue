@@ -94,9 +94,16 @@
 
               <div class="flex-1">
                 <h4 class="font-semibold text-gray-900 text-lg">{{ product.name }}</h4>
-                <p class="text-yellow-700 text-sm mt-1">
-                  {{ t('cart.price') }}: {{ product.price }} {{ t('cart.currency') }}
-                </p>
+                <span class="text-yellow-700 text-sm mt-1">
+                        {{ t('cart.price') }}: {{ product.price - product.total_discounts_value }} {{ t('cart.currency') }}
+              </span>
+              <span
+              v-if="product.total_discounts_value "
+                class=" text-sm m-1 text-[#0b3baa] line-through opacity-80"
+              >
+                {{product.price }} {{ $t("currencyLabel") }}
+              </span>
+
 
                 <div class="flex flex-wrap items-center gap-6 mt-4">
                   <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden">
@@ -315,6 +322,7 @@ const fetchCart = async () => {
       }
 
       storeGroup.items.forEach(item => {
+        console.log(item)
         const price = item.variant?.price || item.product.base_price || 0
         const img = item.product.media?.[0]?.url || item.product.key_default_image || '/images/placeholder-product.png'
 
@@ -325,6 +333,7 @@ const fetchCart = async () => {
           name: locale.value === 'ar' ? item.product.name_ar : item.product.name_en,
           img,
           price: Number(price).toFixed(2),
+          total_discounts_value: item.product.total_discounts_value,
           quantity: item.quantity,
           store_id: storeGroup.store_id,
           unique_store_id,

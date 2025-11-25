@@ -113,7 +113,7 @@
           </div>
 
           <!-- Quantity -->
-          <div class="flex items-center gap-6 mb-8">
+          <div v-if=pro.in_cart class="flex items-center gap-6 mb-8">
             <label class="font-bold text-gray-700 text-lg">{{ t('product.quantity') }}:</label>
             <div class="flex items-center border-2 border-gray-300 rounded-xl overflow-hidden">
               <button
