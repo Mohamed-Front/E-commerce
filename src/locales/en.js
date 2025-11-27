@@ -22,7 +22,7 @@ export default {
     "friday": "Friday",
     "saturday": "Saturday"
   },
- "shippingSetting": {
+  "shippingSetting": {
     "editTitle": "Edit Shipping Settings",
     "hasZones": "Enable Distance Zones",
     "isEnabled": "Shipping Enabled",
@@ -51,13 +51,13 @@ export default {
     "loadStoresError": "Failed to load stores"
   },
   navigation: {
-        "invoices":"invoices",
+    "invoices": "invoices",
 
-    "inventory":"inventory",
-    "shipping":" Prepare delivery",
-    "markets":"markets",
-    orders:"orders",
-    notification:"Notifications",
+    "inventory": "inventory",
+    "shipping": " Prepare delivery",
+    "markets": "markets",
+    orders: "orders",
+    notification: "Notifications",
     setting: 'Settings',
     custom_tabs: 'mange custom tabs',
     quickBooks: 'Quick Books',
@@ -80,7 +80,7 @@ export default {
     addresses: 'Addresses',
   },
   user: {
-    managementTitle:"users Management",
+    managementTitle: "users Management",
     users: 'Users',
     new: 'New',
     search: 'Search...',
@@ -110,7 +110,7 @@ export default {
   "to": "to",
   "from": "of",
   orders: {
-   "title": "My Orders",
+    "title": "My Orders",
     "orderNumber": "Order #",
     "items": "items",
     "item": "item",
@@ -158,7 +158,7 @@ export default {
     "detailTitle": "Order Details",
     "financialSummary": "Financial Summary",
     "generalInfo": "General Information",
-"invoiceConfirmationTitle": "Confirm Invoice Generation",
+    "invoiceConfirmationTitle": "Confirm Invoice Generation",
     "invoiceConfirmationMessage": "Are you sure you want to proceed with generating the official invoice for this order? This action may be irreversible.",
     "orderSummaryBrief": "Order Summary",
     "itemsCount": "Total Items",
@@ -255,7 +255,7 @@ export default {
   warning: 'Warning',
   loading: 'Loading...',
   custom_tabs: {
-    update_tab:"update tab",
+    update_tab: "update tab",
     create_new_tab: 'Create New Tab',
     store_id: 'Store ID',
     select_store: 'Select a Store',
@@ -367,7 +367,7 @@ export default {
       sales: 'Sales',
     },
   },
-"role": {
+  "role": {
     "role_Permissions_Manager": "Role Permissions Manager",
     "role_Name": "Role Name",
     "enter_role_name": "Enter role name",
@@ -437,8 +437,8 @@ export default {
       "error_invalid_data": "Invalid data format"
     }
   },
-"market": {
-  "addServiceFee": "Add Service Fee",
+  "market": {
+    "addServiceFee": "Add Service Fee",
     "addServiceFeeTitle": "Set Service Fee",
     "serviceFee": "Service Fee",
     "serviceFeeSuccess": "Service fee added successfully",
@@ -536,7 +536,7 @@ export default {
     updated_successfully: 'Coupon updated successfully',
   },
 
-"error": "Error",
+  "error": "Error",
   "success": "Success",
   "cancel": "Cancel",
   "warning": "Warning",
@@ -544,7 +544,7 @@ export default {
   "to": "to",
   "from": "from",
   "edit": "Edit",
-    currencyLabel:"JOD",
+  currencyLabel: "JOD",
   "delete": "Delete",
   "brand": {
     "managementTitle": "Brand Management",
@@ -637,7 +637,7 @@ export default {
     exclusive: 'Exclusive offers',
     bestsellers: 'Bestsellers',
     newlyarrived: 'Newly arrived',
-    linkedToMarket:"linked To Market",
+    linkedToMarket: "linked To Market",
     managementTitle: 'Categories Management',
     search: 'Search categories...',
     export: 'Export',
@@ -705,10 +705,10 @@ export default {
     "delete": "Delete ",
     apiError: 'API response indicates failure',
   },
-"address": {
-  select_governorate:"select governorate",
-  "governorate":"governorate",
-   "zip_code":"zip code",
+  "address": {
+    select_governorate: "select governorate",
+    "governorate": "governorate",
+    "zip_code": "zip code",
     "managementTitle": "Address Management",
     "search": "Search addresses...",
     "export": "Export to CSV",
@@ -790,27 +790,27 @@ export default {
     deleteSuccess: 'Custom tab deleted successfully',
     deleteError: 'Failed to delete custom tab',
     updateTitle: 'Update Custom Tab',
-      belongsTo: 'Belongs To',
-      type: 'Type',
-      modelId: 'Model',
-      rowType: 'Row Type',
-      nameEn: 'Name (English)',
-      nameAr: 'Name (Arabic)',
-      updateButton: 'Update',
-      cancelButton: 'Cancel',
-      updateSuccess: 'Custom tab updated successfully'
+    belongsTo: 'Belongs To',
+    type: 'Type',
+    modelId: 'Model',
+    rowType: 'Row Type',
+    nameEn: 'Name (English)',
+    nameAr: 'Name (Arabic)',
+    updateButton: 'Update',
+    cancelButton: 'Cancel',
+    updateSuccess: 'Custom tab updated successfully'
   },
   error: {
-      storeLoad: 'Failed to load stores',
-      categoryLoad: 'Failed to load categories',
-      marketLoad: 'Failed to load markets',
-      modelLoad: 'Failed to load model options',
-      fetchCustomTab: 'Failed to fetch custom tab',
-      updateError: 'Failed to update custom tab',
-      validation: {
-        requiredFields: 'All fields are required'
-      }
-    },
+    storeLoad: 'Failed to load stores',
+    categoryLoad: 'Failed to load categories',
+    marketLoad: 'Failed to load markets',
+    modelLoad: 'Failed to load model options',
+    fetchCustomTab: 'Failed to fetch custom tab',
+    updateError: 'Failed to update custom tab',
+    validation: {
+      requiredFields: 'All fields are required'
+    }
+  },
 
   "favorites": {
     "title": "My Favorites",
@@ -830,7 +830,7 @@ export default {
     "previous": "Previous",
     "next": "Next"
   },
-   "templateNotification": {
+  "templateNotification": {
     "managementTitle": "Template Notification Management",
     "search": "Search Notifications",
     "export": "Export to CSV",
@@ -913,6 +913,7 @@ export default {
     "deliveryFee": "Delivery Fee",
     "couponDiscount": "Coupon Discount",
     "serviceFees": "Service Fees",
+    "discountsFees": "Discounts Fees",
     "deliveryStatus": "Delivery Status",
     "statusAvailable": "Available",
     "statusFree": "Free",
@@ -920,7 +921,7 @@ export default {
     "cannotCheckoutDueToDelivery": "Cannot proceed. One or more stores do not offer delivery to this address."
   },
   profile: {
-   title: 'My Account',
+    title: 'My Account',
     account: 'Account',
     orders: 'Orders',
     addresses: 'Addresses',
@@ -1012,8 +1013,8 @@ export default {
   show: 'Showing',
   to: 'to',
   from: 'of',
-   "product": {
-    "Free_Delivery":" Free Delivery",
+  "product": {
+    "Free_Delivery": " Free Delivery",
     "freeShipping": "Free Shipping",
     "freeShippingEnabled": "Free shipping enabled",
     "freeShippingDisabled": "Free shipping disabled",
@@ -1026,9 +1027,9 @@ export default {
     "updatePriceButton": "Upload & Update Prices",
     "priceUpdateSuccess": "Prices updated successfully!",
     "priceUpdateError": "Error updating prices. Please check the file format and contents.",
-      categoryFilter:" category Filter",
-      storeFilter:"store Filter",
-     "marketFilter":" market",
+    categoryFilter: " category Filter",
+    storeFilter: "store Filter",
+    "marketFilter": " market",
     "managementTitle": "Product Management",
     "createTitle": "Create Product",
     "createButton": "Create",
@@ -1091,15 +1092,15 @@ export default {
     readMore: 'Read More',
     loadError: 'Failed to load product details.',
   },
-  min_price:"min price",
-  max_price:"Max_price ",
+  min_price: "min price",
+  max_price: "Max_price ",
   search: {
     placeholder: 'Search...',
     product: 'Product',
     category: 'Category',
     brand: 'Brand'
   },
-    "notifications": "Notifications",
+  "notifications": "Notifications",
   "no_notifications": "No notifications yet.",
   "signup": {
     "phoneTab": "Phone",
@@ -1191,7 +1192,7 @@ export default {
   reviews: {
     title: 'Leave A Review',
     singular: 'review',
-     writeReview:" write Review",
+    writeReview: " write Review",
     plural: 'reviews',
     placeholder: 'Write your review here...',
     submitting: 'Submitting...',
@@ -1206,9 +1207,9 @@ export default {
     commentRequired: 'Please write a review comment',
     submitError: 'Failed to submit review. Please try again.',
   },
-   "inventory": {
-    "total_products":"Total products",
-    "product":"product",
+  "inventory": {
+    "total_products": "Total products",
+    "product": "product",
     "managementTitle": "Inventory Management",
     "search": "Search Inventories",
     "export": "Export",
@@ -1240,7 +1241,7 @@ export default {
     "quantityUpdateError": "Failed to update product quantity",
     "quantityFormIncomplete": "Please select a product and specify a quantity"
   },
-   "success": "Success",
+  "success": "Success",
   "error": "Error",
   "warning": "Warning",
   "show": "Showing",
@@ -1302,7 +1303,7 @@ export default {
   "edit": "Edit",
   "delete": "Delete",
   "actions": "Actions",
-"products": {
+  "products": {
     "filters": "Filters",
     "category": "Category",
     "searchCategory": "Search categories",
@@ -1316,7 +1317,7 @@ export default {
     "missingParams": "Missing store ID."
   },
   attribute: {
-    isColor:"isColor",
+    isColor: "isColor",
     managementTitle: 'Attributes Management',
     search: 'Search attributes...',
     export: 'Export',

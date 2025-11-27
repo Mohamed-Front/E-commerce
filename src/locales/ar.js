@@ -2,7 +2,7 @@ import { settings } from 'ionicons/icons'
 import Password from 'primevue/password'
 
 export default {
-  id:"الفهرس",
+  id: "الفهرس",
   users: 'المستخدمين',
   Settings: 'الاعدادات',
   roles: 'الأدوار',
@@ -14,16 +14,16 @@ export default {
   Miscellaneous: 'منوعات اخترناها لكم',
   cancel: 'إلغاء',
   remove: 'إزالة',
-  currencyLabel:"د.أ",
+  currencyLabel: "د.أ",
   navigation: {
-    "invoices":"الفواتير",
-    "inventory":"ادارة المخازن",
-   "shipping":"إعدادات التوصيل",
-    "markets":"الأسواق",
-    orders:"الطلبــــات",
-    notification:"قوالب الإشعارات",
-    setting:"الاعدادات",
-    custom_tabs:"ادارة علامة التبويب",
+    "invoices": "الفواتير",
+    "inventory": "ادارة المخازن",
+    "shipping": "إعدادات التوصيل",
+    "markets": "الأسواق",
+    orders: "الطلبــــات",
+    notification: "قوالب الإشعارات",
+    setting: "الاعدادات",
+    custom_tabs: "ادارة علامة التبويب",
     custom_tabs: 'ادارة علامة التبويب',
     quickBooks: 'Quick Books',
     discount: 'الخصومات',
@@ -55,7 +55,7 @@ export default {
     "friday": "الجمعة",
     "saturday": "السبت"
   },
- "shippingSetting": {
+  "shippingSetting": {
     "editTitle": "تعديل إعدادات الشحن",
     "hasZones": "تفعيل مناطق المسافات",
     "isEnabled": "الشحن مفعل",
@@ -84,7 +84,7 @@ export default {
     "loadStoresError": "فشل تحميل المتاجر"
   },
   user: {
-    managementTitle:"ادارة المستخدمين",
+    managementTitle: "ادارة المستخدمين",
     new: 'جديد',
     users: 'المستخدمين',
     search: 'بحث...',
@@ -117,11 +117,11 @@ export default {
   "to": "إلى",
   "from": "من",
   "order": {
-    "total":"الاجمالي ",
+    "total": "الاجمالي ",
     "detailTitle": "تفاصيل الطلب",
     "financialSummary": "الملخص المالي",
     "generalInfo": "معلومات عامة",
-"invoiceConfirmationTitle": "تأكيد إنشاء الفاتورة",
+    "invoiceConfirmationTitle": "تأكيد إنشاء الفاتورة",
     "invoiceConfirmationMessage": "هل أنت متأكد من المتابعة في إنشاء الفاتورة الرسمية لهذا الطلب؟ قد يكون هذا الإجراء غير قابل للإلغاء.",
     "orderSummaryBrief": "ملخص الطلب",
     "itemsCount": "إجمالي المنتجات",
@@ -187,7 +187,7 @@ export default {
   "yes": "نعم",
   "no": "لا",
 
-"settings": {
+  "settings": {
     "title": "الإعدادات",
     "order_tax": "ضريبة الطلب",
     "order_taxPlaceholder": "أدخل ضريبة الطلب",
@@ -225,7 +225,7 @@ export default {
   warning: 'تحذير',
   loading: 'جارٍ التحميل...',
   custom_tabs: {
-    update_tab:"تحديث",
+    update_tab: "تحديث",
     create_new_tab: 'إنشاء تبويب جديد',
     store_id: 'معرف المتجر',
     select_store: 'اختر متجرًا',
@@ -293,7 +293,7 @@ export default {
     enterDescription: 'أدخل وصف الصلاحية...',
   },
   "invoice": {
-    "managementTitle":"ادارة الفواتير",
+    "managementTitle": "ادارة الفواتير",
     "details": "تفاصيل الفاتورة",
     "invoice": "الفاتورة",
     "number": "رقم الفاتورة",
@@ -319,8 +319,8 @@ export default {
   "back": "العودة إلى الفواتير",
   "error": "خطأ",
   "success": "نجاح",
-"role": {
-    "updateWithPermissions":"تحديث الدور",
+  "role": {
+    "updateWithPermissions": "تحديث الدور",
     "role_Permissions_Manager": "مدير صلاحيات الأدوار",
     "role_Name": "اسم الدور",
     "enter_role_name": "أدخل اسم الدور",
@@ -441,7 +441,7 @@ export default {
       sales: 'المبيعات',
     },
   },
-"permissions_management": {
+  "permissions_management": {
     "title": "إدارة الأذونات",
     "subtitle": "عرض وإدارة جميع أذونات النظام المجمعة حسب الوحدات",
     "refresh_button": "تحديث",
@@ -468,7 +468,7 @@ export default {
     }
   },
 
-"error": "خطأ",
+  "error": "خطأ",
   "success": "نجاح",
   "cancel": "إلغاء",
   "warning": "تحذير",
@@ -478,9 +478,9 @@ export default {
   "edit": "تعديل",
   "delete": "حذف",
   "brand": {
-    create:"انشاء",
+    create: "انشاء",
     default: 'العلامة التجارية',
-    createTitle:"اضافة علامه تجارية ",
+    createTitle: "اضافة علامه تجارية ",
     "managementTitle": "إدارة العلامات التجارية",
     "search": "البحث عن العلامات التجارية",
     "import": "استيراد العلامات التجارية",
@@ -523,6 +523,7 @@ export default {
     "fileTypes": "SVG، PNG، JPG أو GIF (الحد الأقصى 2 ميجابايت)"
   },
   cart: {
+    "discountsFees": "اجمالي الخصم ",
     "checkoutThisStoreOnly": "اطلب من هذا المتجر فقط",
     "checkoutAll": "إتمام الطلب (جميع المتاجر)",
     "orderSuccessStore": "تم تقديم الطلب بنجاح من {store}",
@@ -587,7 +588,7 @@ export default {
 
   },
   orders: {
-   "title": "طلباتي",
+    "title": "طلباتي",
     "orderNumber": "الطلب رقم",
     "items": "منتجات",
     "item": "منتج",
@@ -607,8 +608,8 @@ export default {
   },
   "notifications": "الإشعارات",
   "no_notifications": "لا توجد إشعارات حتى الآن.",
-  min_price:"اقل سعر",
-  max_price:"اكبر سعر",
+  min_price: "اقل سعر",
+  max_price: "اكبر سعر",
   "error": "خطأ",
   "invalidParams": "المعلمات المقدمة غير صالحة",
   "warning": "تحذير",
@@ -631,7 +632,7 @@ export default {
   "linkMedia": "ربط الوسائط",
   "viewMedia": "عرض",
   profile: {
-   title: 'حسابي الشخصي',
+    title: 'حسابي الشخصي',
     account: 'حسابي',
     orders: 'طلباتي',
     addresses: 'دليل العناوين',
@@ -664,8 +665,8 @@ export default {
     logoutSuccess: 'تم تسجيل الخروج بنجاح',
     logoutError: 'فشل تسجيل الخروج',
   },
-"market": {
-  "addServiceFee": "إضافة رسوم الخدمة",
+  "market": {
+    "addServiceFee": "إضافة رسوم الخدمة",
     "addServiceFeeTitle": "تحديد رسوم الخدمة",
     "serviceFee": "رسوم الخدمة",
     "serviceFeeSuccess": "تم إضافة رسوم الخدمة بنجاح",
@@ -769,18 +770,18 @@ export default {
     createError: 'فشل إنشاء الموديل',
   },
   category: {
-    subCategories:"الفئات",
-    linkedToMarket:"داخل سوق ",
-    import:"استيراد",
-    storeNameEn:" المتجر (انجليزي)",
-    storeNameAr:" المتجر (عربي)",
-    subCategoryNameEn:"اسم الفئة الفرعية",
-    subSubCategoryNameAr:"اسم الفئة الفرعية",
-    subSubCategoryNameEn:"اسم الفئة الفرعية",
-    importInstructions:"تعليمات الاستيراد",
-    brandNameAr:"البراند (عربي)",
-    brandNameEn:"البراند (انجليزي)",
-    chooseFile:"اختر الملف",
+    subCategories: "الفئات",
+    linkedToMarket: "داخل سوق ",
+    import: "استيراد",
+    storeNameEn: " المتجر (انجليزي)",
+    storeNameAr: " المتجر (عربي)",
+    subCategoryNameEn: "اسم الفئة الفرعية",
+    subSubCategoryNameAr: "اسم الفئة الفرعية",
+    subSubCategoryNameEn: "اسم الفئة الفرعية",
+    importInstructions: "تعليمات الاستيراد",
+    brandNameAr: "البراند (عربي)",
+    brandNameEn: "البراند (انجليزي)",
+    chooseFile: "اختر الملف",
     suggestions: 'أقتراحات تناسبك',
     exclusive: 'عروض حصرية',
     bestsellers: 'الأكثر مبيعاً',
@@ -853,10 +854,10 @@ export default {
     "deleteError": "حدث خطأ غير متوقع أثناء حذف العنوان.",
     "delete": "حذف "
   },
-"address": {
-    "select_governorate":"اختر المحافظة",
-    "governorate":"محافظة",
-    "zip_code":"الرمز البريدي",
+  "address": {
+    "select_governorate": "اختر المحافظة",
+    "governorate": "محافظة",
+    "zip_code": "الرمز البريدي",
     "managementTitle": "إدارة العناوين",
     "search": "البحث عن العناوين...",
     "export": "تصدير إلى CSV",
@@ -936,28 +937,28 @@ export default {
     deleteSuccess: 'تم حذف علامة التبويب المخصصة بنجاح',
     deleteError: 'فشل في حذف علامة التبويب المخصصة',
     updateTitle: 'تحديث علامة التبويب المخصصة',
-      belongsTo: 'ينتمي إلى',
-      type: 'النوع',
-      modelId: 'النموذج',
-      rowType: 'نوع الصف',
-      nameEn: 'الاسم (إنجليزي)',
-      nameAr: 'الاسم (عربي)',
-      updateButton: 'تحديث',
-      cancelButton: 'إلغاء',
-      updateSuccess: 'تم تحديث علامة التبويب المخصصة بنجاح'
+    belongsTo: 'ينتمي إلى',
+    type: 'النوع',
+    modelId: 'النموذج',
+    rowType: 'نوع الصف',
+    nameEn: 'الاسم (إنجليزي)',
+    nameAr: 'الاسم (عربي)',
+    updateButton: 'تحديث',
+    cancelButton: 'إلغاء',
+    updateSuccess: 'تم تحديث علامة التبويب المخصصة بنجاح'
   },
   error: {
-      storeLoad: 'فشل في تحميل المتاجر',
-      categoryLoad: 'فشل في تحميل الفئات',
-      marketLoad: 'فشل في تحميل الأسواق',
-      modelLoad: 'فشل في تحميل خيارات النموذج',
-      fetchCustomTab: 'فشل في جلب علامة التبويب المخصصة',
-      updateError: 'فشل في تحديث علامة التبويب المخصصة',
-      validation: {
-        requiredFields: 'جميع الحقول مطلوبة'
-      }
-    },
-    "custom_tabs": {
+    storeLoad: 'فشل في تحميل المتاجر',
+    categoryLoad: 'فشل في تحميل الفئات',
+    marketLoad: 'فشل في تحميل الأسواق',
+    modelLoad: 'فشل في تحميل خيارات النموذج',
+    fetchCustomTab: 'فشل في جلب علامة التبويب المخصصة',
+    updateError: 'فشل في تحديث علامة التبويب المخصصة',
+    validation: {
+      requiredFields: 'جميع الحقول مطلوبة'
+    }
+  },
+  "custom_tabs": {
     "store": "متجر",
     "category": "فئة",
     "market": "سوق",
@@ -1009,7 +1010,7 @@ export default {
   "items": {
     "loadError": "فشل في تحميل العناصر"
   },
-    "favorites": {
+  "favorites": {
     "title": "المفضلة",
     "loading": "جاري تحميل المفضلة...",
     "empty": "لا توجد عناصر مفضلة بعد",
@@ -1027,7 +1028,7 @@ export default {
     "previous": "السابق",
     "next": "التالي"
   },
-   "templateNotification": {
+  "templateNotification": {
     "managementTitle": "إدارة قوالب الإشعارات",
     "search": "البحث في الإشعارات",
     "export": "تصدير إلى CSV",
@@ -1122,7 +1123,7 @@ export default {
     title: 'اترك تقييمًا',
     singular: 'تقييم',
     plural: 'تقييمات',
-    writeReview:"اكتب تعليقك",
+    writeReview: "اكتب تعليقك",
     placeholder: 'اكتب تقييمك هنا...',
     submitting: 'جارٍ الإرسال...',
     submit: 'إرسال',
@@ -1136,9 +1137,9 @@ export default {
     commentRequired: 'الرجاء كتابة تعليق التقييم',
     submitError: 'فشل في إرسال التقييم. حاول مرة أخرى.',
   },
-   "inventory": {
-    "total_products":"عدد المنتجات",
-    "product":"المنتج ",
+  "inventory": {
+    "total_products": "عدد المنتجات",
+    "product": "المنتج ",
     "managementTitle": "إدارة المخزون",
     "search": "البحث في المخزون",
     "export": "تصدير",
@@ -1170,7 +1171,7 @@ export default {
     "quantityUpdateError": "فشل في تحديث كمية المنتج",
     "quantityFormIncomplete": "يرجى اختيار منتج وتحديد الكمية"
   },
-    "success": "نجاح",
+  "success": "نجاح",
   "error": "خطأ",
   "warning": "تحذير",
   "show": "عرض",
@@ -1186,7 +1187,7 @@ export default {
   "yes": "نعم",
   "no": "لا",
   "products": {
-    "Free_Delivery":"توصيل مجاني",
+    "Free_Delivery": "توصيل مجاني",
     "filters": "الفلاتر",
     "category": "الفئة",
     "searchCategory": "البحث في الفئات",
@@ -1199,26 +1200,26 @@ export default {
     "errorLoading": "فشل في تحميل المنتجات.",
     "missingParams": "معرف المتجر مفقود."
   },
-"product": {
-  "freeShipping": "شحن مجاني",
+  "product": {
+    "freeShipping": "شحن مجاني",
     "freeShippingEnabled": "تم تفعيل الشحن المجاني",
     "freeShippingDisabled": "تم إلغاء الشحن المجاني",
     "freeShippingUpdateError": "فشل تحديث حالة الشحن المجاني",
     "notFreeShipping": "تفعيل الشحن المجاني",
-  "Price after discount":"السعر بعد الخصم",
-"updatePrice": "تحديث ",
+    "Price after discount": "السعر بعد الخصم",
+    "updatePrice": "تحديث ",
     "updatePriceTitle": "تحديث الأسعار بالجملة",
     "priceUpdateInfo": "قم بتحميل ملف CSV يحتوي على 'معرّف المنتج' و 'السعر الأساسي' و 'سعر التكلفة' لتحديث الأسعار بالجملة.",
     "downloadPriceExample": "تحميل مثال تحديث الأسعار",
     "updatePriceButton": "رفع وتحديث الأسعار",
     "priceUpdateSuccess": "تم تحديث الأسعار بنجاح!",
     "priceUpdateError": "حدث خطأ أثناء تحديث الأسعار. يرجى التحقق من تنسيق الملف ومحتوياته.",
-  "stockStatus":"متاح بالمخزن",
-  "inCart":"موجود بالسلة",
-      "marketFilter":"اختر السوق ",
-  categoryFilter:"اختر الفئة",
-  storeFilter:" اختر المتجر",
-  thumbnailAlt: 'صورة مصغرة للمنتج',
+    "stockStatus": "متاح بالمخزن",
+    "inCart": "موجود بالسلة",
+    "marketFilter": "اختر السوق ",
+    categoryFilter: "اختر الفئة",
+    storeFilter: " اختر المتجر",
+    thumbnailAlt: 'صورة مصغرة للمنتج',
     mainImageAlt: 'الصورة الرئيسية للمنتج',
     price: 'السعر',
     quantity: 'الكمية',
@@ -1307,7 +1308,7 @@ export default {
     "fileRequired": "يرجى تحديد ملف للاستيراد"
   },
   attribute: {
-    isColor:"لون",
+    isColor: "لون",
     managementTitle: 'إدارة الخصائص',
     search: 'بحث في الخصائص...',
     export: 'تصدير',
@@ -1430,9 +1431,9 @@ export default {
     "hidePassword": "إخفاء كلمة المرور"
   },
   discount: {
-    edit_discount:"تعديل الخصم",
-    select_category:"اختر الكاتكورجي",
-    select_product:"اختر المنتجات",
+    edit_discount: "تعديل الخصم",
+    select_category: "اختر الكاتكورجي",
+    select_product: "اختر المنتجات",
     managementTitle: 'إدارة الخصومات',
     search: 'البحث في الخصومات...',
     export: 'تصدير',
@@ -1513,15 +1514,15 @@ export default {
     checkpassword: 'تاكيد كلمة المرور',
     forgotpassword: 'نسيت كلمة السر؟',
     rememberme: 'تذكرني علي هذا الجهاز',
-    login:'تسجيل الدخول',
+    login: 'تسجيل الدخول',
     registration: 'إنشاء حساب',
     registrationnow: 'انشئ حساب الان',
     or: 'أو',
-    loginwithfacebock : 'تسجيل الدخول باستخدام الفيسبوك',
+    loginwithfacebock: 'تسجيل الدخول باستخدام الفيسبوك',
     loginwithgoogle: 'تسجيل الدخول باستخدام جوجل',
     notcorrect: 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
     noneerorr: 'حدث خطأ غير متوقع أثناء تسجيل الدخول',
-    username : 'أسم المستخدم',
+    username: 'أسم المستخدم',
     terms: 'اوافق علي الشروط والاحكام',
     usernamereq: 'اسم المستخدم مطلوب',
     repasswordreq: 'يجب تأكيد كلمة المرور',
@@ -1529,15 +1530,15 @@ export default {
     phone: 'رقم الهاتف',
     phonereq: 'رقم الهاتف مطلوب',
     justnum: 'رقم الهاتف يجب أن يحتوي على أرقام فقط',
-    Terms : 'الشروط والاحكام',
-    Termserror : 'يجب الموافقة على الشروط والاحكام',
+    Terms: 'الشروط والاحكام',
+    Termserror: 'يجب الموافقة على الشروط والاحكام',
     forgotpasswordP: 'نسيت كلمة السر ؟ لا تقلق يمكنك انشاء كلمة سر جديدة خلال دقائق من خلال إدخال رقم هاتفك',
     ok: 'تأكيد',
     nofoundemail: 'المعلومات المدخلة غير موجودة',
     code: 'الكود',
     Activationcode: 'كود التفعيل',
     donesend: 'تم إرسال الكود علي رقم الهاتف',
-    expen : 'ستنتهي صلاحية الكود خلال',
+    expen: 'ستنتهي صلاحية الكود خلال',
     resend: 'اعد الإرسال',
     newpassH: 'أنشيء كلمة مرور جديدة',
     newpassP: 'من خلال انشاء كلمة سر قوية يمكنك الحفاظ علي امان معلوماتك الشخصية',

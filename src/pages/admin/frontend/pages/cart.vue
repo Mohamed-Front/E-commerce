@@ -183,6 +183,11 @@
                   <span>{{ Number(order.total_service_fees).toFixed(2) }} {{ t('cart.currency') }}</span>
                 </div>
 
+                <div class="flex justify-between" >
+                  <span class="text-green-600 font-medium">{{ t('cart.discountsFees') || 'Discount Fees' }}</span>
+                  <span class="text-green-600 font-medium"> {{ Number(order.total_discounts_fees).toFixed(2) }} {{ t('cart.currency') }}</span>
+                </div>
+
                 <div class="flex justify-between text-lg font-bold text-gray-900 pt-4 border-t border-amber-300">
                   <span>{{ t('cart.total') }}</span>
                   <span>{{ Number(order.total).toFixed(2) }} {{ t('cart.currency') }}</span>
@@ -216,6 +221,10 @@
           <div class="flex justify-between" v-if="totalOrderSummary.coupon > 0">
             <span class="text-green-600 font-medium">{{ t('cart.couponDiscount') }}</span>
             <span class="text-green-600 font-medium">- {{ totalOrderSummary.coupon.toFixed(2) }} {{ t('cart.currency') }}</span>
+          </div>
+          <div class="flex justify-between" v-if="totalOrderSummary.total_discounts_fees > 0">
+            <span class="text-green-600 font-medium">{{ t('cart.discountsFees') || 'Discount Fees' }}</span>
+            <span class="text-green-600 font-medium"> {{ totalOrderSummary.total_discounts_fees.toFixed(2) }} {{ t('cart.currency') }}</span>
           </div>
           <div class="flex justify-between text-xl font-bold pt-4 text-gray-900">
             <span>{{ t('cart.total') }}</span>
@@ -377,8 +386,9 @@ const totalOrderSummary = computed(() => {
     tax: acc.tax + Number(order.tax || 0),
     total: acc.total + Number(order.total || 0),
     coupon: acc.coupon + Number(order.coupon || 0),
+    total_discounts_fees: acc.total_discounts_fees + Number(order.total_discounts_fees || 0),
     unavailable: acc.unavailable || (order.delivery_status === 'not_available'),
-  }), { subtotal: 0, tax: 0, total: 0, coupon: 0, unavailable: false })
+  }), { subtotal: 0, tax: 0, total: 0, coupon: 0, total_discounts_fees: 0, unavailable: false })
 
   return summary
 })
@@ -417,6 +427,7 @@ const fetchOrderTotals = async () => {
         total: parseFloat(order.total),
         coupon: parseFloat(order.coupon),
         total_service_fees: parseFloat(order.total_service_fees),
+        total_discounts_fees:order.total_discounts_fees,
         delivery_fee: parseFloat(order.delivery_fee || 0),
         unique_store_id: generateUniqueStoreId({
           store_id: order.store_id,
