@@ -14,8 +14,8 @@
       :touch-ratio="1.5"
       class="product-swiper"
       :breakpoints="{
-        320: { slidesPerView: 1.2, spaceBetween: 10, centeredSlides: true },
-        480: { slidesPerView: 1.5, spaceBetween: 12 },
+        320: { slidesPerView: 2, spaceBetween: 5, centeredSlides: true },
+        480: { slidesPerView: 2, spaceBetween: 5 },
         640: { slidesPerView: 2, spaceBetween: 16 },
         768: { slidesPerView: 3, spaceBetween: 20 },
         1024: { slidesPerView: 4, spaceBetween: 24 },
@@ -25,7 +25,7 @@
       <SwiperSlide v-for="(pro, i) in products.products" :key="i" class="py-4">
         <a
           :href="`/product-details/${pro.id}`"
-          target="_blank"
+
           rel="noopener noreferrer"
           class="block h-full bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300  cursor-pointer overflow-hidden group"
           @click.prevent.stop="handleCardClick($event, pro)"
@@ -90,13 +90,13 @@
             <div class="mt-auto">
               <div class="flex  justify-between">
                 <div class="flex items-baseline gap-2">
-                  <span class="text-2xl font-bold text-gray-900">
+                  <span class="lg:text-2xl m-auto font-bold text-gray-900">
                     {{ $t('currencyLabel') }} {{parseFloat( pro.price-pro.total_discounts_value ).toFixed(2)}}
                   </span>
 
                   <span
                     v-if="pro.total_discounts_value !=0"
-                    class=" font-bold text-base line-through text-[#0b3baa] px-2 py-0.5 rounded"
+                    class=" font-bold my-auto text-base line-through text-[#0b3baa] px-2 py-0.5 rounded"
                   >
                     {{ pro.price }}
                   </span>

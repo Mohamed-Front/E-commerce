@@ -1,10 +1,11 @@
 <template>
-  <div class="mx-auto max-w-[1400px] px-4">
+  <div class="mx-auto w-full full px-4">
     <Swiper
       v-if="sliderImages.length"
       :modules="[Autoplay, Navigation]"
       :centered-slides="true"
-      :slides-per-view="1.1"
+      :slides-per-view="1.3"
+      :loop="true"
       :space-between="10"
       :autoplay="{ delay: 3000, disableOnInteraction: false }"
       :navigation="false"
@@ -57,31 +58,7 @@
         </Swiper>
       </div>
 
-      <div class=" rounded-xl mb-4 shadow-lg overflow-hidden">
-        <Swiper
-          v-if="sliderImagesThree.length"
-          :modules="[Autoplay]"
 
-          :slides-per-view="1"
-          :space-between="10"
-          :autoplay="{ delay: 2500, disableOnInteraction: false }"
-          class="w-full h-full"
-        >
-          <SwiperSlide v-for="(image, index) in sliderImagesThree" :key="'three-' + index">
-            <div
-              @click="handleMediaClick(image)"
-              class="flex w-full  items-center justify-center rounded-xl overflow-hidden cursor-pointer"
-            >
-              <img
-                :src="image.url"
-                :alt="`Slider Three Image ${index + 1}`"
-                class="w-full h-full object-cover rounded-xl transform hover:scale-105 transition-transform duration-500"
-                loading="lazy"
-              />
-            </div>
-          </SwiperSlide>
-        </Swiper>
-      </div>
     </div>
 
     <div v-if="categories.length > 1" class="py-2 rounded-sm px-2 bg-[#1F3A932B] mx-auto max-w-7xl">
