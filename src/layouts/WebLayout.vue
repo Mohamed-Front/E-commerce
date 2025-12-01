@@ -9,7 +9,7 @@
 
       </div>
       <div class="app-layout__page">
-        <div class="p-2  bg-[#FAF7F0]">
+        <div class="  bg-[#FAF7F0]">
           <router-view />
         </div>
       </div>

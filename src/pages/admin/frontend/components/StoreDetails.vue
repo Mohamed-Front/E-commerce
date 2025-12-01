@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-auto w-full full px-4">
+  <div class="mx-auto w-full full ">
     <Swiper
       v-if="sliderImages.length"
       :modules="[Autoplay, Navigation]"
