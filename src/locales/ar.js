@@ -1234,6 +1234,7 @@ export default {
     outOfStock: 'غير متوفر في المخزون',
     noDescription: 'لا يوجد وصف متاح.',
     readMore: 'اقرأ المزيد',
+    readLess: 'اقرأ أٌقل',
     loadError: 'فشل في تحميل تفاصيل المنتج.',
     "managementTitle": "إدارة المنتجات",
     "createTitle": "إنشاء منتج",
