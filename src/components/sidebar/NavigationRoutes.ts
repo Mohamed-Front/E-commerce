@@ -190,12 +190,12 @@ export default {
           show: 'list categories',
           meta: { icon: 'settings_applications' }
         },
-        {
-          name: 'connect',
-          displayName: 'navigation.quickBooks',
-          show: 'list categories',
-          meta: { icon: 'account_balance' } // أو أيقونة QuickBooks الرسمية إن وجدت
-        },
+        // {
+        //   name: 'connect',
+        //   displayName: 'navigation.quickBooks',
+        //   show: 'list categories',
+        //   meta: { icon: 'account_balance' } // أو أيقونة QuickBooks الرسمية إن وجدت
+        // },
       ],
     },
   ] as INavigationRoute[],
