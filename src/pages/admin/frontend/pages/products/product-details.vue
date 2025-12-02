@@ -25,7 +25,7 @@
 
         <div class="w-full lg:w-3/4 order-1 lg:order-2">
           <div class="relative w-full aspect-square shadow-xl rounded-2xl overflow-hidden bg-gray-50">
-            <!-- Best Seller -->
+            <!-- Best Seller Badge -->
             <div
               v-if="pro.is_best_seller"
               class="absolute top-4 left-4 z-10 bg-black text-white text-xs font-bold px-4 py-2 rounded-full uppercase tracking-wider shadow-lg"
@@ -33,7 +33,7 @@
               Best Seller
             </div>
 
-            <!-- Free Shipping -->
+            <!-- Free Shipping Badge -->
             <div
               v-if="pro.is_free_shipping"
               class="absolute top-4 right-4 z-10 bg-green-600 text-white text-xs font-bold px-4 py-2 rounded-full flex items-center gap-2 shadow-lg"
@@ -60,21 +60,21 @@
             <span
               v-if="pro.store_id"
               @click="selectStore(pro.store)"
-              class="sub-tiles cursor-pointer hover:bg-opacity-80 transition"
+              class="sub-tiles cursor-pointer"
             >
               {{ locale === 'en' ? pro.store?.name_en : pro.store?.name_ar || t('store.default') }}
             </span>
             <span
               v-if="pro.category"
               @click="goCatgory(pro.category)"
-              class="sub-tiles cursor-pointer hover:bg-opacity-80 transition"
+              class="sub-tiles cursor-pointer"
             >
               {{ locale === 'en' ? pro.category.name_en : pro.category.name_ar }}
             </span>
             <span
               @click="goBrand(pro.brand)"
               v-if="pro.brand_id"
-              class="sub-tiles cursor-pointer hover:bg-opacity-80 transition"
+              class="sub-tiles cursor-pointer"
             >
               {{ locale === 'en' ? pro.brand?.name_en : pro.brand?.name_ar || t('brand.default') }}
             </span>
@@ -97,8 +97,6 @@
 
           <!-- Price & Discount -->
           <div class="mb-8">
-
-
             <div class="flex items-baseline gap-4 flex-wrap">
               <span class="text-4xl font-bold text-gray-900">
                 {{ formatPrice(pro.base_price_after_discount) }} {{ $t("currencyLabel") }}
@@ -109,17 +107,23 @@
               >
                 {{ formatPrice(pro.base_price) }} {{ $t("currencyLabel") }}
               </span>
+              <span
+                v-if="hasDiscount"
+                class="bg-red-100 text-red-800 text-sm font-bold px-3 py-1 rounded-full"
+              >
+                -{{ discountPercentage }}%
+              </span>
             </div>
           </div>
 
-          <!-- Quantity -->
-          <div v-if=pro.in_cart class="flex items-center gap-6 mb-8">
+          <!-- Quantity Selector (Only if already in cart) -->
+          <div v-if="pro.in_cart" class="flex items-center gap-6 mb-8">
             <label class="font-bold text-gray-700 text-lg">{{ t('product.quantity') }}:</label>
-            <div class="flex items-center border-2 border-gray-300 rounded-xl overflow-hidden">
+            <div class="flex items-center border-2 border-gray-300 rounded-xl overflow-hidden select-none">
               <button
                 @click="updateQuantity('minus')"
                 :disabled="quantity <= 1 || isUpdatingQuantity || pro.isOutOfStock"
-                class="px-5 py-3 text-2xl font-bold hover:bg-gray-100 transition"
+                class="px-5 py-3 text-2xl font-bold hover:bg-gray-100 disabled:opacity-50 transition"
               >−</button>
               <span class="px-8 py-3 font-semibold text-lg border-x-2 border-gray-300 min-w-20 text-center">
                 {{ quantity }}
@@ -127,7 +131,7 @@
               <button
                 @click="updateQuantity('plus')"
                 :disabled="isUpdatingQuantity || pro.isOutOfStock"
-                class="px-5 py-3 text-2xl font-bold hover:bg-gray-100 transition"
+                class="px-5 py-3 text-2xl font-bold hover:bg-gray-100 disabled:opacity-50 transition"
               >+</button>
             </div>
           </div>
@@ -139,7 +143,7 @@
             class="w-full py-5 text-xl font-bold rounded-2xl text-white transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center gap-3"
             :class="{
               'bg-[#A6853B] hover:bg-[#8f702c]': !pro.in_cart && !pro.isOutOfStock,
-              'bg-[#0b3baa]': pro.in_cart,
+              'bg-[#0b3baa] hover:bg-[#093080]': pro.in_cart,
               'bg-gray-400 cursor-not-allowed': pro.isOutOfStock
             }"
           >
@@ -166,7 +170,7 @@
       <button
         v-if="isDescriptionLong"
         @click="toggleDescription"
-        class="mt-4 text-[#E39F30] font-bold text-sm hover:underline"
+        class="mt-4 text-[#E39F30] font-bold text-sm hover:underline focus:outline-none"
       >
         {{ showFullDescription ? t('product.readLess') : t('product.readMore') }}
       </button>
@@ -176,21 +180,21 @@
     <section v-if="!isLoading && !error" class="mt-12 p-8 bg-white rounded-2xl shadow-xl">
       <h2 class="text-3xl font-bold text-center text-gray-800 mb-10">{{ t('reviews.title') }}</h2>
 
-      <div class="grid md:grid-cols-3 gap-8">
+      <div class="grid md:grid-cols-3 gap-8 mb-12">
         <!-- Overall Rating -->
         <div class="text-center">
           <div class="text-6xl font-bold text-gray-800">{{ averageRating.toFixed(1) }}</div>
-          <Rating v-model="tempRating" :readonly="true" :cancel="false" class="my-3 justify-center text-3xl" />
+          <Rating :modelValue="averageRating" :readonly="true" :cancel="false" class="my-4 justify-center text-3xl" />
           <p class="text-gray-500">{{ reviews.length }} {{ reviews.length === 1 ? t('reviews.singular') : t('reviews.plural') }}</p>
         </div>
 
         <!-- Rating Bars -->
-        <div class="md:col-span-2">
-          <div v-for="bar in ratingDistribution" :key="bar.stars" class="flex items-center gap-3 mb-4">
-            <span class="w-4 text-sm font-bold">{{ bar.stars }}</span>
-            <div class="flex-1 bg-gray-200 rounded-full h-3 relative overflow-hidden">
+        <div class="md:col-span-2 space-y-3">
+          <div v-for="bar in ratingDistribution" :key="bar.stars" class="flex items-center gap-3">
+            <span class="w-8 text-sm font-medium">{{ bar.stars }} </span>
+            <div class="flex-1 bg-gray-200 rounded-full h-4 relative overflow-hidden">
               <div
-                class="absolute top-0 left-0 h-full bg-[#F0E3C2] transition-all duration-500"
+                class="absolute top-0 left-0 h-full bg-[#A6853B] transition-all duration-700 ease-out"
                 :style="{ width: bar.percentage + '%' }"
               ></div>
             </div>
@@ -200,35 +204,43 @@
       </div>
 
       <!-- Review Form -->
-      <div class="mt-12">
-        <h3 class="text-xl font-bold mb-6 text-center">{{ t('reviews.writeReview') }}</h3>
+      <div class="mt-12 border-t pt-12">
+        <h3 class="text-2xl font-bold text-center mb-8">{{ t('reviews.writeReview') }}</h3>
 
-        <div v-if="authStore.authenticatedweb" class="max-w-2xl mx-auto">
+        <div v-if="authStore.authenticatedweb" class="max-w-2xl mx-auto space-y-6">
+          <div class="text-center">
+            <Rating
+              v-model="newReview.rating"
+              :stars="5"
+              :cancel="false"
+              class="text-4xl justify-center"
+            />
+          </div>
 
           <textarea
             v-model="newReview.comment"
-            rows="5"
-            class="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#A6853B] focus:border-transparent outline-none resize-none"
+            rows="6"
+            class="w-full p-5 border border-gray-300 rounded-xl focus:ring-4 focus:ring-[#A6853B]/20 focus:border-[#A6853B] outline-none resize-none transition"
             :placeholder="t('reviews.placeholder')"
           ></textarea>
 
           <button
             @click="submitReview"
             :disabled="isSubmittingReview || newReview.rating === 0 || !newReview.comment.trim()"
-            class="mt-4 w-full py-4 bg-[#A6853B] hover:bg-[#8f702c] text-white font-bold rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
+            class="w-full py-4 bg-[#A6853B] hover:bg-[#8f702c] text-white font-bold rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
           >
-            {{ isSubmittingReview ? t('reviews.submitting') : t('reviews.submit') }}
+            {{ isSubmittingReview ? t('reviews.submitting') + '...' : t('reviews.submit') }}
           </button>
 
-          <p v-if="reviewError" class="text-red-500 text-center mt-3">{{ reviewError }}</p>
+          <p v-if="reviewError" class="text-red-500 text-center font-medium">{{ reviewError }}</p>
         </div>
 
         <!-- Login Prompt -->
-        <div v-else class="text-center py-8">
-          <p class="text-gray-600 mb-6">{{ t('reviews.loginToReview') }}</p>
+        <div v-else class="text-center py-12 bg-gray-50 rounded-2xl">
+          <p class="text-gray-600 mb-6 text-lg">{{ t('reviews.loginToReview') }}</p>
           <button
             @click="router.push({ name: 'authlog' })"
-            class="px-8 py-4 bg-[#A6853B] text-white font-bold rounded-xl hover:bg-[#8f702c] transition"
+            class="px-10 py-4 bg-[#A6853B] text-white font-bold rounded-xl hover:bg-[#8f702c] transition shadow-lg"
           >
             {{ t('reviews.login') }}
           </button>
@@ -237,20 +249,31 @@
 
       <!-- Customer Reviews List -->
       <div v-if="reviews.length" class="mt-12 space-y-8">
-        <h3 class="text-2xl font-bold text-gray-800">{{ t('reviews.customerReviews') }}</h3>
-        <div v-for="review in displayedReviews" :key="review.id" class="border-b pb-6">
-          <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-3">
-              <span class="font-semibold">{{ review.user?.name || t('reviews.anonymous') }}</span>
-              <Rating :modelValue="review.rate" :readonly="true" :cancel="false" />
+        <h3 class="text-2xl font-bold text-gray-800 border-b pb-4">{{ t('reviews.customerReviews') }}</h3>
+        <div v-for="review in displayedReviews" :key="review.id" class="border-b pb-8 last:border-0">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-xl font-bold text-gray-600">
+                {{ (review.user?.name || 'A')[0].toUpperCase() }}
+              </div>
+              <div>
+                <p class="font-semibold text-lg">{{ review.user?.name || t('reviews.anonymous') }}</p>
+                <Rating :modelValue="review.rate" :readonly="true" :cancel="false" />
+              </div>
             </div>
             <span class="text-sm text-gray-500">{{ formatDate(review.created_at) }}</span>
           </div>
-          <p class="text-gray-700 leading-relaxed">{{ review.message }}</p>
+          <p class="text-gray-700 leading-relaxed pl-16">{{ review.message }}</p>
+        </div>
+
+        <div v-if="reviews.length > 5" class="text-center mt-8">
+          <button class="text-[#A6853B] font-bold hover:underline">
+            {{ t('reviews.viewAll') }} ({{ reviews.length }})
+          </button>
         </div>
       </div>
 
-      <div v-else class="text-center py-12 text-gray-500">
+      <div v-else class="text-center py-16 text-gray-500 text-lg">
         {{ t('reviews.noReviews') }}
       </div>
     </section>
@@ -263,7 +286,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, computed ,watch} from 'vue'
+import { onMounted, ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import axios from 'axios'
@@ -292,24 +315,17 @@ const reviews = ref([])
 const showFullDescription = ref(false)
 const isSubmittingReview = ref(false)
 const reviewError = ref(null)
-const tempRating = ref(0)
 
 const newReview = ref({
-  rating: 0,
+  rating: 2,
   comment: ''
 })
 
 /* ───── COMPUTED ───── */
-const finalPrice = computed(() => {
-  const price = parseFloat(pro.value.price || 0)
-  const discount = parseFloat(pro.value.total_discounts_value || 0)
-  return (price - discount).toFixed(2)
-})
-
-const hasDiscount = computed(() => parseFloat(pro.value.total_discounts_value || 0) > 0)
+const hasDiscount = computed(() => (pro.value.total_discounts_value || 0) > 0)
 
 const discountPercentage = computed(() => {
-  const price = parseFloat(pro.value.price || 0)
+  const price = parseFloat(pro.value.base_price || 0)
   const discount = parseFloat(pro.value.total_discounts_value || 0)
   return price ? Math.round((discount / price) * 100) : 0
 })
@@ -317,8 +333,9 @@ const discountPercentage = computed(() => {
 const formatPrice = (v) => parseFloat(v || 0).toFixed(2)
 
 const fullDescription = computed(() =>
-  locale.value === 'en' ? pro.value.description_en : pro.value.description_ar || t('product.noDescription')
+  locale.value === 'en' ? pro.value.description_en || t('product.noDescription') : pro.value.description_ar || t('product.noDescription')
 )
+
 const isDescriptionLong = computed(() => fullDescription.value.length > 300)
 const truncatedDescription = computed(() =>
   isDescriptionLong.value ? fullDescription.value.slice(0, 300) + '...' : fullDescription.value
@@ -326,23 +343,24 @@ const truncatedDescription = computed(() =>
 
 const averageRating = computed(() => {
   if (!reviews.value.length) return 0
-  const sum = reviews.value.reduce((s, r) => s + r.rate, 0)
+  const sum = reviews.value.reduce((acc, r) => acc + r.rate, 0)
   return sum / reviews.value.length
 })
 
 const ratingDistribution = computed(() => {
   const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
   reviews.value.forEach(r => counts[r.rate]++)
+  const total = reviews.value.length
   return [5, 4, 3, 2, 1].map(stars => ({
     stars,
     count: counts[stars],
-    percentage: reviews.value.length ? Math.round((counts[stars] / reviews.value.length) * 100) : 0
+    percentage: total ? Math.round((counts[stars] / total) * 100) : 0
   }))
 })
 
 const displayedReviews = computed(() => reviews.value.slice(0, 5))
 
-/* ───── HELPERS ───── */
+/* ───── METHODS ───── */
 const changeImg = (url) => (currentImg.value = url)
 const toggleDescription = () => (showFullDescription.value = !showFullDescription.value)
 
@@ -377,11 +395,10 @@ const addToCart = async () => {
   }
 }
 
-const updateQuantity = async (type) => {
-  if (!authStore.authenticatedweb) return router.push({ name: 'authlog' })
-  if (isUpdatingQuantity.value || pro.value.isOutOfStock) return
+const updateQuantity = async (action) => {
+  if (!authStore.authenticatedweb || isUpdatingQuantity.value || pro.value.isOutOfStock) return
 
-  const newQty = type === 'plus' ? quantity.value + 1 : quantity.value - 1
+  const newQty = action === 'plus' ? quantity.value + 1 : quantity.value - 1
   if (newQty < 1) return
 
   isUpdatingQuantity.value = true
@@ -392,8 +409,11 @@ const updateQuantity = async (type) => {
       quantity: newQty
     })
     quantity.value = newQty
-    pro.value.in_cart = true
-    toast.add({ severity: 'success', detail: type === 'plus' ? t('cart.quantityIncreased') : t('cart.quantityDecreased'), life: 2000 })
+    toast.add({
+      severity: 'success',
+      detail: action === 'plus' ? t('cart.quantityIncreased') : t('cart.quantityDecreased'),
+      life: 2000
+    })
   } catch (e) {
     toast.add({ severity: 'error', detail: t('cart.quantityError'), life: 3000 })
   } finally {
@@ -402,7 +422,7 @@ const updateQuantity = async (type) => {
 }
 
 const handleCartAction = () => {
-  if (pro.value.in_cart) return
+  if (pro.value.in_cart || pro.value.isOutOfStock) return
   addToCart()
 }
 
@@ -423,47 +443,64 @@ const submitReview = async () => {
       type: 'product',
       message: newReview.value.comment.trim()
     }
+
     const { data } = await axios.post('/api/review', payload)
 
     if (data.is_success) {
       reviews.value.unshift({
-        id: data.data.id,
+        id: data.data.id || Date.now(),
         rate: newReview.value.rating,
         message: newReview.value.comment.trim(),
-        user: { name: authStore.user?.name || t('reviews.anonymous') },
+        user: { name: authStore.user?.name || 'You' },
         created_at: new Date().toISOString()
       })
+
+      // Reset form
       newReview.value = { rating: 0, comment: '' }
-      toast.add({ severity: 'success', detail: t('reviews.submitSuccess'), life: 3000 })
+
+      toast.add({
+        severity: 'success',
+        summary: t('success'),
+        detail: t('reviews.submitSuccess'),
+        life: 4000
+      })
     }
-  } catch (e) {
-    reviewError.value = e.response?.data?.message || t('reviews.submitError')
+  } catch (err) {
+    reviewError.value = err.response?.data?.message || t('reviews.submitError')
   } finally {
     isSubmittingReview.value = false
   }
 }
 
 /* ───── NAVIGATION ───── */
-const goCatgory = (cat) => cat && router.push(cat.has_subcategories ? { name: 'subcategory', params: { id: cat.id } } : { name: 'produts_category', params: { id: cat.id } })
+const goCatgory = (cat) => cat && router.push(
+  cat.has_subcategories
+    ? { name: 'subcategory', params: { id: cat.id } }
+    : { name: 'produts_category', params: { id: cat.id } }
+)
+
 const goBrand = (brand) => brand && router.push({ name: 'products-brand', params: { id: brand.id } })
 const selectStore = (store) => store && router.push(store.has_market ? { name: 'stores-hasmarket' } : { name: 'home' })
 
 /* ───── FETCH DATA ───── */
 const fetchProductData = async () => {
   isLoading.value = true
+  error.value = null
   try {
     const { data } = await axios.get(`/api/home/product-details/${route.params.id}`)
     if (data.is_success) {
       const p = data.data.product
       pro.value = {
         ...p,
-        in_cart: p.in_cart || false,
+        in_cart: !!p.in_cart,
         isOutOfStock: p.is_stock === 0
       }
       imgs.value = p.media || []
-      currentImg.value = imgs.value[0]?.url || pro.value.key_default_image
+      currentImg.value = imgs.value[0]?.url || p.key_default_image || ''
       reviews.value = p.reviews || []
-      quantity.value = pro.value.in_cart ? (p.quantity || 1) : 1
+      quantity.value = p.in_cart ? (p.quantity || 1) : 1
+    } else {
+      error.value = t('product.notFound')
     }
   } catch (e) {
     error.value = e.response?.data?.message || t('product.loadError')
@@ -471,16 +508,14 @@ const fetchProductData = async () => {
     isLoading.value = false
   }
 }
-watch(
-  () => route.params.id,
-  (newId) => {
-    if (newId) {
-      fetchProductData()
-      window.scrollTo(0, 0) // Optional: scroll to top on product change
-    }
-  },
-  { immediate: false } // We already call it in onMounted, so no need to run immediately again
-)
+
+watch(() => route.params.id, (newId) => {
+  if (newId) {
+    fetchProductData()
+    window.scrollTo(0, 0)
+  }
+})
+
 onMounted(() => {
   window.scrollTo(0, 0)
   fetchProductData()
@@ -490,5 +525,9 @@ onMounted(() => {
 <style scoped>
 .sub-tiles {
   @apply bg-[#E6AC312B] px-5 py-3 rounded-xl font-medium text-sm text-gray-700 hover:bg-[#d89c284d] transition;
+}
+
+.flex-center {
+  @apply flex items-center justify-center;
 }
 </style>
