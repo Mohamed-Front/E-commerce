@@ -189,6 +189,8 @@ export default {
 
   "settings": {
     "title": "الإعدادات",
+    "terms_conditions_en":"الشروط والاحكام انجيلزي",
+    "terms_conditions_ar":"الشروط والاحكام عربي",
     "order_tax": "ضريبة الطلب",
     "order_taxPlaceholder": "أدخل ضريبة الطلب",
     "address": "العنوان",
