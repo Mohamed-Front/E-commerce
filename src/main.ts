@@ -268,12 +268,11 @@ app.use(PrimeVue)
 
 app.mount('#app')
 let k= document.getElementsByClassName("switcher")
-console.log(localStorage.appLang)
-if( localStorage.appLang == 'ar')
 
-document.body.dir ="rtl"
+if( localStorage.appLang ==  'en' )
+ document.body.dir ="ltr"
 else
-document.body.dir ="ltr"
+document.body.dir ="rtl"
 
 
 app.directive('can', (el, binding, vnode) =>{

@@ -4,7 +4,7 @@ import axios from "axios";
 export const useAppLangStore = defineStore("appLangStore", {
   state: () => ({
     appLang: useStorage("appLang", "ar"),
-    isRtl: useStorage("isRtl", true),
+    isRtl: useStorage("isRtl", false),
   }),
   getters: {
     getAppLang() {

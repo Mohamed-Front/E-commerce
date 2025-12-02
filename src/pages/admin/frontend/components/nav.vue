@@ -371,7 +371,7 @@ const handleClickOutside = (event) => {
 // Set correct language text on component mount
 const updateLangButton = () => {
   const lang = localStorage.getItem('appLang') || 'en'
-  currentText.value = lang === 'ar' ? 'A' : 'E'
+  currentText.value = lang === 'ar' ? 'Ar' : 'Eg'
 }
 
 onMounted(() => {
