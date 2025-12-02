@@ -1304,6 +1304,7 @@ export default {
   "delete": "Delete",
   "actions": "Actions",
   "products": {
+    "stars":"Stars",
     "filters": "Filters",
     "category": "Category",
     "searchCategory": "Search categories",

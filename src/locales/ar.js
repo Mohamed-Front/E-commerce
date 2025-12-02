@@ -1187,6 +1187,7 @@ export default {
   "yes": "نعم",
   "no": "لا",
   "products": {
+    "stars":"عدد النجوم ",
     "Free_Delivery": "توصيل مجاني",
     "filters": "الفلاتر",
     "category": "الفئة",
